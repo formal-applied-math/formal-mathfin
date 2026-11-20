@@ -294,8 +294,8 @@ so it also covers the junk values `σ = 0`, `T ≤ 0`). Positivity is only the p
 price statement needs `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. The hypotheses
 `S ≠ 0` and `H ≠ 0` keep the statement off the junk corners (at `H = 0` the closed form is the
 junk constant `0`, so continuity fails wherever the vanilla value is nonzero, in particular on the
-price domain; at `S = 0` the closed
-form is constant in the barrier); the proof uses both. -/
+price domain; at `S = 0` the closed form is
+constant in the barrier); the proof uses both. -/
 theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : S ≠ 0)
     (hH : H ≠ 0) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by

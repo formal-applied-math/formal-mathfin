@@ -30,7 +30,8 @@ needs `σ > 0`, `0 < τ` and `0 < S, K`.
 ## Main results
 
 * `bsd1_scale`, `bsd2_scale`, `bsV_scale`: spatial homogeneity.
-* `bsd1_timeScale`, `bsd2_timeScale`, `bsV_timeScale`: time-volatility scaling.
+* `bsd1_timeScale`, `bsd2_timeScale`, `bsV_timeScale`: time-volatility scaling, with the shared
+  step `vol_sqrt_timeScale`.
 
 ## References
 
