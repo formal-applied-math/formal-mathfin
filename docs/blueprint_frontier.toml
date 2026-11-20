@@ -790,3 +790,130 @@ uses = ["thm:kyle-equilibrium", "thm:glosten-milgrom-quote"]
 lean = "MathFinFrontier.kyle_equilibrium_unique"
 area = "choice/trading"
 family = "mechanisms"
+
+[[node]]
+label = "def:path-signature"
+title = "Signatures of paths"
+statement = "The signature of a path, the series of its iterated integrals in the tensor algebra, and for Brownian motion its Stratonovich signature up to a stopping time with the expected signature: the features of signature methods."
+uses = ["def:brownian-motion"]
+ground = "Mathlib: TensorAlgebra"
+area = "probability/brownian"
+
+[[node]]
+label = "def:nondominated-model"
+title = "Nondominated models"
+statement = "A set of priors 𝒫 on path space dominated by no single measure, 𝒫-quasi-sure statements, the quasi-sure L^∞ space, and superhedging under every prior: the setting of robust finance."
+uses = ["def:emm"]
+area = "valuation/model-free"
+
+[[node]]
+label = "def:convex-order"
+title = "Convex order"
+statement = "μ ≤_cx ν when ∫ φ dμ ≤ ∫ φ dν for every convex φ; for laws on ℝ with equal means, the ordering of call prices at every strike. Peacocks, martingale couplings and minimal-variance aggregation are stated in it."
+uses = ["thm:market-carr-madan"]
+ground = "Mathlib: ConvexOn, integral"
+area = "valuation/model-free"
+
+[[node]]
+label = "def:markov-martingale"
+title = "Markov martingales"
+statement = "A martingale that is a Markov process with respect to a given filtration, raw or satisfying the usual conditions, and the mimicking problem: a Markov martingale with prescribed one-dimensional marginals."
+uses = ["def:brownian-motion"]
+area = "probability/martingales"
+
+[[node]]
+label = "def:zakai-equation"
+title = "The Zakai equation"
+statement = "The unnormalised filter of a signal observed through Y = ∫ h(X) dt + W under a reference measure, and the Zakai equation it solves: the object of nonlinear filtering under partial information."
+uses = ["def:ito-integral-clm"]
+area = "statistics"
+
+[[node]]
+label = "def:optimal-dividend-problem"
+title = "Optimal dividend problems"
+statement = "For one or several surplus processes (Cramér–Lundberg or diffusion), the value of paying dividends until ruin, with admissible dividend strategies, and its HJB variational inequality: the control problem of de Finetti."
+uses = ["thm:cramer-lundberg-claims"]
+area = "risk/insurance"
+
+[[node]]
+label = "def:sabr-model"
+title = "The SABR model"
+statement = "Forward dF = σ F^β dW, volatility dσ = ν σ dZ with d⟨W, Z⟩ = ρ dt and absorption at zero for β < 1: the stochastic-volatility model behind the Hagan smile, stated as a weak solution with its law."
+uses = ["thm:sde-strong-solution"]
+area = "valuation/smile"
+family = "volatility"
+
+[[node]]
+label = "thm:expected-signature-moment-problem"
+title = "Expected signature of stopped Brownian motion"
+statement = "For Brownian motion stopped at the exit time of a bounded C^{2,α} domain, the expected signature determines the law of the signature (open problem)."
+uses = ["def:path-signature"]
+area = "probability/brownian"
+
+[[node]]
+label = "thm:robust-american-irregular-duality"
+title = "Robust American hedging with irregular payoffs"
+statement = "Under semimartingale-characteristic uncertainty, the Snell envelopes of a non-càdlàg American payoff aggregate and the superhedging duality holds with a minimal hedge (open problem)."
+uses = ["def:nondominated-model", "def:snell-envelope"]
+area = "valuation/american"
+
+[[node]]
+label = "thm:raw-filtration-mimicking-martingale"
+title = "Mimicking Markov martingales for the raw filtration"
+statement = "Whether every peacock on ℝᵈ admits a mimicking martingale that is Markov for its raw filtration (open problem)."
+uses = ["def:convex-order", "def:markov-martingale"]
+area = "valuation/model-free"
+
+[[node]]
+label = "thm:zakai-uniqueness-singular-control"
+title = "Zakai uniqueness under singular control"
+statement = "The unnormalised filter is the unique solution of the Zakai equation when the singular control's jump times accumulate (open problem)."
+uses = ["def:zakai-equation"]
+area = "statistics"
+
+[[node]]
+label = "thm:multidimensional-dividend-boundary"
+title = "Optimal dividends of several insurers on the free boundary"
+statement = "The optimal local control on the free boundaries of the n-dimensional dividend problem, n ≥ 2 (open problem)."
+uses = ["def:optimal-dividend-problem"]
+area = "risk/insurance"
+
+[[node]]
+label = "thm:robust-binomial-duality"
+title = "Quasi-sure duality for the robust multi-period binomial model"
+statement = "Whether the robust multi-period binomial model satisfies l(L^∞) = E', the duality that makes its quasi-sure theory usable (open problem)."
+uses = ["def:nondominated-model", "def:coin-flip-measure"]
+area = "valuation/trees"
+
+[[node]]
+label = "thm:sabr-right-tail-correction"
+title = "SABR right tail: the k^{3/2} correction"
+statement = "For ρ < 0, the log right tail of the absorbed SABR forward has a k^{3/2} correction with the constant of Cao–Huang's Conjecture 8.1 (open problem)."
+uses = ["def:sabr-model"]
+area = "valuation/smile"
+family = "volatility"
+
+[[node]]
+label = "thm:uniform-convex-complete-mixability"
+title = "Complete mixability of uniform laws on convex bodies"
+statement = "The uniform law on a bounded convex body of ℝᵈ is n-completely mixable for every n ≥ d + 1 (open problem, Wang 2015)."
+uses = ["thm:frechet-hoeffding"]
+ground = "Mathlib: Measure.map, cond"
+lean = "MathFinFrontier.uniform_convex_completelyMixable"
+area = "risk/aggregation"
+
+[[node]]
+label = "thm:bounded-law-complete-mixability"
+title = "Complete mixability of bounded absolutely continuous laws"
+statement = "An absolutely continuous law on a bounded interval is n-completely mixable for all large n (two conflicting unrefereed resolution claims; Wang 2015)."
+uses = ["thm:frechet-hoeffding"]
+ground = "Mathlib: Measure.map, AbsolutelyContinuous"
+lean = "MathFinFrontier.absolutelyContinuous_eventually_completelyMixable"
+area = "risk/aggregation"
+
+[[node]]
+label = "thm:convex-order-minimal-sum"
+title = "Convex-order minimal sums"
+statement = "Necessary and sufficient conditions on marginals F₁, …, Fₙ for the sums with these marginals to have a smallest element in convex order (open problem, Wang 2015)."
+uses = ["def:convex-order", "thm:frechet-hoeffding"]
+area = "risk/aggregation"

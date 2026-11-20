@@ -636,6 +636,796 @@
           "reason": "Stated in Lean from Theorem 1.1 of the reported resolution (MathFinFrontier/OpenProblems/KyleUniqueness.lean)."
         }
       ]
+    },
+    {
+      "id": "MF-OP-009",
+      "title": "Does the expected signature determine the law of the signature of Brownian motion stopped at a domain exit time?",
+      "statement": "Let $\\Omega\\subset\\mathbb R^d$ be a bounded $C^{2,\\alpha}$ domain, $B$ a Brownian motion started at $x\\in\\Omega$, $\\tau$ its first exit time from $\\Omega$, and $S(B)_{[0,\\tau]}$ the (Stratonovich) signature of the stopped path. Is the law of $S(B)_{[0,\\tau]}$ determined by its expected signature $\\mathbb E[S(B)_{[0,\\tau]}]$? (Chevyrev-Lyons guarantee this when the expected signature has infinite radius of convergence; for $2\\le d\\le 8$ the radius is finite everywhere.)",
+      "statement_origin": "source_question",
+      "area": "rough-paths",
+      "tags": [
+        "expected signature",
+        "moment problem",
+        "stopped Brownian motion"
+      ],
+      "background": "The moment problem for random signatures underlies kernel and two-sample methods and signature-based model identification.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Chevyrev-Lyons (Ann. Probab. 2016, arXiv 1307.3580): expected signature determines the law if its radius of convergence is infinite.",
+        "Boedihardjo-Diehl-Mezzarobba-Ni: finite radius for the unit disc; Li-Ni (arXiv 2011.07917): finite radius everywhere on bounded C^{2,alpha} domains, 2<=d<=8, so the Chevyrev-Lyons sufficient condition fails there."
+      ],
+      "sources": [
+        {
+          "id": "lini2021",
+          "title": "Expected signature of stopped Brownian motion on d-dimensional C^{2,alpha}-domains has finite radius of convergence everywhere: 2<=d<=8",
+          "url": "https://arxiv.org/abs/2011.07917",
+          "date": "2021-10-08",
+          "locator": "Introduction, p.1-2 (version dated October 8, 2021)",
+          "role": "openness",
+          "finding": "States the moment problem 'for the simplest case of the Brownian motion up to the first exit time from a bounded domain... has remained open ever since it was proposed' in the cited prior work; the finite radius result does not resolve it."
+        },
+        {
+          "id": "roughpaths2024",
+          "title": "Rough path theory (survey)",
+          "url": "https://arxiv.org/abs/2402.10331",
+          "date": "2024-02-16",
+          "locator": "not located",
+          "role": "background",
+          "finding": "Per search snippet: the Chevyrev-Lyons condition is known to fail for stopped Brownian motion; PDF could not be text-read, not counted."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2021-10-08",
+        "resolution_searches": [
+          "expected signature uniqueness law finite radius of convergence open problem moment problem",
+          "expected signature of stopped Brownian motion uniqueness 2024 2025 moment problem resolved"
+        ],
+        "nearby_results_checked": [
+          "Chevyrev-Lyons Prop 6.1 / Thm 6.3 (via Li-Ni and search)",
+          "Fawcett (compact support)",
+          "Boedihardjo-Geng-Lyons-Yang uniqueness of signature",
+          "Adversarial check 2026-11-19: survives. Newest source treating it open: Li-Ni 2021. Searches (arXiv API, web) for 2022-2026 signature moment-problem papers empty. Semantic Scholar citing list for 2011.07917 returned empty (not indexed), so citation coverage is weaker."
+        ],
+        "conclusion": "Class A with date 2021-10-08 (Li-Ni, published J. Funct. Anal. 2022). Two searches found no later resolution, but absence is not proof; a 2024 survey is consistent with it still open."
+      },
+      "related_problems": [],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 545,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/545",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:expected-signature-moment-problem",
+          "needs": [
+            "def:path-signature"
+          ],
+          "lean": null,
+          "note": "Needs signatures of Brownian paths and the expected signature."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-010",
+      "title": "Robust American hedging duality for non-càdlàg payoffs under semimartingale-characteristic uncertainty",
+      "statement": "Work in Rodrigues' nondominated framework: a family $\\mathcal P$ of laws on path space under each of which the canonical price $S$ is a semimartingale whose differential characteristics lie in a prescribed measurable set-valued map, with the universally completed right-continuous filtration $\\mathcal G$. For an adapted American payoff $\\xi=(\\xi_t)_{t\\le T}$ of class (D) under every $P\\in\\mathcal P$, Rodrigues proves, when $\\xi$ is càdlàg, that the Snell envelopes $Y^P_t=\\operatorname{ess\\,sup}_{\\tau\\ge t}E^P[\\xi_\\tau\\mid\\mathcal G_t]$ aggregate into one process and that the superhedging duality $\\sup_{P\\in\\mathcal P}\\sup_\\tau E^P[\\xi_\\tau]=\\inf\\{x:\\ x+\\int Z\\,dS\\ge\\xi\\ \\mathcal P\\text{-q.s.}\\}$ holds with a minimal hedge. Do the aggregation and the duality with a minimal hedge still hold when $\\xi$ is an arbitrary optional process of class (D), not càdlàg? (For the dominated class of all equivalent local martingale measures of one market, irregular payoffs are covered by arXiv 2611.05116; the question is the nondominated, characteristic-uncertainty case.)",
+      "statement_origin": "residual_case",
+      "area": "robust-finance",
+      "tags": [
+        "american-options",
+        "superhedging",
+        "aggregation",
+        "snell-envelope",
+        "nondominated"
+      ],
+      "background": "American-option superhedging under uncertainty is the natural dynamic-stopping extension of robust hedging duality; regularity of the payoff is the remaining technical gap in the semimartingale-characteristics framework.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Rodrigues (2025): aggregator of Snell envelopes and robust hedging duality for cadlag class-(D) American payoffs in general semimartingale (jumps allowed, non-vanishing diffusion) uncertainty.",
+        "Guo-Oblój (2025): continuous-semimartingale prices with adapted closed convex volatility constraints, duality via randomised stopping times and optimal transport.",
+        "Chau-Rasonyi (2024, 2411.19206): American superhedging duality with cone constraints and local viability (different uncertainty model)."
+      ],
+      "sources": [
+        {
+          "id": "rodrigues-2025",
+          "title": "Rodrigues, Robust Hedging of American Options via Aggregated Snell Envelopes",
+          "url": "https://arxiv.org/abs/2506.14553",
+          "date": "2025-06-17",
+          "locator": "Section 5 (Conclusions), pp. 18-19",
+          "role": "openness",
+          "finding": "Explicitly says extending to American options without path regularity, to cadlag (G,P)-supermartingales without right-continuous filtration, or to random/unbounded horizons requires new arguments 'even if such extensions are possible' and is 'left for future research'."
+        },
+        {
+          "id": "guo-obloj-2025",
+          "title": "Guo-Oblój, Robust Pricing and Hedging of American Options in Continuous Time",
+          "url": "https://arxiv.org/abs/2510.05463",
+          "date": "2025-10-06",
+          "locator": "Abstract, Section 5",
+          "role": "partial_result",
+          "finding": "Proves robust pricing-hedging duality for continuous semimartingales with volatility constraints; confirms that the original drafted question (general semimartingale uncertainty) is advanced, not open as a whole."
+        },
+        {
+          "id": "minimal-2026",
+          "title": "Minimal Reflected BSDEs and Superhedging of Irregular American Claims",
+          "url": "https://arxiv.org/abs/2611.05116",
+          "date": "2026-11-03",
+          "locator": "Abstract; horizon fixed finite (Sec. 2)",
+          "role": "resolution_check",
+          "finding": "For an irregular optional payoff (no time regularity), over the full set M(X) of equivalent local martingale measures of a locally bounded market, proves optional decomposition of strong optional supermartingales of class (D) and robust Snell-envelope duality p0=sup_Q sup_tau E^Q[xi_tau] with explicit optimal strategy; also unbounded payoffs under UI. Does not cite Rodrigues; setting is a set of equivalent measures on one space, not Rodrigues' characteristics-constrained nondominated family; finite horizon only."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2025-06-17",
+        "resolution_searches": [
+          "superhedging duality American options model uncertainty semimartingale priors arXiv 2025"
+        ],
+        "nearby_results_checked": [
+          "Guo-Obloj 2510.05463",
+          "Chau-Rasonyi 2411.19206",
+          "Rodrigues 2506.14553 full text read",
+          "Adversarial check 2026-11-19: narrowed. No paper found treating characteristics-uncertainty plus irregular obstacle. Decide whether the 'irregular' part counts as killed: the measure-class differs (equivalent vs nondominated)."
+        ],
+        "conclusion": "The drafted D35 (general semimartingale uncertainty) is largely resolved in cadlag class (D) by Rodrigues 2025. The only openness statement found is the author's own list of unaddressed extensions (irregular obstacle etc.), weaker than a 'remains open' claim. Kept open on the residual."
+      },
+      "related_problems": [
+        "MF-OP-014"
+      ],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 546,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/546",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:robust-american-irregular-duality",
+          "needs": [
+            "def:nondominated-model"
+          ],
+          "lean": null,
+          "note": "The Snell envelope exists (def:snell-envelope); the nondominated setting does not."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-011",
+      "title": "A mimicking Markov martingale for every peacock, Markov for the raw filtration",
+      "statement": "Let $(\\mu_t)_{t\\in[0,1]}$ be a weakly continuous peacock on $\\mathbb R^d$, $d\\ge2$ (increasing in convex order). Pammer-Robinson-Schachermayer show that after Gaussian regularisation $\\mu_t*\\gamma^\\eta$ there is a strongly Markov martingale It\\^o diffusion with these marginals, and exhibit peacocks (counterexamples, with the Markov property taken w.r.t. the usual-conditions filtration) with no mimicking Markov martingale without regularisation. Open problem as stated by the authors: when the Markov property is defined with respect to the RAW (natural, non-augmented, non-right-continuous) filtration, is there a peacock admitting no mimicking Markov martingale?",
+      "statement_origin": "source_question",
+      "area": "model-free",
+      "tags": [
+        "peacock",
+        "kellerer",
+        "mimicking-martingale",
+        "markov"
+      ],
+      "background": "Multidimensional Kellerer theorem: which marginal families (e.g. calibrated option surfaces on several assets) admit Markovian martingale models.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Kellerer (1972): d=1 existence of Markov martingale.",
+        "Pammer-Robinson-Schachermayer (2022/24): regularised multi-d existence; uniqueness fails for d>=2; regularisation necessary w.r.t. usual conditions.",
+        "Lacker-Shkolnikov-Zhang: inversion of Markovian projection (adjacent)."
+      ],
+      "sources": [
+        {
+          "id": "prs",
+          "title": "Pammer-Robinson-Schachermayer, A regularized Kellerer theorem in arbitrary dimension",
+          "url": "https://arxiv.org/abs/2210.13847",
+          "date": "2024-03-22",
+          "locator": "Section 4.1, p. 13 ('We do not have an answer to this question, and we leave this as an open problem for future research')",
+          "role": "openness",
+          "finding": "Exact quote of the open question about the raw filtration; also the intro: the higher dimensional case 'has remained wide open'."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2024-03-22",
+        "resolution_searches": [
+          "Markov mimicking martingale multidimensional Gyongy theorem Markovian projection d>=2 Markov martingale marginals open"
+        ],
+        "nearby_results_checked": [
+          "PRS full text read",
+          "Larsson-Long, Lacker et al. (adjacent only)",
+          "Adversarial check 2026-11-19: survives. Newest source treating it open: PRS 2024 v3."
+        ],
+        "conclusion": "The drafted 'minimal regularisation' is NOT what the source leaves open; the source proves some regularisation is necessary for usual-conditions Markov, and leaves only the raw-filtration variant open. Statement narrowed accordingly. No follow-up resolving it was found in one search."
+      },
+      "related_problems": [],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 547,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/547",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:raw-filtration-mimicking-martingale",
+          "needs": [
+            "def:convex-order",
+            "def:markov-martingale"
+          ],
+          "lean": null,
+          "note": "Needs convex order (peacocks) and Markov martingales for a given filtration."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-012",
+      "title": "Uniqueness for the Zakai equation of singular-control filtering when control jumps accumulate",
+      "statement": "Setting (Calvia-Ferrari): signal $dX_t=b(X_t)dt+\\sigma(X_t)dW_t+\\,d\\nu_t$-type process (additively affected by a bounded-variation process $\\nu$) observed through $Y$; $\\nu$ is observation-adapted. They derive the Zakai and Kushner-Stratonovich equations and show that the unnormalised filter is the unique density-valued solution of the Zakai equation if $\\nu$ is continuous or its jump times do not accumulate on $[0,T]$. Open (left by the authors): uniqueness when the jump times of $\\nu$ accumulate; their suggested route is approximating $\\nu$ by cutting jumps below $\\delta$ and passing to the limit, requiring a tightness property.",
+      "statement_origin": "residual_case",
+      "area": "filtering",
+      "tags": [
+        "singular-control",
+        "partial-observation",
+        "zakai"
+      ],
+      "background": "Separated problem for singular control under partial observation requires a well-posed filter.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Calvia-Ferrari (AMO 2022): first explicit filtering equations for singular control of the unobservable signal.",
+        "Earlier singular-control-under-partial-observation literature controls the OBSERVED process only (their intro)."
+      ],
+      "sources": [
+        {
+          "id": "calvia-ferrari",
+          "title": "Calvia-Ferrari, Nonlinear filtering of partially observed systems arising in singular stochastic optimal control",
+          "url": "https://arxiv.org/abs/2106.04635",
+          "date": "2021-06-08",
+          "locator": "Introduction (p. 3-4): 'has not yet received attention'; and the paragraph after Theorem 4.7: 'left for future research'",
+          "role": "openness",
+          "finding": "Both the original gap (now filled by this paper) and the residual accumulating-jump case are stated."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2021-06-08",
+        "resolution_searches": [
+          "singular stochastic control partial observation filtering explicit not yet been addressed OR remains open arXiv 2025",
+          "Calvia Ferrari singular stochastic control partial observation separated problem follow-up filtering singular control 2024 2025",
+          "singular control partial observation unobservable signal filtering Zakai singular control arXiv 2024 2025 2026"
+        ],
+        "nearby_results_checked": [
+          "Calvia-Ferrari full text",
+          "De Angelis dividends partial information (1805.12035, adjacent)",
+          "Adversarial check 2026-11-19: survives. Open status rests on a single authors' remark from 2021; no follow-up located. Low-profile problem; not formalizable without heavy filtering theory."
+        ],
+        "conclusion": "The drafted claim 'not yet addressed' is outdated since June 2021. Residual accumulating-jump case remains stated open by the authors in 2021; source is five years old, no later paper found closing it."
+      },
+      "related_problems": [],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 548,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/548",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:zakai-uniqueness-singular-control",
+          "needs": [
+            "def:zakai-equation"
+          ],
+          "lean": null,
+          "note": "Needs the unnormalised filter and the Zakai equation."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-013",
+      "title": "The optimal local control on the free boundary of the dividend problem for n ≥ 2 insurers",
+      "statement": "n companies with compound-Poisson surplus processes $X^i$, dividend rate/lump-sum controls with weights, switching (Azcue-Muler multidimensional model, $\\delta$-approximation); the optimal value function is a viscosity solution of the HJB system. In dimension one the optimal strategy is a band strategy because the free boundaries are free points where all incoming premium is paid out. Open (stated by the authors): in $n\\ge2$, determine the optimal local control on the free boundary between the non-action region and a dividend-payment region (they conjecture dividends paid at a rate keeping the surplus on the boundary, or lump sums), and decide whether a band-type/curve structure is optimal in general.",
+      "statement_origin": "residual_case",
+      "area": "insurance",
+      "tags": [
+        "optimal-dividends",
+        "multi-dimensional",
+        "free-boundary",
+        "curve-strategy"
+      ],
+      "background": "Multi-dimensional dividend control is the benchmark for cooperating insurers.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Gerber 1969, Azcue-Muler: d=1 band strategies.",
+        "Albrecher-Azcue-Muler (AAP 2017, arXiv 1505.03980): two insurers, value function smallest viscosity supersolution, curve strategies numerically optimal in an example.",
+        "Azcue-Muler (arXiv 1804.02547): n-dim switching problem, convergent numerical scheme, verification result; conjectures for optimal local control on boundaries."
+      ],
+      "sources": [
+        {
+          "id": "azcue-muler-2018",
+          "title": "Azcue-Muler, A multidimensional problem of optimal dividends with irreversible switching: a convergent numerical scheme",
+          "url": "https://arxiv.org/abs/1804.02547",
+          "date": "2018-10-03",
+          "locator": "Introduction, p. 3 ('it is not clear what the optimal local control is in the free boundaries') and Section 'numerical examples' ('Our conjecture ... is the following')",
+          "role": "openness",
+          "finding": "Explicit: the optimal local control on the free boundaries is unclear; conjectural picture from numerics."
+        },
+        {
+          "id": "aam-2015",
+          "title": "Albrecher-Azcue-Muler, Optimal dividend strategies for two collaborating insurance companies",
+          "url": "https://arxiv.org/abs/1505.03980",
+          "date": "2015-05-15",
+          "locator": "Abstract and Section 9",
+          "role": "partial_result",
+          "finding": "Curve strategies identified; explicit optimum in one numerical example only."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2018-10-03",
+        "resolution_searches": [
+          "optimal dividend problem multi-dimensional band strategy optimality dividends several insurers arXiv",
+          "two-dimensional optimal dividend problem compound Poisson collaborating insurers optimal strategy structure free boundary 2023 2024 2025 Azcue Muler Albrecher"
+        ],
+        "nearby_results_checked": [
+          "AAM 2015",
+          "Azcue-Muler 2018",
+          "Albrecher-Ramsey optimal dividend bands revisited 2207.01329 (1-D only)",
+          "reinsurance multi-line 2002.03295",
+          "Adversarial check 2026-11-19: survives. Soft open problem (conjecture from numerics, no crisp statement). Not suitable for Lean as stated."
+        ],
+        "conclusion": "Source is 2018; no later paper found resolving it, but the search tool did not return 2023-2026 hits. Kept open at the age of the source."
+      },
+      "related_problems": [],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 549,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/549",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "not_a_proposition",
+          "blueprint": "thm:multidimensional-dividend-boundary",
+          "needs": [
+            "def:optimal-dividend-problem"
+          ],
+          "lean": null,
+          "note": "The question asks to determine the optimal local control; the authors' conjectured description becomes a proposition once the problem is defined."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-014",
+      "title": "The duality l(L^∞) = E' for the robust multi-period binomial model",
+      "statement": "Let $\\mathcal P$ be a convex set of probability measures on a measurable space $(\\Omega,\\mathcal F)$. Let $E$ be the space of finite signed measures absolutely continuous with respect to at least one $P\\in\\mathcal P$ (total variation norm), let $L^\\infty=L^\\infty(\\mathcal P)$ be the space of $\\mathcal P$-quasi-surely bounded measurable functions modulo $\\mathcal P$-q.s. equality, and let $l:L^\\infty\\to E'$, $l_h(\\mu)=\\int h\\,d\\mu$. The map $l$ is an isometric embedding with weak$^*$-dense range, and the question is whether the range is all of $E'$. For $T=1$ and the robust binomial model of Blanchard--Carassus (parameter box $(u,d,\\pi)\\in E_0$, $\\Omega=(0,\\infty)$, $S_1=S_0Y_1$), one has $l(L^\\infty)=E'$ on a canonical extension of the model (Klein--Köstenberger). Question: for $T>1$, does the robust multi-period binomial model of Blanchard--Carassus (uncertainty set generated by the same parameter box at each of the $T$ steps), or any non-trivial robust multi-period binomial model, satisfy $l(L^\\infty)=E'$ (on the model or on its extension)? A proof or a counterexample settles it. The exact uncertainty set is the one fixed in the cited papers.",
+      "statement_origin": "source_question",
+      "area": "robust-finance",
+      "tags": [
+        "robust-fundamental-theorem",
+        "large-financial-markets",
+        "quasi-sure-analysis",
+        "L1-Linfty-duality",
+        "binomial-model"
+      ],
+      "background": "The quantitative Halmos--Savage theorems and the robust FTAP for large financial markets of Cuchiero--Klein--Köstenberger--Schmidt assume l(L^infty)=E'; without it the multi-period extension of their robust asymptotic-arbitrage theory is not available.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "For T=1, l(L^infty)=E' holds for the robust binomial model after a canonical extension (Klein--Köstenberger, arXiv 2605.04912, Section 5.3 and Corollary 46).",
+        "l(L^infty) is always weak* dense in E' (Lemma 3.4 of arXiv 2504.06686), so the issue is weak* closedness.",
+        "Klein--Köstenberger (Lemma 40, Remark 41) show the supports of the T=1 sub-families are not disjoint in general and that this already occurs for multi-period; the disjoint-support route of the one-period proof therefore does not transfer directly."
+      ],
+      "sources": [
+        {
+          "id": "cuchiero-klein-kostenberger-schmidt-2026",
+          "title": "Cuchiero, Klein, Köstenberger, Schmidt: Quantitative Halmos-Savage theorems and robust large financial markets",
+          "url": "https://arxiv.org/abs/2504.06686",
+          "date": "2026-05-13",
+          "locator": "arXiv v3, Remark 4.8 (Section 4)",
+          "role": "openness",
+          "finding": "States: 'It is an open question, whether any (non-trivial) robust multi-period binomial model satisfies l(L^infty)=E'.' and says it is unclear the multi-period extension is useful without it. Read in the v3 text (pdftotext)."
+        },
+        {
+          "id": "klein-kostenberger-2026",
+          "title": "Klein, Köstenberger: Can the L1-L^infty duality be restored for non-dominated families of probability measures?",
+          "url": "https://arxiv.org/abs/2605.04912",
+          "date": "2026-05-13",
+          "locator": "Section 5.3, Corollary 46, Lemma 40, Remark 41, Appendix 7",
+          "role": "partial_result",
+          "finding": "Proves the one-step case on the Hahn-extension; remarks that multi-period supports are not disjoint; does not claim the multi-period case."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2026-05-13",
+        "resolution_searches": [
+          "Klein Köstenberger 2026 robust binomial model extension l(L^infty)=E' Liebrich Nendel Riedel Halmos-Savage robust",
+          "robust large financial market multi-period binomial L1-Linfty duality",
+          "large financial market asymptotic arbitrage 'open question' 2020..2026"
+        ],
+        "nearby_results_checked": [
+          "arXiv 2605.04912 (same authors) treats only the one-step binomial model explicitly and does not close the multi-period case in the text read (grep for multi-period/open).",
+          "Liebrich-Nendel-Riedel (2022) characterise the duality in the 'supported' case; Appendix D of that paper gives the multi-period supports.",
+          "Adversarial check 2026-11-19: survives. Functional analysis/measure theory; precise uncertainty set must be fixed from the papers. Both sources <7 months old."
+        ],
+        "conclusion": "Stated as open by its authors in May 2026 (v3); no resolution located. Dated literature assessment only."
+      },
+      "related_problems": [
+        "MF-OP-010"
+      ],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 550,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/550",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:robust-binomial-duality",
+          "needs": [
+            "def:nondominated-model"
+          ],
+          "lean": null,
+          "note": "Needs the quasi-sure L^∞ space of a nondominated model; the binomial path measure exists."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-015",
+      "title": "The k^{3/2} correction to the right tail of absorbed SABR for ρ < 0",
+      "statement": "SABR as above, $\\beta\\in(0,1)$, $\\rho\\in(-1,0)$, absorbed at zero, $P(k)=\\mathbb P(F_T>f_0e^k)$. Conjecture 8.1 of Cao-Huang: $-\\ln P(k)=c_-k^2+c_{3/2}k^{3/2}+o(k^{3/2})$ with $c_{3/2}=\\dfrac{\\sqrt2\\,\\beta(1-\\beta)|\\rho|}{\\nu(1-\\rho^2)\\sqrt T}$, where $c_-=(1-\\beta)^2/(2\\nu^2T(1-\\rho^2))$. Prove or disprove.",
+      "statement_origin": "source_question",
+      "area": "stoch-vol",
+      "tags": [
+        "SABR",
+        "tail-asymptotics",
+        "conjecture"
+      ],
+      "background": "Controls the second-order wing of the smile for correlated SABR.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Leading k^2 coefficient proved (same paper); k^{3/2} term supported only by two formal calculations (Legendre inversion; angular-path conditioning)."
+      ],
+      "sources": [
+        {
+          "id": "cao-huang-2026",
+          "title": "Cao, Huang, The Right Wing of the SABR Smile with an Absorbing Boundary",
+          "url": "https://arxiv.org/abs/2610.04209",
+          "date": "2026-10-03",
+          "locator": "Section 8, Conjecture 8.1, p. 30 (v2, 2026-11-07); constant checked against the PDF",
+          "role": "openness",
+          "finding": "Authors state the correction is conjectural, supported by formal calculations only; a proof needs a uniform shrinking-tube lower bound or complex saddle-point estimates."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2026-11-07",
+        "resolution_searches": [
+          "abs:conjecture AND abs:implied volatility"
+        ],
+        "nearby_results_checked": [
+          "Adversarial check 2026-11-19: survives. arXiv date is 2026-10-03 (not 11-07; v2 later). Needs SDE/Brownian motion machinery; not finite-dimensional."
+        ],
+        "conclusion": "Open by the authors' own statement 12 days before the check; the constant in the statement should be re-read from the PDF (pdftotext garbled the square root layout)."
+      },
+      "related_problems": [],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 551,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/551",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:sabr-right-tail-correction",
+          "needs": [
+            "def:sabr-model"
+          ],
+          "lean": null,
+          "note": "The library has the Hagan smile, not the SABR diffusion absorbed at zero."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-016",
+      "title": "Complete mixability of the uniform law on a convex body of ℝ^d for n ≥ d + 1",
+      "statement": "For a convex set $C\\subset\\mathbb R^d$ with nonempty interior, is the uniform distribution on $C$ $n$-completely mixable on $\\mathbb R^d$ (there exist $X_1,\\dots,X_n$ uniform on $C$ with $\\sum X_i=n\\,\\mathbb E X$ a.s.) for every $n\\ge d+1$? Wang notes the statement is equivalent to the case $n=d+1$. Known for $d=1$ ($n\\ge2$) and, for $d=2$, only the projections are $3$-CM.",
+      "statement_origin": "source_question",
+      "area": "risk-aggregation",
+      "tags": [
+        "complete-mixability",
+        "convex-order",
+        "Frechet-class",
+        "risk-aggregation"
+      ],
+      "background": "Sharp upper/lower bounds for VaR/ES of sums of risks with given marginals reduce to mixability and convex-order-minimal dependence.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "d=1: uniform on an interval is n-CM for n>=2 (Gaffke-Ruschendorf 1981).",
+        "Projection of an n-CM law to any subspace is n-CM; concave-density laws on R are n-CM for n>=3 (Puccetti-Wang-Wang 2012)."
+      ],
+      "sources": [
+        {
+          "id": "wang-2015",
+          "title": "Wang, Current open questions in complete mixability (Probability Surveys 12, 2015)",
+          "url": "https://arxiv.org/abs/1411.6190",
+          "date": "2015-07-24",
+          "locator": "Open Problem 5, Section 2.5 (pp. 16-17)",
+          "role": "openness",
+          "finding": "Conjecture that a uniform law on a convex set of R^d is n-CM for all n >= d+1; d=0,1 verified, d=2 only projections handled."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2015-07-24",
+        "resolution_searches": [
+          "\"Current open questions in complete mixability\" solved answer open problem",
+          "complete mixability bounded interval absolutely continuous n-CM large n resolved",
+          "uniform distribution convex set complete mixability multivariate (d+1)-CM"
+        ],
+        "nearby_results_checked": [
+          "Puccetti-Rigo-Wang-Wang 2017 (answers OP1 only)",
+          "Shmalo 2026 (answers OP4 only)",
+          "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
+          "Adversarial check 2026-11-19: survives. Finite-dimensional probability: Lean-statable now (volume.restrict C, identically distributed R^d-valued random variables with a.s. constant sum). S2 coverage of citations is incomplete (rate-limited)."
+        ],
+        "conclusion": "Class A source is 11 years old, so by the catalogue's rule the status is 'lead', not 'open': my searches (web search only; arXiv API was rate-limited) found no resolution, but I did not do a citation-graph sweep of papers citing Wang 2015."
+      },
+      "related_problems": [
+        "MF-OP-017",
+        "MF-OP-018"
+      ],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 552,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/552",
+      "formalization": {
+        "status": "stated",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "stated",
+          "blueprint": "thm:uniform-convex-complete-mixability",
+          "needs": [],
+          "lean": "MathFinFrontier.uniform_convex_completelyMixable",
+          "note": "Stated with couplings on Fin n → ℝᵈ; uses only Mathlib."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-017",
+      "title": "Complete mixability of absolutely continuous laws on a bounded interval for all large n",
+      "statement": "Let $F$ be an absolutely continuous distribution on a bounded interval $[a,b]$. Is there $n_0$ such that $F$ is $n$-completely mixable (centre $n\\mu$) for all $n\\ge n_0$? Known: this holds if the density $f$ satisfies $f\\ge 3/(n(b-a))$ on $[a,b]$ (Puccetti-Wang-Wang 2013), hence for every density bounded away from zero. Open: remove the positive lower bound.",
+      "statement_origin": "source_question",
+      "area": "risk-aggregation",
+      "tags": [
+        "complete-mixability",
+        "convex-order",
+        "Frechet-class",
+        "risk-aggregation"
+      ],
+      "background": "Sharp upper/lower bounds for VaR/ES of sums of risks with given marginals reduce to mixability and convex-order-minimal dependence.",
+      "difficulty": "unassessed",
+      "mathematical_status": "resolution_reported",
+      "known_results": [
+        "Density bounded below by 3/(n(b-a)) implies n-CM (Puccetti-Wang-Wang 2013).",
+        "Necessary mean condition a+(b-a)/n <= mu <= b-(b-a)/n; sufficient for monotone densities (Wang-Wang 2011)."
+      ],
+      "sources": [
+        {
+          "id": "wang-2015",
+          "title": "Wang, Current open questions in complete mixability (Probability Surveys 12, 2015)",
+          "url": "https://arxiv.org/abs/1411.6190",
+          "date": "2015-07-24",
+          "locator": "Open Problem 7, Section 2.6 (p. 17)",
+          "role": "openness",
+          "finding": "Explicitly left open whether the density-bounded-below condition can be removed; asks for all absolutely continuous laws on a bounded interval."
+        },
+        {
+          "id": "shmalo-2026",
+          "title": "Shmalo, Absolutely continuous laws on a bounded interval are completely mixable for all large n (Zenodo preprint)",
+          "url": "https://zenodo.org/records/24070253",
+          "date": "2026-11-08",
+          "locator": "Thm 1.1, Thm 1.2 (n >= (6R/H+1)/q if F >= q U[c-H,c+H]), Lemma 4.1-4.2",
+          "role": "resolution_claim",
+          "finding": "Proves every law on a bounded interval with nonzero a.c. part is n-CM for all n>=N(F); proof (6 pages) is short: quantile-grid coupling + linear tilts of uniform piece + pairing via F*F. I read it fully; steps look sound but it is unrefereed and AI-generated (Claude Opus 5.5 per its own declaration). Also rebuts Yin-Zhu (arXiv 1706.05499 v4) claimed negative example (Remark 5.3)."
+        },
+        {
+          "id": "yin-zhu",
+          "title": "Yin–Zhu, arXiv 1706.05499 (v4)",
+          "url": "https://arxiv.org/abs/1706.05499",
+          "date": null,
+          "locator": "claimed counterexample, as cited in Shmalo, Remark 5.3",
+          "role": "resolution_claim",
+          "finding": "Reported to give a negative example; known here only through Shmalo's rebuttal, not read in this review."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "unreviewed_resolution",
+        "latest_openness_evidence_date": "2015-07-24",
+        "resolution_searches": [
+          "\"Current open questions in complete mixability\" solved answer open problem",
+          "complete mixability bounded interval absolutely continuous n-CM large n resolved",
+          "uniform distribution convex set complete mixability multivariate (d+1)-CM"
+        ],
+        "nearby_results_checked": [
+          "Puccetti-Rigo-Wang-Wang 2017 (answers OP1 only)",
+          "Shmalo 2026 (answers OP4 only)",
+          "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
+          "Adversarial check 2026-11-19: killed provisionally by Shmalo (Thm 1.1–1.2); unrefereed, so recorded as resolution_reported."
+        ],
+        "conclusion": "Two unrefereed claims conflict: Yin–Zhu (arXiv 1706.05499) report a counterexample; Shmalo (Zenodo 24070253, 2026-11-08, self-declared AI-generated) reports a proof and disputes that example. Neither is checked here."
+      },
+      "related_problems": [
+        "MF-OP-016",
+        "MF-OP-018"
+      ],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "resolution_reported",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 553,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/553",
+      "formalization": {
+        "status": "stated",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "stated",
+          "blueprint": "thm:bounded-law-complete-mixability",
+          "needs": [],
+          "lean": "MathFinFrontier.absolutelyContinuous_eventually_completelyMixable",
+          "note": "Stated in the positive direction; a proof settles the conflict between the two unrefereed claims."
+        }
+      }
+    },
+    {
+      "id": "MF-OP-018",
+      "title": "When do the sums with given marginals have a smallest element in convex order?",
+      "statement": "For marginals $F_1,\\dots,F_n$ let $D_n=\\{X_1+\\dots+X_n: X_i\\sim F_i\\}$ (any joint law). When does $D_n$ contain an element $S_0$ with $S_0\\le_{\\rm cx}S$ for all $S\\in D_n$? Find necessary and sufficient conditions on $(F_1,\\dots,F_n)$. Known: not always (Bernard-Jiang-Wang 2014, Example 3.1); exists when all $F_i$ have decreasing densities (Bernard et al. 2014); for Bernoulli classes it always exists (Cossette et al. 2024, as reported by a search summary of arXiv 2309.17346-related work).",
+      "statement_origin": "source_question",
+      "area": "risk-aggregation",
+      "tags": [
+        "complete-mixability",
+        "convex-order",
+        "Frechet-class",
+        "risk-aggregation"
+      ],
+      "background": "Sharp upper/lower bounds for VaR/ES of sums of risks with given marginals reduce to mixability and convex-order-minimal dependence.",
+      "difficulty": "unassessed",
+      "mathematical_status": "open",
+      "known_results": [
+        "Counterexample class exists; smallest element exists for decreasing densities; Bernoulli marginals always have one (cited from search summary, not opened)."
+      ],
+      "sources": [
+        {
+          "id": "wang-2015",
+          "title": "Wang, Current open questions in complete mixability (Probability Surveys 12, 2015)",
+          "url": "https://arxiv.org/abs/1411.6190",
+          "date": "2015-07-24",
+          "locator": "Open Problem 11, Section 2.9 (p. 18)",
+          "role": "openness",
+          "finding": "Says it remains unclear under what conditions a convex-order smallest element of D_n exists."
+        },
+        {
+          "id": "symmetric-2023",
+          "title": "Symmetric Bernoulli distributions and minimal dependence copulas 2309.17346; Cossette et al. 2024/25",
+          "url": "https://arxiv.org/abs/2309.17346",
+          "date": "2023-09-29",
+          "locator": "intro",
+          "role": "resolution_check",
+          "finding": "Bernoulli Frechet classes always have a smallest element; Sigma-countermonotonic iff smallest (Bernoulli). Partial results only; general N&S still open per Dec 2025 paper 2512.06786."
+        }
+      ],
+      "review": {
+        "checked_at": "2026-11-19",
+        "evidence_type": "explicit_open_statement",
+        "latest_openness_evidence_date": "2015-07-24",
+        "resolution_searches": [
+          "\"Current open questions in complete mixability\" solved answer open problem",
+          "complete mixability bounded interval absolutely continuous n-CM large n resolved",
+          "uniform distribution convex set complete mixability multivariate (d+1)-CM"
+        ],
+        "nearby_results_checked": [
+          "Puccetti-Rigo-Wang-Wang 2017 (answers OP1 only)",
+          "Shmalo 2026 (answers OP4 only)",
+          "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
+          "Adversarial check 2026-11-19: survives. Real-valued r.v.s with convex order; Lean-statable (convex order via convex test functions; Mathlib lacks it). Statement is a request for N&S conditions, not a yes/no proposition: needs concrete formulation."
+        ],
+        "conclusion": "Class A source is 11 years old, so by the catalogue's rule the status is 'lead', not 'open': my searches (web search only; arXiv API was rate-limited) found no resolution, but I did not do a citation-graph sweep of papers citing Wang 2015."
+      },
+      "related_problems": [
+        "MF-OP-016",
+        "MF-OP-017"
+      ],
+      "history": [
+        {
+          "date": "2026-11-19",
+          "status": "open",
+          "reason": "Added in round 6 after resolution search and an adversarial check."
+        }
+      ],
+      "issue_number": 554,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/554",
+      "formalization": {
+        "status": "not_started",
+        "scope": "this repository",
+        "declarations": [],
+        "lean_statement": {
+          "status": "not_a_proposition",
+          "blueprint": "thm:convex-order-minimal-sum",
+          "needs": [
+            "def:convex-order"
+          ],
+          "lean": null,
+          "note": "The question asks for necessary and sufficient conditions; candidate conditions are statable once convex order exists."
+        }
+      }
     }
   ]
 }
