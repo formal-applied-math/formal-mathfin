@@ -40,12 +40,12 @@ no second closed form is introduced. Its image form
 `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)`, with `V` the Black–Scholes call price `bsV`, is the
 reciprocal-ratio form of the display `V(S) − (S/B)^{1−2(r−q)/σ²} V(B²/S)` of
 [HowisonSteinberg2005], §2 (unnumbered, restated as eq. (7) in §3.7), for a strike above the
-barrier `B = H` and with a dividend yield `q`; the case `q = 0` is `ptDownOutCall_eq_image`,
-general `q` is `ptDownOutCall_eq_image_printed`. Lean proves that the image form equals
-`ptDownOutCall`, the transcribed Haug (2007) / Reiner–Rubinstein form ([Haug2007], ch. 4;
-[ReinerRubinstein1991]; see also [Hull] for the barrier formulas in `q` and in/out form) for a
-strike above the barrier. That `ptDownOutCall` is that formula is a matter of transcription, not
-proved in Lean.
+barrier `B = H` and with a dividend yield `q`; the printed ratio with dividend yield `q` is
+`ptDownOutCall_eq_image_printed`, and its `q = 0` case, reciprocated, is
+`ptDownOutCall_eq_image`. Lean proves that the image form equals `ptDownOutCall`, the transcribed
+Haug (2007) / Reiner–Rubinstein form ([Haug2007], ch. 4; [ReinerRubinstein1991]; see also [Hull]
+for the barrier formulas in `q` and in/out form) for a strike above the barrier. That
+`ptDownOutCall` is that formula is a matter of transcription, not proved in Lean.
 
 ## Main definitions
 
@@ -122,8 +122,8 @@ open Filter Topology
 [HowisonSteinberg2005], §2: `V(S) − (S/H)^{1−2(r−q)/σ²} · V(H²/S)` with `V = bsVDiv`, the
 Black–Scholes call price at dividend yield `q`; the closed form `ptDownOutCall` carries the cost
 of carry `b = r − q`. The case `q = 0`, with the base reciprocated, is `ptDownOutCall_eq_image`. As
-there, an identity between two closed forms, and a price form only for `σ > 0`, `0 < T`,
-`0 < S, K, H`, `H ≤ K` and `S > H`. -/
+there, an identity between two closed forms, with `K` and `σ` taken positive (the library's usual
+guard), and a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. -/
 theorem ptDownOutCall_eq_image_printed {K H r q σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
     (hH : 0 < H) (hσ : 0 < σ) :
     ptDownOutCall S K H (r - q) r σ T
@@ -170,10 +170,10 @@ down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
 `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
 §2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
 `2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are
-`ptF1, ptF2`. The case `q = 0` of `ptDownOutCall_eq_image_printed`. An identity between two
-closed forms; neither is proved here to be a price. The right-hand side is a price form only
-for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`; the identity itself holds at every
-maturity `T`. -/
+`ptF1, ptF2`. The case `q = 0` of `ptDownOutCall_eq_image_printed`, with `K` and `σ` taken
+positive, the library's usual guard. An identity between two closed forms; neither is proved here
+to be a price. The right-hand side is a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`,
+`H ≤ K` and `S > H`; the identity itself holds at every maturity `T`. -/
 theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
     (hH : 0 < H) (hσ : 0 < σ) :
     ptDownOutCall S K H r r σ T
@@ -186,8 +186,7 @@ theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
 
 /-- **Zero barrier is a junk corner.** At `H = 0` the logarithm `log (0 / S)` is `0` and
 `ptDownOutCall` is `0`, which is a junk value and not the vanilla price. Continuity in the barrier
-is stated for `0 < H` (the financial reading); at `H = 0` the many-dates limit would hold only as
-a statement about this junk value. -/
+is stated for `H ≠ 0`; a price needs `0 < H`. -/
 theorem ptDownOutCall_zero_barrier {K b r σ S T : ℝ} :
     ptDownOutCall S K 0 b r σ T = 0 := by
   simp [ptDownOutCall, ptHSmu, ptHSmu1, ptF1, ptF2, ptD1, ptD2, bsd1, bsd2]
@@ -299,7 +298,10 @@ theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc
 /-- `ptDownOutCall` is continuous in the barrier at every nonzero barrier, for nonzero spot, at
 every strike, carry, rate, volatility and maturity (the proof consumes only `S ≠ 0` and `H ≠ 0`,
 so it also covers the junk values `σ = 0`, `T ≤ 0`). Positivity is only the price reading: a
-price statement needs `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. -/
+price statement needs `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. The hypotheses
+`S ≠ 0` and `H ≠ 0` keep the statement off the junk corners (at `H = 0` the closed form is the
+junk constant `0`, so continuity fails, the vanilla limit not being `0`; at `S = 0` the closed
+form is constant in the barrier); the proof goes through for them. -/
 theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : S ≠ 0)
     (hH : H ≠ 0) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
@@ -338,9 +340,12 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
 the unshifted barrier, for nonzero spot and barrier, at every strike, rate, volatility and
 maturity, with no rate of convergence in `m` (the proof consumes only `S ≠ 0` and `H ≠ 0`, so it
 also covers the junk values `σ = 0`, `T ≤ 0`). It reads as "the BGK approximation tends to the
-continuous price" only for `σ > 0`, `0 < T`, `0 < K` and `1 ≤ m`, with the shifted barrier at
-most `K` and below the spot (true for all large `m` when `H < K` and `S > H`). It is the
-consistency of the shift with the continuous limit, not an accuracy result. -/
+continuous price" only for `σ > 0`, `0 < T`, positive `S, K, H` and `1 ≤ m`, with the shifted
+barrier at most `K` and below the spot (true for all large `m` when `H < K` and `S > H`). The
+hypotheses `S ≠ 0` and `H ≠ 0` keep the statement off the junk corners (at `H = 0` the closed
+form is the junk constant `0`, and the many-dates limit would hold only trivially, as a
+statement about junk); the proof goes through for them. It is the consistency of the shift with
+the continuous limit, not an accuracy result. -/
 theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : S ≠ 0) (hH : H ≠ 0) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
       (𝓝 (ptDownOutCall S K H r r σ T)) :=
