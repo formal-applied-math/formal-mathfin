@@ -1685,7 +1685,7 @@
         "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation.JarrowYildirim\n\n/-- **The priced zero-coupon inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve\nforward**. -/\ntheorem jy_zc_inflation_caplet\n    {Ω : Type*} [MeasurableSpace Ω] {Qn : Measure Ω} [IsProbabilityMeasure Qn] (BT : Ω → ℝ)\n    (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)\n    (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)\n    (hident : ∫ ω, bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) / BT ω ∂Qn = I0 * Pr0T)\n    (hZ : HasLaw Z (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hF0 : 0 < F0) (hV : 0 < V) (hK : 0 < K) :\n    ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0 / BT ω ∂Qn\n      = Pn0T * blackCaplet (I0 * Pr0T / Pn0T) K (Real.sqrt V) 1 1 :=\n  jyZcCaplet_price BT Pn0T Pr0T I0 F0 V K Z hBTpos hBTmeas hPn0T hP hident hZ hF0 hV hK\n"
       },
       "metadata": {
-        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model), §17.1 (the JY caplet; the zero-coupon caplet is its first-period case); H. Dam, A. Macrina, D. Skovmand and D. Sloth, Rational Models for Inflation-Linked Derivatives (2018, arXiv:1801.08804), §2.2; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3, eq. 17.6 (the forward index)",
+        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model), §17.1 (the JY caplet; the zero-coupon caplet is its first-period case); H. Dam, A. Macrina, D. Skovmand and D. Sloth, Rational Models for Inflation-Linked Derivatives, SIAM J. Financial Mathematics 11(4) (2020), 974-1006, §2.2 of the arXiv version 1801.08804; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.3, eq. 17.6 (the forward index)",
         "citations": [
           {
             "key": "JarrowYildirim2003",
@@ -1700,8 +1700,8 @@
             "locator": "ch. 17 §17.3, eq. 17.6"
           },
           {
-            "key": "DamMacrinaSkovmandSloth2018",
-            "locator": "§2.2"
+            "key": "DamMacrinaSkovmandSloth2020",
+            "locator": "§2.2 of the arXiv version 1801.08804"
           }
         ],
         "difficulty": "advanced",
@@ -1718,7 +1718,7 @@
         "lean": "import MathFin.Models.Rates.JarrowYildirim\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.Inflation\n\n/-- **The time-0 price of the year-on-year payment in the printed convexity shape**. -/\ntheorem jy_yoy_payment_price\n    {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measure Ω} (BT : Ω → ℝ)\n    (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (Pn0T : ℝ)\n    (hPn0T : 0 < Pn0T) (hP : Pn0T = ∫ ω, 1 / BT ω ∂Qn)\n    (hmS : mS ≤ m)\n    [SigmaFinite ((forwardMeasure Qn BT).trim hmS)] (IS IT RS : Ω → ℝ)\n    (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)\n    (hIT : Integrable IT (forwardMeasure Qn BT))\n    (hITS : Integrable (fun ω => IT ω / IS ω) (forwardMeasure Qn BT))\n    (hmart : (forwardMeasure Qn BT)[IT | mS] =ᵐ[forwardMeasure Qn BT] fun ω => IS ω * RS ω)\n    (mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov : ℝ)\n    (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))\n    {Z1 Z2 : Ω → ℝ}\n    (hZ1 : HasLaw Z1 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hZ2 : HasLaw Z2 (gaussianReal 0 1) (forwardMeasure Qn BT))\n    (hindep : IndepFun Z1 Z2 (forwardMeasure Qn BT))\n    (hR : ∀ ω, RS ω = (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (Convexity.hwD Br Vr\n        - Convexity.hwD Bn Vn\n        - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω))\n        + Bn * (mn + Real.sqrt Vn * Z1 ω))) :\n    ∫ ω, IT ω / IS ω / BT ω ∂Qn\n      = Pn0T * ((Pr0T * Pn0S / (Pr0S * Pn0T))\n        * Real.exp (-(Br * mr) + Bn * mn + Bn ^ 2 * Vn - Br * Bn * Cov)) :=\n  JarrowYildirim.jyYoyPayment_price BT hBTpos hBTmeas Pn0T hPn0T hP hmS IS IT RS hIS hISpos hIT\n    hITS hmart mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov hVn hVr hρ hCov hZ1 hZ2 hindep hR\n"
       },
       "metadata": {
-        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model); H. Dam, A. Macrina, D. Skovmand and D. Sloth, Rational Models for Inflation-Linked Derivatives (2018, arXiv:1801.08804), §2.2; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.4, eqs. 17.8, 17.10",
+        "reference": "R. Jarrow and Y. Yildirim, Pricing Treasury Inflation Protected Securities and Related Derivatives using an HJM Model, Journal of Financial and Quantitative Analysis 38(2) (2003), 337-358; D. Brigo & F. Mercurio, Interest Rate Models - Theory and Practice, 2nd ed. (Springer, 2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model); H. Dam, A. Macrina, D. Skovmand and D. Sloth, Rational Models for Inflation-Linked Derivatives, SIAM J. Financial Mathematics 11(4) (2020), 974-1006, §2.2 of the arXiv version 1801.08804; S. Bagaria, Notes on Fixed Income Derivative Pricing (lecture notes), ch. 17 §17.4, eqs. 17.8, 17.10",
         "citations": [
           {
             "key": "JarrowYildirim2003",
@@ -1733,8 +1733,8 @@
             "locator": "ch. 17 §17.4, eqs. 17.8, 17.10"
           },
           {
-            "key": "DamMacrinaSkovmandSloth2018",
-            "locator": "§2.2"
+            "key": "DamMacrinaSkovmandSloth2020",
+            "locator": "§2.2 of the arXiv version 1801.08804"
           }
         ],
         "difficulty": "advanced",

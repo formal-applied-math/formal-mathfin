@@ -67,13 +67,15 @@ follows without the SDE calculus.
 The SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift of the real rate and of the log-variance
 `V(0,T)` is not claimed: the index-linked-bond pricing (`hident`), the lognormality of the index
 (`hZ`), the martingale property of the forward index (`hmart`) and the Hull–White reconstitution
-form of the bond ratio (`hR`) are hypotheses. The three-SDE form (dependent Brownian motions for the
-nominal rate, the real rate and the index, with the real-rate drift shift `−ρ_{rI}σ_rσ_I`) is that
-of Dam–Macrina–Skovmand–Sloth §2.2 (arXiv:1801.08804, who cite Brigo–Mercurio ch. 15 for it); the
-nominal-rate–index correlation `ρ_{nI}` is not named there, and the correlation structure of the
-variance integrand is this module's reading. Bagaria ch. 17 supplies only eqs. 17.6, 17.8 and 17.10,
-and the caplet rests on Brigo–Mercurio §17.1. Jarrow–Yildirim (2003) itself was not consulted. The
-exact YoY caplet, calibration, seasonality and Monte Carlo are out of scope.
+form of the bond ratio (`hR`) are hypotheses. The three-SDE form (Hull–White nominal and real short
+rates, lognormal index, dependent Brownian motions) and the real-rate drift shift `−ρ_{rI}σ_rσ_I`
+are those of Dam–Macrina–Skovmand–Sloth, §2.2 of the arXiv version 1801.08804 (who cite
+Brigo–Mercurio ch. 15 for the form), and of Bagaria §17.4 (Calculation 17.7, eq. 17.9, with
+correlations `ρ_{nr}`, `ρ_{rI}`); the nominal-rate–index correlation `ρ_{nI}` is named in neither,
+and the correlation structure of the variance integrand is this module's reading. This module uses
+only eqs. 17.6, 17.8 and 17.10 of Bagaria ch. 17, and the caplet rests on Brigo–Mercurio §17.1.
+Jarrow–Yildirim (2003) itself was not consulted. The exact YoY caplet, calibration, seasonality and
+Monte Carlo are out of scope.
 
 ## References
 
@@ -84,7 +86,8 @@ exact YoY caplet, calibration, seasonality and Monte Carlo are out of scope.
   ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (the JY caplet; the
   zero-coupon caplet is its first-period case)
 * [H. Dam, A. Macrina, D. Skovmand and D. Sloth, *Rational Models for Inflation-Linked Derivatives*,
-  2018, arXiv:1801.08804][DamMacrinaSkovmandSloth2018], §2.2
+  SIAM J. Financial Mathematics 11(4) (2020), 974–1006][DamMacrinaSkovmandSloth2020], §2.2 of the
+  arXiv version 1801.08804
 * [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
   forward index), and §17.4, eqs. 17.8, 17.10
 
