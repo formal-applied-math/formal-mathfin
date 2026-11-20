@@ -25,15 +25,15 @@ nominal `T`-forward measure and its expectation. `Pⁿ(t,T)` and `Pʳ(t,T)` are 
 zero-coupon bond prices, `F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is the forward index (a `Q^T`-martingale in
 `t`) and `F = F(0,T)` its time-0 value, the curve forward. `jyVariance` is the integrated
 log-variance `V(0,T)` of `F(·,T)` (defined below); `V` is a log-variance (a free input of the caplet
-statement), `F₀` the mean of the lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`, `K`
-a caplet strike, `Φ` the standard normal distribution function and `d_{1,2} = (log(F/K) ± V/2)/√V`.
-These symbols (`t`, `T`, `S`, `I_t`, `I₀`, `I_S`, `I_T`, `σ_·`, `a_·`, `ρ_{··}`, `B_x(t,T)`, `Qn`,
-`B_T`, `𝔼^{Qn}`, `Q^T`, `𝔼^T`, `Pⁿ(t,T)`, `Pʳ(t,T)`, `F(t,T)`, `F`, `V`, `V(0,T)`, `F₀`, `Z`, `K`,
-`Φ`, `d_{1,2}`) keep these meanings in every docstring below, except in the general lemmas
-`quad2_nonneg`, `quad3_nonneg` and `blackCaplet_sqrt_variance`, whose letters are free arguments;
-hypothesis names (`hident`, `hZ`, `hmart`, `hR`) and local symbols (`μ`, `m`, `m_S`, `R_S`, `yⁱ`,
-`Dⁱ`, ...) are introduced where first used. This module records what follows without the SDE
-calculus.
+statement), `F₀` the `Q^T`-mean of the lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`
+under `Q^T`, `K` a caplet strike, `Φ` the standard normal distribution function and
+`d_{1,2} = (log(F/K) ± V/2)/√V`. These symbols (`t`, `T`, `S`, `I_t`, `I₀`, `I_S`, `I_T`, `σ_·`,
+`a_·`, `ρ_{··}`, `B_x(t,T)`, `Qn`, `B_T`, `𝔼^{Qn}`, `Q^T`, `𝔼^T`, `Pⁿ(t,T)`, `Pʳ(t,T)`, `F(t,T)`,
+`F`, `V`, `V(0,T)`, `F₀`, `Z`, `K`, `Φ`, `d_{1,2}`) keep these meanings in every docstring below,
+except in the general lemmas `quad2_nonneg`, `quad3_nonneg` and `blackCaplet_sqrt_variance`, whose
+letters are free arguments; hypothesis names (`hident`, `hZ`, `hmart`, `hR`) and local symbols (`μ`,
+`m`, `m_S`, `R_S`, `yⁱ`, `Dⁱ`, ...) are introduced where first used. This module records what
+follows without the SDE calculus.
 
 ## Main definitions
 
@@ -215,7 +215,7 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   exact h2.symm
 
 /-- **ZC inflation caplet: the priced payoff is `Pⁿ(0,T)` times the Black caplet on the curve
-forward.** For `F₀ > 0` (the mean of the lognormal index law), `V > 0`, `K > 0`, under `hZ`
+forward.** For `F₀ > 0` (the `Q^T`-mean of the lognormal index law), `V > 0`, `K > 0`, under `hZ`
 (`I_T = bsTerminal F₀ 0 √V 1 Z` with `Z ~ N(0,1)` under `Q^T`), `hident`
 (`𝔼^{Qn}[I_T/B_T] = I₀·Pʳ(0,T)`) and `0 < Pⁿ(0,T) = 𝔼^{Qn}[1/B_T]` with `B_T` positive and
 measurable, and `Qn` a probability measure (inherited from the section variable of

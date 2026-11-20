@@ -3381,15 +3381,15 @@
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-20",
       "elapsed_s": 2.3,
-      "input_hash": "367bbfc40d0e611f135523973c320eabf4424bc37e1e693aa3f34961b5129f9f",
-      "verified_at_commit": "34ad20f2"
+      "input_hash": "ca6823e5f61a0768d0751422f3dc6ba4f7f52c3447f9d7790dad11b62d82c665",
+      "verified_at_commit": "1d257f3c"
     },
     "mf-jarrow-yildirim-zc-inflation-caplet": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-20",
-      "elapsed_s": 2.2,
-      "input_hash": "dce4dc8649ce1a0477c17836392a06b89283c1cc706fe5c03c5b566b6820c0c8",
-      "verified_at_commit": "34ad20f2"
+      "elapsed_s": 2.3,
+      "input_hash": "f0d276376176ad7356665cc8a4434c631dbfc3a352ecb7d0a17018f98f11e743",
+      "verified_at_commit": "1d257f3c"
     },
     "mf-joint-stdev-triangle": {
       "benchmark_file": "risk_measures.json",
