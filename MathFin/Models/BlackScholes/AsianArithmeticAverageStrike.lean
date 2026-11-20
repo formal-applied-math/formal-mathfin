@@ -31,6 +31,8 @@ derived here. Rogers and Shi's paper itself was not read.
 
 * `expSum`: the exponential sum `z ↦ ∑ₖ aₖ exp(dₖ + cₖ z)`.
 * `condBoundCall`: the closed form `D · ∑ₖ aₖ exp(dₖ + cₖ²/2) · Φ(cₖ − z*)`.
+* `condRate`: the rate `cₖ` of the conditional mean of `ln Sₖ` given `Z`, junk `0` at zero variance.
+* `condShift`: the log-shift `dₖ = ln Fₖ − cₖ²/2`, junk for `Fₖ ≤ 0`.
 
 ## Main results
 
