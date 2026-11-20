@@ -22,6 +22,7 @@ terms allow storing them for research; they are not to be redistributed, so neve
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import re
 import subprocess
@@ -96,6 +97,21 @@ def _get(url: str, timeout: float = 60) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": AGENT})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
+
+
+def _get_retrying(url: str, tries: int = 4) -> bytes:
+    """`_get`, retrying a dropped connection or a server error with backoff (a 404 is final)."""
+    for attempt in range(tries):
+        try:
+            return _get(url, timeout=120)
+        except urllib.error.HTTPError as err:
+            if err.code < 500 or attempt == tries - 1:
+                raise
+        except (OSError, http.client.HTTPException):
+            if attempt == tries - 1:
+                raise
+        time.sleep(5 * 2 ** attempt)
+    raise AssertionError("unreachable")
 
 
 def list_papers(categories=CATEGORIES, page: int = 1000, delay: float = 3.1) -> dict[str, dict]:
@@ -185,12 +201,12 @@ def fetch_one(paper: dict, root: Path) -> dict:
             return {"id": paper["id"], "status": "ok", "version": v, "path": str(dest)}
     for v in range(paper["version"], 0, -1):
         try:
-            pdf = _get(pdf_url(paper["id"], v), timeout=120)
+            pdf = _get_retrying(pdf_url(paper["id"], v))
         except urllib.error.HTTPError as err:
             if err.code == 404:
                 continue
             return {"id": paper["id"], "status": f"http-{err.code}"}
-        except (urllib.error.URLError, TimeoutError) as err:
+        except (OSError, http.client.HTTPException) as err:
             return {"id": paper["id"], "status": f"error: {err}"}
         dest = local_path(root, paper["id"], v)
         dest.parent.mkdir(parents=True, exist_ok=True)
