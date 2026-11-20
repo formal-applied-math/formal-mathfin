@@ -26,7 +26,8 @@ rate–index, nominal rate–index, nominal–real rate), and `B_x(t,T) = (1 −
 of a year-on-year payment `I_T/I_S`, `I_S` the index at `S`, `𝔼^{Qn}` the expectation under `Qn`,
 `Φ` the standard normal distribution function, `V` the log-variance of the index (`jyVariance` below
 is the candidate value `V(0,T)`), and `F₀` the forward parameter of the lognormal index law
-`I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`. `d_{1,2} = (log(F/K) ± V/2)/√V`.
+`I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`. `F = F(0,T) = I₀·Pʳ(0,T)/Pⁿ(0,T)` is the curve forward
+and `d_{1,2} = (log(F/K) ± V/2)/√V`.
 
 ## Main definitions
 
@@ -81,7 +82,7 @@ transcription. The exact YoY caplet, calibration, seasonality and Monte Carlo ar
   ed. (2006), §15.3 (the JY model), §16.3 (YYIIS with the JY model), §17.1 (the JY caplet; the
   zero-coupon caplet is its first-period case)
 * [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
-  forward index) and §17.4 (eqs. 17.8, 17.10)
+  forward index), and §17.4, eqs. 17.8, 17.10
 
 ## Tags
 
@@ -377,15 +378,17 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
 reconstitution form (`hR`: `R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))`
 times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`), with `Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`, `Bⁿ, Bʳ` the Hull–White
 loadings of the nominal and real short rates over `[S,T]` (free reals here; they enter only through
-`hR`), `mⁱ, Vⁱ` the mean and variance of the rate deviation `yⁱ`, `yⁿ = mⁿ + √Vⁿ·Z1` and
-`yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)`, the two Gaussian rate deviations of `yoyConvexity_eq`,
+`hR`), `Z1, Z2` independent standard normals under `μ`, `ρ` the correlation of the two rate
+deviations (a free parameter of the statement; it plays the role of `ρ_{nr}`), `mⁱ, Vⁱ` the mean and
+variance of the rate deviation `yⁱ`, `yⁿ = mⁿ + √Vⁿ·Z1` and `yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)`, the
+two Gaussian rate deviations of `yoyConvexity_eq`,
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
 where `Cov` is the covariance of the two rate deviations; i.e. the naive ratio times the convexity
 factor. The exponent is the same quantity as in `yoyConvexity_eq`, with its terms in Bagaria's
-printed order (equal by `ring`). Further hypotheses: `Z1, Z2` independent standard normals under `μ`
-(`hZ1`, `hZ2`, `hindep`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1` and `hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means,
+printed order (equal by `ring`). Further hypotheses: `hZ1`, `hZ2`, `hindep` (the law and
+independence of `Z1, Z2`), `0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1` and `hCov : Cov = ρ·√(Vⁿ·Vʳ)`. The means,
 variances, covariance, `Bⁿ`, `Bʳ`, `hR` and `hmart` are hypotheses or inputs; they are not derived
 from the SDEs here. Junk corner: the naive ratio `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` is `0` by
 Lean's division convention if `Pʳ(0,S)` or `Pⁿ(0,T)` is `0`; the bond prices are positive in the
