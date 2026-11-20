@@ -191,6 +191,23 @@ def fetch(works: list[dict], root: Path, workers: int = 16) -> dict:
     return status
 
 
+def _cached_pdf(work_id: str, tries: int = 4) -> tuple[bytes, str]:
+    """One cached PDF from the content API. A 429 is first a per-second rate limit: wait as
+    OpenAlex's Retry-After says (10 s if it says nothing) and try again."""
+    for attempt in range(tries):
+        try:
+            body, _ = _get(f"{CONTENT}/{work_id}.pdf", {"Authorization": f"Bearer {_key()}"},
+                           timeout=120)
+            return body, "ok" if is_pdf(body) else "not-pdf"
+        except urllib.error.HTTPError as err:
+            if err.code != 429 or attempt == tries - 1:
+                return b"", f"http-{err.code}"
+            time.sleep(float(err.headers.get("Retry-After") or 10))
+        except (OSError, ValueError) as err:
+            return b"", f"error: {type(err).__name__}"
+    return b"", "http-429"
+
+
 def cached(works: list[dict], root: Path, budget: float = 0.9) -> dict:
     """OpenAlex's cached PDF for each work that has one and is not yet on disk, until `budget`
     dollars are spent ($0.01 a file) or OpenAlex refuses (the day's allowance is gone). A work
@@ -209,17 +226,10 @@ def cached(works: list[dict], root: Path, budget: float = 0.9) -> dict:
         for w in todo:
             if spent + 0.01 > budget + 1e-9:
                 break
-            try:
-                body, _ = _get(f"{CONTENT}/{wid(w)}.pdf", {"Authorization": f"Bearer {_key()}"},
-                               timeout=120)
-                st = "ok" if is_pdf(body) else "not-pdf"
-            except urllib.error.HTTPError as err:
-                body, st = b"", f"http-{err.code}"
-            except (OSError, ValueError) as err:
-                body, st = b"", f"error: {type(err).__name__}"
+            body, st = _cached_pdf(wid(w))
             if st in ("http-402", "http-429"):
                 status[st] = status.get(st, 0) + 1
-                break  # the day's allowance is spent: stop, resume tomorrow
+                break  # refused even after waiting: the day's allowance is spent
             spent += 0.01
             attempted += 1
             if st == "ok":
