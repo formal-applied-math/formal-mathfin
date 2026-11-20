@@ -653,15 +653,17 @@ split by area. What each bridge proves, by area:
   vanilla leg identified with the digital call contract's value
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
-  (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the shifted-barrier expression is proved to
-  tend to `ptDownOutCall` as `m → ∞` (for positive spot and barrier) and to be invariant under
-  the `(r, σ, T) ↦ (cr, σ√c, T/c)` rescaling for `c > 0`; `ptDownOutCall` is spatially homogeneous
-  in `(S, K, H)` for every real `c`, equal to its image form
-  for positive `S, K, H, σ` (also with a dividend yield, in the printed shape) and `0`, a junk value, at `H = 0` (where the BGK knock-in is the whole `bsV`, also a junk value); and the
-  closed form `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`).
-  Not derived: `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of
-  convergence in `m`, and the accuracy of the shift as an approximation to the discretely
-  monitored price.
+  (`mf-bgk-discrete-barrier-shift`, `reduced_core`). The shifted-barrier expression is proved to
+  tend to `ptDownOutCall` as `m → ∞` (for nonzero spot and barrier; a price reading needs
+  `σ > 0`, `0 < T`, positive `S, K, H`, `1 ≤ m` and the shifted barrier at most `K` and below
+  the spot). It is invariant under the `(r, σ, T) ↦ (cr, σ√c, T/c)` rescaling for `c > 0`.
+  `ptDownOutCall` is spatially homogeneous in `(S, K, H)` for every real `c`. It equals its image
+  form for positive `S, K, H, σ`, also with a dividend yield in the printed shape. At `H = 0` it
+  is `0`, a junk value, and the BGK knock-in is the whole `bsV`, also a junk value. The closed
+  form `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`). Not derived:
+  `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of convergence in
+  `m`, and the accuracy of the shift as an approximation to the discretely monitored price.
+
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio

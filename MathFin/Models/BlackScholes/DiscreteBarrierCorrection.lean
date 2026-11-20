@@ -40,10 +40,12 @@ no second closed form is introduced. Its image form
 `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)`, with `V` the Black–Scholes call price `bsV`, is the
 reciprocal-ratio form of the display `V(S) − (S/B)^{1−2(r−q)/σ²} V(B²/S)` of
 [HowisonSteinberg2005], §2 (unnumbered, restated as eq. (7) in §3.7), for a strike above the
-barrier `B = H` and with a dividend yield `q`; the case here is `q = 0`. Lean proves that the
-image form equals `ptDownOutCall`, the transcribed Reiner–Rubinstein form
-([ReinerRubinstein1991]; see also [Hull]) for a strike above the barrier. That `ptDownOutCall` is
-the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in Lean.
+barrier `B = H` and with a dividend yield `q`; the case `q = 0` is `ptDownOutCall_eq_image`,
+general `q` is `ptDownOutCall_eq_image_printed`. Lean proves that the image form equals
+`ptDownOutCall`, the transcribed Haug (2007) / Reiner–Rubinstein form ([Haug2007], ch. 4;
+[ReinerRubinstein1991]; see also [Hull] for the barrier formulas in `q` and in/out form) for a
+strike above the barrier. That `ptDownOutCall` is that formula is a matter of transcription, not
+proved in Lean.
 
 ## Main definitions
 
@@ -74,7 +76,7 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `bgkDownBarrier_timeScale`, `bgkDownOutCall_timeScale`: the shift `σ√(T/m)` is fixed by the same
   scaling at fixed `m` (`Δt ↦ Δt/c`), so the BGK expression is as well.
 * `continuousAt_ptDownOutCall_barrier`: `ptDownOutCall` is continuous in the barrier at every
-  positive barrier, for positive spot, at any strike, carry, rate, volatility and maturity.
+  nonzero barrier, for nonzero spot, at any strike, carry, rate, volatility and maturity.
 * `tendsto_bgkDownBarrier`: the shifted barrier tends to `H` as the number of dates `m → ∞`.
 * `tendsto_bgkDownOutCall`: as `m → ∞` the BGK expression tends to `ptDownOutCall` at `H`.
 * `abs_knockIn_sub_bgkKnockIn_le`: a linear rearrangement of in–out parity
@@ -100,6 +102,7 @@ only.
   options*][BroadieGlassermanKou1997]
 * [S. Howison, M. Steinberg, *A matched asymptotic expansions approach to continuity corrections
   for discretely sampled options. Part 1: barrier options*][HowisonSteinberg2005], §1, §2 and §3.7
+* [E. G. Haug, *The Complete Guide to Option Pricing Formulas*][Haug2007] (2nd ed., 2007), ch. 4
 * [E. Reiner and M. Rubinstein, *Breaking down the barriers*][ReinerRubinstein1991]
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (10th ed., Pearson, 2018), ch. 26
 
@@ -232,12 +235,12 @@ theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) :
   simp only [ptDownOutCall, ptHSmu, ptHSmu1, hmu, hF, hF2, hD, hD2, e1, e2]
 
 /-- The shifted barrier of a down option, `H · exp(−β σ √(T/m))`. It is `H` at `m = 0` and for
-`T < 0`, where `T / m` or its square root is a junk value. -/
+`T ≤ 0`, where `T / m` or its square root is a junk value. -/
 noncomputable def bgkDownBarrier (β : ℝ) (m : ℕ) (H σ T : ℝ) : ℝ :=
   H * Real.exp (-(β * σ * Real.sqrt (T / m)))
 
 /-- The shifted barrier of an up option, `H · exp(β σ √(T/m))`. It is `H` at `m = 0` and for
-`T < 0`. -/
+`T ≤ 0`. -/
 noncomputable def bgkUpBarrier (β : ℝ) (m : ℕ) (H σ T : ℝ) : ℝ :=
   H * Real.exp (β * σ * Real.sqrt (T / m))
 
@@ -293,15 +296,15 @@ theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc
 
 /-! ### The limit of many monitoring dates -/
 
-/-- `ptDownOutCall` is continuous in the barrier at every positive barrier, for positive spot, at
-every strike, carry, rate, volatility and maturity (the proof consumes only `0 < S` and `0 < H`,
-so it also covers the junk values `σ = 0`, `T ≤ 0`). It is a price statement only for `σ > 0`,
-`0 < T`, `0 < K`, `H ≤ K` and `S > H`. -/
-theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : 0 < S)
-    (hH : 0 < H) :
+/-- `ptDownOutCall` is continuous in the barrier at every nonzero barrier, for nonzero spot, at
+every strike, carry, rate, volatility and maturity (the proof consumes only `S ≠ 0` and `H ≠ 0`,
+so it also covers the junk values `σ = 0`, `T ≤ 0`). Positivity is only the price reading: a
+price statement needs `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. -/
+theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : S ≠ 0)
+    (hH : H ≠ 0) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
   have hl : ContinuousAt (fun h : ℝ ↦ Real.log (h / S)) H :=
-    ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH.ne' hS.ne')
+    ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH hS)
   have hPhi : ∀ {f : ℝ → ℝ}, ContinuousAt f H → ContinuousAt (fun h ↦ Phi (f h)) H :=
     fun hf ↦ continuous_Phi.continuousAt.comp hf
   have hE : ∀ a : ℝ, ContinuousAt (fun h ↦ Real.exp (a * Real.log (h / S))) H := fun a ↦
@@ -332,13 +335,13 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
   rwa [mul_one] at this
 
 /-- **Many-dates limit.** As `m → ∞` the expression `bgkDownOutCall` tends to `ptDownOutCall` at
-the unshifted barrier, for positive spot and barrier, at every strike, rate, volatility and
-maturity, with no rate of convergence in `m` (the proof consumes only `0 < S` and `0 < H`, so it
+the unshifted barrier, for nonzero spot and barrier, at every strike, rate, volatility and
+maturity, with no rate of convergence in `m` (the proof consumes only `S ≠ 0` and `H ≠ 0`, so it
 also covers the junk values `σ = 0`, `T ≤ 0`). It reads as "the BGK approximation tends to the
 continuous price" only for `σ > 0`, `0 < T`, `0 < K` and `1 ≤ m`, with the shifted barrier at
 most `K` and below the spot (true for all large `m` when `H < K` and `S > H`). It is the
 consistency of the shift with the continuous limit, not an accuracy result. -/
-theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : 0 < S) (hH : 0 < H) :
+theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : S ≠ 0) (hH : H ≠ 0) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
       (𝓝 (ptDownOutCall S K H r r σ T)) :=
   (continuousAt_ptDownOutCall_barrier hS hH).tendsto.comp (tendsto_bgkDownBarrier β H σ T)
