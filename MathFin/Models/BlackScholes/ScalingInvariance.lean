@@ -16,8 +16,8 @@ Two invariances of `bsd1`, `bsd2` and `bsV` that follow from the formulas alone.
   price by `c`.
 * Time-volatility scaling: `(r, σ, τ) ↦ (c r, σ√c, τ/c)` fixes `r τ`, `σ² τ` and `σ √τ`, hence
   `d₁`, `d₂` and the price. For zero rates and `c = τ` the scaling gives the dependence on
-  `σ² τ` alone, of which `bsV_eq_totalVarianceCall`
-  (`Models/ModelFree/CalendarArbitrage.lean`) is the `r = 0`, `c = τ` instance.
+  `σ² τ` alone; `bsV_eq_totalVarianceCall` (`Models/ModelFree/CalendarArbitrage.lean`) is the
+  corresponding statement through the definition of `totalVarianceCall`, for `σ, τ > 0`.
 
 These are identities of the closed forms. They hold at every input, including the junk corners
 (division by zero at `σ = 0` or `K = 0`, `√` of a negative, `log` of a nonpositive), because both
@@ -83,9 +83,9 @@ theorem bsd2_timeScale {S K r σ τ c : ℝ} (hc : 0 < c) :
   rw [bsd2, bsd2, bsd1_timeScale hc, hden]
 
 /-- **Time-volatility scaling**: `bsV K (c r) (σ √c) S (τ / c) = bsV K r σ S τ` for `c > 0`.
-For `r = 0` and `c = τ` this gives the dependence of the call on `σ² τ` alone, of which
-`bsV_eq_totalVarianceCall` is the instance; here the rate is scaled with it so that `r τ` is
-fixed too. -/
+For `r = 0` and `c = τ` this gives the dependence of the call on `σ² τ` alone, from which
+`bsV_eq_totalVarianceCall` follows together with the definition of `totalVarianceCall`; here the
+rate is scaled with it so that `r τ` is fixed too. -/
 theorem bsV_timeScale {K r σ S τ c : ℝ} (hc : 0 < c) :
     bsV K (c * r) (σ * Real.sqrt c) S (τ / c) = bsV K r σ S τ := by
   have hexp : c * r * (τ / c) = r * τ := by field_simp

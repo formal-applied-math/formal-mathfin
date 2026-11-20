@@ -22,8 +22,8 @@ proved here: every theorem below is stated for an arbitrary shift constant `β`.
 
 The statement for a down-and-out call with barrier `B` is
 `V_d(S, t; B) = V_cont(S, t; B e^{−βσ√(T/N)}) + (an error term)`, as restated in
-[HowisonSteinberg2005], §1, which cites [BroadieGlassermanKou1997] and itself flags the accuracy
-of the statement as limited. The BGK paper is neither reproduced nor derived here.
+[HowisonSteinberg2005], §1, which cites [BroadieGlassermanKou1997]. The BGK paper is neither
+reproduced nor derived here.
 
 This file takes that shift as a **definition** and proves what follows from the definition alone.
 The scaling theorems are identities of closed forms: they hold at every input, including the junk
@@ -65,7 +65,7 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 * `bgkDownBarrier_timeScale`, `bgkDownOutCall_timeScale`: the shift `σ√(T/m)` is fixed by the same
   scaling at fixed `m` (`Δt ↦ Δt/c`), so the BGK expression is as well.
 * `continuousAt_ptDownOutCall_barrier`: `ptDownOutCall` is continuous in the barrier at every
-  positive barrier, for positive spot, strike, volatility and maturity.
+  positive barrier, for positive spot, at any strike, carry, rate, volatility and maturity.
 * `tendsto_bgkDownBarrier`: the shifted barrier tends to `H` as the number of dates `m → ∞`.
 * `tendsto_bgkDownOutCall`: as `m → ∞` the BGK expression tends to `ptDownOutCall` at `H`.
 * `abs_knockIn_sub_bgkKnockIn_le`: a linear rearrangement of in–out parity
@@ -109,8 +109,9 @@ down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
 `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
 §2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
 `2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are
-`ptF1, ptF2`. An identity between two closed forms; neither is proved here to be a price. It
-is the price form for `H ≤ K` and `S > H`; the identity itself holds at every maturity `T`. -/
+`ptF1, ptF2`. An identity between two closed forms; neither is proved here to be a price. The
+right-hand side is a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`;
+the identity itself holds at every maturity `T`. -/
 theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
     (hH : 0 < H) (hσ : 0 < σ) :
     ptDownOutCall S K H r r σ T
@@ -210,8 +211,8 @@ spaced monitoring dates: `ptDownOutCall` at the shifted barrier `bgkDownBarrier`
 price only for `σ > 0`, `0 < T`, `1 ≤ m`, `0 < S, K, H`, the shifted barrier at most `K` and the
 spot above it (for an arbitrary `β` with `β σ < 0` the shifted barrier lies above `H`, so
 `H ≤ K` alone does not suffice). At `H = 0` the shifted barrier is `0`, `log (0 / S) = 0`, and
-`ptDownOutCall` is a junk value, not the vanilla price. The accuracy of the shift as an
-approximation to the discretely monitored price is not proved here. -/
+`ptDownOutCall` is a junk value, not the vanilla price. The accuracy of the shift is not proved
+here. -/
 noncomputable def bgkDownOutCall (β : ℝ) (m : ℕ) (K H r σ S T : ℝ) : ℝ :=
   ptDownOutCall S K (bgkDownBarrier β m H σ T) r r σ T
 
@@ -241,8 +242,10 @@ theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc
 
 /-! ### The limit of many monitoring dates -/
 
-/-- `ptDownOutCall` is continuous in the barrier at every positive barrier, for positive spot. No
-claim that it is a price: that needs `H ≤ K` and `S > H`. -/
+/-- `ptDownOutCall` is continuous in the barrier at every positive barrier, for positive spot, at
+every strike, carry, rate, volatility and maturity (the proof consumes only `0 < S` and `0 < H`,
+so it also covers the junk values `σ = 0`, `T ≤ 0`). It is a price statement only for `σ > 0`,
+`0 < T`, `0 < K`, `H ≤ K` and `S > H`. -/
 theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : 0 < S)
     (hH : 0 < H) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
@@ -278,10 +281,11 @@ theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
   rwa [mul_one] at this
 
 /-- **Many-dates limit.** As `m → ∞` the expression `bgkDownOutCall` tends to `ptDownOutCall` at
-the unshifted barrier, for positive spot and barrier, with no rate of convergence in `m`. It is a
-statement about the closed-form expression; it reads as "the BGK approximation tends to the
-continuous price" only where `ptDownOutCall` is a price. It is the consistency of the shift with
-the continuous limit, not an accuracy result. -/
+the unshifted barrier, for positive spot and barrier, at every strike, rate, volatility and
+maturity, with no rate of convergence in `m` (the proof consumes only `0 < S` and `0 < H`, so it
+also covers the junk values `σ = 0`, `T ≤ 0`). It reads as "the BGK approximation tends to the
+continuous price" only for `σ > 0`, `0 < T`, `0 < K`, `H ≤ K`, `S > H` and `1 ≤ m`. It is the
+consistency of the shift with the continuous limit, not an accuracy result. -/
 theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : 0 < S) (hH : 0 < H) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
       (𝓝 (ptDownOutCall S K H r r σ T)) :=

@@ -654,10 +654,12 @@ split by area. What each bridge proves, by area:
   (`mf-partial-time-barrier-down-add-up`, `mf-binary-barrier-inout-parity`, both `reduced_core`).
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
   (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the shifted-barrier expression is proved to
-  tend to `ptDownOutCall` as `m → ∞` and to be invariant under the Brownian time-volatility
-  scaling, and `ptDownOutCall` is equal to its image form. Not derived: `ptDownOutCall` as a
-  discounted expected payoff, the value of `β`, any rate of convergence in `m`, and the accuracy
-  of the shift as an approximation to the discretely monitored price.
+  tend to `ptDownOutCall` as `m → ∞` and to be invariant under the `(r, σ, T) ↦ (cr, σ√c, T/c)`
+  rescaling; `ptDownOutCall` is spatially homogeneous in `(S, K, H)` and equal to its image
+  form, and the call price `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`).
+  Not derived: `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of
+  convergence in `m`, and the accuracy of the shift as an approximation to the discretely
+  monitored price.
   `MargrabeGrounding`'s two existential theorems no longer claim to derive their hypothesis: they
   now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
