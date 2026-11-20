@@ -207,16 +207,10 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
     F0 = I0 * Pr0T / Pn0T := by
   have h := ZCSwap.forwardIndex_eq (Qn := Qn) BT Pn0T Pr0T I0
     (fun ω => bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) hBTpos hBTmeas hPn0T hP hident
-  have hmeas : AEStronglyMeasurable (fun z => bsTerminal F0 0 (Real.sqrt V) 1 z)
-      (gaussianReal 0 1) := by
-    unfold bsTerminal; fun_prop
-  rw [show (fun ω => bsTerminal F0 0 (Real.sqrt V) 1 (Z ω))
-      = (fun z => bsTerminal F0 0 (Real.sqrt V) 1 z) ∘ Z from rfl,
-    hZ.integral_comp hmeas] at h
-  have h2 := integral_bsTerminal_eq_forward F0 0 (Real.sqrt V) 1 zero_le_one
-  simp only [Real.exp_zero, mul_one] at h2
+  have h2 := integral_discounted_bsTerminal hZ F0 0 (Real.sqrt V) (T := 1) zero_le_one
+  simp only [neg_zero, zero_mul, Real.exp_zero, one_mul] at h2
   rw [← h]
-  simpa [bsTerminal] using h2.symm
+  exact h2.symm
 
 /-- **ZC inflation caplet: the priced payoff is `Pⁿ(0,T)` times the Black caplet on the curve
 forward.** For `F₀ > 0` (the mean of the lognormal index law), `V > 0`, `K > 0`, under `hZ`
