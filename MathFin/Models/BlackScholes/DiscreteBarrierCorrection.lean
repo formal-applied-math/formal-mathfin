@@ -31,7 +31,8 @@ The scaling theorems are identities of closed forms: they hold at every input, i
 corners (division by zero, `√` of a negative, `log` of a nonpositive), because both sides are the
 same expression of the junk value, up to the factor `c` for the homogeneity statement, and they
 are not claims that the value is a price. A price needs `σ > 0`,
-`0 < T`, `0 < S, K, H`, a (shifted) barrier at most `K` and spot above it; at `H = 0`, for
+`0 < T`, `0 < S, K, H`, a (shifted) barrier at most `K` and spot above it (and `1 ≤ m` for the BGK
+expression); at `H = 0`, for
 instance, `ptDownOutCall` is a junk value. The theorems that consume positivity state it.
 The continuous down-and-out call is the library's `ptDownOutCall`
 (`PartialTimeBarrierOption.lean`, the full-life branch with `X ≥ H`) at cost of carry `b = r`;
@@ -46,11 +47,11 @@ the Reiner–Rubinstein/Hull formula is a matter of transcription, not proved in
 
 ## Main definitions
 
-* `bgkDownBarrier`, `bgkUpBarrier`: the shifted barriers `H e^{∓βσ√(T/m)}`.
+* `bgkDownBarrier`, `bgkUpBarrier`: the shifted barriers `H e^{∓βσ√(T/m)}`; the up-barrier shift
+  `bgkUpBarrier` is defined without a price (no up-and-out closed form in this library).
 * `bgkDownOutCall`: `ptDownOutCall` at the shifted down barrier, the BGK approximation to the
   discretely monitored down-and-out call. It reads as a price only for `σ > 0`, `0 < T`,
-  `1 ≤ m`, `0 < S, K, H`, a shifted barrier at most `K` and spot above it. There is no up-and-out
-  closed form in this library, so only the up-barrier shift is defined.
+  `1 ≤ m`, `0 < S, K, H`, a shifted barrier at most `K` and spot above it.
 * `bgkKnockIn`: the BGK knock-in expression, the vanilla price `bsV` minus `bgkDownOutCall`.
 
 ## Main results
@@ -183,8 +184,7 @@ theorem ptDownOutCall_zero_barrier {K b r σ S T : ℝ} :
 
 /-- Spatial homogeneity of the closed form: scaling spot, strike and barrier by `c > 0` scales
 `ptDownOutCall` by `c`, at any cost of carry `b`. An identity of the closed form, not a claim of
-price: the value is a price only for barrier `≤ K`, `0 < H` and spot above it (with `σ > 0`,
-`0 < T`, `0 < S, K`). -/
+price (see the module docstring). -/
 theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} (hc : 0 < c) :
     ptDownOutCall (c * S) (c * K) (c * H) b r σ T = c * ptDownOutCall S K H b r σ T := by
   simp only [ptDownOutCall, ptD1, ptD2, ptF1, ptF2, ptHSmu, ptHSmu1, bsd1_scale hc,
@@ -193,9 +193,8 @@ theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} (hc : 0 < c) :
 
 /-- The closed form is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ √c, T / c)` for `c > 0`, at
 any cost of carry `b`: the quantities `(b - r) T`, `r T`, `σ √T`, `(b + σ²/2) T` and
-`(b - σ²/2) / σ²` are all fixed. An identity of the closed form, not a claim of price: the value
-is a price only for barrier `≤ K`, `0 < H` and spot above it (with `σ > 0`, `0 < T`,
-`0 < S, K`). -/
+`(b - σ²/2) / σ²` are all fixed. An identity of the closed form, not a claim of price (see the
+module docstring). -/
 theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) :
     ptDownOutCall S K H (c * b) (c * r) (σ * Real.sqrt c) (T / c)
       = ptDownOutCall S K H b r σ T := by

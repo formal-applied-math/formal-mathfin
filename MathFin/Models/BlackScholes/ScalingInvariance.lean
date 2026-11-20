@@ -34,6 +34,7 @@ statements; they are not claims that the value is a price, which needs `σ > 0`,
 ## References
 
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (10th ed., Pearson, 2018), ch. 15
+  (the Black–Scholes closed form)
 
 ## Tags
 
@@ -85,9 +86,9 @@ theorem bsd2_timeScale {S K r σ τ c : ℝ} (hc : 0 < c) :
   rw [bsd2, bsd2, bsd1_timeScale hc, hden]
 
 /-- **Time-volatility scaling**: `bsV K (c r) (σ √c) S (τ / c) = bsV K r σ S τ` for `c > 0`.
-For `r = 0` and `c = τ` this gives the dependence of the call on `σ² τ` alone, from which
-`bsV_eq_totalVarianceCall` follows together with the definition of `totalVarianceCall`; here the
-rate is scaled with it so that `r τ` is fixed too. -/
+For `r = 0`, `c = τ` and `τ > 0` this gives the dependence of the call on `σ² τ` alone, from
+which `bsV_eq_totalVarianceCall` (for `σ > 0`) follows together with the definition of
+`totalVarianceCall`; here the rate is scaled with it so that `r τ` is fixed too. -/
 theorem bsV_timeScale {K r σ S τ c : ℝ} (hc : 0 < c) :
     bsV K (c * r) (σ * Real.sqrt c) S (τ / c) = bsV K r σ S τ := by
   have hexp : c * r * (τ / c) = r * τ := by field_simp
