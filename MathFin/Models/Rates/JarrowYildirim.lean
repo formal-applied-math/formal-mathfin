@@ -44,7 +44,8 @@ calculus.
 * `jyZcCaplet_price`: if the index-linked bond is priced on the real curve and the index is
   lognormal under `Q^T`, the priced caplet payoff `𝔼^{Qn}[(I_T − K)⁺/B_T]` is `Pⁿ(0,T)` times the
   Black caplet on the curve forward `F` at total variance `V` (by
-  `MathFin.Contracts.value_caplet_black76`; the strike convention is in its docstring).
+  `MathFin.Contracts.value_caplet_black76`; the strike convention is in `jyZcCaplet_price`'s
+  docstring).
   `jyForwardIndex_lognormal_eq_curves` puts the lognormal index on `F`.
   `jyZcCaplet_price_deterministic_rates`: for `σ_r = σ_n = 0` it is `Pⁿ(0,T)` times the Black caplet
   at volatility `σ_I` and maturity `T` (by `blackCaplet_sqrt_variance`).
@@ -355,14 +356,14 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
 
 /-- **YoY forward in the printed convexity shape (Bagaria ch. 17 §17.4, eq. 17.10; Brigo–Mercurio
 §16.3).** Let `Z1, Z2` be independent standard normals under `μ` (`hZ1`, `hZ2`, `hindep`), `ρ` a
-correlation (a free parameter of the statement; it plays the role of `ρ_{nr}`), and
-`yⁿ = mⁿ + √Vⁿ·Z1`, `yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)` the two Gaussian rate deviations of
-`yoyConvexity_eq`, with means `mⁱ` and variances `Vⁱ` (`0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1`) and covariance
-`Cov = ρ·√(Vⁿ·Vʳ)` (`hCov`). `Bⁿ = B_n(S,T)` and `Bʳ = B_r(S,T)` are the Hull–White loadings over
-`[S,T]` (free reals here; they enter only through `hR`), and `Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the
-hypotheses of `jyYoyForward_eq_bondRatio`, and assuming the bond ratio has the Hull–White
-reconstitution form `hR` (`R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))`
-times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
+correlation of the two rate deviations at `S` (a free parameter of the statement; equal to `ρ_{nr}`
+only when `a_n = a_r`), and `yⁿ = mⁿ + √Vⁿ·Z1`, `yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)` the two Gaussian
+rate deviations of `yoyConvexity_eq`, with means `mⁱ` and variances `Vⁱ` (`0 ≤ Vⁿ`, `0 ≤ Vʳ`,
+`ρ² ≤ 1`) and covariance `Cov = ρ·√(Vⁿ·Vʳ)` (`hCov`). `Bⁿ = B_n(S,T)` and `Bʳ = B_r(S,T)` are the
+Hull–White loadings over `[S,T]` (free reals here; they enter only through `hR`), and
+`Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the hypotheses of `jyYoyForward_eq_bondRatio`, and assuming the
+bond ratio has the Hull–White reconstitution form `hR` (`R_S` is the naive ratio of forwards
+`Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
