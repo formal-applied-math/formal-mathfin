@@ -586,7 +586,7 @@
       "id": "mf-asian-avgstrike-expsum-gaussian-positive-part",
       "name": "Gaussian Positive Part of a Signed Exponential Sum",
       "domain": "mathematical_finance",
-      "description": "For a standard normal Z and a signed sum of exponentials g(z) = sum a_k exp(d_k + c_k z) that is positive exactly to the right of a point z*, E[g(Z)+] = sum a_k exp(d_k + c_k^2/2) Phi(c_k - z*). The single-crossing hypothesis is carried explicitly; the companion lemma proves it when a_k(c_k - p) >= 0 for a pivot p, strictly for one k. That g is the conditional mean of an average-strike Asian payoff is not derived here.",
+      "description": "Reduced core: for a standard normal Z and a signed sum of exponentials g(z) = sum a_k exp(d_k + c_k z) that is positive exactly to the right of a point z*, E[g(Z)+] = sum a_k exp(d_k + c_k^2/2) Phi(c_k - z*). The single-crossing hypothesis is carried explicitly; the companion lemma proves it when a_k(c_k - p) >= 0 for a pivot p, strictly for one k. That g is the conditional mean of an average-strike Asian payoff is not derived here.",
       "code": {
         "lean": "import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Gaussian positive part of an exponential sum.** Re-exports\n`MathFin.integral_max_expSum_hasLaw`. -/\ntheorem asian_avgstrike_expsum_gaussian_positive_part\n    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} {Z : Ω → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) P) {n : ℕ} (a d c : Fin n → ℝ) (zs : ℝ)\n    (hpos : ∀ z, 0 < expSum a d c z ↔ zs < z) :\n    ∫ ω, max (expSum a d c (Z ω)) 0 ∂P\n      = ∑ k, a k * Real.exp (d k + c k ^ 2 / 2) * Phi (c k - zs) :=\n  MathFin.integral_max_expSum_hasLaw hZ a d c zs hpos\n"
       },
@@ -602,8 +602,8 @@
           }
         ],
         "difficulty": "advanced",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.integral_max_expSum_hasLaw (MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean), which writes max(g, 0) as the indicator of (z*, infinity) and integrates term by term with integral_exp_mul_gaussianPDFReal_Ioi. SCOPE: the single crossing of g at z* is a hypothesis of the entry (expSum_pos_iff_of_root proves it from a sign pattern); the identification of g with a conditional mean is not part of this entry."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.integral_max_expSum_hasLaw (MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean), which writes max(g, 0) as the indicator of (z*, infinity) and integrates term by term with integral_exp_mul_gaussianPDFReal_Ioi. SCOPE: the single crossing of g at z* is a hypothesis of the entry (expSum_pos_iff_of_root proves it from a sign pattern); the identification of g with a conditional mean is not part of this entry."
       }
     },
     {

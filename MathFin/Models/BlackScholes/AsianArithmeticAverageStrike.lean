@@ -321,12 +321,15 @@ end Moments
 
 /-- The rate `cₖ = (Cu)ₖ/√(uᵀCu)` of the conditional mean, for log-covariance
 `Cⱼₖ = σ² min(tⱼ, tₖ)` and weights `u` (here `u = (−1/N, …, −1/N, 1)` over the fixings and `T`).
-It is the covariance of `ln Sₖ` with `Z = ∑ uₖ ln Sₖ`, over the standard deviation of `Z`. -/
+It is the covariance of `ln Sₖ` with `Z = ∑ uₖ ln Sₖ`, over the standard deviation of `Z`.
+Junk value `0` when the variance `uᵀCu` is not positive (division by `√0`); meaningful only for a
+positive variance, which callers must supply. -/
 noncomputable def condRate {m : ℕ} (σ : ℝ) (ts u : Fin m → ℝ) (k : Fin m) : ℝ :=
   (∑ j, u j * (σ ^ 2 * min (ts j) (ts k))) /
     Real.sqrt (∑ i, ∑ j, u i * u j * (σ ^ 2 * min (ts i) (ts j)))
 
-/-- The log-shift `dₖ = ln Fₖ − cₖ²/2`, so that `exp(dₖ + cₖ²/2) = Fₖ`. -/
+/-- The log-shift `dₖ = ln Fₖ − cₖ²/2`, so that `exp(dₖ + cₖ²/2) = Fₖ`.
+Meaningful only for `Fₖ > 0`; `Real.log` is junk otherwise. -/
 noncomputable def condShift {m : ℕ} (F c : Fin m → ℝ) (k : Fin m) : ℝ :=
   Real.log (F k) - c k ^ 2 / 2
 
