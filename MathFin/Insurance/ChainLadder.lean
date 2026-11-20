@@ -229,7 +229,8 @@ theorem cast_chainCompleteRat?_some (n : ℕ) (C : ℕ → ℕ → ℚ)
     obtain ⟨q, hq⟩ := ih (by omega)
     by_cases h : i + (j + 1) ≤ n
     · exact ⟨C i (j + 1), by simp [chainCompleteRat?, h]⟩
-    · exact ⟨_, by simp [chainCompleteRat?, h, hq, chainFactorRat?, hdenom j (by omega)]⟩
+    · exact ⟨q * ((∑ a ∈ range (n - j), C a (j + 1)) / ∑ a ∈ range (n - j), C a j),
+        by simp [chainCompleteRat?, h, hq, chainFactorRat?, hdenom j (by omega)]⟩
 
 /-- **Denominator failure propagates**: a zero denominator sum at a factor the cell needs makes
 the rational completion `none`. -/

@@ -307,6 +307,15 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
   stays in the library. Of the six Mathlib-shaped private lemmas, two one-liners were inlined and
   four genuine facts (the product-weight sums of an iid vector, the scaled-profile boundary-value
   solution) became public under names that say what they prove.
+- **The last two of the wave, landed on their neighbours.** #501's zero-maturity transform was a
+  standalone module whose headline lemma dropped the `γ ≠ 0` guard through `log(0/0) = 0`. It
+  now lives beside the vanishing vol-of-vol limit: `hestonTransform_terminal` needs only `γ ≠ 0`
+  (it had carried the strip), and at maturity the transform is the moment of the point mass at
+  the log-spot, the zero-variance member of the Black–Scholes family the limit reaches
+  (`hestonTransform_terminal_eq_mgf_dirac`). #524's exact rational chain ladder sits in
+  `ChainLadder.lean` with a soundness theorem that needs no hypothesis (a returned value is the
+  real completion, and on unobserved cells Mack's prediction by the selected factors), and a
+  worked reserve in `MathFinExamples` evaluates a triangle in the kernel and certifies it in `ℝ`.
 
 ### Lens gradients
 

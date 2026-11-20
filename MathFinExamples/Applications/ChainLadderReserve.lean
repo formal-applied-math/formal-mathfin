@@ -63,7 +63,7 @@ theorem ultimates_computed :
     chainCompleteRat? 3 triangle 0 3 = some 1800 ∧ chainCompleteRat? 3 triangle 1 3 = some 2016 ∧
       chainCompleteRat? 3 triangle 2 3 = some 2100 ∧
       chainCompleteRat? 3 triangle 3 3 = some (25636 / 11) := by
-  decide
+  decide +kernel
 
 /-- **The real chain-ladder ultimates**, certified by the computation. -/
 theorem ultimates :
