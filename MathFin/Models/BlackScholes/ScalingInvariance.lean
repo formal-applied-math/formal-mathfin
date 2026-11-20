@@ -12,15 +12,16 @@ public import MathFin.Models.BlackScholes.PDE
 
 Two invariances of `bsd1`, `bsd2` and `bsV` that follow from the formulas alone.
 
-* Spatial homogeneity: scaling spot and strike by `c > 0` leaves `d₁`, `d₂` fixed and scales the
-  closed form `bsV` by `c`.
+* Spatial homogeneity: scaling spot and strike by a nonzero `c` leaves `d₁`, `d₂` fixed, and
+  scales the closed form `bsV` by `c` for every real `c`.
 * Time-volatility scaling: `(r, σ, τ) ↦ (c r, σ√c, τ/c)` fixes `r τ`, `σ² τ` and `σ √τ`, hence
   `d₁`, `d₂` and the closed form `bsV`. For zero rates and `c = τ` the scaling gives the
   dependence on `σ² τ` alone; `bsV_eq_totalVarianceCall`
   (`Models/ModelFree/CalendarArbitrage.lean`) is the corresponding statement through the
   definition of `totalVarianceCall`, for `σ, τ > 0`.
 
-These are identities of the closed forms. They hold at every input, including the junk corners
+These are identities of the closed forms (the time-volatility rescaling for `c > 0`, the spatial
+homogeneity for every real `c`). They hold at every input, including the junk corners
 (division by zero at `σ = 0` or `K = 0`, `√` of a negative, `log` of a nonpositive), because both
 sides are the same expression of the junk value, up to the factor `c` for the homogeneity
 statements; they are not claims that the value is a price, which needs `σ > 0`, `0 < τ` and
@@ -45,19 +46,21 @@ Black–Scholes, scaling, homogeneity, total variance, MSC 91G20, JEL G13
 
 namespace MathFin
 
-/-- `d₁` is unchanged when spot and strike are scaled together by `c > 0`. -/
-theorem bsd1_scale {S K r σ τ c : ℝ} (hc : 0 < c) :
+/-- `d₁` is unchanged when spot and strike are scaled together by a nonzero `c`. -/
+theorem bsd1_scale {S K r σ τ c : ℝ} (hc : c ≠ 0) :
     bsd1 (c * S) (c * K) r σ τ = bsd1 S K r σ τ := by
-  simp [bsd1, mul_div_mul_left _ _ hc.ne']
+  simp [bsd1, mul_div_mul_left _ _ hc]
 
-/-- `d₂` is unchanged when spot and strike are scaled together by `c > 0`. -/
-theorem bsd2_scale {S K r σ τ c : ℝ} (hc : 0 < c) :
+/-- `d₂` is unchanged when spot and strike are scaled together by a nonzero `c`. -/
+theorem bsd2_scale {S K r σ τ c : ℝ} (hc : c ≠ 0) :
     bsd2 (c * S) (c * K) r σ τ = bsd2 S K r σ τ := by
   simp [bsd2, bsd1_scale hc]
 
-/-- **Spatial homogeneity**: `bsV (c K) r σ (c S) τ = c · bsV K r σ S τ` for `c > 0`. -/
-theorem bsV_scale {K r σ S τ c : ℝ} (hc : 0 < c) :
+/-- **Spatial homogeneity**: `bsV (c K) r σ (c S) τ = c · bsV K r σ S τ` for every real `c`. -/
+theorem bsV_scale {K r σ S τ c : ℝ} :
     bsV (c * K) r σ (c * S) τ = c * bsV K r σ S τ := by
+  rcases eq_or_ne c 0 with rfl | hc
+  · simp [bsV]
   unfold bsV
   rw [bsd1_scale hc, bsd2_scale hc]
   ring

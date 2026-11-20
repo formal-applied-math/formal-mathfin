@@ -655,7 +655,8 @@ split by area. What each bridge proves, by area:
   The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
   (`mf-bgk-discrete-barrier-shift`, `reduced_core`): the shifted-barrier expression is proved to
   tend to `ptDownOutCall` as `m → ∞` (for positive spot and barrier) and to be invariant under
-  the `(r, σ, T) ↦ (cr, σ√c, T/c)` rescaling; `ptDownOutCall` is spatially homogeneous in `(S, K, H)`, equal to its image form
+  the `(r, σ, T) ↦ (cr, σ√c, T/c)` rescaling for `c > 0`; `ptDownOutCall` is spatially homogeneous
+  in `(S, K, H)` for every real `c`, equal to its image form
   (also with a dividend yield, in the printed shape) and `0`, a junk value, at `H = 0`; and the
   closed form `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`).
   Not derived: `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of

@@ -27,7 +27,8 @@ The statement for a down-and-out call with barrier `B` is
 reproduced nor derived here.
 
 This file takes that shift as a **definition** and proves what follows from the definition alone.
-The scaling theorems are identities of closed forms: they hold at every input, including the junk
+The scaling theorems are identities of closed forms (the time-volatility rescaling for `c > 0`,
+the spatial homogeneity for every real `c`): they hold at every input, including the junk
 corners (division by zero, `√` of a negative, `log` of a nonpositive), because both sides are the
 same expression of the junk value, up to the factor `c` for the homogeneity statement, and they
 are not claims that the value is a price. A price needs `σ > 0`,
@@ -86,14 +87,17 @@ proved here. Howison and Steinberg themselves note that the accuracy of BGK's st
 written, is limited ([HowisonSteinberg2005], §1). Nothing here is a model of discrete monitoring:
 the discretely monitored value never appears, except as the hypothesised benchmark in
 `abs_knockIn_sub_bgkKnockIn_le`. Neither is `ptDownOutCall` proved to be a price (the
-reflection-principle step is not derived).
+reflection-principle step is not derived). The library's discretely monitored objects
+(`Contracts.upAndIn` and `Contracts.upAndInPayoff` in `Contracts/Instruments/Options.lean`,
+priced in `Models/Binomial/BarrierMarket.lean`) are not connected here: this module is closed-form
+only.
 
 ## References
 
 * [M. Broadie, P. Glasserman, S. Kou, *A continuity correction for discrete barrier
   options*][BroadieGlassermanKou1997]
 * [S. Howison, M. Steinberg, *A matched asymptotic expansions approach to continuity corrections
-  for discretely sampled options. Part 1: barrier options*][HowisonSteinberg2005], §1 and §2
+  for discretely sampled options. Part 1: barrier options*][HowisonSteinberg2005], §1, §2 and §3.7
 * [E. Reiner and M. Rubinstein, *Breaking down the barriers*][ReinerRubinstein1991]
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (10th ed., Pearson, 2018), ch. 26
 
@@ -182,13 +186,15 @@ theorem ptDownOutCall_zero_barrier {K b r σ S T : ℝ} :
     ptDownOutCall S K 0 b r σ T = 0 := by
   simp [ptDownOutCall, ptHSmu, ptHSmu1, ptF1, ptF2, ptD1, ptD2, bsd1, bsd2]
 
-/-- Spatial homogeneity of the closed form: scaling spot, strike and barrier by `c > 0` scales
+/-- Spatial homogeneity of the closed form: scaling spot, strike and barrier by any real `c` scales
 `ptDownOutCall` by `c`, at any cost of carry `b`. An identity of the closed form, not a claim of
 price (see the module docstring). -/
-theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} (hc : 0 < c) :
+theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} :
     ptDownOutCall (c * S) (c * K) (c * H) b r σ T = c * ptDownOutCall S K H b r σ T := by
+  rcases eq_or_ne c 0 with rfl | hc
+  · simp [ptDownOutCall_zero_barrier]
   simp only [ptDownOutCall, ptD1, ptD2, ptF1, ptF2, ptHSmu, ptHSmu1, bsd1_scale hc,
-    bsd2_scale hc, mul_div_mul_left _ _ hc.ne']
+    bsd2_scale hc, mul_div_mul_left _ _ hc]
   ring
 
 /-- The closed form is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ √c, T / c)` for `c > 0`, at
