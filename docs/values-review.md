@@ -293,6 +293,20 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
   detour around a deterministic discount, about 40 public Almgren–Chriss helpers (the discrete
   optimum is the continuous path sampled at the discrete rate `cosh κ̃Δ = 1 + cΔ²/2η`), and about
   4000 lines of contributor tests in `MathFinTest/`, which holds the README and manual checks.
+- **After the merge: the index ratchets, met by connections.** main's first `build` on the wave
+  rose three index counts the branch never computed (they run only there). Each was met by a
+  theorem rather than a baseline. Expected shortfall of an arithmetic loss is the least
+  Rockafellar–Uryasev value on the lattice (`isLeast_rockafellarUryasev_lattice`), so the stop-loss
+  recursion rests on `thm:rockafellar-uryasev`. Whole-life insurance and the annuity-due are limits
+  of term `Contract.value`s (`tendsto_value_termInsurance`), which puts that entry on the trunk.
+  The volatility swap is priced under the forward measure of a stochastic bank account
+  (`volSwapValue_forwardMeasure`), a genuine use of `forwardMeasure_price`, unlike the
+  deterministic-discount detour removed above. `chainPrediction` is a definition node
+  (`def:chain-ladder-prediction`), the joint of the completion and Mack's model. The
+  Nelson–Siegel–Svensson decay-limit entry left the corpus: it touched no node, and its theorem
+  stays in the library. Of the six Mathlib-shaped private lemmas, two one-liners were inlined and
+  four genuine facts (the product-weight sums of an iid vector, the scaled-profile boundary-value
+  solution) became public under names that say what they prove.
 
 ### Lens gradients
 
@@ -329,7 +343,9 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
 ### Evidence
 
 `pytest` green on the branch apart from the blueprint export, the ledger rows and this review
-before it was written; architecture and ratchets green (no layer violation, no module unused).
+before it was written; architecture and the host-side ratchets green (no layer violation, no
+module unused). The index ratchets were not computed on the branch, and main went red on three of
+them; see the last upgrade above.
 `lean-build` of the default targets with the blueprint export and the runner ledger sweep of the
 stale rows are the branch's CI; every reworked module and new corpus entry was built and checked
 locally first, one Lean process at a time.

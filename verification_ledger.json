@@ -573,9 +573,9 @@
     "mf-almgren-chriss-EL": {
       "benchmark_file": "market_microstructure.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.8,
-      "input_hash": "11f411806abe6cec087fcc9ed622966d86626bdfc5b4da143dcd38d5908ff4b8",
-      "verified_at_commit": "daed461"
+      "elapsed_s": 2.5,
+      "input_hash": "1f6c098d1b58eb53d921529c5285b31356d015ab14f0f49ff7c3a1c0be08d2a7",
+      "verified_at_commit": "1f7ac15"
     },
     "mf-am-gm-two": {
       "benchmark_file": "exotic_options.json",
@@ -1637,23 +1637,23 @@
     "mf-buhlmann-credibility-best-affine-predictor": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.7,
-      "input_hash": "a4a6b5d75a9f9d2041e54651bcb1804c6a81274c6304190cf9fe6aa5db6537f0",
-      "verified_at_commit": "b0d5578"
+      "elapsed_s": 2.9,
+      "input_hash": "53789ca35d16f6f2f61d4f0b48b791d145c9766f0726b8f036251a1cf052d120",
+      "verified_at_commit": "1f7ac15"
     },
     "mf-buhlmann-sample-mean-variance-covariance": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.4,
-      "input_hash": "0798009f5a602968d939eda3f8e841b446120a134ecec8f0765c54f3b062dba6",
-      "verified_at_commit": "b0d5578"
+      "elapsed_s": 2.8,
+      "input_hash": "95842f08f5ed65e10f5383fcf586efea3630452655d24dcbc343b83e0ddbb9b5",
+      "verified_at_commit": "1f7ac15"
     },
     "mf-buhlmann-single-index-shocks": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-19",
-      "elapsed_s": 3.0,
-      "input_hash": "e15d32690090a2da889ce9cfcfcded0aadf78c058c779ec96e2fb9a9bebc2b60",
-      "verified_at_commit": "b0d5578"
+      "elapsed_s": 2.8,
+      "input_hash": "db45d0de740f09c3f031827ad17bbd8c8cdebea4b22bb32a142eb4f8b43f7ea1",
+      "verified_at_commit": "1f7ac15"
     },
     "mf-bull-call-spread-payoff-le": {
       "benchmark_file": "black_scholes.json",
@@ -3825,13 +3825,6 @@
       "input_hash": "e1c0d0112f5e277e34ddff8f50444ce7818469e57b47fbae428117440e7ee85c",
       "verified_at_commit": "8796bf4"
     },
-    "mf-last-survivor-annuity-value": {
-      "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 3.1,
-      "input_hash": "51f4296975e61c03edea44045056065f31ca1039a11c3a78b48f0cb6cd20c5bb",
-      "verified_at_commit": "54c0176d"
-    },
     "mf-level-payment-balance-annuity": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
@@ -3858,13 +3851,6 @@
       "date": "2026-11-19",
       "elapsed_s": 2.6,
       "input_hash": "c49715cad7c60f1b290b3078c57fb7cc1959d7daf21073ca54faf63b5c3a617e",
-      "verified_at_commit": "54c0176d"
-    },
-    "mf-life-annuity-due-is-contract-value": {
-      "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 2.9,
-      "input_hash": "8547847b0785c108d2924a2624d1b1b6a156c62b0687eb5be66d4a29fc22d375",
       "verified_at_commit": "54c0176d"
     },
     "mf-life-table-survival-ratio": {
@@ -4392,13 +4378,6 @@
       "input_hash": "32eaced6bc59f459707d6fdbd58f4ad6856df15db29b82e44aa1706f4b45350b",
       "verified_at_commit": "c047ee3"
     },
-    "mf-nss-vanishing-decay-limit": {
-      "benchmark_file": "interest_rates.json",
-      "date": "2026-11-19",
-      "elapsed_s": 2.4,
-      "input_hash": "5a1dcda3c41409bb9f5fa2ee8b376b5f1be6c2f1d5a5714c5a389fbd1dae9997",
-      "verified_at_commit": "b0d5578"
-    },
     "mf-nth-moment-terminal": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-19",
@@ -4409,9 +4388,9 @@
     "mf-on-backward-caplet-black": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
-      "elapsed_s": 3.1,
-      "input_hash": "27e47142005b3ac9bb38c8974eaaba0941f989d0efed3dc9824d835620566c84",
-      "verified_at_commit": "cfba75f"
+      "elapsed_s": 2.9,
+      "input_hash": "35cb1acf23c1124f755bc3696631670adb2a1dc0ea114ac8e50e3b6079bc3a36",
+      "verified_at_commit": "1f7ac15"
     },
     "mf-on-caplet-jensen-ordering": {
       "benchmark_file": "black_scholes.json",
@@ -4622,13 +4601,6 @@
       "elapsed_s": 2.0,
       "input_hash": "e8c71d9d7785de15e44a3de537b74fc654c6d8f4c8592fc96a853a26785f6060",
       "verified_at_commit": "c047ee3"
-    },
-    "mf-reversionary-annuity-value": {
-      "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 3.0,
-      "input_hash": "83ccd5c958f4444d3a4263082b8719f204a8bdbd6eaa0a89ea6d739131b6eaf8",
-      "verified_at_commit": "54c0176d"
     },
     "mf-rho": {
       "benchmark_file": "black_scholes.json",
@@ -5029,13 +5001,6 @@
       "input_hash": "3d6e77d2db9d87c3a7c260252093062a3094678000e9be6e87ca821b636c15f5",
       "verified_at_commit": "54c0176d"
     },
-    "mf-term-insurance-plus-pure-endowment": {
-      "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 2.9,
-      "input_hash": "40b7bc89633f58b0b566c101399d4e6d90cb0aa70d40ad300fa125137e324b8a",
-      "verified_at_commit": "54c0176d"
-    },
     "mf-thiele-reserve-ode": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-19",
@@ -5284,9 +5249,9 @@
     "mf-volatility-swap-lognormal-variance": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.3,
-      "input_hash": "086a6fc147591b199d8e821142434f1948ad8af2847b9d230dbf208efac6408a",
-      "verified_at_commit": "cfba75f"
+      "elapsed_s": 3.1,
+      "input_hash": "c4c3585035f87c96b705bcf09dbf547194e796b77d1b3e902de73507e9e5f4ae",
+      "verified_at_commit": "1f7ac15"
     },
     "mf-weak-forward-uniqueness-const": {
       "benchmark_file": "stochastic_calculus.json",
@@ -5294,13 +5259,6 @@
       "elapsed_s": 1.9,
       "input_hash": "34279bcc08ed56efa3b055ff8b28f097810be127c6d55583986e6c5c41c5fa28",
       "verified_at_commit": "c047ee3"
-    },
-    "mf-whole-life-insurance-annuity-due": {
-      "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 3.1,
-      "input_hash": "de9162d3d9b53d2beddd43487eacbd09931b312d7232398046bc60dc80567685",
-      "verified_at_commit": "54c0176d"
     },
     "mf-wiener-conditional-laplace": {
       "benchmark_file": "stochastic_foundations.json",
@@ -5816,9 +5774,9 @@
     "qrm-stop-loss-lattice-recursion": {
       "benchmark_file": "quantitative_risk_management.json",
       "date": "2026-11-19",
-      "elapsed_s": 2.1,
-      "input_hash": "1d5a7d1bdf67a53ff122d0c701fc80b42c5e02342189d97abfeba889b58eec40",
-      "verified_at_commit": "cfba75f"
+      "elapsed_s": 3.0,
+      "input_hash": "1a89428f4feaf579adbadf09ac24229e0e70c318e8799d2c0f557d1968544ca0",
+      "verified_at_commit": "1f7ac15"
     },
     "qrm-student-t-cauchy": {
       "benchmark_file": "quantitative_risk_management.json",

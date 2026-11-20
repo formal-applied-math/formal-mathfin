@@ -1559,6 +1559,15 @@ attribute [blueprint "thm:mack-chain-ladder"
   of the reserve are not covered. -/)]
   MathFin.IsMackRow.isEMM_chainPrediction
 
+attribute [blueprint "def:chain-ladder-prediction"
+  (title := "Chain-ladder prediction")
+  (statement := /-- The prediction $(\prod_{m\le k<N} f_k)\,c_m$ of the value at $N$ of a
+  development row $c$ from its value at $m$, by development factors $f$. With the selected factors
+  of a triangle it is the chain-ladder completion of an unobserved cell
+  (`chainComplete_eq_chainPrediction`); with the factors of Mack's model it is the conditional
+  expectation of the ultimate. -/)]
+  MathFin.chainPrediction
+
 attribute [blueprint "thm:markowitz-lagrangian"
   (title := "Markowitz mean–variance optimality")
   (statement := /-- For a positive-semidefinite covariance $\Sigma$, a portfolio with $\sum

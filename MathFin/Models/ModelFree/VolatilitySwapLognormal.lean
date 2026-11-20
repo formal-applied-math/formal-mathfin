@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.Forward
+public import MathFin.Pricing.ForwardMeasure
 public import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 
 /-!
@@ -52,11 +53,15 @@ approximation is proved here.
   `σ · exp(−s²/8) < σ`.
 * `integral_discounted_volSwapPayoff`: with the deterministic discount factor `exp(−rT)`, the
   value of the swap paid at `T` is `exp(−rT) · N · (volSwapFairStrike K s − K_vol)`.
+* `volSwapValue_forwardMeasure`: for a stochastic bank account `B`, with the realized variance
+  lognormal under the `T`-forward measure, the value is `P(0, T) · N · (volSwapFairStrike K s −
+  K_vol)` with `P(0, T) = 𝔼^Q[1/B]`.
 
 ## Scope
 
-The fair strikes are undiscounted, unseasoned and annualized; discounting enters only through
-`integral_discounted_volSwapPayoff`, with a deterministic discount factor, as an expectation
+The fair strikes are undiscounted, unseasoned and annualized; discounting enters through
+`integral_discounted_volSwapPayoff` (a deterministic discount factor) and
+`volSwapValue_forwardMeasure` (a bank account, through the forward measure), as expectations
 rather than a `Contract.value`: the payoff language of `Contracts/Core` has no square root of an
 observed variance. The lognormal law of `V` is assumed
 (see above), so these are statements about the assumed law, not about a Black–Scholes or
@@ -179,5 +184,20 @@ theorem integral_discounted_volSwapPayoff {Ω : Type*} {mΩ : MeasurableSpace Ω
     ∫ ω, Real.exp (-(r * T)) * (N * (Real.sqrt (bsTerminal K 0 s 1 (Z ω)) - Kvol)) ∂Q
       = Real.exp (-(r * T)) * (N * (volSwapFairStrike K s - Kvol)) := by
   rw [integral_const_mul, integral_const_mul, integral_volSwapPayoff h Kvol]
+
+/-- **The volatility swap under the forward measure.** For a bank account `B > 0` with
+`𝔼^Q[1/B] < ∞`, let the realized variance be lognormal under the `T`-forward measure
+`Q^T = forwardMeasure Q B`. The time-0 value `𝔼^Q[N(√V − K_vol)/B]` of the swap paid at `T` is
+the bond price `P(0, T) = 𝔼^Q[1/B]` times `N · (volSwapFairStrike K s − K_vol)`. Rates may be
+stochastic; the law of `V` is assumed under `Q^T`, where a payoff at `T` is priced by its
+expectation (`forwardMeasure_price`). -/
+theorem volSwapValue_forwardMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}
+    [IsProbabilityMeasure Q] {B : Ω → ℝ} (hBm : Measurable B) (hB : ∀ ω, 0 < B ω)
+    (hint : Integrable (fun ω ↦ 1 / B ω) Q) [IsProbabilityMeasure (forwardMeasure Q B)]
+    {K s : ℝ} {Z : Ω → ℝ} (h : VolSwapHyp (forwardMeasure Q B) K s Z) (N Kvol : ℝ) :
+    ∫ ω, N * (Real.sqrt (bsTerminal K 0 s 1 (Z ω)) - Kvol) / B ω ∂Q
+      = (∫ ω, 1 / B ω ∂Q) * (N * (volSwapFairStrike K s - Kvol)) := by
+  rw [← forwardMeasure_price _ hBm hB (integral_one_div_pos hB hint), integral_const_mul,
+    integral_volSwapPayoff h Kvol]
 
 end MathFin
