@@ -593,18 +593,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/MarketCallSurface.lean"},
  {"uses": [],
-  "title": "Carr–Madan spanning identity",
-  "text":
-  "A payoff $f$ twice differentiable on $[L,U]$ with continuous $f''$\n  decomposes, at every spot in $[L,U]$, as cash, a forward, and a static book of OTM options\n  on the strikes in $[L,U]$ weighted by its convexity $f''$ — one integration by parts plus a\n  positive-part case split. A pathwise identity; its reading as prices is\n  `thm:market-carr-madan`. The unbounded-strike form is not proved. The log payoff\n  specializes to the variance-swap $1/K^2$ strip.",
-  "name": "MathFin.carrMadan_spanning",
-  "module": "MathFin.Models.ModelFree.CarrMadan",
-  "line": 89,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:carr-madan",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/CarrMadan.lean"},
- {"uses": [],
   "title": "Copula",
   "text":
   "A copula on $\\mathbb{R}^\\iota$ is a probability measure every coordinate\n  of which is uniformly distributed on $(0,1)$ (the measure-first definition); its\n  distribution function $u \\mapsto C(u)$ is a copula in the sense of McNeil–Frey–Embrechts,\n  Definition 7.1.",
@@ -616,6 +604,18 @@
   "label": "def:copula",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/Copula.lean"},
+ {"uses": [],
+  "title": "Carr–Madan spanning identity",
+  "text":
+  "A payoff $f$ twice differentiable on $[L,U]$ with continuous $f''$\n  decomposes, at every spot in $[L,U]$, as cash, a forward, and a static book of OTM options\n  on the strikes in $[L,U]$ weighted by its convexity $f''$ — one integration by parts plus a\n  positive-part case split. A pathwise identity; its reading as prices is\n  `thm:market-carr-madan`. The unbounded-strike form is not proved. The log payoff\n  specializes to the variance-swap $1/K^2$ strip.",
+  "name": "MathFin.carrMadan_spanning",
+  "module": "MathFin.Models.ModelFree.CarrMadan",
+  "line": 89,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:carr-madan",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/CarrMadan.lean"},
  {"uses": ["def:merton-default-probability", "def:standard-normal-cdf"],
   "title": "Liquidation of a lending position is Merton default",
   "text":
@@ -659,18 +659,6 @@
   "label": "thm:binomial-knock-in-market",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierMarket.lean"},
- {"uses": [],
-  "title": "Chain-ladder prediction",
-  "text":
-  "The prediction $(\\prod_{m\\le k<N} f_k)\\,c_m$ of the value at $N$ of a\n  development row $c$ from its value at $m$, by development factors $f$. With the selected factors\n  of a triangle it is the chain-ladder completion of an unobserved cell\n  (`chainComplete_eq_chainPrediction`); with the factors of Mack's model it is the conditional\n  expectation of the ultimate.",
-  "name": "MathFin.chainPrediction",
-  "module": "MathFin.Insurance.ChainLadder",
-  "line": 93,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:chain-ladder-prediction",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/ChainLadder.lean"},
  {"uses": [],
   "title": "Compound Poisson moment generating function",
   "text":
@@ -754,6 +742,18 @@
   "label": "thm:crr-bs-convergence",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/CRRClosedForm.lean"},
+ {"uses": [],
+  "title": "Chain-ladder prediction",
+  "text":
+  "The prediction $(\\prod_{m\\le k<N} f_k)\\,c_m$ of the value at $N$ of a\n  development row $c$ from its value at $m$, by development factors $f$. With the selected factors\n  of a triangle it is the chain-ladder completion of an unobserved cell\n  (`chainComplete_eq_chainPrediction`); with the factors of Mack's model it is the conditional\n  expectation of the ultimate.",
+  "name": "MathFin.chainPrediction",
+  "module": "MathFin.Insurance.ChainLadder",
+  "line": 103,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:chain-ladder-prediction",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/ChainLadder.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -784,18 +784,6 @@
   "label": "thm:forward-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ForwardMeasure.lean"},
- {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
-  "title": "The insured market and its Esscher pricing measure",
-  "text":
-  "The market of a loss $X$ quoted at its Esscher premium until a date $T$ and\n  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the\n  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim\n  paying the loss is worth the Esscher premium. The market is built to quote the loss at that\n  premium, with no dynamics before $T$.",
-  "name": "MathFin.isPricingMeasure_insuredMarket_tilted",
-  "module": "MathFin.Insurance.EsscherPremium",
-  "line": 105,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:insured-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -813,6 +801,18 @@
   "label": "thm:market-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
+ {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
+  "title": "The insured market and its Esscher pricing measure",
+  "text":
+  "The market of a loss $X$ quoted at its Esscher premium until a date $T$ and\n  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the\n  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim\n  paying the loss is worth the Esscher premium. The market is built to quote the loss at that\n  premium, with no dynamics before $T$.",
+  "name": "MathFin.isPricingMeasure_insuredMarket_tilted",
+  "module": "MathFin.Insurance.EsscherPremium",
+  "line": 105,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:insured-market",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses": [],
   "title": "Duration and immunization",
   "text":
@@ -891,18 +891,6 @@
   "label": "thm:dmw-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
- {"uses": [],
-  "title": "Esscher transform of a Gaussian",
-  "text":
-  "Tilting the physical Gaussian by an exponential density yields an\n  equivalent probability measure with shifted mean — static Girsanov, constructed, not\n  assumed.",
-  "name": "MathFin.hasLaw_esscher_tilt",
-  "module": "MathFin.Models.BlackScholes.GaussianGirsanov",
-  "line": 116,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:esscher-tilt",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/GaussianGirsanov.lean"},
  {"uses": ["def:emm", "thm:first-ftap", "thm:martingale-transform"],
   "title": "Second fundamental theorem on a finite space",
   "text":
@@ -915,6 +903,18 @@
   "label": "thm:second-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/FTAPComplete.lean"},
+ {"uses": [],
+  "title": "Esscher transform of a Gaussian",
+  "text":
+  "Tilting the physical Gaussian by an exponential density yields an\n  equivalent probability measure with shifted mean — static Girsanov, constructed, not\n  assumed.",
+  "name": "MathFin.hasLaw_esscher_tilt",
+  "module": "MathFin.Models.BlackScholes.GaussianGirsanov",
+  "line": 116,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:esscher-tilt",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/GaussianGirsanov.lean"},
  {"uses": [],
   "title": "The coin-flip path law",
   "text":
@@ -1607,18 +1607,6 @@
   "label": "thm:martingale-transform",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MartingaleTransform.lean"},
- {"uses": ["def:emm", "def:chain-ladder-prediction"],
-  "title": "Mack's model: the chain-ladder predictions are a martingale",
-  "text":
-  "For one accident year, let the cumulative claims $C_j$ after $j$ development\n  years be adapted and integrable with $\\mathbb E[C_{j+1}\\mid\\mathcal F_j]=f_j C_j$ (Mack's\n  model). Then the reference measure is an equivalent martingale measure, up to the ultimate date\n  $N$, of the prediction $m\\mapsto(\\prod_{m\\le k<N}f_k)\\,C_m$ of the ultimate $C_N$; this\n  prediction is $\\mathbb E[C_N\\mid\\mathcal F_m]$, and the claims development result from $m$ to\n  $m+1$ has conditional mean zero. The chain-ladder completion of a triangle is this prediction\n  with the selected factors $\\hat f_j$ in place of $f_j$; their unbiasedness and the standard error\n  of the reserve are not covered.",
-  "name": "MathFin.IsMackRow.isEMM_chainPrediction",
-  "module": "MathFin.Insurance.ChainLadder",
-  "line": 186,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:mack-chain-ladder",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/ChainLadder.lean"},
  {"uses": ["thm:compound-poisson-mgf"],
   "title": "Variance swap and the log contract",
   "text":
@@ -1794,18 +1782,6 @@
   "label": "thm:black76-caplet",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
- {"uses": ["def:coin-flip-measure"],
-  "title": "Binomial barrier prices via reflection",
-  "text":
-  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
-  "name": "MathFin.binomial_upAndIn_reflection",
-  "module": "MathFin.Models.Binomial.BarrierReflection",
-  "line": 245,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:binomial-barrier-reflection",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1823,6 +1799,18 @@
   "label": "thm:immunization-market-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
+ {"uses": ["def:coin-flip-measure"],
+  "title": "Binomial barrier prices via reflection",
+  "text":
+  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
+  "name": "MathFin.binomial_upAndIn_reflection",
+  "module": "MathFin.Models.Binomial.BarrierReflection",
+  "line": 245,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:binomial-barrier-reflection",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility satisfies independence and continuity",
   "text":
@@ -1878,6 +1866,18 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Bracket of the Itô integral",
+  "text":
+  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
+  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
+  "module": "MathFin.Probability.Martingales.BracketCompensator",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bracket-compensator",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses": ["thm:carr-madan"],
   "title": "Breeden–Litzenberger formula",
   "text":
@@ -1890,23 +1890,6 @@
   "label": "thm:breeden-litzenberger",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
- {"uses":
-  ["def:market",
-   "def:contract",
-   "def:pricing-functional",
-   "thm:key-rate-duration",
-   "thm:zero-coupon-bond-price"],
-  "title": "Key-rate durations for market prices",
-  "text":
-  "In a family of markets $M_y$ with numéraire $(1+y)^{\\lfloor t\\rfloor}$, at a\n  flat curve $y$ with $1 + y \\ne 0$ the key-rate partials of a coupon bond sum to the derivative\n  in $y$ of the market price of its cash-flow schedule.",
-  "name": "MathFin.Rates.sum_deriv_keyRate_eq_deriv_price",
-  "module": "MathFin.Models.Rates.DeterministicMarket",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:key-rate-market-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -1925,18 +1908,23 @@
   "label": "thm:fissler-ziegel",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/JointElicitability.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Bracket of the Itô integral",
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:key-rate-duration",
+   "thm:zero-coupon-bond-price"],
+  "title": "Key-rate durations for market prices",
   "text":
-  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
-  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
-  "module": "MathFin.Probability.Martingales.BracketCompensator",
+  "In a family of markets $M_y$ with numéraire $(1+y)^{\\lfloor t\\rfloor}$, at a\n  flat curve $y$ with $1 + y \\ne 0$ the key-rate partials of a coupon bond sum to the derivative\n  in $y$ of the market price of its cash-flow schedule.",
+  "name": "MathFin.Rates.sum_deriv_keyRate_eq_deriv_price",
+  "module": "MathFin.Models.Rates.DeterministicMarket",
   "line": 267,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:bracket-compensator",
+  "label": "thm:key-rate-market-price",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
@@ -1979,6 +1967,18 @@
   "label": "thm:continuous-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ContinuousMarket.lean"},
+ {"uses": ["def:emm", "def:chain-ladder-prediction"],
+  "title": "Mack's model: the chain-ladder predictions are a martingale",
+  "text":
+  "For one accident year, let the cumulative claims $C_j$ after $j$ development\n  years be adapted and integrable with $\\mathbb E[C_{j+1}\\mid\\mathcal F_j]=f_j C_j$ (Mack's\n  model). Then the reference measure is an equivalent martingale measure, up to the ultimate date\n  $N$, of the prediction $m\\mapsto(\\prod_{m\\le k<N}f_k)\\,C_m$ of the ultimate $C_N$; this\n  prediction is $\\mathbb E[C_N\\mid\\mathcal F_m]$, and the claims development result from $m$ to\n  $m+1$ has conditional mean zero. The chain-ladder completion of a triangle is this prediction\n  with the selected factors $\\hat f_j$ in place of $f_j$; their unbiasedness and the standard error\n  of the reserve are not covered.",
+  "name": "MathFin.IsMackRow.isEMM_chainPrediction",
+  "module": "MathFin.Insurance.ChainLadder",
+  "line": 289,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:mack-chain-ladder",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/ChainLadder.lean"},
  {"uses": ["def:emm", "thm:martingale-transform", "thm:stiemke"],
   "title": "First fundamental theorem on a finite space (Harrison–Pliska)",
   "text":
@@ -2105,6 +2105,18 @@
   "label": "thm:sde-pathwise-uniqueness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEUniqueness.lean"},
+ {"uses": ["thm:compound-poisson-mgf"],
+  "title": "Risk-neutral drift of a jump-diffusion",
+  "text":
+  "For a jump-diffusion $X$ with drift $b$, volatility $\\sigma$, jump\n  intensity $\\Lambda$ and a jump law $\\nu$ with $\\mathbb{E}[e^J] < \\infty$, and $S_0 \\ne 0$,\n  the discounted price $e^{-rt}S_0e^{X_t}$ is a martingale if and only if $b = r - \\sigma^2/2\n  - \\Lambda(\\mathbb{E}[e^J] - 1)$. Merton's log-normal jumps have $\\mathbb{E}[e^J] - 1 =\n  \\kappa$ (`integral_exp_mertonJump`), the compensation $r - \\lambda\\kappa$.",
+  "name": "MathFin.JumpDiffusionProcess.martingale_iff",
+  "module": "MathFin.Models.Jumps.JumpDiffusionProcess",
+  "line": 344,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:merton-risk-neutral-drift",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
  {"uses":
   ["def:market",
    "thm:log-optimal-numeraire-one-period",
@@ -2125,41 +2137,6 @@
   "label": "thm:kelly-is-log-optimal",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/KellyNumeraire.lean"},
- {"uses": ["thm:compound-poisson-mgf"],
-  "title": "Risk-neutral drift of a jump-diffusion",
-  "text":
-  "For a jump-diffusion $X$ with drift $b$, volatility $\\sigma$, jump\n  intensity $\\Lambda$ and a jump law $\\nu$ with $\\mathbb{E}[e^J] < \\infty$, and $S_0 \\ne 0$,\n  the discounted price $e^{-rt}S_0e^{X_t}$ is a martingale if and only if $b = r - \\sigma^2/2\n  - \\Lambda(\\mathbb{E}[e^J] - 1)$. Merton's log-normal jumps have $\\mathbb{E}[e^J] - 1 =\n  \\kappa$ (`integral_exp_mertonJump`), the compensation $r - \\lambda\\kappa$.",
-  "name": "MathFin.JumpDiffusionProcess.martingale_iff",
-  "module": "MathFin.Models.Jumps.JumpDiffusionProcess",
-  "line": 344,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:merton-risk-neutral-drift",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
- {"uses":
-  ["def:market",
-   "def:heston-transform",
-   "def:gbm",
-   "def:brownian-motion",
-   "def:pricing-measure",
-   "def:contract",
-   "def:pricing-functional",
-   "thm:girsanov-brownian-characterisation",
-   "thm:black-scholes-market",
-   "def:contract-value"],
-  "title":
-  "As vol-of-vol vanishes the Heston transform is a Black–Scholes price",
-  "text":
-  "In the Black–Scholes market with volatility $\\sigma > 0$, the Girsanov\n  measure $Q$ of $\\theta = (m - r)/\\sigma$ at a horizon $H \\ge T > 0$ is a pricing measure, and\n  for $\\kappa > 0$, $0 < u < 1$ and the variance started at its mean $\\theta = v = \\sigma^2$, the\n  discounted explicit Heston transform $e^{-rT}\\Phi_\\xi(0, \\log S_0, \\sigma^2)$ tends, as the\n  vol-of-vol $\\xi \\to 0$, to the $Q$-price of the claim paying $S_T^u$ at $T$. A limit of the\n  Riccati-level transform, not of a Heston process.",
-  "name": "MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice",
-  "module": "MathFin.Models.StochVol.HestonSmallVolOfVol",
-  "line": 345,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:heston-bs-market-limit",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/StochVol/HestonSmallVolOfVol.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -2224,6 +2201,29 @@
   "label": "thm:ito-product-rule",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/Ito/ItoProductRule.lean"},
+ {"uses":
+  ["def:market",
+   "def:heston-transform",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:pricing-measure",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:girsanov-brownian-characterisation",
+   "thm:black-scholes-market",
+   "def:contract-value"],
+  "title":
+  "As vol-of-vol vanishes the Heston transform is a Black–Scholes price",
+  "text":
+  "In the Black–Scholes market with volatility $\\sigma > 0$, the Girsanov\n  measure $Q$ of $\\theta = (m - r)/\\sigma$ at a horizon $H \\ge T > 0$ is a pricing measure, and\n  for $\\kappa > 0$, $0 < u < 1$ and the variance started at its mean $\\theta = v = \\sigma^2$, the\n  discounted explicit Heston transform $e^{-rT}\\Phi_\\xi(0, \\log S_0, \\sigma^2)$ tends, as the\n  vol-of-vol $\\xi \\to 0$, to the $Q$-price of the claim paying $S_T^u$ at $T$. A limit of the\n  Riccati-level transform, not of a Heston process.",
+  "name": "MathFin.Heston.tendsto_hestonTransform_smallVolOfVol_marketPrice",
+  "module": "MathFin.Models.StochVol.HestonSmallVolOfVol",
+  "line": 361,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:heston-bs-market-limit",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/StochVol/HestonSmallVolOfVol.lean"},
  {"uses": ["def:portfolio-variance"],
   "title": "Bühlmann credibility",
   "text":
@@ -2400,7 +2400,7 @@
   "For $0 < u < 1$, $\\Phi(t, x, v) = \\exp(\\hat a(T - t) + ux + \\hat b(T - t)v)$,\n  where $\\hat a, \\hat b$ are the closed-form (Möbius and logarithmic) solutions of the Heston\n  Riccati system from $\\hat a(0) = \\hat b(0) = 0$: the candidate for $E[e^{u\\log S_T}]$.",
   "name": "MathFin.Heston.hestonTransform",
   "module": "MathFin.Models.StochVol.Heston",
-  "line": 701,
+  "line": 703,
   "leanOk": true,
   "latexEnv": "definition",
   "label": "def:heston-transform",
@@ -2412,7 +2412,7 @@
   "For $0 < u < 1$ and $\\xi \\ne 0$, the profile $\\Phi(t,x,v) = \\exp(A(t) + ux +\n  B(t)v)$ built from the explicit solutions $A(t) = \\hat a(T-t)$, $B(t) = \\hat b(T-t)$ of the\n  Heston Riccati system satisfies the backward Heston pricing equation $\\partial_t\\Phi + L\\Phi =\n  0$, and $\\Phi(T,x,v) = e^{ux}$ (`hestonTransform_terminal`). The Heston variance process is\n  not constructed, so the link from $\\Phi$ to a market's prices is not proved.",
   "name": "MathFin.Heston.hestonTransform_pde",
   "module": "MathFin.Models.StochVol.Heston",
-  "line": 708,
+  "line": 710,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:heston-pde",

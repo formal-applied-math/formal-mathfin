@@ -491,6 +491,26 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written: IsMackRow.isEMM_chainPrediction, IsMackRow.condExp_eq and IsMackRow.condExp_chainPrediction_succ_sub in MathFin/Insurance/ChainLadder.lean. One accident year; Mack's independence of accident years and his variance assumption are not used and not stated. The chain-ladder completion is this prediction with the selected factors (mf-chain-ladder-completion-prediction)."
       }
+    },
+    {
+      "id": "mf-chain-ladder-exact-rational",
+      "name": "Exact Rational Chain Ladder Certifies the Real Completion",
+      "domain": "mathematical_finance",
+      "description": "For a run-off triangle with rational entries and n development periods, the chain ladder computed exactly over ℚ (returning none where a factor's denominator column sum vanishes) is sound: any value q it returns at a cell (i, j) is the real chain-ladder completion of the cast triangle at that cell, with no hypothesis on the triangle, and on an unobserved cell (n < i + j) q is the prediction (∏_{n−i ≤ k < j} f̂_k) · C(i, n − i) of the row's value by the selected factors. When every factor denominator within the horizon is nonzero, the evaluator returns a value at every cell with j ≤ n.",
+      "code": {
+        "lean": "import MathFin.Insurance.ChainLadder\n\nopen MathFin\n\n/-- The exact chain ladder is sound, lands on the prediction by the selected factors, and\nsucceeds when the denominators are nonzero. -/\ntheorem chain_ladder_exact_rational (n : ℕ) (C : ℕ → ℕ → ℚ) (i j : ℕ) :\n    (∀ q : ℚ, chainCompleteRat? n C i j = some q →\n      chainComplete n (fun a b ↦ (C a b : ℝ)) i j = q ∧\n        (n < i + j → chainPrediction (chainFactor n fun a b ↦ (C a b : ℝ))\n          (fun b ↦ (C i b : ℝ)) j (n - i) = q)) ∧\n    ((∀ k < n, ∑ a ∈ Finset.range (n - k), C a k ≠ 0) → j ≤ n →\n      ∃ q : ℚ, chainCompleteRat? n C i j = some q) :=\n  ⟨fun _ h ↦ ⟨chainComplete_eq_of_chainCompleteRat?_eq_some h,\n      fun hij ↦ chainPrediction_eq_of_chainCompleteRat?_eq_some hij h⟩,\n    fun hdenom hj ↦ (cast_chainCompleteRat?_some n C hdenom i j hj).imp fun _ h ↦ h.1⟩\n"
+      },
+      "metadata": {
+        "reference": "Mack (1993)",
+        "citations": [
+          {
+            "key": "Mack1993"
+          }
+        ],
+        "difficulty": "elementary",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: chainComplete_eq_of_chainCompleteRat?_eq_some, chainPrediction_eq_of_chainCompleteRat?_eq_some and cast_chainCompleteRat?_some in MathFin/Insurance/ChainLadder.lean (the evaluator contributed in #524). A worked reserve computed by evaluation and certified in ℝ is MathFinExamples/Applications/ChainLadderReserve.lean."
+      }
     }
   ]
 }

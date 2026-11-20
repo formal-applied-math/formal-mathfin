@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1109 MathFin constants, 29 upstream). Citations
+  corpus (1113 MathFin constants, 29 upstream). Citations
   are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
   unqualified under `open`, by dot notation on a hypothesis, or declared
   outside the MathFin namespace is pinned like any other. Statement-position
@@ -774,6 +774,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.Heston.hestonTransform_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Heston.hestonTransform_pde
+
+/-- info: 'MathFin.Heston.hestonTransform_terminal_eq_mgf_dirac' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.hestonTransform_terminal_eq_mgf_dirac
 
 /-- info: 'MathFin.Heston.tendsto_hestonProfile_smallVolOfVol_blackScholes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1839,6 +1843,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.carrMadan_spanning
 
+/-- info: 'MathFin.cast_chainCompleteRat?_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.cast_chainCompleteRat?_some
+
 /-- info: 'MathFin.cdf_expMeasure_inMDA' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.cdf_expMeasure_inMDA
@@ -1850,6 +1858,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.chainComplete_eq_chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.chainComplete_eq_chainPrediction
+
+/-- info: 'MathFin.chainComplete_eq_of_chainCompleteRat?_eq_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.chainComplete_eq_of_chainCompleteRat?_eq_some
+
+/-- info: 'MathFin.chainPrediction_eq_of_chainCompleteRat?_eq_some' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.chainPrediction_eq_of_chainCompleteRat?_eq_some
 
 /-- info: 'MathFin.changeOfMeasure_setIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
