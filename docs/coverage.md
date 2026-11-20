@@ -40,9 +40,10 @@ module's variance lemmas are module-only, not corpus entries). Corpus 904 → 90
   lognormality of the index under the nominal T-forward measure (hypothesis hZ), its SDE-level
   derivation, and the real-rate drift shift. V is a free positive input; this statement does not
   identify it with jyVariance.
-- **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the year-on-year forward
-  and the time-0 price of its payment, from the conditional-expectation (martingale) hypothesis for
-  the forward index plus the tower step `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`.
+- **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the time-0 price of the
+  year-on-year payment, from the forward identity `jyYoyForward_eq_convexity` (the
+  conditional-expectation (martingale) hypothesis for the forward index plus the tower step
+  `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`) and the numéraire change.
   Not derived: the martingale property of the forward index under Q^T (the conditional-expectation
   hypothesis), the Hull-White reconstitution form hR of the bond ratio, the means, variances and
   covariance of the rate deviations and the Hull-White loadings B^n, B^r (free inputs), their
