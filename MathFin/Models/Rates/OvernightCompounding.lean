@@ -185,17 +185,11 @@ theorem onEffectiveTime_one (hτ : τ₀ < τ₁) :
   field_simp
   ring
 
-private lemma ratio_facts (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
-    max τ₀ 0 < τ₁ ∧ 0 ≤ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) ∧ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) ≤ 1 := by
-  have hL : 0 < τ₁ - τ₀ := sub_pos.2 hτ
-  have hs := max_lt hτ hτ1
-  exact ⟨hs, div_nonneg (sub_nonneg.2 hs.le) hL.le,
-    (div_le_one hL).2 (by linarith [le_max_left τ₀ 0])⟩
-
 /-- The variance time is at least the already-elapsed part `max τ₀ 0`. -/
 theorem le_onEffectiveTime (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
     max τ₀ 0 ≤ onEffectiveTime τ₀ τ₁ q := by
-  obtain ⟨hs, hx0, -⟩ := ratio_facts hτ hτ1
+  have hs := max_lt hτ hτ1
+  have hx0 : 0 ≤ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_nonneg (sub_nonneg.2 hs.le) (sub_pos.2 hτ).le
   unfold onEffectiveTime
   have : 0 ≤ (τ₁ - max τ₀ 0) * (((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q)) / (2 * q + 1) :=
     div_nonneg (mul_nonneg (sub_nonneg.2 hs.le) (Real.rpow_nonneg hx0 _)) (by linarith)
@@ -204,7 +198,7 @@ theorem le_onEffectiveTime (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁)
 /-- The variance time is positive. -/
 theorem onEffectiveTime_pos (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
     0 < onEffectiveTime τ₀ τ₁ q := by
-  obtain ⟨hs, -, -⟩ := ratio_facts hτ hτ1
+  have hs := max_lt hτ hτ1
   have hx : 0 < (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_pos (sub_pos.2 hs) (sub_pos.2 hτ)
   unfold onEffectiveTime
   have : 0 < (τ₁ - max τ₀ 0) * (((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q)) / (2 * q + 1) :=
@@ -214,7 +208,10 @@ theorem onEffectiveTime_pos (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁
 /-- The variance time never exceeds the full horizon `τ₁`. -/
 theorem onEffectiveTime_le (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
     onEffectiveTime τ₀ τ₁ q ≤ τ₁ := by
-  obtain ⟨hs1, hx0, hx1⟩ := ratio_facts hτ hτ1
+  have hs1 := max_lt hτ hτ1
+  have hx0 : 0 ≤ (τ₁ - max τ₀ 0) / (τ₁ - τ₀) := div_nonneg (sub_nonneg.2 hs1.le) (sub_pos.2 hτ).le
+  have hx1 : (τ₁ - max τ₀ 0) / (τ₁ - τ₀) ≤ 1 :=
+    (div_le_one (sub_pos.2 hτ)).2 (by linarith [le_max_left τ₀ 0])
   have h1 : ((τ₁ - max τ₀ 0) / (τ₁ - τ₀)) ^ (2 * q) ≤ 1 :=
     Real.rpow_le_one hx0 hx1 (by linarith)
   unfold onEffectiveTime

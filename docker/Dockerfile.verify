@@ -57,7 +57,7 @@ RUN elan default "$(cat lean-toolchain)"
 # Lean prebuild layer above. The `[dev]` extra brings pytest + pytest-asyncio
 # so the static lints (`pytest tests/test_router.py`,
 # `python -m tools.verify.coverage_report`) run inside this container too.
-COPY pyproject.toml requirements.txt ./
+COPY pyproject.toml ./
 COPY tools/ tools/
 RUN python3 -m pip install --break-system-packages -e ".[all,dev]"
 

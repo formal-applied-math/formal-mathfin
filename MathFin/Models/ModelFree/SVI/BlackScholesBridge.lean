@@ -24,8 +24,9 @@ price is convex in the strike.
 
 ## Main results
 
-* `blackCall_eq_bsSmile`: for `K > 0` and positive variance at `log K`, the forward-normalised Black
-  call `blackCall p K` equals `bsSmile p K`.
+* `blackCall_eq_bsV`: for `K > 0` and positive variance at `log K`, the forward-normalised Black
+  call `blackCall p K` is the Black–Scholes call `bsV` at the SVI volatility, which is
+  `bsSmile p K`.
 * `bsSmile_convex_iff`: for `σ > 0` and positive variance, `bsSmile p` is convex on `(0, ∞)` iff
   `durrleman p k ≥ 0` for all `k`.
 * `fullCertificateFormula_iff_bsSmile_convex`: the finite sign formula holds iff `σ > 0`, `b ≥ 0`,
@@ -48,9 +49,12 @@ with spot, maturity and discount factor normalized to one. -/
 noncomputable def bsSmile (p : Params) (K : ℝ) : ℝ :=
   MathFin.bsV K 0 (rootVariance p (Real.log K)) 1 1
 
-theorem blackCall_eq_bsSmile (p : Params) (K : ℝ) (hK : 0 < K)
-    (hw : 0 < variance p (Real.log K)) : blackCall p K = bsSmile p K := by
-  have hn := ne_of_gt (rootVariance_pos p (Real.log K) hw)
+/-- **The forward-normalised Black call is the Black–Scholes call at the SVI volatility**: for
+`K > 0` and positive variance at `log K`, `blackCall p K` is `bsV` at strike `K`, rate `0`,
+volatility `√w(log K)`, spot `1` and maturity `1`, which is `bsSmile p K`. -/
+theorem blackCall_eq_bsV (p : Params) (K : ℝ) (hK : 0 < K)
+    (hw : 0 < variance p (Real.log K)) :
+    blackCall p K = MathFin.bsV K 0 (rootVariance p (Real.log K)) 1 1 := by
   have hd1 : MathFin.bsd1 1 K 0 (rootVariance p (Real.log K)) 1 =
       dpl (Real.log K) (variance p (Real.log K)) := by
     have h := bsd1_eq_dpl (F := 1) (k := Real.log K) one_ne_zero (rootVariance_pos p _ hw) one_pos
@@ -60,7 +64,7 @@ theorem blackCall_eq_bsSmile (p : Params) (K : ℝ) (hK : 0 < K)
     rw [MathFin.bsd2, hd1]
     simp only [Real.sqrt_one, mul_one, dpl_eq_rootVariance, dmi_eq_rootVariance]
     ring
-  simp [blackCall, ForwardSmile.blackForm, bsSmile, MathFin.bsV, hd1, hd2, Real.exp_log hK]
+  simp [blackCall, ForwardSmile.blackForm, MathFin.bsV, hd1, hd2, Real.exp_log hK]
 
 /-- The certificate applies to the existing Black–Scholes function with SVI
 volatility substituted strike by strike, not a constant-volatility derivative. -/
@@ -68,7 +72,7 @@ theorem bsSmile_convex_iff (p : Params) (hs : 0 < p.sigma)
     (hw : ∀ k : ℝ, 0 < variance p k) :
     ConvexOn ℝ (Ioi 0) (bsSmile p) ↔ ∀ k : ℝ, 0 ≤ durrleman p k := by
   have he : EqOn (blackCall p) (bsSmile p) (Ioi 0) :=
-    fun K hK ↦ blackCall_eq_bsSmile p K hK (hw _)
+    fun K hK ↦ blackCall_eq_bsV p K hK (hw _)
   constructor
   · intro hc
     exact (blackCall_convex_iff p hs hw).mp (hc.congr he.symm)

@@ -1,13 +1,15 @@
 # Open problems in mathematical finance — survey and research catalogue
 
-**Current catalogue (2026-10-21):** [eight structured records](research-problems/README.md)
+**Current catalogue (2026-11-19):** [eighteen structured records](research-problems/README.md)
 with stable IDs, exact statements, source locators, dated reviews, and separate
-mathematical and Lean statuses. Five are open research questions, two retain
-existing formal resolutions, and one records a reported resolution. The
-[JSON database](research-problems/problems.json) is the maintained record;
-the [audit](research-problems/audit-2026-10-21.md) explains the corrections.
-The older survey below retains additional leads. Entries outside that audit
-have **not** all been revalidated as of October 2026.
+mathematical and Lean statuses: fourteen open questions, two formal resolutions, and two
+reported resolutions. Three are stated in Lean (`MathFinFrontier/OpenProblems/`). The
+[JSON database](research-problems/problems.json) is the maintained record. Round 6
+([audit](research-problems/audit-2026-11-19.md)) re-checked every lead below: the Tier 1 entries
+that never became records, all of Tier 3, and the four unswept areas. Its per-candidate verdicts
+(open, lead, solved, reported, not a question) are in
+[candidates-2026-11-19.json](research-problems/candidates-2026-11-19.json), and they supersede
+the descriptions of those entries in this document where the two disagree.
 
 **Purpose.** This library formalizes *known* mathematics. This document is the
 scouting report for the other activity: genuinely unsolved problems, and which
@@ -554,10 +556,10 @@ Honesty about scope is what keeps the Tier 1 count meaningful.
 | Principal–agent | ◐ topic-level only | 5 |
 | Energy & commodities | ◐ topic-level only | 5 |
 | XVA / counterparty | ◐ topic-level only | 5 |
-| Implied-vol market models | ❌ | — |
-| Large-markets FTAP | ❌ | — |
-| High-frequency econometrics | ❌ | — |
-| Real options | ❌ | — |
+| Implied-vol market models | ◐ swept, nothing class A | 6 |
+| Large-markets FTAP | ✅ | 6 |
+| High-frequency econometrics | ◐ two leads | 6 |
+| Real options | ◐ one lead | 6 |
 | Climate / ESG finance | ❌ | — |
 | Behavioural / prospect-theory pricing | ❌ | — |
 | Multi-curve & rate-benchmark transition | ❌ | — |

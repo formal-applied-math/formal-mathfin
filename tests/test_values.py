@@ -236,7 +236,7 @@ def _blueprint_tagged_names() -> list:
 
 
 def _audited_names() -> set:
-    return set(re.findall(r"#print axioms\s+([A-Za-z_][\w.']*)",
+    return set(re.findall(r"#print axioms\s+([A-Za-z_][\w.'!?]*)",
                           AUDIT_PATH.read_text()))
 
 
@@ -515,7 +515,7 @@ UNRESOLVED_ALLOWLIST: dict[tuple[str, str], str] = {
 
 def _pinned_names() -> set:
     return {name for path in (AUDIT_PATH, GEN_PATH)
-            for name in re.findall(r"#print axioms\s+([A-Za-z_][\w.']*)",
+            for name in re.findall(r"#print axioms\s+([A-Za-z_][\w.'!?]*)",
                                    path.read_text())}
 
 

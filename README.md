@@ -290,11 +290,12 @@ Raphael Coelho maintains the library, with contributions from:
   cubic splines, FX smile quotes, SABR chain-rule Greeks, the continuous lookback and the shout
   floor, Marchenko–Pastur edges and historical VaR for concentrated liquidity; the Bachelier spread
   call, the Nelson–Siegel–Svensson decay limit, the backward-looking caplet, the lognormal
-  volatility swap and the Broadie–Glasserman–Kou barrier shift for discrete monitoring.
+  volatility swap, the Heston transform at maturity and the Broadie–Glasserman–Kou barrier shift
+  for discrete monitoring.
 - [Adam Kiezun](https://github.com/akiezun): whole-life insurance on the survival function, the
   life table, two-life annuities, Thiele's reserve equation, Bühlmann credibility, sampled stopping
-  rules, CDS recovery timing, the stop-loss recursion, discrete Almgren–Chriss liquidation and the
-  chain ladder.
+  rules, CDS recovery timing, the stop-loss recursion, discrete Almgren–Chriss liquidation, and
+  the chain ladder with its exact rational evaluation.
 
 Each module's header names its authors.
 

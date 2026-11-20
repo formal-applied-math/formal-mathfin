@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 import MathFinExamples.Applications.BinomialTree
 import MathFinExamples.Applications.Bootstrapping
+import MathFinExamples.Applications.ChainLadderReserve
 import MathFinExamples.Applications.CappedCall
 import MathFinExamples.Applications.CreditCorrelation
 import MathFinExamples.Applications.GaussianRiskReport
