@@ -61,6 +61,10 @@ theorem isItoIntegral_itoIntegralCLM [IsProbabilityMeasure μ] (hB : IsPreBrowni
   intro s t hst htT F hF φ hφ
   obtain rfl : φ = simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hst htT hF) :=
     Lp.ext (hφ.trans (ae_simpleAssemblyHorizon_iocSPHorizon (μ := μ) hBmeas hst htT hF).symm)
+  -- the goal's coercion is typed by the Challenge's `integrandMeasure`; restate it in the
+  -- library's `trimMeasure`, which it unfolds to, so the library lemma's pattern matches
+  show ⇑(itoIntegralCLM hB T hBmeas
+      (simpleAssemblyHorizon (μ := μ) T hBmeas (iocSPHorizon hBmeas hst htT hF))) =ᵐ[μ] _
   rw [itoIntegralCLM_simpleAssemblyHorizon, ← itoSimple_iocSPHorizon hBmeas hst htT hF]
   exact MemLp.coeFn_toLp _
 
