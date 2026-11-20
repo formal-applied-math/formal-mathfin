@@ -15,18 +15,18 @@ public import MathFin.Models.Rates.VasicekBondPrice
 Notation. The nominal and real short rates are Gaussian (Hull–White) and the price index `I` is a
 geometric Brownian motion; `I₀` is its time-0 value, `σ_I, σ_r, σ_n` the volatilities of the index
 and of the real and nominal short rates, `a_r, a_n` their mean reversions, `ρ_{rI}, ρ_{nI}, ρ_{nr}`
-the correlations (real rate–index, nominal rate–index, nominal–real rate), and
-`B_x(t,T) = (1 − e^{−a_x(T−t)})/a_x` (`x ∈ {r, n}`) the Hull–White loadings. `Qn` is the nominal
-pricing measure with money-market account `B_T` and expectation `𝔼^{Qn}`; `Q^T` and `𝔼^T` are the
-nominal `T`-forward measure and its expectation, where `T` is the payment date (the caplet maturity,
-or for the year-on-year payment `I_T/I_S` the end of `[S,T]` with start `S < T`). `Pⁿ(t,T)` and
-`Pʳ(t,T)` are the nominal and real zero-coupon bond prices, `F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is the
-forward index (a `Q^T`-martingale in `t`) and `F = F(0,T)` its time-0 value, the curve forward.
-`jyVariance` is the integrated log-variance `V(0,T)` of `F(·,T)` (defined below); `V` is a
-log-variance (a free input of the caplet statement), `F₀` the mean of the lognormal index law
-`I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`, `K` a caplet strike, `Φ` the standard normal distribution
-function and `d_{1,2} = (log(F/K) ± V/2)/√V`. This module records what follows without the SDE
-calculus.
+the correlations of the driving Brownian motions (real rate–index, nominal rate–index, nominal–real
+rate), and `B_x(t,T) = (1 − e^{−a_x(T−t)})/a_x` (`x ∈ {r, n}`) the Hull–White loadings. `Qn` is the
+nominal pricing measure with money-market account `B_T` and expectation `𝔼^{Qn}`; `Q^T` and `𝔼^T`
+are the nominal `T`-forward measure and its expectation, where `T` is the payment date (the caplet
+maturity, or for the year-on-year payment `I_T/I_S` the end of `[S,T]` with start `S < T`).
+`Pⁿ(t,T)` and `Pʳ(t,T)` are the nominal and real zero-coupon bond prices,
+`F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is the forward index (a `Q^T`-martingale in `t`) and `F = F(0,T)` its
+time-0 value, the curve forward. `jyVariance` is the integrated log-variance `V(0,T)` of `F(·,T)`
+(defined below); `V` is a log-variance (a free input of the caplet statement), `F₀` the mean of the
+lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`, `K` a caplet strike, `Φ` the standard
+normal distribution function and `d_{1,2} = (log(F/K) ± V/2)/√V`. This module records what follows
+without the SDE calculus.
 
 ## Main definitions
 
