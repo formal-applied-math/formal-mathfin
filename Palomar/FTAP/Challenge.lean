@@ -24,8 +24,8 @@ is a martingale. No integrability of `S`, no finiteness of `Ω` and no measurabl
 hypothesis is assumed.
 
 `isCompleteMarket_iff_existsUnique_isEMM` is the second fundamental theorem on a finite space
-(Harrison and Pliska, *Stochastic Processes and their Applications* 11 (1981)): when every state
-has positive probability, all events are observable at the horizon and there is no arbitrage,
+(Harrison and Pliska, *Stochastic Processes and their Applications* 11 (1981)): when `P` gives
+every state positive mass, all events are observable at the horizon and there is no arbitrage,
 every bounded claim is replicable if and only if the equivalent martingale measure is unique.
 
 Scope, stated here so the reader need not reconstruct it:

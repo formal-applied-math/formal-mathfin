@@ -119,8 +119,8 @@ integrability of the price, finiteness of the space or measurable-selection hypo
 assumed. The proof replaces the measure by an equivalent one under which the price is integrable, \
 finds in each period a conditional weight in (0, 1] that balances the price increment, applies \
 the weights backward and normalises the total mass once, at the end. The second registered \
-theorem is the second fundamental theorem on a finite space: when every state has positive \
-probability, every event is observable at the horizon and there is no arbitrage, every bounded \
+theorem is the second fundamental theorem on a finite space: when the reference measure gives \
+every state positive mass, every event is observable at the horizon and there is no arbitrage, every bounded \
 claim is replicable if and only if the equivalent martingale measure is unique. The several-asset \
 Dalang–Morton–Willinger theorem is not claimed. The development sits in formal-mathfin, a library \
 of formally verified mathematical finance built on Mathlib and Rémy Degenne's BrownianMotion \
