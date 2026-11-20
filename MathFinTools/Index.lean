@@ -3,11 +3,13 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
--- NOT a `module`-header file: exe tooling that loads the built library at run time, like
--- `MathFinTools/Blueprint.lean`. It imports no MathFin module at compile time, so building it
--- compiles only core Lean and Batteries.
-import Lean
-import Batteries.Tactic.Lint.Basic
+module
+-- Exe tooling that loads the built library at run time, like `MathFinTools/Blueprint.lean`. It
+-- imports no MathFin module at compile time, so building it compiles only core Lean and Batteries.
+-- Batteries' linter API is `meta`, so the imports are `meta` and the file is a meta section.
+
+public meta import Lean
+public meta import Batteries.Tactic.Lint.Basic
 
 /-!
 # `mathfin_index` — the environment's account of every MathFin declaration
@@ -36,6 +38,8 @@ connector library `MathFinFrontier` (stated, unproved bridges; never imported by
 indexed on its own, so its statements can be placed against the library's without entering the
 library's own index.
 -/
+
+public meta section
 
 open Lean Meta
 

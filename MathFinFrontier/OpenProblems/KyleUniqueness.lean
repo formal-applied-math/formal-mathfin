@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Open problem MF-OP-008: the one-period Gaussian Kyle equilibrium is unique
@@ -27,6 +29,8 @@ and every order `x`; market efficiency holds almost surely. Expected profits are
 integrals. They take no junk values here: given market efficiency, `p(x + U)` is integrable for
 every `x` (the paper's Lemma 2.3), so the integrals are the expected profits.
 -/
+
+@[expose] public section
 
 open MeasureTheory ProbabilityTheory
 open scoped NNReal

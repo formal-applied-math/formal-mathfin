@@ -1,6 +1,8 @@
-import MathFin.Risk.AcceptanceSet
-import MathFin.Risk.PositionsConvention
-import MathFin.Risk.WorstCaseRisk
+module
+
+public import MathFin.Risk.AcceptanceSet
+public import MathFin.Risk.PositionsConvention
+public import MathFin.Risk.WorstCaseRisk
 
 /-!
 # Proofs of the advertised statements
@@ -26,6 +28,8 @@ has no counterpart of `IsCoherentRisk` (that would be the duplicate), so the
 axioms are handed to the bridge field by field; `ADEH.representingSet ρ` is the
 library's `MathFin.representingSet` of `L ↦ ρ (-L)` under the sign flip.
 -/
+
+@[expose] public section
 
 namespace ADEH
 

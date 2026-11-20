@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho, Adam Kiezun
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Using the library: a chain-ladder reserve, computed exactly and certified
@@ -40,6 +42,8 @@ The shape of the file follows the bootstrapping example
 (`MathFinExamples/Applications/Bootstrapping.lean`); the exact evaluator is Adam Kiezun's (#524).
 The claim amounts below are illustrative.
 -/
+
+@[expose] public section
 
 namespace MathFin.Examples.ChainLadderReserve
 

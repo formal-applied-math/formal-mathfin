@@ -3,12 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
--- NOT a `module`-header file (deliberately): this is exe tooling, not library
--- API, and it consumes the legacy (non-module) LeanArchitect package, whose
--- declarations the module system imports privately/`meta`-walled. Legacy mode
--- has no such wall. The expose-section rule (test_router) governs
--- `module`-header files only.
-import Architect
+module
+-- Exe tooling, not library API. LeanArchitect declares everything in a `public meta section`, so
+-- this file imports it `meta` and runs in a meta section of its own (the Palomar intake requires
+-- every `.lean` file to be a module).
+
+public meta import Architect
 
 /-!
 # `blueprint_export` — blueprint JSON with *inferred* dependency edges
@@ -27,6 +27,8 @@ Run inside the verify container (after `lake build MathFin.Blueprint`):
 
   `lake exe blueprint_export MathFin.Blueprint`
 -/
+
+public meta section
 
 open Lean Architect
 

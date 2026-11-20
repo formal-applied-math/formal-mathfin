@@ -161,7 +161,7 @@ def _guard_block(name: str) -> str:
 def generate() -> str:
     names = collect_proof_position_names()
     upstream = collect_upstream_names()
-    imports = "".join(f"import {m}\n" for m in ["MathFin", *upstream_imports()])
+    imports = "".join(f"public import {m}\n" for m in ["MathFin", *upstream_imports()])
     header = f"""/-
   GENERATED FILE — do not edit by hand.
 
@@ -184,7 +184,11 @@ def generate() -> str:
   Freshness:   tests/test_values.py::test_axiom_audit_gen_is_fresh
   (Excluded from CI kernel replay like AxiomAudit: whole-library closure.)
 -/
+module
+
 {imports}
+@[expose] public section
+
 -- The `#guard_msgs` docstrings below are Lean's own output, matched as printed.
 set_option linter.style.longLine false
 

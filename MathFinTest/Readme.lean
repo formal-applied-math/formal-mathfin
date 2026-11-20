@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # The README's Lean, as a downstream project sees it
@@ -13,6 +15,8 @@ restates the theorem quoted at the top of `README.md` word for word. It stops bu
 statement changes or the umbrella stops exporting it. `.github/workflows/downstream.yml` compiles
 the same file in a fresh Lake project that requires this repository.
 -/
+
+@[expose] public section
 
 open MathFin Filter
 open scoped Topology

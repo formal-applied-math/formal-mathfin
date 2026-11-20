@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Examples — a curated tour of five representative results
@@ -24,6 +26,8 @@ library are in `MathFinExamples/Applications/`.
 5. **Variance swap fair strike (log-payoff piece)**
    `(2/T)·E[log(F/S_T)] = σ²` (`BlackScholes.VarianceSwap.varianceSwap_log_contribution`).
 -/
+
+@[expose] public section
 
 namespace MathFin.Examples
 
