@@ -864,6 +864,7 @@ public import MathFin.Risk.StopLossGap
 public import MathFin.Risk.GaussianExpectedShortfall
 public import MathFin.Risk.ValueAtRiskBisection
 public import MathFin.Risk.VaRSuperadditivity
+public import MathFin.Risk.DependenceUncertainty
 public import MathFin.Risk.DiscreteVaR
 public import MathFin.Risk.RiskClosedForms
 public import MathFin.Risk.StudentTValueAtRisk
