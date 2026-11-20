@@ -28,8 +28,10 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### Jarrow–Yildirim: the index variance, the ZC inflation caplet, the YoY forward (2026-11-20)
 
-Module `Models/Rates/JarrowYildirim.lean`; two `reduced_core` entries in `interest_rates.json`, each
-composing existing results under model hypotheses.
+Two `reduced_core` entries in `benchmarks/interest_rates.json` (module
+`Models/Rates/JarrowYildirim.lean`), each composing existing results under model hypotheses. Corpus
+904 → 906 on the merged tree (reduced_core 22 → 24, interest_rates 3 → 5 reduced; 882
+delivery-ready, unchanged).
 
 - **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
   inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the

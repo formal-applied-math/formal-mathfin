@@ -303,7 +303,7 @@ volatility.** With `σ_r = σ_n = 0`, `σ_I > 0` and `T > 0`, the integrated var
 `jyZcCaplet_price` at `V := jyVariance …` is `Pⁿ·blackCaplet (I₀Pʳ/Pⁿ) K σ_I T 1`: Black on the
 curve forward at the index volatility and maturity `T`. Hypotheses: all those of
 `jyZcCaplet_price`, including `[IsProbabilityMeasure Qn]`, except `hV`, which follows from
-`σ_I > 0` and `T > 0`; `hident` and `hZ` are stated at
+`σ_I > 0` and `T > 0`; `hident` is stated at
 `V := jyVariance ar an σI 0 0 ρrI ρnI ρnr T`. None is derived from the SDEs. -/
 theorem jyZcCaplet_price_deterministic_rates [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (ar an σI ρrI ρnI ρnr T : ℝ) (Pn0T Pr0T I0 F0 K : ℝ) (Z : Ω → ℝ)
