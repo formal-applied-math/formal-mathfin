@@ -65,28 +65,27 @@ theorem bsV_scale {K r σ S τ c : ℝ} :
   rw [bsd1_scale hc, bsd2_scale hc]
   ring
 
+/-- The volatility factor `σ √τ` is unchanged under `(σ, τ) ↦ (σ √c, τ / c)` for `c > 0`. -/
+theorem vol_sqrt_timeScale {σ τ c : ℝ} (hc : 0 < c) :
+    σ * Real.sqrt c * Real.sqrt (τ / c) = σ * Real.sqrt τ := by
+  have hsc : 0 < Real.sqrt c := Real.sqrt_pos.2 hc
+  rw [Real.sqrt_div' τ hc.le]; field_simp
+
 /-- `d₁` is unchanged under `(r, σ, τ) ↦ (c r, σ √c, τ / c)` for `c > 0`: the map fixes
 `σ² τ`, `r τ` and `σ √τ`. -/
 theorem bsd1_timeScale {S K r σ τ c : ℝ} (hc : 0 < c) :
     bsd1 S K (c * r) (σ * Real.sqrt c) (τ / c) = bsd1 S K r σ τ := by
   have hsc : 0 < Real.sqrt c := Real.sqrt_pos.2 hc
   have hsq : Real.sqrt c ^ 2 = c := Real.sq_sqrt hc.le
-  have hv : Real.sqrt (τ / c) = Real.sqrt τ / Real.sqrt c := Real.sqrt_div' τ hc.le
   have hnum : (c * r + (σ * Real.sqrt c) ^ 2 / 2) * (τ / c) = (r + σ ^ 2 / 2) * τ := by
     rw [mul_pow, hsq]; field_simp
-  have hden : σ * Real.sqrt c * Real.sqrt (τ / c) = σ * Real.sqrt τ := by
-    rw [hv]; field_simp
   unfold bsd1
-  rw [hnum, hden]
+  rw [hnum, vol_sqrt_timeScale hc]
 
 /-- `d₂` is unchanged under `(r, σ, τ) ↦ (c r, σ √c, τ / c)` for `c > 0`. -/
 theorem bsd2_timeScale {S K r σ τ c : ℝ} (hc : 0 < c) :
     bsd2 S K (c * r) (σ * Real.sqrt c) (τ / c) = bsd2 S K r σ τ := by
-  have hsc : 0 < Real.sqrt c := Real.sqrt_pos.2 hc
-  have hv : Real.sqrt (τ / c) = Real.sqrt τ / Real.sqrt c := Real.sqrt_div' τ hc.le
-  have hden : σ * Real.sqrt c * Real.sqrt (τ / c) = σ * Real.sqrt τ := by
-    rw [hv]; field_simp
-  rw [bsd2, bsd2, bsd1_timeScale hc, hden]
+  rw [bsd2, bsd2, bsd1_timeScale hc, vol_sqrt_timeScale hc]
 
 /-- **Time-volatility scaling**: `bsV K (c r) (σ √c) S (τ / c) = bsV K r σ S τ` for `c > 0`.
 For `r = 0`, `c = τ` and `τ > 0` this gives the dependence of the call on `σ² τ` alone, from

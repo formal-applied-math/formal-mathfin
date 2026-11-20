@@ -210,9 +210,7 @@ theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) :
     ptDownOutCall S K H (c * b) (c * r) (σ * Real.sqrt c) (T / c)
       = ptDownOutCall S K H b r σ T := by
   have hsq : Real.sqrt c ^ 2 = c := Real.sq_sqrt hc.le
-  have hv : Real.sqrt (T / c) = Real.sqrt T / Real.sqrt c := Real.sqrt_div' T hc.le
-  have hden : σ * Real.sqrt c * Real.sqrt (T / c) = σ * Real.sqrt T := by
-    rw [hv]; field_simp [(Real.sqrt_pos.2 hc).ne']
+  have hden := vol_sqrt_timeScale (σ := σ) (τ := T) hc
   have hnum : (c * b + (σ * Real.sqrt c) ^ 2 / 2) * (T / c) = (b + σ ^ 2 / 2) * T := by
     rw [mul_pow, hsq]; field_simp
   have hmu : ptMu (c * b) (σ * Real.sqrt c) = ptMu b σ := by
@@ -277,13 +275,8 @@ theorem bgkKnockIn_zero_barrier {β : ℝ} {m : ℕ} {K r σ S T : ℝ} :
 monitoring step becomes `Δt / c` and the shift `σ √Δt` is invariant. -/
 theorem bgkDownBarrier_timeScale {β : ℝ} {m : ℕ} {H σ T c : ℝ} (hc : 0 < c) :
     bgkDownBarrier β m H (σ * Real.sqrt c) (T / c) = bgkDownBarrier β m H σ T := by
-  have hsc : 0 < Real.sqrt c := Real.sqrt_pos.2 hc
-  have hv : Real.sqrt (T / c / m) = Real.sqrt (T / m) / Real.sqrt c := by
-    rw [div_right_comm, Real.sqrt_div' _ hc.le]
-  have : σ * Real.sqrt c * Real.sqrt (T / c / m) = σ * Real.sqrt (T / m) := by
-    rw [hv]; field_simp
   unfold bgkDownBarrier
-  rw [mul_assoc β, mul_assoc β, this]
+  rw [mul_assoc β, mul_assoc β, div_right_comm, vol_sqrt_timeScale hc]
 
 /-- The BGK expression is unchanged under `(r, σ, T) ↦ (c r, σ √c, T / c)` with the number of
 dates `m` fixed, so it is invariant under the same scaling that fixes `σ² T` and `r T`. -/
@@ -300,8 +293,9 @@ every strike, carry, rate, volatility and maturity (the proof consumes only `S �
 so it also covers the junk values `σ = 0`, `T ≤ 0`). Positivity is only the price reading: a
 price statement needs `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. The hypotheses
 `S ≠ 0` and `H ≠ 0` keep the statement off the junk corners (at `H = 0` the closed form is the
-junk constant `0`, so continuity fails, the vanilla limit not being `0`; at `S = 0` the closed
-form is constant in the barrier); the proof goes through for them. -/
+junk constant `0`, so continuity fails wherever the vanilla value is nonzero, in particular on the
+price domain; at `S = 0` the closed
+form is constant in the barrier); the proof uses both. -/
 theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : S ≠ 0)
     (hH : H ≠ 0) :
     ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
@@ -343,9 +337,9 @@ also covers the junk values `σ = 0`, `T ≤ 0`). It reads as "the BGK approxima
 continuous price" only for `σ > 0`, `0 < T`, positive `S, K, H` and `1 ≤ m`, with the shifted
 barrier at most `K` and below the spot (true for all large `m` when `H < K` and `S > H`). The
 hypotheses `S ≠ 0` and `H ≠ 0` keep the statement off the junk corners (at `H = 0` the closed
-form is the junk constant `0`, and the many-dates limit would hold only trivially, as a
-statement about junk); the proof goes through for them. It is the consistency of the shift with
-the continuous limit, not an accuracy result. -/
+form is the junk constant `0`, so continuity in the barrier fails wherever the vanilla value is
+nonzero, in particular on the price domain); the proof uses both. It is the consistency of the
+shift with the continuous limit, not an accuracy result. -/
 theorem tendsto_bgkDownOutCall {β K H r σ S T : ℝ} (hS : S ≠ 0) (hH : H ≠ 0) :
     Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop
       (𝓝 (ptDownOutCall S K H r r σ T)) :=
