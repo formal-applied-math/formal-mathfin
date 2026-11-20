@@ -468,7 +468,7 @@
         ],
         "lean_statement": {
           "status": "proved",
-          "blueprint": null,
+          "blueprint": "thm:american-put-boundary-convex",
           "needs": [],
           "lean": null,
           "note": "Proved in MathFin/; see declarations."
