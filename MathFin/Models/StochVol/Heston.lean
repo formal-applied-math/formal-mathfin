@@ -104,8 +104,10 @@ module is the generator/PDE level only.
 * `hestonProfile_pde`: for any `A, B` solving the calendar-time Riccati system,
   `∂_t Φ + LΦ = 0` for `Φ = hestonProfile`.
 * `hestonTransform`: the explicit transform, `hestonProfile` along `â(T − ·)`, `b̂(T − ·)`.
-* `hestonTransform_pde`, `hestonTransform_terminal`: for `ξ ≠ 0` and `0 < u < 1`, the transform
-  built from `hestonA` and `hestonBv` solves `∂_t Φ + LΦ = 0` and equals `e^{u x}` at `t = T`.
+* `hestonTransform_pde`: for `ξ ≠ 0` and `0 < u < 1`, the transform built from `hestonA` and
+  `hestonBv` solves `∂_t Φ + LΦ = 0`.
+* `hestonTransform_terminal`: whenever the root `γ` is nonzero, the transform equals `e^{u x}` at
+  `t = T`.
   The identification of the profile with `E[e^{u log S_T}]` for a Heston process is not
   proved.
 
@@ -719,12 +721,11 @@ theorem hestonTransform_pde (r κ θ ξ ρ u T : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
     (fun s ↦ hasDerivAt_hestonACalendar r κ θ ξ ρ u T hξ hu1 hu2 s) t x v
 
 /-- Terminal condition of the explicit transform: `Φ(T, x, v) = e^{u·x}`
-(`â(0) = 0`, `b̂(0) = 0`). -/
-theorem hestonTransform_terminal (r κ θ ξ ρ u T x v : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u)
-    (hu2 : u < 1) :
+(`â(0) = 0`, `b̂(0) = 0`), whenever `γ ≠ 0`, which holds on the strip `0 < u < 1`, `ξ ≠ 0`. At
+`γ = 0` the closed form of `â` reads `log(0/0)` at `τ = 0`, and no statement is made. -/
+theorem hestonTransform_terminal (r κ θ ξ ρ u T x v : ℝ) (hγ : hestonGamma κ ξ ρ u ≠ 0) :
     hestonTransform r κ θ ξ ρ u T T x v = Real.exp (u * x) :=
-  hestonProfile_terminal u _ _ T x v
-    (by simpa using hestonA_at_zero r κ θ ξ ρ u (hestonGamma_ne_zero κ ξ ρ u hξ hu1 hu2))
+  hestonProfile_terminal u _ _ T x v (by simpa using hestonA_at_zero r κ θ ξ ρ u hγ)
     (by simpa using hestonBv_at_zero κ ξ ρ u)
 
 end MathFin.Heston

@@ -195,6 +195,45 @@ theorem wholeLife_epv_eq (hpos : ∀ᵐ ω ∂Q, 0 < τ ω) {r : ℝ} (hr : 0 < 
     (fun k ↦ SurvivalModel.survivalFunction_nonneg k) (Real.exp_pos _)
     ((Real.exp_lt_exp.2 (neg_neg_of_pos hr)).trans_eq Real.exp_zero)
 
+/-- **The whole-life annuity-due is the limit of the term annuity values**: for a measurable
+lifetime and a flat rate `r > 0`, the value of the `n`-year life annuity-due contract tends to
+`ä = ∑_{k ≥ 0} e^{-rk} S_τ(k)` as `n → ∞`. -/
+theorem tendsto_value_lifeAnnuityFlows (hτ : Measurable τ) {r : ℝ} (hr : 0 < r) :
+    Filter.Tendsto
+      (fun n ↦ (lifeAnnuityFlows n).value Q (fun s _ ↦ zcb r 0 s) (defaultIndicator τ))
+      Filter.atTop (nhds (∑' k : ℕ, zcb r 0 k * SurvivalModel.survivalFunction Q τ k)) := by
+  have hv0 : 0 ≤ Real.exp (-r) := (Real.exp_pos _).le
+  have hv1 : Real.exp (-r) < 1 := (Real.exp_lt_exp.2 (neg_neg_of_pos hr)).trans_eq Real.exp_zero
+  simp only [value_lifeAnnuityFlows Q hτ, NNReal.coe_natCast]
+  refine (Summable.of_nonneg_of_le (fun k ↦ ?_) (fun k ↦ ?_)
+    (summable_geometric_of_lt_one hv0 hv1)).hasSum.tendsto_sum_nat <;> rw [zcb_zero_natCast]
+  · exact mul_nonneg (pow_nonneg hv0 k) (SurvivalModel.survivalFunction_nonneg _)
+  · exact mul_le_of_le_one_right (pow_nonneg hv0 k) (SurvivalModel.survivalFunction_le_one _)
+
+/-- **Whole-life insurance is the limit of the term insurance values, and `A = 1 - d ä`**: for a
+measurable lifetime, positive almost surely, and a flat rate `r > 0`, the value of the `n`-year
+term insurance contract tends to `1 - (1 - e^{-r}) ä` as `n → ∞`, with `ä` the limit of the life
+annuity-due values (`tendsto_value_lifeAnnuityFlows`). -/
+theorem tendsto_value_termInsurance (hτ : Measurable τ) (hpos : ∀ᵐ ω ∂Q, 0 < τ ω) {r : ℝ}
+    (hr : 0 < r) :
+    Filter.Tendsto
+      (fun n ↦ (termInsurance n).value Q (fun s _ ↦ zcb r 0 s) (defaultIndicator τ))
+      Filter.atTop (nhds (1 - (1 - Real.exp (-r)) *
+        ∑' k : ℕ, zcb r 0 k * SurvivalModel.survivalFunction Q τ k)) := by
+  have hv0 : 0 ≤ Real.exp (-r) := (Real.exp_pos _).le
+  have hv1 : Real.exp (-r) < 1 := (Real.exp_lt_exp.2 (neg_neg_of_pos hr)).trans_eq Real.exp_zero
+  rw [← wholeLife_epv_eq Q hpos hr]
+  simp only [value_termInsurance Q hτ, NNReal.coe_natCast]
+  refine (Summable.of_nonneg_of_le (fun k ↦ ?_) (fun k ↦ ?_)
+    (summable_geometric_of_lt_one hv0 hv1)).hasSum.tendsto_sum_nat <;> rw [zcb_zero_natCast]
+  · exact mul_nonneg (pow_nonneg hv0 _)
+      (sub_nonneg.2 (SurvivalModel.survivalFunction_antitone (Nat.cast_le.2 k.le_succ)))
+  · have h1 := SurvivalModel.survivalFunction_le_one (P := Q) (X := τ) k
+    have h2 := SurvivalModel.survivalFunction_nonneg (P := Q) (X := τ) ((k + 1 : ℕ) : ℝ)
+    have h3 : Real.exp (-r) ^ (k + 1) ≤ Real.exp (-r) ^ k :=
+      pow_le_pow_of_le_one hv0 hv1.le k.le_succ
+    nlinarith [pow_nonneg hv0 (k + 1)]
+
 end Values
 
 /-- **Last-survivor annuity identity.** The value of the annuity paying while either of two lives

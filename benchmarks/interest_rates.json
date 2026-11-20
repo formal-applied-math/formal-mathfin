@@ -1735,30 +1735,6 @@
       }
     },
     {
-      "id": "mf-nss-vanishing-decay-limit",
-      "name": "Nelson–Siegel–Svensson Yield at Vanishing Decay",
-      "description": "At a fixed maturity tau != 0, as both decay constants l1, l2 of the Nelson–Siegel–Svensson yield nssYield tend to infinity, the yield tends to beta0 + beta1: each argument tau/l_i tends to 0 through nonzero values, so the slope factor s(tau/l_i) = (1 - exp(-tau/l_i))/(tau/l_i) tends to 1 and exp(-tau/l_i) to 1, and both curvature terms (the Nelson–Siegel beta2 term and Svensson's beta3 term) vanish. A limit of the closed-form curve at fixed coefficients; no claim about a fitted curve, and the value at tau = 0 is not this limit.",
-      "domain": "mathematical_finance",
-      "metadata": {
-        "chapter": null,
-        "reference": "C. R. Nelson and A. F. Siegel, Parsimonious Modeling of Yield Curves, Journal of Business 60(4) (1987), 473–489; L. E. O. Svensson, Estimating and Interpreting Forward Interest Rates: Sweden 1992–1994 (NBER Working Paper 4871, 1994)",
-        "citations": [
-          {
-            "key": "NelsonSiegel1987"
-          },
-          {
-            "key": "Svensson1994"
-          }
-        ],
-        "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof, MathFin/Models/Rates/NelsonSiegelSvensson.lean (tendsto_nssYield_decay_atTop), built on tendsto_nssSlope_nhdsNE_zero. Scope: fixed maturity and coefficients, both decay constants to infinity through the product filter; the short-end limit in the maturity direction is tendsto_nssYield_nhdsNE_zero. Axioms-clean."
-      },
-      "code": {
-        "lean": "import MathFin.Models.Rates.NelsonSiegelSvensson\n\nopen Filter Topology\n\nnamespace MathFin\n\ntheorem nss_vanishing_decay_limit_thm (β₀ β₁ β₂ β₃ τ : ℝ) (hτ : τ ≠ 0) :\n    Tendsto (fun l : ℝ × ℝ => nssYield β₀ β₁ β₂ β₃ l.1 l.2 τ) (atTop ×ˢ atTop)\n      (𝓝 (β₀ + β₁)) :=\n  tendsto_nssYield_decay_atTop β₀ β₁ β₂ β₃ hτ\n\nend MathFin\n"
-      }
-    },
-    {
       "id": "mf-on-backward-caplet-black",
       "name": "Backward-looking caplet: Black formula at the integrated damping variance",
       "description": "A caplet on a compounded overnight rate over [tau0, tau1], with the rate lognormal at total variance sigma^2 Theta under the payment measure, where Theta is the integral from 0 to tau1 of psi(t)^2 and psi(t) = min(1, ((tau1 - t)/(tau1 - tau0))^q) is the volatility damping, has expected undiscounted payoff equal to the Black formula R0 Phi(d1) - K Phi(d2) at that variance. The identification of Theta with s + (tau1 - s) x^(2q)/(2q + 1), s = max(tau0, 0), x = (tau1 - s)/(tau1 - tau0), is proved. The lognormal law of the compounded rate (the Ito isometry for dR = psi sigma R dB) and the martingale property of the rate are hypotheses, not derived; the entry is an expectation under that law, not a contract-level price.",

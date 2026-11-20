@@ -3184,3 +3184,7 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.IsMackRow.isEMM_chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.IsMackRow.isEMM_chainPrediction
+
+/-- info: 'MathFin.chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.chainPrediction

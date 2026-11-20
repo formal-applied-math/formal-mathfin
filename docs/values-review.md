@@ -124,6 +124,110 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-19 — corpus 903, modules 790 — one concept, one object: the seven duplicates of the trunk table tied or removed
+
+Scope: the branch `claude/inspiring-curie-fpg212`. It clears the `concept_duplicates` count of
+`tools/verify/trunk.toml` (7 → 0) and gives `Contracts.bondPrice` a home in `Pricing/`. It adds no
+corpus entry, and it does not touch the three counts main went red on in the 2026-11-18 merge
+(`private_mathlib_shaped`, `corpus_off_blueprint`, `price_entries_off_trunk`), which are another
+session's. Three read-only reviewers split the lenses: the first pass; lenses 2, 4 and 5; lenses
+1, 3, 6, 7 and 8. Their findings were adjudicated against the code and the declaration index.
+
+### The standing first pass: prose against statement
+
+- The new `DeterministicMarket` docstring said "the library has one bond price". `HJMModel.bond`,
+  `vasicekBondV` and the market's own assets are not tied to `Contracts.bondPrice`. It now says
+  the bond price is canonical and names the three formulas tied to it.
+- The coupon and key-rate ties were called "this bond price at a deterministic curve". They are sums
+  of cash flows times it, the key-rate price with one curve per cash flow; the prose says so.
+- Junk values: both ties hold for every yield or key rate, but the curve `(1 + y)^{−⌊u⌋}` is a
+  discount curve only for `y > −1` (at `y = −1` it is a totalized `0` after date `0`). The docstrings keep
+  the identity general and say when `P(0, tᵢ)` is a bond price.
+- The survival tie wrote `ₜpₓ` with the age in the duration slot, and called a ratio a probability
+  where `T < t` makes it exceed `1`. It now writes `_{T−t}p_t` for `T ≥ t`, and notes that the
+  hypothesis on the law can be met only for `h₀ > 0`.
+- `Caplet.lean` said, with no theorem, that the bond price at `0` is the zero curve. It is now
+  `bondPrice_zero_eq_zeroCurve`.
+- `SharpeFOCDerivation` lost its only pointer to what `V(w)` is when `varianceTwo` went; item 1 now
+  names `portfolioVarTwo`. Its "`V > 0` regime" was a hypothesis `V ≠ 0`; it now says `V ≠ 0`.
+
+### Upgrades executed
+
+- **The bond price in the trunk's layer.** `Contracts.bondPrice`, `bondPrice_deflator_eq_priceAt`
+  and the new `bondPrice_deterministic` (a deterministic discount `D` gives `P(t, T) = D T / D t`,
+  one `condExp_const`) live in `Pricing/BondPrice.lean`, which `Caplet` imports. With them,
+  `bondPrice_zero_eq_zeroCurve` and `Market.priceAt_pay_one_of_numeraire`: a deterministic numéraire
+  `f` prices the unit payment at `t` at `f t / f T`.
+- **`zcb` is the bond price under a constant rate** (`Rates.bondPrice_exp_eq_zcb`) and the market's
+  price at `t` of one unit paid at `T` when the numéraire is `e^{rt}` (`Rates.priceAt_pay_eq_zcb`,
+  an instance of the numéraire lemma). The definition stays the formula on real dates: the market
+  clock is `ℝ≥0`, and seventeen corpus entries reach `zcb`, many on real dates (yields, durations,
+  FRAs, DeFi accrual). Redefining it would narrow them, so `prices_off_trunk` does not move. The panel concurred; the `zcbFormula`
+  rename of spec §9.2 waits for the rates limb.
+- **Coupon bonds.** `bondPriceKeyRate_eq_sum_bondPrice`, and `bondPriceDisc_eq_sum_bondPrice` as its
+  flat case, a term (`bondPriceKeyRate_const` is `rfl`).
+- **Margrabe is the Black–Scholes call at zero rate** (`margrabePrice_eq_bsV`), with no hypotheses:
+  at rate `0` the two `d₁` agree by `ring`. The first version carried two positivity hypotheses
+  inherited from the Garman route; the panel caught them.
+- **The SVI Black call is `bsV`** (`blackCall_eq_bsV`, formerly `blackCall_eq_bsSmile`). The old
+  statement was definitionally this one through `bsSmile`, but the index reads uses from statements
+  and proof terms, and `simp` had unfolded `bsV` out of both.
+- **Survival.** `survivalFunction_div_eq_survivalProbability` (memorylessness: `S_τ(T) / S_τ(t)` is
+  `e^{−h₀(T−t)}` for an exponential lifetime) and `survive_eq_survivalProbability` (`_{T−t}p_t`).
+- **`varianceTwo` removed**, an alias of `portfolioVarTwo` with the weight first. Its lemmas are
+  `portfolioVarTwo_eq_sum_mul_marginalVar` and `hasDerivAt_portfolioVarTwo`, in `portfolioVarTwo`'s
+  argument order, the derivative stated of `portfolioVarTwo σ₁ σ₂ ρ` itself.
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `bondPrice_deterministic`, one fact that makes three formulas
+  instances of the canonical price. Next: the key-rate price as a market price on one curve.
+- **Coherence.** Exemplar: `Market.priceAt_pay_one_of_numeraire`, from `deflator_of_numeraire` and
+  the bond price. Next: the constant-hazard ties through Mathlib's `expMeasure` (`HasLaw`) rather
+  than a hand-written CDF.
+- **Zero slop.** The instructive item is the Margrabe hypotheses: inherited from a general route,
+  dead at the special point.
+- **Architecture.** Exemplar: the bond price moved to the layer it belongs to, so the deterministic
+  bond market reaches it without importing the Black-76 caplet stack. Next: the deterministic market's asset
+  at every date as an instance of the numéraire lemma.
+- **First principles.** Exemplar: `priceAt_pay_eq_zcb`, whose only hypothesis is the numéraire.
+  Weak spot: the coupon ties quantify over a measure and information that a deterministic curve
+  makes irrelevant.
+- **Idiom.** The derivative is stated of the function, not of an eta-expanded lambda.
+- **Concept clarity.** Next: `marginalVarOne`, `marginalVarTwo` are `marginalVariance` of `covTwo`;
+  "Two" means "two assets" in one name of the file and "asset 2" in the next.
+- **Beauty.** Next: `zcb_div_zcb`, the exponential ratio both the bond and the survival ties prove
+  inline; `survivalProbability h` and `zcb h` are one function (#320).
+
+### Ranked backlog
+
+1. Re-found the rates limb (spec §5, §9): `zcb` renamed `zcbFormula`, the duration and convexity
+   entries restated about the price, after the Phase 3 gate (L).
+2. The key-rate price as a market price on one discount curve, under `Set.InjOn t s` (S–M).
+3. The constant-hazard survival ties stated with `HasLaw τ (expMeasure h₀) P` (S).
+4. One `(k, w)`-coordinates lemma, `ForwardSmile.blackForm_eq_bsV` for `0 < w`, with
+   `bsCallSmile_eq` and `blackCall_eq_bsV` as instances (S).
+5. `marginalVarOne`, `marginalVarTwo` as `marginalVariance` of `covTwo`, with a `[[duplicate]]` row
+   for marginal variance (M).
+6. `sharpeSqTwo_critical_iff_crossProduct_FOC` through `sharpeSqTwo_deriv_numerator_factored`
+   instead of a forty-line ladder (S).
+7. `zcb_div_zcb`, and `survivalProbability` routed through the one constant-rate discount (#320) (S).
+8. The deterministic bond market's asset at every date from `Market.priceAt_pay_one_of_numeraire`
+   (S); names `margrabe_eq_bsVGarman` → `margrabePrice_eq_bsVGarman`,
+   `survive_eq_survivalFunction_ratio` → `survive_eq_survivalFunction_div` (S).
+
+### Evidence
+
+`lake build` of every default target (9929 jobs) and `lake lint` green in the verify image; the
+declaration index built on the branch: `concept_duplicates` 7 → 0, `chain_beyond_r3_permille`
+288 → 286, both baselines lowered; no other count moved (main's three red counts are unchanged).
+`decl_diff` against main: 13 added, 4 removed (the alias, its two lemmas under their old names,
+`blackCall_eq_bsSmile`), 4 statements changed (the Sharpe theorems, `varianceTwo` → `portfolioVarTwo`).
+The ledger rows whose inputs changed were re-verified through the lean-repl daemon. Renames for the
+release notes: `SVI.blackCall_eq_bsSmile` → `SVI.blackCall_eq_bsV`, `varianceTwo_eq_w_dot_Sigma_w` →
+`portfolioVarTwo_eq_sum_mul_marginalVar`, `hasDerivAt_varianceTwo` → `hasDerivAt_portfolioVarTwo`;
+`varianceTwo` removed.
+
 ## 2026-11-18 — corpus 901, modules 788 — the November contributed wave, brought onto the library's objects before it lands
 
 Scope: the branch `review/pr-wave-final`, twenty-one open pull requests reworked against the
@@ -189,6 +293,29 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
   detour around a deterministic discount, about 40 public Almgren–Chriss helpers (the discrete
   optimum is the continuous path sampled at the discrete rate `cosh κ̃Δ = 1 + cΔ²/2η`), and about
   4000 lines of contributor tests in `MathFinTest/`, which holds the README and manual checks.
+- **After the merge: the index ratchets, met by connections.** main's first `build` on the wave
+  rose three index counts the branch never computed (they run only there). Each was met by a
+  theorem rather than a baseline. Expected shortfall of an arithmetic loss is the least
+  Rockafellar–Uryasev value on the lattice (`isLeast_rockafellarUryasev_lattice`), so the stop-loss
+  recursion rests on `thm:rockafellar-uryasev`. Whole-life insurance and the annuity-due are limits
+  of term `Contract.value`s (`tendsto_value_termInsurance`), which puts that entry on the trunk.
+  The volatility swap is priced under the forward measure of a stochastic bank account
+  (`volSwapValue_forwardMeasure`), a genuine use of `forwardMeasure_price`, unlike the
+  deterministic-discount detour removed above. `chainPrediction` is a definition node
+  (`def:chain-ladder-prediction`), the joint of the completion and Mack's model. The
+  Nelson–Siegel–Svensson decay-limit entry left the corpus: it touched no node, and its theorem
+  stays in the library. Of the six Mathlib-shaped private lemmas, two one-liners were inlined and
+  four genuine facts (the product-weight sums of an iid vector, the scaled-profile boundary-value
+  solution) became public under names that say what they prove.
+- **The last two of the wave, landed on their neighbours.** #501's zero-maturity transform was a
+  standalone module whose headline lemma dropped the `γ ≠ 0` guard through `log(0/0) = 0`. It
+  now lives beside the vanishing vol-of-vol limit: `hestonTransform_terminal` needs only `γ ≠ 0`
+  (it had carried the strip), and at maturity the transform is the moment of the point mass at
+  the log-spot, the zero-variance member of the Black–Scholes family the limit reaches
+  (`hestonTransform_terminal_eq_mgf_dirac`). #524's exact rational chain ladder sits in
+  `ChainLadder.lean` with a soundness theorem that needs no hypothesis (a returned value is the
+  real completion, and on unobserved cells Mack's prediction by the selected factors), and a
+  worked reserve in `MathFinExamples` evaluates a triangle in the kernel and certifies it in `ℝ`.
 
 ### Lens gradients
 
@@ -225,7 +352,9 @@ lenses 2, 4 and 5; lenses 1, 3, 6, 7 and 8.
 ### Evidence
 
 `pytest` green on the branch apart from the blueprint export, the ledger rows and this review
-before it was written; architecture and ratchets green (no layer violation, no module unused).
+before it was written; architecture and the host-side ratchets green (no layer violation, no
+module unused). The index ratchets were not computed on the branch, and main went red on three of
+them; see the last upgrade above.
 `lean-build` of the default targets with the blueprint export and the runner ledger sweep of the
 stale rows are the branch's CI; every reworked module and new corpus entry was built and checked
 locally first, one Lean process at a time.

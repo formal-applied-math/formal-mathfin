@@ -17,9 +17,9 @@
     "prices_off_trunk": 41,
     "price_entries_off_trunk": 171,
     "pricing_devices_unbridged": 0,
-    "concept_duplicates": 7,
+    "concept_duplicates": 0,
     "layer_violations": 0,
-    "chain_beyond_r3_permille": 288,
+    "chain_beyond_r3_permille": 286,
     "families_without_socket": 0
   }
 }

@@ -33,6 +33,8 @@ measure `P` and write `P(S > c)` for `P.real {c < S}`; it is a probability when 
   `E[(S − (j + 1)h)⁺] = E[(S − jh)⁺] − h · P(S > jh)`.
 * `rockafellarUryasev_add_of_gap`: across a gap, the Rockafellar–Uryasev objective increases by
   `h · (1 − (1 − α)⁻¹ P(S > c))`.
+* `isLeast_rockafellarUryasev_lattice`: for an arithmetic loss, expected shortfall is the least
+  Rockafellar–Uryasev value over the lattice points, which the recursion computes.
 
 ## References
 
@@ -112,5 +114,37 @@ theorem rockafellarUryasev_add_of_gap (hSm : Measurable S) (hS : Integrable S P)
       rockafellarUryasev S P α c + h * (1 - (1 - α)⁻¹ * P.real {ω | c < S ω}) := by
   rw [rockafellarUryasev, rockafellarUryasev, integral_max_sub_add_of_gap hSm hS hh hgap]
   ring
+
+omit [IsFiniteMeasure P] in
+/-- **Expected shortfall of an arithmetic loss is the least Rockafellar–Uryasev value on the
+lattice.** If `S ∈ hℤ` almost surely with `h > 0` and `α ∈ (0, 1)`, then `ES_α(S)` is the least of
+`c + (1 − α)⁻¹E[(S − c)⁺]` over the lattice points `c = jh`. Between two lattice points the
+objective is affine (`rockafellarUryasev_add_of_gap`), so its least value over the line
+(`isLeast_rockafellarUryasev`) is taken at an end of the cell holding a minimiser. -/
+theorem isLeast_rockafellarUryasev_lattice [IsProbabilityMeasure P] (hSm : Measurable S)
+    (hS : Integrable S P) {h : ℝ} (hh : 0 < h) (hlat : ∀ᵐ ω ∂P, ∃ n : ℤ, S ω = n * h) {α : ℝ}
+    (hα : α ∈ Set.Ioo 0 1) :
+    IsLeast (Set.range fun j : ℤ ↦ rockafellarUryasev S P α (j * h)) (expectedShortfall S P α) := by
+  have hES := isLeast_rockafellarUryasev hS hα
+  refine ⟨?_, Set.forall_mem_range.2 fun j ↦ hES.2 ⟨_, rfl⟩⟩
+  obtain ⟨c, hc⟩ := hES.1
+  set j := ⌊c / h⌋
+  have hj : (j : ℝ) * h ≤ c := (le_div_iff₀ hh).1 (Int.floor_le _)
+  have hj' : c < (j : ℝ) * h + h := by
+    have := (div_lt_iff₀ hh).1 (Int.lt_floor_add_one (c / h))
+    rwa [add_mul, one_mul] at this
+  have hgap := ae_notMem_Ioo_of_lattice hh.le hlat j
+  have hcell := rockafellarUryasev_add_of_gap hSm hS (sub_nonneg.2 hj)
+    (hgap.mono fun ω hω h' ↦ hω ⟨h'.1, by linarith [h'.2]⟩) α
+  rw [show (j : ℝ) * h + (c - j * h) = c by ring] at hcell
+  have hnext := rockafellarUryasev_add_of_gap hSm hS hh.le hgap α
+  have h1 := hES.2 ⟨(j : ℝ) * h, rfl⟩
+  have h2 := hES.2 ⟨(j : ℝ) * h + h, rfl⟩
+  rcases le_or_gt 0 (1 - (1 - α)⁻¹ * P.real {ω | (j : ℝ) * h < S ω}) with hs | hs
+  · exact ⟨j, le_antisymm (by nlinarith [mul_nonneg (sub_nonneg.2 hj) hs]) h1⟩
+  · refine ⟨j + 1, ?_⟩
+    simp only [Int.cast_add, Int.cast_one, add_mul, one_mul]
+    have := mul_nonpos_of_nonneg_of_nonpos (show 0 ≤ h - (c - j * h) by linarith) hs.le
+    exact le_antisymm (by nlinarith) h2
 
 end MathFin
