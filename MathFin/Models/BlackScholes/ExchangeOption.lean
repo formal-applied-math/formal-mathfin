@@ -57,6 +57,7 @@ discounted expected exchange payoff.
   effective variance `(σ₁² + σ₂² − 2ρσ₁σ₂)·T`.
 * `exchange_payoff_eq_ratio`: `max(a − b, 0) = b · max(a/b − 1, 0)` for `b > 0`.
 * `margrabe_eq_bsVGarman`: Margrabe price is a `GarmanNormalForm` instance.
+* `margrabePrice_eq_bsV`: it is the Black–Scholes call formula at strike `S²₀` and rate `0`.
 * `margrabe_parity`: `Margrabe(S¹,S²) − Margrabe(S²,S¹) = S¹ − S²`.
 * `margrabe_price_via_call`: the exchange option is a `bs_call_formula` call
   on the ratio (price-level reduction).
@@ -150,6 +151,16 @@ theorem margrabe_eq_bsVGarman (S1 S2 σ T : ℝ) :
     unfold margrabeD1 gbsd1; rw [mul_one]
   unfold margrabePrice bsVGarman margrabeD2 gbsd2
   rw [hd1, mul_one]
+
+/-- **Margrabe's price is the Black–Scholes call at zero rate**: the exchange price
+`margrabePrice S¹₀ S²₀ σ T` is the Black–Scholes call formula `bsV` with spot `S¹₀`, strike `S²₀`,
+rate `0` and the effective volatility `σ`: the second asset is the strike, with no discounting. At
+rate `0` the two `d₁` agree and the discount factor is `1`, so no sign condition is needed. -/
+theorem margrabePrice_eq_bsV (S1 S2 σ T : ℝ) : margrabePrice S1 S2 σ T = bsV S2 0 σ S1 T := by
+  have hd1 : margrabeD1 S1 S2 σ T = bsd1 S1 S2 0 σ T := by
+    rw [margrabeD1, bsd1]
+    ring
+  rw [margrabePrice, bsV, margrabeD2, bsd2, hd1, zero_mul, neg_zero, Real.exp_zero, mul_one]
 
 /-- **Exchange-option parity** — the analog of put-call parity. The option to
 exchange asset 2 for asset 1 minus the option to exchange asset 1 for asset 2

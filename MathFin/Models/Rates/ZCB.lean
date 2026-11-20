@@ -37,7 +37,10 @@ a constant short rate `r`:
 * `zcb_convexity_eq_time_to_maturity_sq`: convexity `∂²_r B / B = (T - t)²`.
 
 The model is purely deterministic; the Vasicek / CIR / HJM stochastic versions
-would need Itô calculus.
+would need Itô calculus. `zcb r t T` is the library's bond price `Contracts.bondPrice` at the
+curve `e^{−rs}` (`Rates.bondPrice_exp_eq_zcb`), and the market's price at `t` of one unit paid at
+`T` whenever the numéraire is `e^{rt}` (`Rates.priceAt_pay_eq_zcb`, both in
+`Models/Rates/DeterministicMarket.lean`). It is defined here as the formula, on real dates.
 
 ## References
 
