@@ -6,6 +6,7 @@ itself class-A evidence, so this scans full texts for such sentences instead.
 
     python3 -m tools.verify.arxiv_scan list --out scan/papers.jsonl
     python3 -m tools.verify.arxiv_scan scan --papers scan/papers.jsonl --out scan/
+    python3 -m tools.verify.arxiv_scan fetch --papers scan/papers.jsonl --dir <pdf dir>
 
 ``list`` pages through the arXiv API for the q-fin categories that carry mathematical
 finance (cross-lists included), one request every three seconds as the API terms ask.
@@ -14,7 +15,8 @@ Storage, the full-text copy behind arXiv's Kaggle dataset, which arXiv's bulk-da
 names as a sanctioned source. Only the matching passages are kept, with the paper's id and
 page: full texts are never stored or redistributed (arXiv's terms of use). The passages are
 leads for the catalogue (docs/research-problems/), each still to be checked for a later
-resolution.
+resolution. ``fetch`` downloads and keeps the PDFs instead, for local research use (arXiv's
+terms allow storing them for research; they are not to be redistributed, so never commit them).
 """
 
 from __future__ import annotations
@@ -167,6 +169,54 @@ def scan_one(paper: dict) -> dict:
     return {"id": paper["id"], "status": "missing"}
 
 
+def local_path(root: Path, pid: str, version: int) -> Path:
+    """Where `fetch` keeps a paper: `<root>/2101/2101.00001v2.pdf`, `<root>/math/0501/0501001v1.pdf`."""
+    if "/" in pid:
+        archive, num = pid.split("/")
+        return root / archive / num[:4] / f"{num}v{version}.pdf"
+    return root / pid.split(".")[0] / f"{pid}v{version}.pdf"
+
+
+def fetch_one(paper: dict, root: Path) -> dict:
+    """Download the newest version the bucket has into `root`, unless it is already there."""
+    for v in range(paper["version"], 0, -1):
+        dest = local_path(root, paper["id"], v)
+        if dest.exists():
+            return {"id": paper["id"], "status": "ok", "version": v, "path": str(dest)}
+    for v in range(paper["version"], 0, -1):
+        try:
+            pdf = _get(pdf_url(paper["id"], v), timeout=120)
+        except urllib.error.HTTPError as err:
+            if err.code == 404:
+                continue
+            return {"id": paper["id"], "status": f"http-{err.code}"}
+        except (urllib.error.URLError, TimeoutError) as err:
+            return {"id": paper["id"], "status": f"error: {err}"}
+        dest = local_path(root, paper["id"], v)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_suffix(".part")
+        tmp.write_bytes(pdf)
+        tmp.rename(dest)
+        return {"id": paper["id"], "status": "ok", "version": v, "path": str(dest)}
+    return {"id": paper["id"], "status": "missing"}
+
+
+def fetch(papers: list[dict], root: Path, workers: int = 4) -> dict:
+    """Download every paper's PDF into `root` (resumable: present files are skipped), and write
+    `root/fetched.jsonl`, one status line per paper."""
+    root.mkdir(parents=True, exist_ok=True)
+    status: dict[str, int] = {}
+    with ThreadPoolExecutor(workers) as pool, (root / "fetched.jsonl").open("w") as log:
+        for i, r in enumerate(pool.map(lambda p: fetch_one(p, root), papers), start=1):
+            log.write(json.dumps(r) + "\n")
+            key = r["status"] if r["status"] in ("ok", "missing") else "error"
+            status[key] = status.get(key, 0) + 1
+            if i % 200 == 0:
+                log.flush()
+                print(f"{i}/{len(papers)} {status}", file=sys.stderr)
+    return status
+
+
 def scan(papers: list[dict], out: Path, workers: int = 4, minutes: float = 330) -> dict:
     """Scan the papers not yet in `out/done.jsonl`, appending as it goes, until done or out
     of time. Resumable: a rerun skips what is done."""
@@ -216,6 +266,10 @@ def main(argv: list[str] | None = None) -> int:
     a = sub.add_parser("list")
     a.add_argument("--out", type=Path, required=True)
     a.add_argument("--categories", nargs="*", default=list(CATEGORIES))
+    f = sub.add_parser("fetch", help="download and keep the PDFs (no scanning)")
+    f.add_argument("--papers", type=Path, required=True)
+    f.add_argument("--dir", type=Path, required=True)
+    f.add_argument("--workers", type=int, default=4)
     b = sub.add_parser("scan")
     b.add_argument("--papers", type=Path, required=True)
     b.add_argument("--out", type=Path, required=True)
@@ -232,6 +286,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{len(papers)} papers", file=sys.stderr)
         return 0
     papers = [json.loads(l) for l in args.papers.open()]
+    if args.cmd == "fetch":
+        print(json.dumps(fetch(papers, args.dir, args.workers)))
+        return 0
     if args.limit:
         papers = papers[:args.limit]
     print(json.dumps(scan(papers, args.out, args.workers, args.minutes), indent=2))
