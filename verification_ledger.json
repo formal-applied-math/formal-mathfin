@@ -1860,10 +1860,17 @@
     },
     "mf-chain-ladder-completion-prediction": {
       "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 3.2,
-      "input_hash": "2d5cdf86bfcb96fa6ae0eec6bd0af31c42e0df5cc04b5ecc052080150fc2ed5d",
-      "verified_at_commit": "daed461"
+      "date": "2026-11-20",
+      "elapsed_s": 2.5,
+      "input_hash": "4a9ce77ebaf2a62e4410237d88162f55a767a7eea9db4b8d5c0049f00aa87c5f",
+      "verified_at_commit": "4adf630"
+    },
+    "mf-chain-ladder-exact-rational": {
+      "benchmark_file": "actuarial.json",
+      "date": "2026-11-20",
+      "elapsed_s": 2.4,
+      "input_hash": "ffb2fb22f178c3f599cd36ba14fd9798677daf448da8301f96e3521f46f443b5",
+      "verified_at_commit": "4adf630"
     },
     "mf-change-of-numeraire": {
       "benchmark_file": "no_arbitrage.json",
@@ -3211,24 +3218,24 @@
     },
     "mf-heston-affine-pde": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-16",
-      "elapsed_s": 2.3,
-      "input_hash": "fad791f079cddab9477cc99f2cfd87778af94f7842a00babd044d7276faafa96",
-      "verified_at_commit": "74778e1"
+      "date": "2026-11-20",
+      "elapsed_s": 2.2,
+      "input_hash": "b123369f38ae66cb7717049ac059e2ad41a7db1e4b2098c904dac9197960c7aa",
+      "verified_at_commit": "4adf630"
     },
     "mf-heston-small-vol-of-vol-blackscholes-limit": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-19",
-      "elapsed_s": 2.2,
-      "input_hash": "7e621f863412b72b37dc0512fdcb212f74d881a74d7727ec1faa27f63c5ab000",
-      "verified_at_commit": "cfba75f"
+      "date": "2026-11-20",
+      "elapsed_s": 2.7,
+      "input_hash": "e15bc824f4664f387b8159d93a7bca643ccce284c8725eae774e53d1303c37d2",
+      "verified_at_commit": "4adf630"
     },
     "mf-heston-zero-maturity-pointmass-collapse": {
       "benchmark_file": "black_scholes.json",
-      "date": "2026-11-16",
-      "elapsed_s": 2.0,
-      "input_hash": "8877c33fffd8da1b1f369b5e996268b4816e247fb86ef71fa297579d0ef1aaf4",
-      "verified_at_commit": "c047ee3"
+      "date": "2026-11-20",
+      "elapsed_s": 2.7,
+      "input_hash": "6f4f7fe2c54437bcfe9b5b6f2ec1ceee03a767f33a1ea0fa33ea6bd4612ee7b0",
+      "verified_at_commit": "4adf630"
     },
     "mf-heston-zero-vol-of-vol-integrated-variance": {
       "benchmark_file": "black_scholes.json",
@@ -3939,10 +3946,10 @@
     },
     "mf-mack-chain-ladder-martingale": {
       "benchmark_file": "actuarial.json",
-      "date": "2026-11-19",
-      "elapsed_s": 3.1,
-      "input_hash": "edb96452616155e9ed609ba0fb158194a41bf32b0c0712696566995b7afd1c14",
-      "verified_at_commit": "daed461"
+      "date": "2026-11-20",
+      "elapsed_s": 2.5,
+      "input_hash": "b01018e1c6c4d889715c99213b8f6553456427b1a2fedd77997acd846130df61",
+      "verified_at_commit": "4adf630"
     },
     "mf-marchenko-pastur-edges": {
       "benchmark_file": "portfolio_and_performance.json",
