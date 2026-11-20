@@ -7,9 +7,6 @@ itself class-A evidence, so this scans full texts for such sentences instead.
     python3 -m tools.verify.arxiv_scan list --out scan/papers.jsonl
     python3 -m tools.verify.arxiv_scan scan --papers scan/papers.jsonl --out scan/
     python3 -m tools.verify.arxiv_scan fetch --papers scan/papers.jsonl --dir <pdf dir>
-    python3 -m tools.verify.arxiv_scan text --papers scan/papers.jsonl --pdf <pdf dir> --txt <txt dir>
-    python3 -m tools.verify.arxiv_scan index --papers scan/papers.jsonl --txt <txt dir> --db <corpus.db>
-    python3 -m tools.verify.arxiv_scan search --db <corpus.db> '"remains open" NEAR uniqueness'
 
 ``list`` pages through the arXiv API for the q-fin categories that carry mathematical
 finance (cross-lists included), one request every three seconds as the API terms ask.
@@ -20,9 +17,8 @@ page: full texts are never stored or redistributed (arXiv's terms of use). The p
 leads for the catalogue (docs/research-problems/), each still to be checked for a later
 resolution. ``fetch`` downloads and keeps the PDFs instead, for local research use (arXiv's
 terms allow storing them for research; they are not to be redistributed, so never commit them).
-``text`` turns the kept PDFs into text with Poppler's ``pdftotext`` (pages separated by form
-feeds), and ``index`` loads the texts page by page into an SQLite FTS5 index, so a phrase finds
-its paper and page; ``search`` queries it. Texts and index are local, like the PDFs.
+Text, the search index and search over the kept PDFs are ``corpus_text``, shared with the
+OpenAlex corpus.
 """
 
 from __future__ import annotations
@@ -31,7 +27,6 @@ import argparse
 import http.client
 import json
 import re
-import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -240,102 +235,6 @@ def fetch(papers: list[dict], root: Path, workers: int = 4) -> dict:
     return status
 
 
-def text_one(paper: dict, pdf_root: Path, txt_root: Path) -> dict:
-    """`pdftotext` the newest kept version of a paper into `txt_root` (mirroring the PDF tree),
-    unless its text is already there."""
-    for v in range(paper["version"], 0, -1):
-        pdf = local_path(pdf_root, paper["id"], v)
-        if not pdf.exists():
-            continue
-        txt = local_path(txt_root, paper["id"], v).with_suffix(".txt")
-        if txt.exists():
-            return {"id": paper["id"], "status": "ok", "version": v}
-        txt.parent.mkdir(parents=True, exist_ok=True)
-        part = txt.with_suffix(".part")
-        try:
-            run = subprocess.run(["pdftotext", "-enc", "UTF-8", str(pdf), str(part)],
-                                 capture_output=True, timeout=300)
-        except subprocess.TimeoutExpired:
-            part.unlink(missing_ok=True)
-            return {"id": paper["id"], "status": "timeout", "version": v}
-        if run.returncode != 0 or not part.exists():
-            part.unlink(missing_ok=True)
-            return {"id": paper["id"], "status": "pdftotext-failed", "version": v}
-        part.rename(txt)
-        return {"id": paper["id"], "status": "ok", "version": v}
-    return {"id": paper["id"], "status": "no-pdf"}
-
-
-def text(papers: list[dict], pdf_root: Path, txt_root: Path, workers: int = 8) -> dict:
-    """Extract every kept PDF's text (resumable); `txt_root/text.jsonl` has one line per paper."""
-    txt_root.mkdir(parents=True, exist_ok=True)
-    status: dict[str, int] = {}
-    with ThreadPoolExecutor(workers) as pool, (txt_root / "text.jsonl").open("w") as log:
-        for i, r in enumerate(pool.map(lambda p: text_one(p, pdf_root, txt_root), papers), 1):
-            log.write(json.dumps(r) + "\n")
-            status[r["status"]] = status.get(r["status"], 0) + 1
-            if i % 500 == 0:
-                print(f"{i}/{len(papers)} {status}", file=sys.stderr)
-    return status
-
-
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS papers (id TEXT PRIMARY KEY, version INTEGER, title TEXT,
-    published TEXT, primary_category TEXT, categories TEXT);
-CREATE VIRTUAL TABLE IF NOT EXISTS pages USING fts5(id UNINDEXED, page UNINDEXED, body,
-    tokenize = 'porter unicode61 remove_diacritics 2');
-"""
-
-
-def pages_of(raw: str) -> list[str]:
-    """A text's pages as searchable prose: hyphenated line breaks rejoined, lines joined."""
-    return [re.sub(r"\s*\n\s*", " ", re.sub(r"(\w)-\n(\w)", r"\1\2", p)).strip()
-            for p in raw.split("\f")]
-
-
-def index(papers: list[dict], txt_root: Path, db: Path) -> dict:
-    """Load every extracted text into `db`, one FTS5 row per page (rebuilt from scratch)."""
-    db.unlink(missing_ok=True)
-    con = sqlite3.connect(db)
-    con.executescript(SCHEMA)
-    n_papers = n_pages = 0
-    for p in papers:
-        for v in range(p["version"], 0, -1):
-            txt = local_path(txt_root, p["id"], v).with_suffix(".txt")
-            if txt.exists():
-                break
-        else:
-            continue
-        con.execute("INSERT INTO papers VALUES (?,?,?,?,?,?)",
-                    (p["id"], v, p.get("title"), p.get("published"), p.get("primary"),
-                     " ".join(p.get("categories", []))))
-        rows = [(p["id"], k, body) for k, body in
-                enumerate(pages_of(txt.read_text("utf-8", "replace")), 1) if body]
-        con.executemany("INSERT INTO pages VALUES (?,?,?)", rows)
-        n_papers += 1
-        n_pages += len(rows)
-        if n_papers % 1000 == 0:
-            con.commit()
-            print(f"{n_papers} papers, {n_pages} pages", file=sys.stderr)
-    con.commit()
-    con.execute("INSERT INTO pages(pages) VALUES ('optimize')")
-    con.commit()
-    con.close()
-    return {"papers": n_papers, "pages": n_pages}
-
-
-def search(db: Path, query: str, limit: int = 20) -> list[dict]:
-    """FTS5 query (phrases in double quotes, NEAR, AND/OR/NOT, prefix*) over the pages, best
-    match first: each hit's paper, page, title and a snippet with the match in [brackets]."""
-    con = sqlite3.connect(db)
-    rows = con.execute(
-        "SELECT pages.id, pages.page, papers.title, papers.published, "
-        "snippet(pages, 2, '[', ']', ' … ', 24) FROM pages JOIN papers USING (id) "
-        "WHERE pages MATCH ? ORDER BY rank LIMIT ?", (query, limit)).fetchall()
-    con.close()
-    return [dict(zip(("id", "page", "title", "published", "snippet"), r)) for r in rows]
-
-
 def scan(papers: list[dict], out: Path, workers: int = 4, minutes: float = 330) -> dict:
     """Scan the papers not yet in `out/done.jsonl`, appending as it goes, until done or out
     of time. Resumable: a rerun skips what is done."""
@@ -389,19 +288,6 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--papers", type=Path, required=True)
     f.add_argument("--dir", type=Path, required=True)
     f.add_argument("--workers", type=int, default=4)
-    t = sub.add_parser("text", help="pdftotext every kept PDF")
-    t.add_argument("--papers", type=Path, required=True)
-    t.add_argument("--pdf", type=Path, required=True)
-    t.add_argument("--txt", type=Path, required=True)
-    t.add_argument("--workers", type=int, default=8)
-    x = sub.add_parser("index", help="load the texts into an SQLite FTS5 index")
-    x.add_argument("--papers", type=Path, required=True)
-    x.add_argument("--txt", type=Path, required=True)
-    x.add_argument("--db", type=Path, required=True)
-    q = sub.add_parser("search", help="query the index")
-    q.add_argument("--db", type=Path, required=True)
-    q.add_argument("query")
-    q.add_argument("--limit", type=int, default=20)
     b = sub.add_parser("scan")
     b.add_argument("--papers", type=Path, required=True)
     b.add_argument("--out", type=Path, required=True)
@@ -417,18 +303,7 @@ def main(argv: list[str] | None = None) -> int:
                 f.write(json.dumps(p, ensure_ascii=False) + "\n")
         print(f"{len(papers)} papers", file=sys.stderr)
         return 0
-    if args.cmd == "search":
-        for h in search(args.db, args.query, args.limit):
-            print(f"{h['id']} p.{h['page']}  {h['title']} ({(h['published'] or '')[:4]})\n"
-                  f"    {h['snippet']}")
-        return 0
     papers = [json.loads(l) for l in args.papers.open()]
-    if args.cmd == "text":
-        print(json.dumps(text(papers, args.pdf, args.txt, args.workers)))
-        return 0
-    if args.cmd == "index":
-        print(json.dumps(index(papers, args.txt, args.db)))
-        return 0
     if args.cmd == "fetch":
         print(json.dumps(fetch(papers, args.dir, args.workers)))
         return 0
