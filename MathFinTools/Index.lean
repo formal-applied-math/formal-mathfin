@@ -6,9 +6,12 @@ Authors: Raphael Coelho
 module
 -- Exe tooling that loads the built library at run time, like `MathFinTools/Blueprint.lean`. It
 -- imports no MathFin module at compile time, so building it compiles only core Lean and Batteries.
--- Batteries' linter API is `meta`, so the imports are `meta` and the file is a meta section.
+-- Batteries' linter API is `meta`, so the file is a meta section; each import is both plain (its
+-- initializers run in the executable) and `meta` (the meta code may call it), as in `Blueprint.lean`.
 
+public import Lean
 public meta import Lean
+public import Batteries.Tactic.Lint.Basic
 public meta import Batteries.Tactic.Lint.Basic
 
 /-!

@@ -4,10 +4,13 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 module
--- Exe tooling, not library API. LeanArchitect declares everything in a `public meta section`, so
--- this file imports it `meta` and runs in a meta section of its own (the Palomar intake requires
--- every `.lean` file to be a module).
+-- Exe tooling, not library API (a module because the Palomar intake requires every `.lean` file to
+-- be one). LeanArchitect declares everything in a `public meta section`, so `main` is `meta` too.
+-- Each import is both plain and `meta`: the `meta` one lets `main` call the package, the plain one
+-- links its initializers into the executable (a `meta import` alone leaves the environment
+-- extensions unregistered at run time, and the exe segfaults).
 
+public import Architect
 public meta import Architect
 
 /-!
