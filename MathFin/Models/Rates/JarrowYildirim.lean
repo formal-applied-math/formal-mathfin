@@ -73,10 +73,10 @@ rates, lognormal index, dependent Brownian motions) and the real-rate drift shif
 are those of Dam–Macrina–Skovmand–Sloth, §2.2 of the arXiv version 1801.08804 (who cite
 Brigo–Mercurio ch. 15 for the form), and of Bagaria §17.4 (Calculation 17.7, eq. 17.9, with
 correlations `ρ_{nr}`, `ρ_{rI}`); the nominal-rate–index correlation `ρ_{nI}` is named in neither,
-and the correlation structure of the variance integrand is this module's reading. This module uses
-only eqs. 17.6, 17.8 and 17.10 of Bagaria ch. 17, and the caplet rests on Brigo–Mercurio §17.1.
-Jarrow–Yildirim (2003) itself was not consulted. The exact YoY caplet, calibration, seasonality and
-Monte Carlo are out of scope.
+and the correlation structure of the variance integrand is this module's reading. This module states
+results only from eqs. 17.6, 17.8 and 17.10 of Bagaria ch. 17 (the model form follows its eq. 17.9,
+Calculation 17.7), and the caplet rests on Brigo–Mercurio §17.1. Jarrow–Yildirim (2003) itself was
+not consulted. The exact YoY caplet, calibration, seasonality and Monte Carlo are out of scope.
 
 ## References
 
@@ -90,7 +90,7 @@ Monte Carlo are out of scope.
   SIAM J. Financial Mathematics 11(4) (2020), 974–1006][DamMacrinaSkovmandSloth2020], §2.2 of the
   arXiv version 1801.08804
 * [S. Bagaria, *Notes on Fixed Income Derivative Pricing*][BagariaFIDP], ch. 17 §17.3, eq. 17.6 (the
-  forward index), and §17.4, eqs. 17.8, 17.10
+  forward index), and §17.4, eqs. 17.8, 17.10 (model form: Calculation 17.7, eq. 17.9)
 
 ## Tags
 
