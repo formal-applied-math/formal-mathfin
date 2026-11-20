@@ -39,12 +39,11 @@ Pareto laws with integer index.
 
 ## References
 
-* [P. Embrechts and G. Puccetti, *Bounds for functions of dependent risks*][EmbrechtsPuccetti2006],
-  Theorem 4.2
+* [P. Embrechts and G. Puccetti, *Bounds for functions of dependent risks*][EmbrechtsPuccetti2006]
 * [G. Puccetti and L. Rüschendorf, *Bounds for joint portfolios of dependent
-  risks*][PuccettiRuschendorf2012], §3
+  risks*][PuccettiRuschendorf2012]
 * [A. J. McNeil, R. Frey and P. Embrechts, *Quantitative Risk Management: Concepts, Techniques and
-  Tools*][McNeilFreyEmbrechts], §8.4.4
+  Tools*][McNeilFreyEmbrechts]
 
 ## Tags
 

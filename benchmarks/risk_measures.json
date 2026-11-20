@@ -1074,15 +1074,13 @@
       },
       "metadata": {
         "chapter": 8,
-        "reference": "Embrechts–Puccetti, Bounds for functions of dependent risks (2006); McNeil–Frey–Embrechts, Quantitative Risk Management, §8.4.4",
+        "reference": "Embrechts–Puccetti, Bounds for functions of dependent risks (2006); McNeil–Frey–Embrechts, Quantitative Risk Management",
         "citations": [
           {
-            "key": "EmbrechtsPuccetti2006",
-            "locator": "Theorem 4.2"
+            "key": "EmbrechtsPuccetti2006"
           },
           {
-            "key": "McNeilFreyEmbrechts",
-            "locator": "§8.4.4"
+            "key": "McNeilFreyEmbrechts"
           }
         ],
         "difficulty": "intermediate",
@@ -1100,15 +1098,13 @@
       },
       "metadata": {
         "chapter": 8,
-        "reference": "Embrechts–Puccetti (2006), Theorem 4.2; Puccetti–Rüschendorf, Bounds for joint portfolios of dependent risks (2012), §3",
+        "reference": "Embrechts–Puccetti, Bounds for functions of dependent risks (2006); Puccetti–Rüschendorf, Bounds for joint portfolios of dependent risks (2012)",
         "citations": [
           {
-            "key": "EmbrechtsPuccetti2006",
-            "locator": "Theorem 4.2"
+            "key": "EmbrechtsPuccetti2006"
           },
           {
-            "key": "PuccettiRuschendorf2012",
-            "locator": "§3"
+            "key": "PuccettiRuschendorf2012"
           }
         ],
         "difficulty": "intermediate",
