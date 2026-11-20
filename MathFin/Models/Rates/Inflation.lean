@@ -38,9 +38,8 @@ Hull–White model (`Models/Rates/HullWhiteCalibration`) by `integral_exp_hwD_fo
 
 ## Scope
 
-Out of scope, and not claimed here: the eq. (17.8) tower step (not named in this module; named as
-`MathFin.Inflation.JarrowYildirim.jyYoyForward_eq_bondRatio` in `Models/Rates/JarrowYildirim.lean`;
-the set-integral anchor is `MathFin.changeOfNumeraire_setIntegral_eq`); eq. (17.9)'s SDE-level
+Out of scope, and not claimed: eq. (17.8)'s conditional identity as a named lemma (the
+landed anchor is `MathFin.changeOfNumeraire_setIntegral_eq`); eq. (17.9)'s SDE-level
 drift-shift derivation `δ = −ρ_{rI}σ_rσ_I`; the two-correlated-Hull–White dynamics (the
 means, variances and covariance of the rate deviations are explicit inputs here); and the
 chapter's numeric tables. The Jarrow–Yildirim identification is a hypothesis (`hident`),
@@ -272,8 +271,7 @@ below) — the Gaussian expectation collapses to the naive ratio times the corre
 
   `C = exp(Bⁿ·mⁿ − Bʳ·mʳ + Bⁿ²·Vⁿ − Bʳ·Bⁿ·Cov)`,
 
-the chapter's eq. (17.10), equal by reordering (the chapter prints the real-rate term
-first: `−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿCov`), with `Cov = ρ·√(VⁿVʳ)` (hypothesis `hCov`) the
+the chapter's eq. (17.10) verbatim, with `Cov = ρ·√(VⁿVʳ)` (hypothesis `hCov`) the
 covariance of the two rate deviations. The exponent's composition is pure algebra on
 `yoyRatioExp_gaussian_cov`: `(Dʳ−Dⁿ) = (Bⁿ²Vⁿ − Bʳ²Vʳ)/2` cancels the *real*
 variance's half exactly and doubles the *nominal* variance's half. The means `mⁿ, mʳ`,
