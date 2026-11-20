@@ -1,180 +1,120 @@
-# American put option exercise-boundary convexity
+# Convexity of the American put exercise boundary
 
-This contribution addresses [issue #175](https://github.com/formal-applied-math/formal-mathfin/issues/175)
-in the constant-parameter Black–Scholes model. For strike `K > 0`, risk-free
-interest rate `r > 0`, volatility `σ > 0`, and dividend yield `0 ≤ q ≤ r`, it
-proves, on positive time-to-expiry:
+Reference page for the American put results in `MathFin/Models/BlackScholes/American/`. In the
+constant-parameter Black–Scholes model, with strike `K > 0`, risk-free rate `r > 0`, volatility
+`σ > 0` and dividend yield `0 ≤ q ≤ r`, the early-exercise boundary of the American put is convex in
+the time to expiry `τ > 0`, in two forms: its logarithm is convex, and the boundary itself is
+strictly convex.
 
-- convexity of `τ ↦ log(B(τ) / K)`;
-- strict convexity of the stock-price exercise boundary `τ ↦ B(τ)`.
+These are chord-inequality statements. The development does not assert classical second
+derivatives of the boundary, strictly positive logarithmic curvature, or convexity when `q > r`.
 
-These are geometric, chord-inequality statements. The contribution does not
-assert classical boundary second derivatives, strictly positive logarithmic
-curvature, or convexity when `q > r`.
+[`open-problems.md`](open-problems.md) (Tier 1, §1) records the case `0 < q < r` as open in the
+literature and these theorems as covering it: convexity was known at `q = 0` (Chen–Chadam–Cheng–Saunders;
+Ekström) and fails for `q > r`. The statements below include both endpoints `q = 0` and `q = r`.
 
-**This resolves an open problem.** `docs/open-problems.md` Tier 1 §1 recorded
-`0 < q < r` as open in the literature: convexity was proved at `q = 0`
-(Chen–Chadam–Cheng–Saunders; Ekström) and disproved for `q > r`. The theorems
-below cover `0 ≤ q ≤ r`, the whole open region and both endpoints, and the proof
-is machine-checked and axiom-clean.
+## Statements
 
-**A second, conditional development also ships here.** The boundary-geometry modules
-`Boundary/{NearExpiry, IncrementPositivity, StrictBoundarySpeed, FlatTail, StockConclusion, …}`
-and the PDE-facing `Stopping/Classical*` modules (`ClassicalHeatComparison`,
-`ClassicalSupermartingale`, `ClassicalBridge`) are stated over an assumed classical solution
-`Boundary.DividendPutSolution`. That structure extends `ContinuousBoundaryPutSolution`, which the
-actual stopping price is proved to satisfy (`canonicalPrice_continuousBoundaryPutSolution`), so the
-only field **nothing in this port shows inhabited** is `boundary_smooth`, the smoothness of the
-exercise boundary at positive times. The conditional track terminates in
-`Stopping/ClassicalBridge.lean`'s `brownian_boundary_curvature_of_price_identification`, whose own
-docstring names `hprice` an outstanding verification obligation. Results on that track, including
-`brownianUsual_boundary_conclusions`, the only `B'' > 0` statement in the tree, are therefore of
-unknown vacuity. The classical candidate, first-contact rule and supermartingale step are not part
-of that caveat: they are stated for any `PutEnvelope` with `PutWaiting`, and the actual price is an
-instance. The two headline declarations carry no such hypothesis and route around the
-conditional track entirely; that is the point of the stopping-value construction. The source
-development's classical-regularity results are present in the import closure but are **not
-claimed by these two entries**.
+Import `MathFin.Models.BlackScholes.American.Stopping.PhysicalBoundaryConvexity`. The declarations
+are in the namespace `MathFin.BlackScholes.AmericanPut.Stopping`, and each has exactly the
+hypotheses `0 < K`, `0 < r`, `0 ≤ q`, `q ≤ r`, `0 < σ`.
 
-## Public declarations and benchmark entries
+```lean
+theorem brownianUsualLogBoundary_convexOn {K r q σ : ℝ}
+    (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
+    ConvexOn ℝ (Ioi 0)
+      (fun τ : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ τ.toNNReal / K))
 
-Import [`MathFin.Models.BlackScholes.American.Stopping.PhysicalBoundaryConvexity`](../MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean).
-Both principal declarations are in namespace
-`MathFin.BlackScholes.AmericanPut.Stopping`:
+theorem brownianUsualStockBoundary_strictConvexOn {K r q σ : ℝ}
+    (hK : 0 < K) (hr : 0 < r) (hq : 0 ≤ q) (hqr : q ≤ r) (hσ : 0 < σ) :
+    StrictConvexOn ℝ (Ioi 0)
+      (fun τ : ℝ => brownianUsualExerciseBoundary K r q σ τ.toNNReal)
+```
 
-| Declaration | Conclusion | Benchmark ID |
-|---|---|---|
-| `brownianUsualLogBoundary_convexOn` | `ConvexOn ℝ (Set.Ioi 0) (fun τ : ℝ => Real.log (brownianUsualExerciseBoundary K r q σ τ.toNNReal / K))` | `mf-american-put-log-boundary-convex` |
-| `brownianUsualStockBoundary_strictConvexOn` | `StrictConvexOn ℝ (Set.Ioi 0) (fun τ : ℝ => brownianUsualExerciseBoundary K r q σ τ.toNNReal)` | `mf-american-put-stock-boundary-strict-convex` |
+`τ.toNNReal` makes the function total; the domain is strictly positive real time, where the
+conversion does not change time. Corpus entries: `mf-american-put-log-boundary-convex` and
+`mf-american-put-stock-boundary-strict-convex`
+([`benchmarks/american_put_boundary.json`](../benchmarks/american_put_boundary.json)). The module
+also proves strict decrease and local Lipschitz continuity of the boundary, and the convexity
+results for `q = 0` and for `q + σ²/2 ≤ r` under their own hypotheses.
 
-Each has exactly the parameter hypotheses `0 < K`, `0 < r`, `0 ≤ q`,
-`q ≤ r`, and `0 < σ`. Neither assumes a classical pricing solution,
-smoothness of the exercise boundary, or an interval-preservation property.
-`τ.toNNReal` makes the function total; the theorem's domain restricts it to
-strictly positive real time-to-expiry, where the conversion does not change time.
+`aeAmericanPutValue_eq` and `aeExerciseThreshold_eq` (`Stopping/AEHorizonValue.lean`) show that
+allowing stopping times bounded by the horizon only almost surely gives the same value and
+threshold, by clipping on the exceptional null set.
 
-## Which boundary is proved convex?
+## Definitions: which boundary is convex
 
-The following files are under `MathFin/Models/BlackScholes/American/Stopping/`.
+The files below are under `MathFin/Models/BlackScholes/American/Stopping/`.
 
-1. `Rules.lean`, `Reward.lean`, and `AmericanValue.lean` define the value as
-   a supremum of expected discounted put payoffs over **all** stopping times
-   of the specified filtration that are pointwise bounded by the horizon.
-   The stock is explicit GBM with drift `r-q`, volatility `σ`, and initial
-   value `S`; discounting uses `r`. No exercise grid or family of candidate
-   hitting times replaces that supremum. `AEHorizonValue.lean` proves
-   `aeAmericanPutValue_eq` and `aeExerciseThreshold_eq`: allowing extended
-   stopping times bounded by the horizon only almost surely gives exactly
-   the same value and threshold, by clipping on the exceptional null set.
-2. `UsualBrownianValue.lean` instantiates the value with the constructed
-   Brownian process, the completed Gaussian probability measure, and its
-   completed, null-augmented, right-continuous natural filtration.
-   `ExerciseRegion.lean` defines the boundary as the supremum of payoff-contact
-   stock prices in `[0,K]`.
-3. `CanonicalPrice.lean` and `StrictExerciseGeometry.lean` specialize
-   these stopping objects to strike one and volatility `sqrt 2`.
-   `PositiveExerciseBoundary.lean` proves a positive lower bound before
-   defining `canonicalLogBoundary`; it also identifies payoff contact with
-   being below that boundary. Thus the logarithm is not masking a zero
-   exercise threshold.
-4. `ActualLogConvexity.lean` proves `canonicalLogBoundary_convexOn` from the
-   actual stopping price. `ActualBoundaryNormalization.lean` proves the
-   physical/canonical boundary identity from price normalization and payoff
-   contact; it does not introduce an assumed free-boundary solution.
+* `Reward.lean` and `AmericanValue.lean`, with the stopping rules of
+  `MathFin/Probability/Martingales/StoppingRule.lean`, define the value `americanPutValue` as a
+  supremum of expected discounted put payoffs over all stopping times of the filtration bounded by
+  the horizon. The stock is geometric Brownian motion with drift `r − q` and volatility `σ`, and
+  discounting uses `r`. No exercise grid replaces the supremum.
+* `UsualBrownianValue.lean` instantiates the value with the constructed Brownian process, the
+  completed Gaussian measure and its completed, null-augmented, right-continuous natural
+  filtration. `brownianUsualExerciseBoundary` is the `exerciseThreshold` of that value, the
+  supremum of the payoff-contact stock prices in `[0,K]` (`ExerciseRegion.lean`).
+* `CanonicalPrice.lean` and `StrictExerciseGeometry.lean` specialise to strike one and volatility
+  `√2`. `PositiveExerciseBoundary.lean` proves a positive lower bound before defining
+  `canonicalLogBoundary`, so the logarithm does not mask a zero threshold.
+* `ActualLogConvexity.lean` proves `canonicalLogBoundary_convexOn` from the actual stopping price,
+  and `ActualBoundaryNormalization.lean` identifies the physical and canonical boundaries from
+  price normalisation and payoff contact.
 
-This is a result for the explicitly constructed Brownian probability space
-and filtration. The principal declarations do not quantify over arbitrary
-probability-space representations of Black–Scholes. Auxiliary conditional
-verification theorems elsewhere in the import closure should not be confused
-with assumptions of these two declarations.
+The result is for the explicitly constructed Brownian space and filtration; it does not quantify
+over arbitrary probability-space representations of Black–Scholes.
 
 ## Proof sketch
 
-Normalize `x = log(S/K)` and `t = σ²τ/2`, writing `k = 2r/σ²`,
-`h = 2q/σ²`, and `α = k-h-1`. For a decreasing line `ℓ(t) = d-ct`,
-construct a pricing-equation solution
+Normalise `x = log(S/K)` and `t = σ²τ/2`, with `k = 2r/σ²`, `h = 2q/σ²` and `α = k − h − 1`. For a
+decreasing line `ℓ(t) = d − ct`, construct a solution of the pricing equation
+`p̂(x,t) = f(x − ℓ(t)) − eˣ g(x − ℓ(t))`. The two constant-coefficient ODE profiles treat the
+constant and exponential parts of the payoff separately, and their initial conditions impose value
+matching and smooth fit on the line. A nonnegative forcing term, using `k ≥ h`, makes `p̂` dominate
+the payoff below the strike.
 
-\[
-\widehat p(x,t)=f(x-\ell(t))-e^x g(x-\ell(t)).
-\]
+Dividing the price difference by the positive profile `f` removes the zero-order term from its
+parabolic equation. A Riccati identity gives the initial difference interval-shaped positive
+superlevel sets, and a three-point maximum argument preserves that property: at a violating
+maximum the three spatial first derivatives vanish, so the drift drops out and the time-derivative
+signs contradict one another. A terminal rectangle barrier then excludes a boundary contact
+between two times when the actual boundary lies below the comparison line. This interval property,
+the near-expiry estimate and the monotonicity of the boundary give the chord inequality for the
+logarithm. A separate no-flat-tail barrier gives strict decrease, and strict convexity of the
+exponential gives strict convexity of `B`.
 
-The two constant-coefficient ODE profiles treat the constant and exponential
-parts of the payoff separately. Their initial conditions impose value
-matching and smooth fit on the line. A nonnegative forcing term, using
-`k ≥ h`, makes this comparison dominate the payoff below the strike.
+## Scope
 
-Dividing the price difference by the positive profile `f` removes the
-zero-order term from its parabolic equation. A Riccati identity gives the
-initial difference interval-shaped positive superlevel sets. A three-point
-maximum argument preserves that property: at a violating maximum the three
-spatial first derivatives vanish, so the drift drops out and the time
-derivative signs contradict one another.
+A second development in the same directory is conditional. The boundary-geometry modules
+(`Boundary/NearExpiry`, `IncrementPositivity`, `StrictBoundarySpeed`, `FlatTail`,
+`StockConclusion`, and others) and the PDE-facing `Stopping/Classical*` modules are stated over an
+assumed classical solution `Boundary.DividendPutSolution`. That structure extends
+`ContinuousBoundaryPutSolution`, which the actual stopping price is proved to satisfy
+(`canonicalPrice_continuousBoundaryPutSolution`), so the one field no declaration shows inhabited
+is `boundary_smooth`, the smoothness of the boundary at positive times. The conditional track ends
+in `brownian_boundary_curvature_of_price_identification` (`Stopping/ClassicalBridge.lean`), whose
+docstring names its hypothesis `hprice` an outstanding verification obligation. Results there,
+including the curvature statement `brownianUsual_boundary_conclusions` for the constructed
+Brownian space, are of unknown vacuity. The two headline declarations carry no such hypothesis and do not depend on the
+conditional track. The landmark entry in [`landmarks.toml`](landmarks.toml) separately records the
+verification principle `value_eq_of_attained`, in which the supermartingale is a hypothesis.
 
-An explicit terminal rectangle barrier then excludes a boundary contact
-between two times when the actual boundary lies below the comparison line.
-This time-interval property, the near-expiry estimate, and nonincrease of the
-boundary give the chord inequality for the logarithmic boundary. A separate
-no-flat-tail barrier yields strict decrease; strict convexity of the
-exponential gives strict convexity of `B`. No second derivative of the
-exercise boundary is required for these geometric conclusions.
+## Verification
 
-## Verification and provenance
+`lake build` is the canonical check. The generated axiom audit (`MathFin/AxiomAuditGen.lean`) and
+`MathFin/AxiomAudit.lean` pin the axioms of `brownianUsualLogBoundary_convexOn`,
+`brownianUsualStockBoundary_strictConvexOn`, `aeAmericanPutValue_eq` and
+`aeExerciseThreshold_eq` to `[propext, Classical.choice, Quot.sound]`. Some BrownianMotion modules
+carry `sorry` warnings; none is a dependency of these four theorems. This is an axiom audit, not a
+kernel replay of the full closure. The two corpus entries are tracked by the verification ledger.
 
-The canonical build command is `lake build`. The two short, explicit
-consumer statements live in
-[`benchmarks/american_put_boundary.json`](../benchmarks/american_put_boundary.json).
-The repository's [contribution checklist](../CONTRIBUTING.md) governs the
-regression tests, generated axiom audit and freshness-tracked
-[`verification_ledger.json`](../verification_ledger.json). A successful
-source-development audit is not a substitute for checking this port against
-MathFin's pinned toolchain and dependencies. Kernel validation of formal
-statements and correspondence with the intended financial model remain
-distinct checks.
-
-The port was checked natively with the repository's pinned Lean 4.32.0,
-Mathlib `81a5d257c8e410db227a6665ed08f64fea08e997`, and BrownianMotion
-`4d52fa776130a29d4ad7d6eda2035a919c0b4696`. No Docker or dependency upgrade
-was needed. An explicit `lake env lean` probe reported the following axiom
-set for each of `brownianUsualLogBoundary_convexOn`,
-`brownianUsualStockBoundary_strictConvexOn`, `aeAmericanPutValue_eq`, and
-`aeExerciseThreshold_eq`:
-
-```text
-[propext, Classical.choice, Quot.sound]
-```
-
-These checks are also pinned by `#guard_msgs` in `MathFin/AxiomAudit.lean`.
-Some imported BrownianMotion modules have existing `sorry` warnings; the
-reported dependency sets show those gaps are not dependencies of these four
-theorems. This is an axiom audit, not a new full-proof-closure kernel replay.
-
-The native default `lake build` completed successfully (9,178 jobs), including
-both axiom-audit modules and otherwise unimported library leaves. The two
-intentional `sorry` declarations in the repository's pre-existing Comparator
-`Challenge.lean` are statement placeholders, not dependencies of these results.
-
-The two benchmark re-export statements were then checked with the ledger's
-native execution mode, at proof commit `e986c38`:
-
-```sh
-LEDGER_EXEC_LOCAL=1 python -m tools.verify.ledger verify --exec
-python -m tools.verify.ledger status
-python -m pytest tests/ -q
-```
-
-Results: two new entries verified, zero failures; 371 fresh ledger entries,
-zero stale or missing; 49 tests passed and one skipped. Python tests used an
-isolated native virtual environment. `formalization.yaml` and the generated
-axiom audit also passed their freshness checks. These local checks do not
-claim a fresh-runner CI result.
+## Provenance
 
 Ported from Robert Martin's
-[`AmericanPutConvexity`](https://github.com/robertmartin8/AmericanPutConvexity/tree/9b2b208520341a63b64eef43c1ecb3c5708a8e63)
-development (Apache-2.0), with the manuscript *Log-convexity of the exercise
-boundary of an American put option*. The proof and formalization were
-substantially AI-assisted: the author reports development with ChatGPT-6 Pro
-(Astra), checking with Fable 5.1, and Lean formalization primarily with
-gpt-6-astra-high in Codex. Those reports are provenance, not independent
-peer review or new verification evidence for this port. MathFin, Mathlib,
-and the BrownianMotion library supply underlying financial, analytic and
-probabilistic infrastructure.
+[AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity), Apache-2.0, with the
+manuscript *Log-convexity of the exercise boundary of an American put option*; the modules carry
+his name in their headers. The author reports that the proof and formalization were substantially
+AI-assisted (ChatGPT-6 Pro (Astra) for the proof, Fable 5.1 for checking, gpt-6-astra-high in
+Codex for the Lean). Those reports are provenance, not independent review or verification
+evidence. See [`sources.md`](sources.md).

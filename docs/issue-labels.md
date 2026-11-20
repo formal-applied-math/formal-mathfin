@@ -1,15 +1,15 @@
 # Issue label taxonomy
 
 This taxonomy gives maintainers and contributors a shared vocabulary for
-triaging work. Labels should answer four questions:
+triaging work. Labels answer four questions:
 
-- **Where does the result sit?** `area:<cell>` and `family:<family>`, derived (below).
-- **What kind of work is it?** Use one `type:*` label.
-- **How hard is it for a contributor?** Use one `difficulty:*` label.
-- **What is the current state?** Use one `status:*` label.
+- Where does the result sit? `area:<cell>` and `family:<family>`, derived (below).
+- What kind of work is it? Use one `type:*` label.
+- How hard is it for a contributor? Use one `difficulty:*` label.
+- What is the current state? Use one `status:*` label.
 
-Use `good first issue` and `help wanted` as public entry-point labels on top of
-the taxonomy when the task is ready for outside contributors.
+`good first issue` and `help wanted` are the public entry-point labels, set on top of the
+taxonomy when a task is ready for outside contributors.
 
 Use `open-problem` for a sourced mathematical research-problem record. Retain
 it when the problem is solved so closed issues remain discoverable. An unresolved
@@ -26,14 +26,14 @@ use a semantic scale (green → amber → red).
 ## Area and family labels
 
 The library has one organization, stated once in [`docs/taxonomy.toml`](taxonomy.toml) and
-explained in [`docs/organization.md`](organization.md): a **cell** says where a result sits (a
+explained in [`docs/organization.md`](organization.md): a cell says where a result sits (a
 root, the trunk of positions and markets, or a branch of the valuation, choice or risk limb), a
 **family** says which kind of randomness it is about (trees, diffusions, volatility, jumps, term
 structures, default, insurance, mechanisms, model-free).
 
 The issue labels are that taxonomy, one `area:<cell>` per cell (`area:valuation/term`,
 `area:risk/measures`, `area:probability/brownian`, ...) and one `family:<family>` per family.
-**Nobody sets them by hand.** An issue's `Blueprint:` line names its nodes; a Lean node's cell
+Nobody sets them by hand. An issue's `Blueprint:` line names its nodes; a Lean node's cell
 and family are its module's, a frontier node's are its `area` and `family` in
 `docs/blueprint_frontier.toml`. `blueprint-sync` writes the derived labels on every issue event
 and nightly (`python3 -m tools.verify.blueprint_issues labels --apply`), and the check fails on
@@ -46,6 +46,14 @@ Three labels are not mathematics and stay hand-set:
 | `area:tooling` | Python verification tools, scripts, ledger logic, and generated audits under `tools/` and `scripts/`. |
 | `area:docs` | Markdown docs, README content, onboarding, coverage/blueprint prose, and cross-links. |
 | `area:ci` | GitHub Actions, Docker images, build gates, and release automation. |
+
+## Other labels
+
+| Label | Use for |
+|---|---|
+| `frontier` | An issue for a frontier node of the blueprint, a result stated and not yet formalized. It carries a `Blueprint:` line. |
+| `tracking` | An umbrella issue that collects others. The blueprint check exempts it from the `Blueprint:` rule. |
+| `autoform`, `new-defs` | Set by the autoformalization pipeline. |
 
 ## Type labels
 
@@ -83,11 +91,9 @@ Three labels are not mathematics and stay hand-set:
 
 ### Three of these are machine-written
 
-The autoformalization pipeline in `formal-foundry` used to only READ this backlog.
-It kept its own private record of which issues it had already worked, that record
-drifted from reality, and the pipeline re-drafted work it had already queued. The
-fix was to stop keeping a private record: **the issue is now the state machine, and
-everything the pipeline stores locally is a cache of it.**
+The autoformalization pipeline in `formal-foundry` reads this backlog and writes three of the
+status labels. The issue is the state machine, and everything the pipeline stores locally is a
+cache of it.
 
 So the pipeline moves an issue between three of the eight statuses:
 
@@ -98,18 +104,18 @@ So the pipeline moves an issue between three of the eight statuses:
 | back to `status:ready` | the PR was closed unmerged, or the staged stub was retired |
 | → closed | GitHub closes it when the PR merges |
 
-Three consequences worth knowing when you triage:
+Three consequences for triage:
 
-- **A label may move without a human touching it.** If an issue you filed is
+- A label may move without a human touching it. If an issue you filed is
   suddenly `status:in-progress` with nobody assigned, a machine drafted a statement
   for it. Nothing has been merged — see below.
-- **The pre-existing manual statuses are yours alone, and the pipeline will not
-  overrule them.** `status:blocked-design` in particular looks identical to "ready" from the
+- The other statuses are set by hand, and the pipeline does not overrule them.
+  `status:blocked-design` in particular looks identical to "ready" from the
   machine's side (no PR, no stub), so it is explicitly excluded: parking an issue
   there reliably keeps it out of the pipeline. An issue with *no* status label is
   likewise never promoted — the pipeline repairs its own writes, it does not decide
   what is worth proving.
-- **`status:review` still means a human reviews it.** Scout-not-author is unchanged:
+- `status:review` means a human reviews it. Scout-not-author is unchanged:
   a machine may draft a statement and find a proof, and a person refines and merges
   it. No label transition here is an approval of anything.
 
@@ -132,40 +138,10 @@ corrects itself rather than needing a manual fix.
 
 The mathematical rows carry no `area:` label by hand: their `Blueprint:` line gives it.
 
-## Bootstrap commands
+## Creating the labels
 
-Maintainers can create the taxonomy with `gh label create`:
-
-```bash
-# area:<cell> and family:<family> — created from docs/taxonomy.toml, then derived per issue
-python3 -m tools.verify.blueprint_issues labels --apply
-
-# the three hand-set area labels
-gh label create "area:tooling"      --color "ededed" --description "Verification tools, scripts, ledger logic, and generated audits"
-gh label create "area:docs"         --color "ededed" --description "Markdown docs, onboarding, coverage/blueprint prose, and cross-links"
-gh label create "area:ci"           --color "ededed" --description "GitHub Actions, Docker images, build gates, and release automation"
-
-# type:* — one shared purple
-gh label create "type:bug"         --color "5319e7" --description "Something expected to work is broken"
-gh label create "type:proof"       --color "5319e7" --description "Lean theorem, proof repair, or theorem generalization"
-gh label create "type:docs"        --color "5319e7" --description "Documentation-only work"
-gh label create "type:refactor"    --color "5319e7" --description "Structure or naming change that should preserve behavior"
-gh label create "type:tooling"     --color "5319e7" --description "Verification scripts, exports, or developer tooling"
-gh label create "type:research"    --color "5319e7" --description "Open investigation where the path is not yet clear"
-gh label create "type:maintenance" --color "5319e7" --description "Routine cleanup, dependency updates, or housekeeping"
-
-# difficulty:* — green → red scale
-gh label create "difficulty:good-first" --color "0e8a16" --description "Small, well-scoped task for new contributors"
-gh label create "difficulty:small"      --color "c2e0c6" --description "Straightforward change for someone familiar with the repo"
-gh label create "difficulty:medium"     --color "fbca04" --description "Requires repo context, Lean fluency, or careful validation"
-gh label create "difficulty:hard"       --color "d93f0b" --description "Requires deep domain knowledge or upstream coordination"
-
-# status:* — grey (new) → green (go) → amber (active) → red (blocked) → blue (review)
-gh label create "status:needs-triage"     --color "ededed" --description "New issue that has not been classified yet"
-gh label create "status:needs-info"       --color "fef2c0" --description "Waiting on clarification before work should start"
-gh label create "status:ready"            --color "0e8a16" --description "Scoped enough for a contributor to pick up"
-gh label create "status:in-progress"      --color "fbca04" --description "Someone is actively working on it"
-gh label create "status:blocked-upstream" --color "b60205" --description "Blocked on Mathlib, BrownianMotion, or another external project"
-gh label create "status:blocked-design"   --color "e99695" --description "Blocked on a modeling, theorem-shape, or architecture decision"
-gh label create "status:review"           --color "c5def5" --description "PR exists and maintainer review is the next step"
-```
+The `area:<cell>` and `family:<family>` labels are created from `docs/taxonomy.toml` by
+`python3 -m tools.verify.blueprint_issues labels --apply`. The hand-set labels (`area:tooling`,
+`area:docs`, `area:ci`, `type:*`, `difficulty:*`, `status:*`) exist in the repository; a
+maintainer adds one with `gh label create`. Colors follow the scheme above: one hue per dimension
+for `area:*`, `family:*` and `type:*`, and a green to red scale for `difficulty:*` and `status:*`.

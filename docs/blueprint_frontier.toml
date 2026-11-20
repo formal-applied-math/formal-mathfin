@@ -1,27 +1,40 @@
-# The blueprint's frontier: results on the program, stated, not yet formalized.
+# The blueprint's frontier: results on the program, stated, not yet formalized
+# (docs/blueprint.md, "The frontier").
 #
-# A node here has no Lean declaration yet, so it cannot be an `@[blueprint]` tag (the
-# library is sorry-free). It is linked to its issues by the issues themselves: each one
-# carries a body line `Blueprint: <label>`. `python3 -m tools.verify.blueprint_issues check`
-# keeps both sides connected (every frontier node has an open issue; every open math issue
-# names a node). When the result is delivered, tag the declaration in
-# `MathFin/Blueprint.lean` with the same label and delete the entry here.
+# A node here has no Lean declaration in `MathFin/` yet, so it cannot be an `@[blueprint]` tag (the
+# library is sorry-free). It is linked to its issues by the issues themselves: each one carries a
+# body line `Blueprint: <label>`. `python3 -m tools.verify.blueprint_issues check` keeps both sides
+# connected (every frontier node has an open issue; every open math issue names a node). When the
+# result is delivered, tag the declaration in `MathFin/Blueprint.lean` with the same label and
+# delete the entry here.
 #
-# Fields: label (`thm:`/`def:` + kebab-case), title, statement (one honest sentence of what
-# proving it would establish), uses (labels it builds on), area (the issue's `area:*`).
+# Fields:
+#   label      `thm:` or `def:` followed by a kebab-case name; never changed once issues name it.
+#   title      a short name.
+#   statement  one self-contained sentence stating the proposition: the setting (model, measure and
+#              hypotheses in words) and the conclusion. It says what proving the node would
+#              establish and is not a claim that the node is proved. An open problem is stated as
+#              "Open (MF-OP-NNN): whether ..." with its id in
+#              docs/research-problems/problems.json; a resolution reported but not checked says so.
+#   uses       labels it builds on.
+#   area       the cell of docs/taxonomy.toml; the issue's `area:*` label derives from it.
+#   family     the model family of docs/taxonomy.toml.
+#   ground     optional: "Mathlib: ..." naming the material a node builds on when `uses` reaches no
+#              proved node.
+#   core       optional: corpus entries that already prove part of the node. The node stays on the
+#              frontier, and the map draws it as partly grown. Each entry must exist; the check
+#              flags a `core` entry that is not `full` or `reduced_core`.
+#   lean       optional: the declaration in `MathFinFrontier/` that states the node in Lean, closed
+#              by `sorry`.
 #
 # Every frontier node grows from the proved blueprint: following `uses` (through other frontier
-# nodes) reaches a node with a Lean declaration. A result that builds only on Mathlib says so in
-# `ground` instead ("Mathlib: …", what it draws on). `blueprint_issues check` enforces this.
-#
-# Optional `core` lists the corpus entries that already prove part of the node: the node stays on
-# the frontier, and the map draws it as partly grown. Each entry must exist; the check flags a
-# `core` entry that is not `full` or `reduced_core`.
+# nodes) reaches a node with a Lean declaration, or `ground` says what it draws on.
+# `blueprint_issues check` enforces this.
 
 [[node]]
 label = "thm:cramer-lundberg-claims"
 title = "Cramér–Lundberg claims"
-statement = "E[S_t]=λtμ₁ and the compensated claims process is a martingale."
+statement = "In the Cramér–Lundberg model, with claims arriving as a Poisson process of rate λ and i.i.d. claim sizes of mean μ₁, the aggregate claims satisfy E[S_t] = λtμ₁, and the claims process compensated by λμ₁t is a martingale."
 uses = ["thm:compound-poisson-mgf"]
 area = "risk/insurance"
 family = "insurance"
@@ -29,7 +42,7 @@ family = "insurance"
 [[node]]
 label = "thm:lundberg-ruin-bound"
 title = "Lundberg ruin bound"
-statement = "ψ(u)≤e^{-Ru} from the Lundberg exponential martingale."
+statement = "In the Cramér–Lundberg model with an adjustment coefficient R, the ruin probability satisfies ψ(u) ≤ e^{−Ru} for every initial capital u, proved from the Lundberg exponential martingale."
 uses = ["thm:cramer-lundberg-claims", "thm:compound-poisson-mgf"]
 area = "risk/insurance"
 family = "insurance"
@@ -37,7 +50,7 @@ family = "insurance"
 [[node]]
 label = "thm:panjer-recursion"
 title = "Panjer recursion"
-statement = "Panjer's recursion computes the aggregate-loss law for the (a,b,0) class."
+statement = "For an aggregate loss whose claim count has a distribution of the (a,b,0) class and whose claim sizes are i.i.d. on the nonnegative integers, Panjer's recursion computes the law of the aggregate loss."
 uses = ["thm:compound-poisson-mgf"]
 area = "risk/insurance"
 family = "insurance"
@@ -45,7 +58,7 @@ family = "insurance"
 [[node]]
 label = "thm:survival-model"
 title = "Survival model and life tables"
-statement = "Survival relations, curtate lifetime, expectation of life and life-table layer tied to the probabilistic survival model."
+statement = "The survival function, curtate lifetime, expectation of life and life-table quantities (l_x, q_x, e_x) of a lifetime random variable satisfy the standard relations, so that the life-table layer is a theorem about one probabilistic survival model."
 uses = ["def:survival-function"]
 core = ["mf-survival-ccdf-ratio", "mf-survival-ccdf-zero", "mf-life-table-survival-ratio"]
 area = "valuation/insurance"
@@ -54,7 +67,7 @@ family = "insurance"
 [[node]]
 label = "thm:american-put-premium"
 title = "American put early-exercise premium"
-statement = "The American put is strictly worth more than the European put in the binomial model."
+statement = "In the binomial model with a positive interest rate, the American put is worth strictly more than the European put with the same strike and expiry whenever immediate exercise is worth more than continuation at some node reached with positive probability."
 uses = ["thm:snell-envelope"]
 area = "valuation/american"
 family = "trees"
@@ -62,7 +75,7 @@ family = "trees"
 [[node]]
 label = "thm:barrier-lookback-closed-forms"
 title = "Barrier and lookback closed forms"
-statement = "Down-and-out call and floating-strike lookback call closed forms via the reflection principle."
+statement = "In the Black–Scholes model the down-and-out call and the floating-strike lookback call have closed-form prices, obtained from the reflection principle for Brownian motion with drift."
 uses = ["thm:reflection-principle", "thm:bs-call"]
 area = "valuation/diffusions"
 family = "diffusions"
@@ -70,7 +83,7 @@ family = "diffusions"
 [[node]]
 label = "thm:carr-lee-moment"
 title = "Carr–Lee moment formula"
-statement = "Wing decay of the smile is bounded by the finiteness of the moments E[S_T^p]."
+statement = "If the moments E[S_T^p] of the terminal price are finite exactly up to a critical order p*, then the implied total variance grows at most linearly in log-moneyness in the wings, with asymptotic slope bounded by a function of p* (Lee's moment formula)."
 uses = ["thm:bs-call"]
 area = "valuation/smile"
 family = "volatility"
@@ -78,7 +91,7 @@ family = "volatility"
 [[node]]
 label = "thm:forward-start-call"
 title = "Forward-start call"
-statement = "The Rubinstein closed form for a forward-start call."
+statement = "In the Black–Scholes model, a call struck at a fixed multiple of the asset price at a future date T₁ and expiring at T₂ has the Rubinstein closed-form price, a multiple of a Black–Scholes call price at time T₁."
 uses = ["thm:bs-call"]
 area = "valuation/diffusions"
 family = "diffusions"
@@ -86,7 +99,7 @@ family = "diffusions"
 [[node]]
 label = "thm:implied-vol-existence"
 title = "Implied volatility for every arbitrage-free price"
-statement = "Every arbitrage-free call price has a unique implied volatility, computed by bisection and safeguarded Newton."
+statement = "For every call price in the open interval allowed by no arbitrage, there is exactly one Black–Scholes volatility that reproduces it, and bisection and a safeguarded Newton iteration converge to it."
 uses = ["thm:bs-call", "thm:bs-delta"]
 area = "valuation/smile"
 family = "diffusions"
@@ -94,7 +107,7 @@ family = "diffusions"
 [[node]]
 label = "thm:kou-jump-diffusion"
 title = "Kou double-exponential jump-diffusion"
-statement = "The Kou jump MGF, risk-neutral compensator and European call price for double-exponential jumps."
+statement = "For a jump-diffusion with i.i.d. double-exponential jump sizes (Kou), the moment generating function of the log-price, the compensator that makes the discounted price a martingale, and the European call price are given in closed form."
 uses = ["thm:jump-diffusion-law", "thm:bs-call"]
 area = "valuation/jumps"
 family = "jumps"
@@ -102,7 +115,7 @@ family = "jumps"
 [[node]]
 label = "thm:margrabe-numeraire"
 title = "Margrabe and chooser via the S²-numéraire"
-statement = "Margrabe's price and the chooser's Markov step derived under the S²-numéraire measure."
+statement = "Margrabe's exchange-option price, and the one-step Markov property that prices the chooser option, follow under the measure that takes the squared asset price (S²) as numéraire."
 uses = ["thm:margrabe", "thm:change-of-numeraire"]
 area = "valuation/diffusions"
 family = "diffusions"
@@ -110,7 +123,7 @@ family = "diffusions"
 [[node]]
 label = "thm:merton-pide"
 title = "Merton PIDE"
-statement = "The Merton option value solves a partial integro-differential equation."
+statement = "The value of a European option in the Merton jump-diffusion model solves the partial integro-differential equation formed by the Black–Scholes operator and the compensated jump integral."
 uses = ["thm:ito-levy-formula", "thm:jump-diffusion-mixing"]
 area = "valuation/jumps"
 family = "jumps"
@@ -118,7 +131,7 @@ family = "jumps"
 [[node]]
 label = "thm:perpetual-american"
 title = "Perpetual American option"
-statement = "Closed form for the perpetual American option with its optimal exercise boundary."
+statement = "The perpetual American option in the Black–Scholes model has a closed-form value and an optimal exercise boundary at a constant level of the asset price."
 uses = ["thm:snell-envelope", "thm:bs-pde"]
 area = "valuation/american"
 family = "diffusions"
@@ -126,7 +139,7 @@ family = "diffusions"
 [[node]]
 label = "thm:two-asset-option-formulas"
 title = "Stulz and Heynen–Kat two-asset formulas"
-statement = "The Stulz and Heynen–Kat prices are discounted expected payoffs for every strike and correlation."
+statement = "For two correlated lognormal assets, the Stulz price of the call on the maximum and the Heynen–Kat price of the two-asset barrier option equal the discounted expected payoff, for every strike and every correlation."
 uses = ["thm:margrabe", "thm:bs-call"]
 area = "valuation/diffusions"
 family = "diffusions"
@@ -134,7 +147,7 @@ family = "diffusions"
 [[node]]
 label = "thm:variance-gamma-call"
 title = "Variance-gamma European call"
-statement = "The variance-gamma call price is a Gamma-mixture of Black–Scholes prices."
+statement = "In the variance-gamma model the European call price is the expectation, over the Gamma-distributed time change, of Black–Scholes prices with the matching variance."
 uses = ["thm:bs-call"]
 area = "valuation/jumps"
 family = "jumps"
@@ -142,7 +155,7 @@ family = "jumps"
 [[node]]
 label = "thm:black-cox-default"
 title = "Black–Cox first-passage default"
-statement = "The closed-form barrier default probability P(τ≤T)."
+statement = "In the Black–Cox model, where default occurs when the firm value first hits a barrier, the default probability P(τ ≤ T) is given in closed form in terms of the normal distribution function."
 uses = ["thm:reflection-principle", "def:standard-normal-cdf"]
 area = "valuation/default"
 family = "default"
@@ -150,7 +163,7 @@ family = "default"
 [[node]]
 label = "thm:large-pool-loss"
 title = "Large homogeneous pool loss law"
-statement = "The Vasicek large-pool loss distribution and CDO tranche expected loss."
+statement = "As the number of names in a homogeneous one-factor pool tends to infinity, the portfolio loss fraction converges to the Vasicek distribution, and the expected loss of a CDO tranche is the integral of the tranche payoff against that law."
 uses = ["thm:one-factor-copula-default", "def:gaussian-factor-copula", "def:standard-normal-cdf", "thm:large-portfolio-limit"]
 core = ["mf-lhp-stop-loss-closed-form"]
 area = "risk/credit"
@@ -159,7 +172,7 @@ family = "default"
 [[node]]
 label = "thm:merton-credit-spread"
 title = "Merton structural credit spread"
-statement = "The Merton credit spread s(T) in closed form."
+statement = "In the Merton structural model, where default is a shortfall of firm value against debt at maturity T, the credit spread s(T) of the debt is given in closed form in terms of leverage, volatility and maturity."
 uses = ["thm:bs-call"]
 area = "valuation/default"
 family = "default"
@@ -167,7 +180,7 @@ family = "default"
 [[node]]
 label = "thm:one-factor-copula-default"
 title = "One-factor Gaussian copula default"
-statement = "Conditional default probability p(M)=Φ((c-√ρM)/√(1-ρ)) with a joint law, heterogeneous thresholds, recovery and migration."
+statement = "In the one-factor Gaussian copula, a name defaults when its latent variable falls below a threshold c, and its default probability conditional on the common factor M is p(M) = Φ((c − √ρ M)/√(1 − ρ)); the joint law, heterogeneous thresholds, recovery and rating migration are built on this."
 uses = ["def:gaussian-factor-copula", "def:standard-normal-cdf", "thm:large-portfolio-limit"]
 core = ["mf-one-factor-copula-joint-default"]
 area = "risk/credit"
@@ -176,7 +189,7 @@ family = "default"
 [[node]]
 label = "thm:stefan-uniqueness"
 title = "Stefan uniqueness with accumulating jumps"
-statement = "Physical Stefan problem uniqueness when jumps accumulate at time zero (open problem)."
+statement = "Open (MF-OP-002): whether the physical solution of the supercooled Stefan problem is unique when the jumps of the loss process accumulate at time zero."
 uses = ["def:supercooled-stefan-solution"]
 area = "valuation/default"
 family = "default"
@@ -184,7 +197,7 @@ family = "default"
 [[node]]
 label = "thm:aave-health-factor-bound"
 title = "Aave multi-asset health factor: a liquidation bound"
-statement = "A bound on the probability that Aave's multi-asset health factor falls below 1 under lognormal collateral (a single-asset or moment bound; the ratio has no closed form)."
+statement = "For a lending position collateralised by several lognormal assets, an upper bound on the probability that Aave's multi-asset health factor falls below 1; the bound is for a single asset or in terms of moments, since the ratio of sums of lognormals has no closed form."
 uses = ["thm:aave-liquidation-kmv"]
 area = "risk/credit"
 family = "mechanisms"
@@ -192,7 +205,7 @@ family = "mechanisms"
 [[node]]
 label = "thm:balancer-invariant"
 title = "Balancer constant-mean AMM"
-statement = "The weighted product invariant and spot price of the constant-mean AMM."
+statement = "In Balancer's constant-mean automated market maker, trades preserve the weighted product ∏ Bᵢ^{wᵢ} of the reserves Bᵢ with weights wᵢ summing to one, and the spot price of one asset in terms of another is the ratio of their reserve-to-weight ratios."
 uses = ["thm:impermanent-loss"]
 area = "valuation/model-free"
 family = "mechanisms"
@@ -200,7 +213,7 @@ family = "mechanisms"
 [[node]]
 label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"
-statement = "Compound's cToken exchange rate is the deposit index of a money-market account under the borrow index, tying Markets/DeFi/Compound to the library's lending indices, or the gap is recorded."
+statement = "Compound's cToken exchange rate equals the deposit index of a money-market account accruing at the borrow index, which ties Markets/DeFi/Compound to the library's lending indices, or the statement records exactly where the two differ."
 uses = ["thm:bond-immunization"]
 area = "valuation/model-free"
 family = "mechanisms"
@@ -208,7 +221,7 @@ family = "mechanisms"
 [[node]]
 label = "thm:liquidation-first-passage"
 title = "Liquidation before maturity as first passage"
-statement = "The probability that a lending position is liquidated before T, as the Black–Cox first-passage probability of its collateral ratio."
+statement = "The probability that a lending position is liquidated before time T equals the Black–Cox first-passage probability of its collateral ratio through the liquidation threshold."
 uses = ["thm:black-cox-default", "thm:aave-liquidation-kmv"]
 area = "risk/credit"
 family = "mechanisms"
@@ -216,7 +229,7 @@ family = "mechanisms"
 [[node]]
 label = "thm:kyle-equilibrium"
 title = "Kyle single-period equilibrium"
-statement = "Equilibrium price impact λ=σ_v/(2σ_u)."
+statement = "In the one-period Kyle model with Gaussian fundamental value (variance σ_v²) and Gaussian noise trading (variance σ_u²), there is a linear equilibrium in which the market maker's price impact is λ = σ_v/(2σ_u)."
 uses = []
 ground = "Mathlib: Gaussian conditional expectation"
 area = "choice/trading"
@@ -225,7 +238,7 @@ family = "mechanisms"
 [[node]]
 label = "thm:affine-term-structure"
 title = "Affine term structure"
-statement = "Bond prices P=exp(A(T)-B(T)r₀) form a general affine abstraction with Vasicek, Ho–Lee and Hull–White as instances."
+statement = "A short-rate model whose bond prices have the form P(t,T) = exp(A(T−t) − B(T−t)r_t) is an affine term structure, a single abstraction of which the Vasicek, Ho–Lee and Hull–White models are instances."
 uses = ["thm:vasicek-bond-pde"]
 core = ["mf-affine-bond-pde-from-riccati"]
 area = "valuation/term"
@@ -234,7 +247,7 @@ family = "term"
 [[node]]
 label = "thm:bermudan-callable-snell"
 title = "Callable bonds and Bermudan swaptions by Snell envelope"
-statement = "Callable bond and Bermudan swaption values are Snell envelopes."
+statement = "The value of a callable bond and of a Bermudan swaption is the Snell envelope of the discounted exercise payoff under the pricing measure, taken over the exercise dates."
 uses = ["thm:snell-envelope"]
 area = "valuation/term"
 family = "term"
@@ -242,7 +255,7 @@ family = "term"
 [[node]]
 label = "thm:cir-bond-loadings"
 title = "CIR bond-price loadings"
-statement = "The CIR loadings solve the Riccati system B' = 1 − κB − σ²B²/2, A' = −κθB, and give the CIR forward curve."
+statement = "In the CIR model the bond-price loadings A and B solve the Riccati system B' = 1 − κB − σ²B²/2, A' = −κθB, and the forward curve implied by them is given in closed form."
 uses = ["thm:affine-term-structure"]
 core = ["mf-cir-bond-loading-riccati", "mf-cir-bond-level-loading"]
 area = "valuation/term"
@@ -251,7 +264,7 @@ family = "term"
 [[node]]
 label = "thm:cms-convexity-adjustment"
 title = "CMS convexity adjustment"
-statement = "The CMS convexity adjustment under the payment-date forward measure."
+statement = "Under the forward measure of the payment date, the expected CMS rate differs from the forward swap rate by an explicit convexity adjustment."
 uses = ["thm:change-of-numeraire"]
 core = ["mf-contract-cms-swaplet-adjustment-nonneg"]
 area = "valuation/term"
@@ -260,7 +273,7 @@ family = "term"
 [[node]]
 label = "thm:futures-forward-convexity"
 title = "Futures–forward convexity adjustment"
-statement = "The futures-forward convexity adjustment in a Gaussian short-rate model."
+statement = "In a Gaussian short-rate model the futures price of an asset differs from its forward price by an explicit convexity adjustment determined by the model's volatility."
 uses = ["thm:affine-term-structure"]
 area = "valuation/forwards"
 family = "term"
@@ -268,7 +281,7 @@ family = "term"
 [[node]]
 label = "thm:hjm-affine-models"
 title = "HJM recovers Ho–Lee and Vasicek"
-statement = "Constant volatility gives Ho–Lee and exponential volatility recovers Vasicek/Hull–White bond prices."
+statement = "In the Heath–Jarrow–Morton framework, a constant forward-rate volatility gives the Ho–Lee bond prices and an exponentially decaying volatility gives the Vasicek and Hull–White bond prices."
 uses = ["thm:hjm-drift-condition", "thm:affine-term-structure"]
 area = "valuation/term"
 family = "term"
@@ -276,7 +289,7 @@ family = "term"
 [[node]]
 label = "thm:hjm-bond-dynamics"
 title = "HJM bond-price dynamics"
-statement = "The bond and discounted bond have dynamics dP/P=(r-α*+½σ*²)dt-σ*dW (and the discounted analogue)."
+statement = "Under the HJM forward-rate dynamics with volatility σ and drift α, the bond price satisfies dP/P = (r − α* + ½σ*²)dt − σ*dW, and the discounted bond has the analogous dynamics, where α* and σ* are the integrals of α and σ over the maturity."
 uses = ["thm:hjm-log-bond-dynamics", "thm:ito-formula-c2", "def:hjm-model"]
 area = "valuation/term"
 family = "term"
@@ -284,7 +297,7 @@ family = "term"
 [[node]]
 label = "thm:hjm-drift-condition"
 title = "HJM drift condition"
-statement = "The discounted bond is a (local) martingale iff α=σ∫σ, in integrated, pointwise and converse forms."
+statement = "In the HJM model the discounted bond price is a local martingale if and only if the drift satisfies α = σ∫σ, stated in integrated and pointwise form and with its converse."
 uses = ["thm:hjm-bond-dynamics", "def:hjm-model"]
 area = "valuation/term"
 family = "term"
@@ -292,7 +305,7 @@ family = "term"
 [[node]]
 label = "thm:hjm-log-bond-dynamics"
 title = "HJM log-bond dynamics"
-statement = "The log-bond satisfies dY=(r-α*)dt-σ*dW, via the Itô Fubini and a moving-boundary Leibniz term."
+statement = "In the HJM model the log-bond price Y satisfies dY = (r − α*)dt − σ*dW, derived with a stochastic Fubini theorem and a Leibniz rule with a moving boundary."
 uses = ["thm:stochastic-fubini-process", "def:hjm-model"]
 area = "valuation/term"
 family = "term"
@@ -300,7 +313,7 @@ family = "term"
 [[node]]
 label = "thm:hjm-musiela"
 title = "HJM Musiela parametrization"
-statement = "The Musiela parametrization r(t,x)=f(t,t+x) turns HJM into an SPDE."
+statement = "In the Musiela parametrization r(t,x) = f(t,t+x) by time to maturity, the HJM forward-rate dynamics become a stochastic partial differential equation for r."
 uses = ["thm:hjm-drift-condition"]
 area = "valuation/term"
 family = "term"
@@ -308,7 +321,7 @@ family = "term"
 [[node]]
 label = "thm:hjm-short-rate"
 title = "HJM induces a short-rate model"
-statement = "r(t)=f(t,t) and its induced SDE follow from the HJM dynamics."
+statement = "The HJM model induces a short-rate model: the short rate is r(t) = f(t,t), and the SDE it satisfies follows from the HJM forward-rate dynamics."
 uses = ["thm:hjm-drift-condition"]
 area = "valuation/term"
 family = "term"
@@ -316,7 +329,7 @@ family = "term"
 [[node]]
 label = "thm:lmm-forward-martingale"
 title = "LIBOR market model forward martingale"
-statement = "Forward LIBOR is a martingale under its own forward measure."
+statement = "In the LIBOR market model, the forward LIBOR rate for an accrual period is a martingale under the forward measure of its own payment date."
 uses = ["thm:change-of-numeraire"]
 area = "valuation/term"
 family = "term"
@@ -324,35 +337,35 @@ family = "term"
 [[node]]
 label = "def:real-erf"
 title = "erf / erfc / erfinv for Mathlib"
-statement = "Mathlib-style Real.erf, Real.erfc and Real.erfinv with their basic identities, upstreamed."
+statement = "Real.erf, Real.erfc and Real.erfinv, defined in Mathlib style with their basic identities (oddness, erf + erfc = 1, monotonicity, erfinv as the inverse of erf), upstreamed to Mathlib."
 uses = ["def:standard-normal-cdf"]
 area = "probability/gaussian"
 
 [[node]]
 label = "thm:bracket-quadratic-variation"
 title = "Bracket is the quadratic variation of an Itô integral"
-statement = "The bracket ∫φ² of an Itô integral is the limit of the realized quadratic variation, and M²-⟨M⟩ is a bundled martingale."
+statement = "For an Itô integral M = ∫φ dB, the bracket ∫φ² dt is the limit in probability of the realized quadratic variation of M along partitions with vanishing mesh, and M² − ⟨M⟩ is a martingale in the bundled sense."
 uses = ["thm:bracket-compensator", "thm:quadratic-variation", "thm:ito-integral-martingale"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:brownian-nowhere-differentiable"
 title = "Brownian paths are nowhere differentiable"
-statement = "Almost every path of the canonical continuous Brownian motion is differentiable at no time."
+statement = "Almost every path of the canonical continuous Brownian motion is differentiable at no time t ≥ 0."
 uses = ["def:brownian-motion"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:clark-ocone"
 title = "L¹ martingale representation and Clark–Ocone"
-statement = "Martingale representation extends from L² to L¹/H¹ and the integrand is named by the Malliavin derivative (Clark–Ocone)."
+statement = "Martingale representation extends from square-integrable to integrable claims (L¹ and H¹), and for a Malliavin-differentiable claim H the integrand is the predictable projection of its Malliavin derivative (Clark–Ocone)."
 uses = ["thm:martingale-representation"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:compensated-poisson-integral"
 title = "Compensated-Poisson integral"
-statement = "The compensated-Poisson integral of an L² integrand is a mean-zero L² martingale with jump quadratic variation ∫∫H² dN."
+statement = "For a square-integrable predictable integrand H, the integral of H against the compensated Poisson process is a mean-zero L² martingale whose quadratic variation is the jump sum ∫∫H² dN."
 uses = []
 ground = "Mathlib: Poisson measure; the L² extension of an isometry"
 core = ["sc-levy-integral-clm-isometry"]
@@ -361,7 +374,7 @@ area = "probability/jumps"
 [[node]]
 label = "thm:esscher-emm-levy"
 title = "Esscher EMM for exponential-Lévy markets"
-statement = "An Esscher transform yields an equivalent martingale measure for an exponential-Lévy market."
+statement = "In an exponential-Lévy market whose Lévy measure has the required exponential moments, there is an Esscher parameter for which the Esscher transform of the physical measure is an equivalent martingale measure for the discounted price."
 uses = ["thm:esscher-tilt", "thm:jump-diffusion-law"]
 area = "valuation/jumps"
 family = "jumps"
@@ -369,14 +382,14 @@ family = "jumps"
 [[node]]
 label = "thm:feynman-kac-variable-coefficient"
 title = "Variable-coefficient Feynman–Kac"
-statement = "The conditional expectation of a payoff along a variable-coefficient SDE solves the associated parabolic PDE (local-vol / Heston), beyond the heat-kernel case."
+statement = "For a solution X of an SDE with Lipschitz variable coefficients, the function u(t,x) = E[g(X_T) | X_t = x] solves the associated backward parabolic PDE, which covers local-volatility and Heston-type generators and goes beyond the heat-kernel case."
 uses = ["thm:feynman-kac-heat-eq", "thm:sde-continuous-solution", "thm:ito-formula-c2"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:girsanov-continuous-emm"
 title = "Girsanov EMM from the Itô tower"
-statement = "For bounded adapted θ the Doléans–Dade exponential is a martingale and defines a measure making B-∫θ Brownian, deriving the continuous EMM from the Itô tower and retiring the Wald shortcut."
+statement = "For bounded adapted θ, the Doléans–Dade exponential of −∫θ dB is a martingale and defines an equivalent measure under which B + ∫θ ds is Brownian, so that the continuous-time equivalent martingale measure is derived from the Itô integral and no longer from the Wald exponential alone."
 uses = ["thm:continuous-ftap", "thm:ito-formula-c2", "thm:esscher-tilt"]
 area = "valuation/diffusions"
 family = "diffusions"
@@ -384,14 +397,14 @@ family = "diffusions"
 [[node]]
 label = "thm:ito-formula-2d"
 title = "Two-process Itô formula"
-statement = "A continuous Itô formula for general C² f(t,X,Y) with two Itô processes, upgrading the reduced_core sc-thm-7.5.2; the product case f = xy is proved."
+statement = "For f of class C² in (t,x,y) and two Itô processes X and Y driven by one Brownian motion, f(t,X_t,Y_t) is an Itô process whose drift and diffusion are given by the Itô correction terms; the product case f = xy is already proved."
 uses = ["thm:ito-formula-c2", "thm:ito-product-rule"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:ito-integral-martingale"
 title = "General-integrand Itô process is a martingale"
-statement = "The Itô integral of a general L² integrand is exhibited as a bundled Martingale, composing the PricesGainsAtZero guards."
+statement = "For a general predictable L² integrand φ, the process t ↦ ∫₀ᵗ φ dB is a Martingale in Mathlib's sense, adapted and square-integrable, and composes with the library's self-financing guards."
 uses = ["def:ito-integral-clm", "thm:market-completeness"]
 core = ["sc-ito-general-martingale"]
 area = "probability/brownian"
@@ -399,14 +412,14 @@ area = "probability/brownian"
 [[node]]
 label = "thm:ito-levy-formula"
 title = "Itô–Lévy change of variables"
-statement = "The Itô formula for a jump-diffusion driven by Brownian motion and a compensated Poisson integral."
+statement = "For a jump-diffusion driven by a Brownian motion and a compensated Poisson integral, and f of class C², f(X_t) − f(X_0) equals the continuous Itô terms plus the integral of f(X_{s−} + jump) − f(X_{s−}) against the jump measure, compensated where required."
 uses = ["thm:ito-formula-c2", "def:ito-integral-clm"]
 area = "probability/jumps"
 
 [[node]]
 label = "thm:jump-diffusion-law"
 title = "Compound-Poisson and jump-diffusion law"
-statement = "The compound-Poisson law, its convolution semigroup, and the law layer of a jump-diffusion with Λ>0, including realized-variance variance and the price law."
+statement = "The compound-Poisson law with rate Λ > 0 and its convolution semigroup are constructed, and the law of a jump-diffusion built on it, including the variance of the realized variance and the price law, is computed."
 uses = ["thm:compound-poisson-mgf"]
 core = ["mf-jump-diffusion-model-exists", "mf-jump-diffusion-compensator"]
 area = "probability/jumps"
@@ -421,28 +434,28 @@ area = "probability/brownian"
 [[node]]
 label = "thm:martingale-representation-vector"
 title = "Vector martingale representation"
-statement = "Martingales of a multi-dimensional Brownian filtration are Itô integrals against the vector driver."
+statement = "Every square-integrable martingale of the filtration of a d-dimensional Brownian motion is its initial value plus an Itô integral of a predictable d-dimensional integrand against the vector driver."
 uses = ["thm:martingale-representation"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:novikov-girsanov"
 title = "Novikov Girsanov for unbounded θ"
-statement = "Under Novikov's condition the Doléans–Dade exponential of a progressively measurable unbounded θ is a true martingale and Girsanov's theorem holds for it."
+statement = "If a progressively measurable θ satisfies Novikov's condition E[exp(½∫₀ᵀ θ² dt)] < ∞, then the Doléans–Dade exponential of −∫θ dB is a true martingale and Girsanov's theorem holds for θ."
 uses = ["thm:girsanov-continuous-emm"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:perron-frobenius-markov"
 title = "Perron–Frobenius and finite Markov chain ergodicity"
-statement = "For a finite primitive chain, recurrence, convergence to the unique stationary law and the ergodic theorem follow from a renewal and Perron–Frobenius build."
+statement = "For a finite Markov chain with primitive transition matrix, the chain is recurrent, its law converges to the unique stationary distribution, and the ergodic theorem holds, proved by a renewal argument and the Perron–Frobenius theorem."
 uses = ["thm:markov-path-law"]
 area = "probability/discrete"
 
 [[node]]
 label = "thm:poisson-interarrival-iid"
 title = "Poisson interarrivals are iid exponential"
-statement = "The whole interarrival sequence of a Poisson process is iid Exp(λ), upgrading the reduced_core pp-prop-3.3.6."
+statement = "The whole sequence of interarrival times of a Poisson process of rate λ is i.i.d. with the Exp(λ) law, which upgrades the reduced-core entry pp-prop-3.3.6 on the first arrival."
 uses = []
 ground = "Mathlib: exponential and Poisson laws"
 area = "probability/jumps"
@@ -450,7 +463,7 @@ area = "probability/jumps"
 [[node]]
 label = "thm:propagator-no-arbitrage"
 title = "Transient-impact propagator no-arbitrage"
-statement = "A positive-semidefinite criterion for no price manipulation under transient impact, with certified counterexamples (open problem)."
+statement = "Open: whether a positive-semidefiniteness criterion on the propagator kernel characterises the absence of price manipulation under transient impact, with certified counterexamples where it fails."
 uses = []
 ground = "Mathlib: positive-semidefinite kernels"
 area = "choice/trading"
@@ -459,35 +472,35 @@ family = "mechanisms"
 [[node]]
 label = "thm:reflection-principle"
 title = "Reflection principle for Brownian motion"
-statement = "On the canonical continuous Brownian path space, P(max_{s≤t} B_s ≥ a) = 2P(B_t ≥ a) for a ≥ 0 (the strong Markov reflection at the hitting time)."
+statement = "On the canonical continuous Brownian path space, P(max_{s≤t} B_s ≥ a) = 2P(B_t ≥ a) for every a ≥ 0, proved by reflecting the path at the hitting time of a by the strong Markov property."
 uses = ["def:brownian-motion"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:second-ftap-converse"
 title = "Second FTAP: uniqueness implies completeness"
-statement = "A unique equivalent martingale measure implies the market is complete, the converse of the completeness result already proved."
+statement = "If a discrete-time market has a unique equivalent martingale measure, then it is complete, so that the market is complete if and only if the measure is unique."
 uses = ["thm:market-completeness", "thm:second-ftap"]
 area = "market"
 
 [[node]]
 label = "thm:semistatic-ftap"
 title = "Semistatic FTAP with entropy"
-statement = "A semistatic no-arbitrage criterion for the existence of an equivalent martingale measure of finite entropy calibrated to option prices (open problem)."
+statement = "Open (MF-OP-005): whether a semistatic no-arbitrage criterion is equivalent to the existence of an equivalent martingale measure of finite relative entropy that is calibrated to the observed option prices."
 uses = ["def:calibrated-martingale-measures", "def:semistatic-strategy", "thm:dmw-ftap"]
 area = "valuation/general"
 
 [[node]]
 label = "thm:stochastic-fubini-levy"
 title = "Stochastic Fubini for Itô–Lévy integrals"
-statement = "The stochastic Fubini swap holds for the compensated-Poisson (Itô–Lévy) integral."
+statement = "For the compensated-Poisson (Itô–Lévy) integral and a jointly measurable integrand satisfying the integrability conditions, integrating over a parameter and taking the stochastic integral commute almost surely."
 uses = ["thm:stochastic-fubini"]
 area = "probability/jumps"
 
 [[node]]
 label = "thm:futures-basis-convergence"
 title = "Contango, backwardation and basis convergence"
-statement = "For F=Se^{(r-δ)T} the curve is in contango or backwardation by the sign of r-δ and the basis converges."
+statement = "For a forward price F = S e^{(r−δ)T}, the curve is in contango when r > δ and in backwardation when r < δ, and the basis F − S converges to zero as T tends to zero."
 uses = ["thm:interest-rate-parity"]
 area = "valuation/forwards"
 family = "term"
@@ -495,7 +508,7 @@ family = "term"
 [[node]]
 label = "thm:siegel-paradox"
 title = "Siegel's paradox"
-statement = "E[S_T]E[1/S_T]=e^{σ²T}>1."
+statement = "If S_T is lognormal with log-variance σ²T, then E[S_T]·E[1/S_T] = e^{σ²T} > 1."
 uses = ["thm:ito-formula-c2"]
 area = "valuation/forwards"
 family = "term"
@@ -503,14 +516,14 @@ family = "term"
 [[node]]
 label = "thm:apt-pricing"
 title = "APT exact-factor pricing"
-statement = "No arbitrage implies E[Rᵢ]-r=Σβᵢₖλₖ."
+statement = "In a market with K factors and no arbitrage, the expected excess return of each asset is E[Rᵢ] − r = Σₖ βᵢₖλₖ, where βᵢₖ are the factor loadings and λₖ the factor risk premia (exact-factor arbitrage pricing)."
 uses = ["def:emm", "thm:capm-equilibrium"]
 area = "choice/equilibrium"
 
 [[node]]
 label = "thm:log-optimal-numeraire"
 title = "Log-optimal portfolio is the numéraire"
-statement = "Prices deflated by the growth-optimal portfolio are martingales under the physical measure, identifying the EMM with a change of numéraire."
+statement = "Prices deflated by the growth-optimal (log-optimal) portfolio are martingales under the physical measure, so an equivalent martingale measure is identified with the change of numéraire to that portfolio."
 uses = ["thm:change-of-numeraire", "thm:continuous-ftap"]
 area = "choice/dynamic"
 
@@ -524,7 +537,7 @@ area = "choice/portfolio"
 [[node]]
 label = "thm:merton-portfolio-fraction"
 title = "Merton myopic risky fraction"
-statement = "The optimal risky fraction (μ-r)/(γσ²) is the CRRA / mean-variance first-order maximiser."
+statement = "In the Black–Scholes market with CRRA utility of relative risk aversion γ, the optimal constant fraction of wealth in the risky asset is the myopic Merton fraction (μ − r)/(γσ²), the first-order maximiser of the CRRA and mean-variance objectives."
 uses = ["thm:ito-formula-c2", "def:portfolio-variance"]
 area = "choice/dynamic"
 family = "diffusions"
@@ -546,21 +559,21 @@ area = "choice/portfolio"
 [[node]]
 label = "thm:time-inconsistent-equilibrium"
 title = "Relaxed equilibria under time inconsistency"
-statement = "Relaxed equilibria exist with action-dependent diffusion under time inconsistency (open problem)."
+statement = "Open (MF-OP-003): whether relaxed equilibria exist for a time-inconsistent control problem whose diffusion coefficient depends on the action."
 uses = ["def:relaxed-controlled-diffusion"]
 area = "choice/dynamic"
 
 [[node]]
 label = "thm:variance-optimal-hedging"
 title = "Variance-optimal hedging"
-statement = "Variance-optimal hedges exist and are characterised in finite-state markets."
+statement = "In a finite-state market, for every claim the variance-optimal hedge, the strategy minimising the expected squared hedging error, exists and is characterised by orthogonality of the residual to the discounted gains."
 uses = ["thm:martingale-transform", "def:emm"]
 area = "valuation/general"
 
 [[node]]
 label = "thm:expected-utility-risk-aversion"
 title = "Expected utility and risk aversion"
-statement = "Arrow–Pratt coefficients, CARA certainty equivalent, stochastic dominance orderings and utility acceptance."
+statement = "For a von Neumann–Morgenstern utility, the Arrow–Pratt coefficients of absolute and relative risk aversion, the CARA certainty equivalent, the stochastic dominance orders and the utility acceptance sets satisfy their standard characterisations."
 uses = []
 ground = "Mathlib: convex functions and Jensen"
 area = "choice/preferences"
@@ -568,14 +581,14 @@ area = "choice/preferences"
 [[node]]
 label = "thm:glivenko-cantelli"
 title = "Glivenko–Cantelli theorem"
-statement = "The empirical distribution function of an i.i.d. sample converges to the true one uniformly, almost surely."
+statement = "For an i.i.d. sample from a distribution function F, the empirical distribution function converges to F uniformly on ℝ almost surely."
 uses = ["thm:empirical-cdf-strong-law"]
 area = "statistics"
 
 [[node]]
 label = "thm:kusuoka"
 title = "Kusuoka representation"
-statement = "Law-invariant coherent risk measures are suprema of CVaR mixtures."
+statement = "On a standard nonatomic probability space, every law-invariant coherent risk measure with the Fatou property is the supremum, over a set of probability measures on the levels α, of the corresponding mixtures of CVaR_α (Kusuoka representation)."
 uses = ["thm:expected-shortfall-coherent", "def:coherent-risk-measure"]
 area = "risk/measures"
 
@@ -590,21 +603,21 @@ area = "statistics"
 [[node]]
 label = "thm:risk-measure-families"
 title = "Entropic, distortion and expectile risk measures"
-statement = "Entropic, Wang-distortion and expectile risk measures satisfy their axioms (convexity, cash invariance, coherence for τ≥½)."
+statement = "The entropic risk measure, the Wang distortion risk measures and the expectile risk measures satisfy their axioms: convexity and cash invariance, with coherence for the expectile at level τ ≥ ½."
 uses = ["def:coherent-risk-measure"]
 area = "risk/measures"
 
 [[node]]
 label = "thm:sklar-general"
 title = "Sklar's theorem for arbitrary margins"
-statement = "Every joint distribution function factors as C(F₁,…,F_d) through a copula C, without assuming continuous margins (the library has the continuous case)."
+statement = "Every joint distribution function F with margins F₁,…,F_d factors as F = C(F₁,…,F_d) for some copula C, without the assumption that the margins are continuous (the library proves the continuous case)."
 uses = ["def:quantile"]
 area = "probability/dependence"
 
 [[node]]
 label = "thm:bates-cf"
 title = "Bates characteristic function"
-statement = "The Bates stochastic-volatility-plus-jumps characteristic function."
+statement = "The characteristic function of the log-price in the Bates model, the Heston model with added Merton-type jumps in the price, is the product of the Heston characteristic function and the characteristic function of the compensated jump component."
 uses = ["thm:heston-cf", "thm:jump-diffusion-law"]
 area = "valuation/volatility"
 family = "volatility"
@@ -612,7 +625,7 @@ family = "volatility"
 [[node]]
 label = "thm:cev-call"
 title = "CEV European call"
-statement = "The CEV call price in closed form via the non-central chi-squared law."
+statement = "In the CEV model, whose volatility is a power of the asset price, the European call price is given in closed form through the non-central chi-squared distribution function."
 uses = ["thm:bs-call"]
 area = "valuation/volatility"
 family = "volatility"
@@ -620,7 +633,7 @@ family = "volatility"
 [[node]]
 label = "thm:dupire-local-vol"
 title = "Dupire local volatility"
-statement = "The local volatility is determined by call prices via σ²=(∂_T C+rK∂_K C)/(½K²∂²_K C)."
+statement = "If call prices C(T,K) are sufficiently smooth in the maturity T and the strike K, then the local volatility consistent with them is determined by σ²(T,K) = (∂_T C + rK ∂_K C)/(½K² ∂²_K C)."
 uses = ["thm:bs-pde", "thm:feynman-kac-variable-coefficient", "thm:dupire-zero-rates"]
 core = ["mf-dupire-local-vol"]
 area = "valuation/volatility"
@@ -629,7 +642,7 @@ family = "volatility"
 [[node]]
 label = "thm:heston-cf"
 title = "Heston characteristic function"
-statement = "The Heston characteristic function's C and D solve the Heston Riccati ODEs."
+statement = "In the Heston model the characteristic function of the log-price has the affine form exp(C(τ,u) + D(τ,u)v₀ + iu log S₀) where C and D solve the Heston Riccati ordinary differential equations."
 uses = ["thm:heston-pde"]
 area = "valuation/volatility"
 family = "volatility"
@@ -637,7 +650,7 @@ family = "volatility"
 [[node]]
 label = "thm:model-free-variance"
 title = "Model-free implied variance replication"
-statement = "Implied variance (VIX) is the 1/K² strip of out-of-the-money options."
+statement = "The model-free implied variance, the quantity behind the VIX, is a strip of out-of-the-money options with weights proportional to 1/K², independently of the volatility model."
 uses = ["thm:market-carr-madan"]
 area = "valuation/model-free"
 family = "model-free"
@@ -645,7 +658,7 @@ family = "model-free"
 [[node]]
 label = "thm:rough-heston-pathwise-uniqueness"
 title = "Rough-Heston pathwise uniqueness"
-statement = "Pathwise uniqueness holds for the square-root rough-Heston variance equation (open problem)."
+statement = "Open (MF-OP-001): whether pathwise uniqueness holds for the square-root rough-Heston variance equation, a stochastic Volterra equation with a singular fractional kernel."
 uses = ["def:stochastic-volterra-equation"]
 area = "valuation/volatility"
 family = "volatility"
@@ -653,7 +666,7 @@ family = "volatility"
 [[node]]
 label = "thm:sabr-hagan"
 title = "SABR Hagan asymptotic implied vol"
-statement = "Hagan's asymptotic implied volatility holds at ATM leading order with an O(T²) error bound."
+statement = "In the SABR model, Hagan's asymptotic implied volatility holds at the leading order at the money, with an error bounded by a constant times T² for small maturities T."
 uses = ["thm:bs-call"]
 area = "valuation/volatility"
 family = "volatility"
@@ -661,7 +674,7 @@ family = "volatility"
 [[node]]
 label = "thm:schrodinger-spx-vix"
 title = "Schrödinger calibration of SPX/VIX"
-statement = "Integrable Schrödinger potentials exist for continuum SPX/VIX calibration (open problem)."
+statement = "Open (MF-OP-004): whether integrable Schrödinger potentials exist that calibrate a continuum of SPX and VIX option prices at once."
 uses = ["def:calibrated-martingale-measures", "thm:model-free-variance"]
 area = "valuation/volatility"
 family = "volatility"
@@ -669,14 +682,14 @@ family = "volatility"
 [[node]]
 label = "thm:sde-continuous-solution"
 title = "Continuous strong solutions on every horizon"
-statement = "The every-horizon Picard fixed point has a continuous adapted representative solving dX=b(X)dt+σ(X)dB pathwise, unique up to indistinguishability."
+statement = "For Lipschitz b and σ and every horizon T, the Picard fixed point of dX = b(X)dt + σ(X)dB has a continuous adapted representative that solves the equation pathwise, and any two such solutions are indistinguishable."
 uses = ["thm:sde-strong-solution"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:stochastic-fubini-process"
 title = "Stochastic Fubini for the integral process"
-statement = "The parameter integral and the Itô integral commute as processes in t, almost surely at every t at once."
+statement = "For a jointly measurable integrand satisfying the integrability conditions, the parameter integral and the Itô integral commute as processes in t: almost surely, the identity holds at every t at once."
 uses = ["thm:stochastic-fubini"]
 core = ["sc-stochastic-fubini-ito"]
 area = "probability/brownian"
@@ -686,7 +699,7 @@ area = "probability/brownian"
 [[node]]
 label = "thm:cva-is-price"
 title = "CVA is the price of the default loss"
-statement = "Unilateral CVA is the price of the default-contingent exposure loss as a contract under a pricing measure with an independent default time, and the Gaussian-exposure closed form is a theorem about it."
+statement = "Unilateral CVA is the price, under a pricing measure with a default time independent of the market, of the contract paying the exposure lost at default, and the closed form for a Gaussian exposure is a theorem about that price."
 uses = ["def:pricing-functional", "thm:unilateral-cva"]
 area = "valuation/default"
 family = "default"
@@ -785,7 +798,7 @@ area = "valuation/general"
 [[node]]
 label = "thm:kyle-equilibrium-unique"
 title = "Uniqueness of the Kyle equilibrium"
-statement = "In the one-period Gaussian Kyle model every equilibrium among Borel strategies is Kyle's affine one (resolution reported by Monteiro–Tourky, 2026; unchecked here)."
+statement = "In the one-period Gaussian Kyle model every equilibrium among Borel strategies is Kyle's affine one (MF-OP-008); a resolution is reported by Monteiro and Tourky (2026) and is not checked here."
 uses = ["thm:kyle-equilibrium", "thm:glosten-milgrom-quote"]
 lean = "MathFinFrontier.kyle_equilibrium_unique"
 area = "choice/trading"
@@ -846,49 +859,49 @@ family = "volatility"
 [[node]]
 label = "thm:expected-signature-moment-problem"
 title = "Expected signature of stopped Brownian motion"
-statement = "For Brownian motion stopped at the exit time of a bounded C^{2,α} domain, the expected signature determines the law of the signature (open problem)."
+statement = "Open (MF-OP-009): whether the expected signature of Brownian motion stopped at the exit time of a bounded C^{2,α} domain determines the law of its signature."
 uses = ["def:path-signature"]
 area = "probability/brownian"
 
 [[node]]
 label = "thm:robust-american-irregular-duality"
 title = "Robust American hedging with irregular payoffs"
-statement = "Under semimartingale-characteristic uncertainty, the Snell envelopes of a non-càdlàg American payoff aggregate and the superhedging duality holds with a minimal hedge (open problem)."
+statement = "Open (MF-OP-010): whether, under semimartingale-characteristic uncertainty and a non-càdlàg American payoff, the Snell envelopes aggregate and the superhedging duality holds with a minimal hedge."
 uses = ["def:nondominated-model", "def:snell-envelope"]
 area = "valuation/american"
 
 [[node]]
 label = "thm:raw-filtration-mimicking-martingale"
 title = "Mimicking Markov martingales for the raw filtration"
-statement = "Whether every peacock on ℝᵈ admits a mimicking martingale that is Markov for its raw filtration (open problem)."
+statement = "Open (MF-OP-011): whether every peacock on ℝᵈ has a mimicking martingale that is Markov for its own raw filtration."
 uses = ["def:convex-order", "def:markov-martingale"]
 area = "valuation/model-free"
 
 [[node]]
 label = "thm:zakai-uniqueness-singular-control"
 title = "Zakai uniqueness under singular control"
-statement = "The unnormalised filter is the unique solution of the Zakai equation when the singular control's jump times accumulate (open problem)."
+statement = "Open (MF-OP-012): whether the unnormalised filter is the unique solution of the Zakai equation when the jump times of the singular control accumulate."
 uses = ["def:zakai-equation"]
 area = "statistics"
 
 [[node]]
 label = "thm:multidimensional-dividend-boundary"
 title = "Optimal dividends of several insurers on the free boundary"
-statement = "The optimal local control on the free boundaries of the n-dimensional dividend problem, n ≥ 2 (open problem)."
+statement = "Open (MF-OP-013): the form of the optimal local control on the free boundaries of the dividend problem for n ≥ 2 insurers."
 uses = ["def:optimal-dividend-problem"]
 area = "risk/insurance"
 
 [[node]]
 label = "thm:robust-binomial-duality"
 title = "Quasi-sure duality for the robust multi-period binomial model"
-statement = "Whether the robust multi-period binomial model satisfies l(L^∞) = E', the duality that makes its quasi-sure theory usable (open problem)."
+statement = "Open (MF-OP-014): whether the robust multi-period binomial model satisfies the duality l(L^∞) = E', which makes its quasi-sure theory usable."
 uses = ["def:nondominated-model", "def:coin-flip-measure"]
 area = "valuation/trees"
 
 [[node]]
 label = "thm:sabr-right-tail-correction"
 title = "SABR right tail: the k^{3/2} correction"
-statement = "For ρ < 0, the log right tail of the absorbed SABR forward has a k^{3/2} correction with the constant of Cao–Huang's Conjecture 8.1 (open problem)."
+statement = "Open (MF-OP-015): for ρ < 0, whether the log right tail of the absorbed SABR forward has a k^{3/2} correction, with the constant of Conjecture 8.1 of Cao and Huang."
 uses = ["def:sabr-model"]
 area = "valuation/smile"
 family = "volatility"
@@ -896,7 +909,7 @@ family = "volatility"
 [[node]]
 label = "thm:uniform-convex-complete-mixability"
 title = "Complete mixability of uniform laws on convex bodies"
-statement = "The uniform law on a bounded convex body of ℝᵈ is n-completely mixable for every n ≥ d + 1 (open problem, Wang 2015)."
+statement = "Open (MF-OP-016, Wang 2015): whether the uniform law on a bounded convex body of ℝᵈ is n-completely mixable for every n ≥ d + 1."
 uses = ["thm:frechet-hoeffding"]
 ground = "Mathlib: Measure.map, cond"
 lean = "MathFinFrontier.uniform_convex_completelyMixable"
@@ -905,7 +918,7 @@ area = "risk/aggregation"
 [[node]]
 label = "thm:bounded-law-complete-mixability"
 title = "Complete mixability of bounded absolutely continuous laws"
-statement = "An absolutely continuous law on a bounded interval is n-completely mixable for all large n (two conflicting unrefereed resolution claims; Wang 2015)."
+statement = "Open (MF-OP-017, Wang 2015): whether an absolutely continuous law on a bounded interval is n-completely mixable for all large n; two unrefereed resolution claims conflict, and neither is checked here."
 uses = ["thm:frechet-hoeffding"]
 ground = "Mathlib: Measure.map, AbsolutelyContinuous"
 lean = "MathFinFrontier.absolutelyContinuous_eventually_completelyMixable"
@@ -914,6 +927,6 @@ area = "risk/aggregation"
 [[node]]
 label = "thm:convex-order-minimal-sum"
 title = "Convex-order minimal sums"
-statement = "Necessary and sufficient conditions on marginals F₁, …, Fₙ for the sums with these marginals to have a smallest element in convex order (open problem, Wang 2015)."
+statement = "Open (MF-OP-018, Wang 2015): which conditions on marginals F₁,…,Fₙ are necessary and sufficient for the sums with these marginals to have a smallest element in convex order."
 uses = ["def:convex-order", "thm:frechet-hoeffding"]
 area = "risk/aggregation"

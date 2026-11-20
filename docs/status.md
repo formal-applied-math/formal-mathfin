@@ -1,7 +1,7 @@
 # Status
 
 Where the program stands, in one page: what it covers, how its parts connect, and where the work
-is. Strategy is in [`roadmap.md`](roadmap.md); the per-theorem audit is in
+is. Strategy is in [`roadmap.md`](roadmap.md); the log of status changes is
 [`coverage.md`](coverage.md).
 
 ## Scope
@@ -16,33 +16,32 @@ named after. For the current split, run:
 python3 -m tools.verify.coverage_report
 ```
 
-The corpus is grouped by area: no-arbitrage, Black–Scholes, exotic options, jumps and variance
-swaps, interest rates, credit, risk measures, quantitative risk management, portfolio and
+The corpus is grouped by area, one file per area in [`../benchmarks/`](../benchmarks/): the
+stochastic-processes files follow the chapters of Saporito's *Stochastic Processes* (Brownian
+motion, martingales, Markov chains, Poisson processes, stochastic calculus, Girsanov), and the
+finance files follow the field (no arbitrage, Black–Scholes, exotic options, jumps and variance
+swaps, interest rates, credit, risk measures, quantitative risk management, portfolios and
 performance, binomial models, contracts, actuarial mathematics, market microstructure,
-commodities and DeFi, with the results that tie the stochastic foundations to them. Next to these sit the stochastic-calculus files (Brownian motion, martingales,
-stochastic calculus, Girsanov), the American-put boundary and the SVI certificate.
+commodities and DeFi). The site's [corpus page](https://formal-applied-math.github.io/formal-mathfin/corpus.html)
+lists every entry with its status.
 
 ## How the parts connect
 
-The library is organised around four pillars and the bridges between them, described with their
-current state in [`mathematical-architecture.md`](mathematical-architecture.md):
-
-| Pillar | Core |
-|---|---|
-| I. No-arbitrage as convex duality | the FTAPs, state prices, superhedging, the coherent-risk representation, all on one separation root |
-| II. Stochastic calculus | the Itô integral and formula, Girsanov, martingale representation, the integral against a price |
-| III. Probabilistic ↔ analytic | Feynman–Kac and the Black–Scholes PDE |
-| IV. Gaussian and exponential families | one normal law, its partial moments and quantile, the exponential of an integrated intensity |
+[`organization.md`](organization.md) is the account: one object (positions in a market and the
+pricing measures that price them), three questions asked of it (valuation, risk, choice), the
+model families as a second axis, probability and statistics as the tools. The four methods the
+results are proved with, and the seams between them, are in
+[`mathematical-architecture.md`](mathematical-architecture.md).
 
 Three rules keep it one library, each enforced by a test:
 
 * **Every module connects** (`tests/test_architecture.py`). It imports a library module or is
-  imported by one, and is imported by another module or cited by a corpus entry. Imports point
-  one way, `Probability/` → `Contracts/` → `Pricing/` → the limbs; a limb imports another only
-  through an edge declared in `tools/verify/layers.py`. A join lives in the module that consumes it.
-* **Every claim is checked.** No `sorry`, and every cited constant axiom-pinned
-  (`MathFin/AxiomAudit*.lean`). Prose may not outrun the statement (`tests/test_values.py`). The
-  verification ledger re-checks exactly the entries whose inputs changed.
+  imported by one, and is imported by another module or cited by a corpus entry. Imports follow
+  the layers of [`architecture.md`](architecture.md).
+* **Every claim is checked.** No `sorry`, and every cited constant
+  [axiom-pinned](glossary.md#axiom-pin). Prose may not outrun the statement
+  (`tests/test_values.py`). The [ledger](glossary.md#ledger) re-checks exactly the entries whose
+  inputs changed.
 * **The values review keeps pace.** A review is due when the corpus or the module count outgrows
   the last recorded one ([`values-review.md`](values-review.md)).
 
