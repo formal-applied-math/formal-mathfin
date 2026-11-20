@@ -72,27 +72,31 @@ section Sums
 
 variable {Ξ : Type*} [Fintype Ξ] {n : ℕ} {q : Ξ → ℝ}
 
-private lemma sum_prod_mul_prod (f : Fin n → Ξ → ℝ) :
+/-- Under the product weight `∏ᵢ q(xᵢ)` on `Fin n → Ξ`, the sum of a product of functions of the
+coordinates factorizes into the product of their sums against `q`. -/
+lemma sum_pi_weight_mul_prod (f : Fin n → Ξ → ℝ) :
     ∑ x : Fin n → Ξ, (∏ i, q (x i)) * ∏ i, f i (x i) = ∏ i, ∑ ξ, q ξ * f i ξ := by
   simp_rw [← Finset.prod_mul_distrib]
   exact (Fintype.prod_sum fun i ξ ↦ q ξ * f i ξ).symm
 
-private lemma sum_pi_weight (hq : ∑ ξ, q ξ = 1) : ∑ x : Fin n → Ξ, ∏ i, q (x i) = 1 := by
-  simpa [hq] using (Fintype.prod_sum fun (_ : Fin n) ξ ↦ q ξ).symm
-
-/-- One coordinate of an iid vector has the law `q`. -/
-private lemma sum_pi_eval (hq : ∑ ξ, q ξ = 1) (g : Ξ → ℝ) (j : Fin n) :
+/-- One coordinate of an iid vector has the law `q`: under the product weight `∏ᵢ q(xᵢ)` of a
+probability vector `q`, the sum of `g (x j)` is `∑ ξ, q ξ · g ξ`. -/
+lemma sum_pi_weight_mul_apply (hq : ∑ ξ, q ξ = 1) (g : Ξ → ℝ) (j : Fin n) :
     ∑ x : Fin n → Ξ, (∏ i, q (x i)) * g (x j) = ∑ ξ, q ξ * g ξ := by
-  have h := sum_prod_mul_prod (q := q) fun i ξ ↦ if i = j then g ξ else 1
+  have h := sum_pi_weight_mul_prod (q := q) fun i ξ ↦ if i = j then g ξ else 1
   simp only [Fintype.prod_ite_eq'] at h
   rw [h, Fintype.prod_eq_single j fun i hi ↦ by simp [hi, hq]]
   simp
 
-/-- Two distinct coordinates of an iid vector are independent. -/
-private lemma sum_pi_eval₂ (hq : ∑ ξ, q ξ = 1) (g h : Ξ → ℝ) {i j : Fin n} (hij : i ≠ j) :
+/-- Two distinct coordinates of an iid vector are independent: under the product weight
+`∏ₖ q(xₖ)` of a probability vector `q`, the sum of `g (x i) · h (x j)`, `i ≠ j`, is the product of
+the two sums against `q`. -/
+lemma sum_pi_weight_mul_apply_mul_apply (hq : ∑ ξ, q ξ = 1) (g h : Ξ → ℝ) {i j : Fin n}
+    (hij : i ≠ j) :
     ∑ x : Fin n → Ξ, (∏ k, q (x k)) * (g (x i) * h (x j))
       = (∑ ξ, q ξ * g ξ) * ∑ ξ, q ξ * h ξ := by
-  have h' := sum_prod_mul_prod (q := q) fun k ξ ↦ if k = i then g ξ else if k = j then h ξ else 1
+  have h' := sum_pi_weight_mul_prod (q := q)
+    fun k ξ ↦ if k = i then g ξ else if k = j then h ξ else 1
   have e (x : Fin n → Ξ) : (∏ k, if k = i then g (x k) else if k = j then h (x k) else 1)
       = g (x i) * h (x j) := by
     rw [Fintype.prod_eq_mul i j hij fun k hk ↦ by simp [hk.1, hk.2]]
@@ -175,14 +179,14 @@ theorem isProbabilityMeasure_mixtureLaw (hm : IsLatentModel p w) :
     IsProbabilityMeasure (mixtureLaw n p w) :=
   Measure.isProbabilityMeasure_ofWeights
     (fun ω _ ↦ mul_nonneg (hm.p_nonneg _) (Finset.prod_nonneg fun i _ ↦ hm.w_nonneg _ _))
-    (by simp [Fintype.sum_prod_type, ← Finset.mul_sum, sum_pi_weight (hm.w_sum _), hm.p_sum])
+    (by simp [Fintype.sum_prod_type, ← Finset.mul_sum, ← Fintype.prod_sum, hm.w_sum, hm.p_sum])
 
 /-- Expectation of a function of the parameter alone. -/
 private lemma integral_comp_fst (hm : IsLatentModel p w) (F : Θ → ℝ) :
     ∫ ω, F ω.1 ∂mixtureLaw n p w = ∫ θ, F θ ∂Measure.ofWeights Finset.univ p := by
   rw [integral_mixtureLaw hm, Measure.integral_ofWeights _ fun θ _ ↦ hm.p_nonneg θ]
   refine Finset.sum_congr rfl fun θ _ ↦ ?_
-  simp only [← Finset.sum_mul, sum_pi_weight (hm.w_sum θ), one_mul]
+  simp [← Finset.sum_mul, ← Fintype.prod_sum, hm.w_sum θ]
 
 private lemma variance_comp_fst (hm : IsLatentModel p w) (F : Θ → ℝ) :
     Var[fun ω : Θ × (Fin n → Ξ) ↦ F ω.1; mixtureLaw n p w]
@@ -224,7 +228,7 @@ private lemma integral_shock (hm : IsLatentModel p w) (i : Fin n) :
   rw [integral_mixtureLaw hm]
   refine Finset.sum_eq_zero fun θ _ ↦ ?_
   simp only [shock]
-  rw [sum_pi_eval (hm.w_sum θ) (fun ξ ↦ v ξ - condMean (w θ) v) i,
+  rw [sum_pi_weight_mul_apply (hm.w_sum θ) (fun ξ ↦ v ξ - condMean (w θ) v) i,
     sum_weight_mul_sub_condMean hm θ, mul_zero]
 
 /-- The idiosyncratic shocks are uncorrelated with the factor `m(Θ)`. -/
@@ -235,7 +239,7 @@ theorem covariance_latentMean_shock (hm : IsLatentModel p w) (i : Fin n) :
     mul_zero, sub_zero, integral_mixtureLaw hm]
   refine Finset.sum_eq_zero fun θ _ ↦ ?_
   simp only [latentMean, shock, Pi.mul_apply]
-  rw [sum_pi_eval (hm.w_sum θ) (fun ξ ↦ condMean (w θ) v * (v ξ - condMean (w θ) v)) i]
+  rw [sum_pi_weight_mul_apply (hm.w_sum θ) (fun ξ ↦ condMean (w θ) v * (v ξ - condMean (w θ) v)) i]
   have h0 : ∑ ξ, w θ ξ * (condMean (w θ) v * (v ξ - condMean (w θ) v)) = 0 := by
     simp_rw [mul_left_comm (w θ _)]
     rw [← Finset.mul_sum, sum_weight_mul_sub_condMean hm θ, mul_zero]
@@ -250,7 +254,7 @@ theorem covariance_shock_shock (hm : IsLatentModel p w) {i j : Fin n} (hij : i �
     integral_shock hm j, mul_zero, sub_zero, integral_mixtureLaw hm]
   refine Finset.sum_eq_zero fun θ _ ↦ ?_
   simp only [shock, Pi.mul_apply]
-  rw [sum_pi_eval₂ (hm.w_sum θ) (fun ξ ↦ v ξ - condMean (w θ) v)
+  rw [sum_pi_weight_mul_apply_mul_apply (hm.w_sum θ) (fun ξ ↦ v ξ - condMean (w θ) v)
     (fun ξ ↦ v ξ - condMean (w θ) v) hij, sum_weight_mul_sub_condMean hm θ]
   simp
 
@@ -263,7 +267,8 @@ theorem variance_shock (hm : IsLatentModel p w) (i : Fin n) :
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, sub_zero, Pi.pow_apply]
   refine Finset.sum_congr rfl fun θ _ ↦ ?_
   simp only [shock]
-  rw [sum_pi_eval (hm.w_sum θ) (fun ξ ↦ (v ξ - condMean (w θ) v) ^ 2) i, condVar_eq hm θ]
+  rw [sum_pi_weight_mul_apply (hm.w_sum θ) (fun ξ ↦ (v ξ - condMean (w θ) v) ^ 2) i,
+    condVar_eq hm θ]
 
 theorem variance_latentMean (hm : IsLatentModel p w) :
     Var[latentMean n w v; mixtureLaw n p w] = varianceHypotheticalMean p w v :=

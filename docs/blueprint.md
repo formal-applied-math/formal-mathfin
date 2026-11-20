@@ -67,6 +67,7 @@ edge is a genuine logical root.
 ```mermaid
 graph TD
   brownianMotion["Brownian motion (Mathlib, upstream)"]:::upstream
+  chainLadderPrediction["Chain-ladder prediction"]:::proved
   coinFlipMeasure["The coin-flip path law"]:::proved
   contract["Contract"]:::proved
   convexRiskMeasure["Convex risk measure"]:::proved
@@ -440,6 +441,7 @@ graph TD
   empiricalCdfStrongLaw --> largePortfolioLimit
   brownianMotion --> levyCharacterization
   survivalFunction --> lifeInsuranceEpv
+  chainLadderPrediction --> mackChainLadder
   emm --> mackChainLadder
   standardNormalCdf --> margrabe
   esscherTilt --> margrabe
@@ -970,6 +972,7 @@ graph TD
 | node | status | issues and pull requests |
 |---|---|---|
 | `def:brownian-motion` Brownian motion (Mathlib, upstream) | ✅ upstream | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Abrownian-motion%22%20in%3Abody) |
+| `def:chain-ladder-prediction` Chain-ladder prediction | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Achain-ladder-prediction%22%20in%3Abody) |
 | `def:coin-flip-measure` The coin-flip path law | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoin-flip-measure%22%20in%3Abody) |
 | `def:contract` Contract | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract%22%20in%3Abody) |
 | `def:convex-risk-measure` Convex risk measure | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-risk-measure%22%20in%3Abody) |

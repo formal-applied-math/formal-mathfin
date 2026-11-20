@@ -1806,11 +1806,11 @@
     },
     {
       "id": "qrm-stop-loss-lattice-recursion",
-      "name": "Stop-loss recursion of an arithmetic loss",
-      "description": "For an integrable loss S taking values in hℤ almost surely (h ≥ 0), the stop-loss transform satisfies E[(S − (j+1)h)⁺] = E[(S − jh)⁺] − h·P(S > jh) at every integer level j, and the Rockafellar–Uryasev objective c ↦ c + (1−α)⁻¹E[(S − c)⁺] increases by h·(1 − (1−α)⁻¹P(S > jh)) from jh to (j+1)h. The general statement (no mass strictly inside (c, c+h)) is integral_max_sub_add_of_gap.",
+      "name": "Stop-Loss Recursion and Expected Shortfall of an Arithmetic Loss",
+      "description": "For an integrable loss S taking values in hℤ almost surely (h > 0) and α ∈ (0, 1): the stop-loss transform satisfies E[(S − (j+1)h)⁺] = E[(S − jh)⁺] − h·P(S > jh) at every integer level j; the Rockafellar–Uryasev objective c ↦ c + (1−α)⁻¹E[(S − c)⁺] increases by h·(1 − (1−α)⁻¹P(S > jh)) from jh to (j+1)h; and expected shortfall ES_α(S) is the least value of that objective over the lattice points jh, so the recursion computes it. The general statement (no mass strictly inside (c, c+h)) is integral_max_sub_add_of_gap.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Risk.StopLossGap\n\nopen MeasureTheory\nopen MathFin\n\n/-- The stop-loss recursion of an arithmetic loss `S ∈ hℤ`, and the increment of the\nRockafellar–Uryasev objective across each lattice cell. -/\ntheorem stop_loss_lattice_recursion {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {S : Ω → ℝ} (hSm : Measurable S) (hS : Integrable S P) {h : ℝ}\n    (hh : 0 ≤ h) (hlat : ∀ᵐ ω ∂P, ∃ n : ℤ, S ω = n * h) (j : ℤ) (α : ℝ) :\n    ∫ ω, max (S ω - (j + 1) * h) 0 ∂P =\n        ∫ ω, max (S ω - j * h) 0 ∂P - h * P.real {ω | j * h < S ω} ∧\n      rockafellarUryasev S P α (j * h + h) =\n        rockafellarUryasev S P α (j * h) + h * (1 - (1 - α)⁻¹ * P.real {ω | j * h < S ω}) :=\n  ⟨integral_max_sub_succ_mul_of_lattice hSm hS hh hlat j,\n    rockafellarUryasev_add_of_gap hSm hS hh (ae_notMem_Ioo_of_lattice hh hlat j) α⟩\n"
+        "lean": "import MathFin.Risk.StopLossGap\n\nopen MeasureTheory\nopen MathFin\n\n/-- The stop-loss recursion of an arithmetic loss `S ∈ hℤ`, the increment of the\nRockafellar–Uryasev objective across each lattice cell, and expected shortfall as the least value\nof that objective on the lattice. -/\ntheorem stop_loss_lattice_recursion {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {S : Ω → ℝ} (hSm : Measurable S) (hS : Integrable S P) {h : ℝ}\n    (hh : 0 < h) (hlat : ∀ᵐ ω ∂P, ∃ n : ℤ, S ω = n * h) {α : ℝ} (hα : α ∈ Set.Ioo 0 1) :\n    (∀ j : ℤ, ∫ ω, max (S ω - (j + 1) * h) 0 ∂P =\n        ∫ ω, max (S ω - j * h) 0 ∂P - h * P.real {ω | j * h < S ω}) ∧\n      (∀ j : ℤ, rockafellarUryasev S P α (j * h + h) =\n        rockafellarUryasev S P α (j * h) + h * (1 - (1 - α)⁻¹ * P.real {ω | j * h < S ω})) ∧\n      IsLeast (Set.range fun j : ℤ ↦ rockafellarUryasev S P α (j * h)) (expectedShortfall S P α) :=\n  ⟨integral_max_sub_succ_mul_of_lattice hSm hS hh.le hlat,\n    fun j ↦ rockafellarUryasev_add_of_gap hSm hS hh.le (ae_notMem_Ioo_of_lattice hh.le hlat j) α,\n    isLeast_rockafellarUryasev_lattice hSm hS hh hlat hα⟩\n"
       },
       "metadata": {
         "chapter": 8,
@@ -1826,7 +1826,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof in MathFin/Risk/StopLossGap.lean (contributed in #513, generalized from the natural-number lattice with a nonnegativity hypothesis to any gap in the law). Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof in MathFin/Risk/StopLossGap.lean (contributed in #513, generalized from the natural-number lattice with a nonnegativity hypothesis to any gap in the law). The expected-shortfall part rests on isLeast_rockafellarUryasev: the objective is affine on each lattice cell, so its least value over the line is taken at a lattice point. Axioms-clean."
       }
     }
   ]
