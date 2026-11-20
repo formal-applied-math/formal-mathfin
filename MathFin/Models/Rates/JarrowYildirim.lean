@@ -14,26 +14,27 @@ public import MathFin.Models.Rates.VasicekBondPrice
 
 Notation. Time `t` runs on `[0,T]`, where `T` is the payment date (the caplet maturity, or for the
 year-on-year payment (the index ratio over `[S,T]`) the end of `[S,T]`, with start `S < T`). The
-nominal and real short rates are Gaussian (Hull–White) and the price index `I_t` is a geometric
-Brownian motion, with values `I₀`, `I_S`, `I_T` at times `0`, `S`, `T`. `σ_I, σ_r, σ_n` are the
-volatilities of the index and of the real and nominal short rates, `a_r, a_n` their mean reversions,
-`ρ_{rI}, ρ_{nI}, ρ_{nr}` the correlations of the driving Brownian motions (real rate–index, nominal
-rate–index, nominal–real rate), and `B_x(t,T) = (1 − e^{−a_x(T−t)})/a_x` (`x ∈ {r, n}`) the
-Hull–White loadings (not to be confused with the money-market account `B_T`). `Qn` is the nominal
-pricing measure with money-market account `B_T` and expectation `𝔼^{Qn}`; `Q^T` and `𝔼^T` are the
-nominal `T`-forward measure and its expectation. `Pⁿ(t,T)` and `Pʳ(t,T)` are the nominal and real
-zero-coupon bond prices, `F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is the forward index (a `Q^T`-martingale in
-`t`) and `F = F(0,T)` its time-0 value, the curve forward. `jyVariance` is the integrated
-log-variance `V(0,T)` of `F(·,T)` (defined below); `V` is a log-variance (a free input of the caplet
-statement), `F₀` the `Q^T`-mean of the lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)`
-under `Q^T`, `K` a caplet strike, `Φ` the standard normal distribution function and
-`d_{1,2} = (log(F/K) ± V/2)/√V`. These symbols (`t`, `T`, `S`, `I_t`, `I₀`, `I_S`, `I_T`, `σ_·`,
-`a_·`, `ρ_{··}`, `B_x(t,T)`, `Qn`, `B_T`, `𝔼^{Qn}`, `Q^T`, `𝔼^T`, `Pⁿ(t,T)`, `Pʳ(t,T)`, `F(t,T)`,
-`F`, `V`, `V(0,T)`, `F₀`, `Z`, `K`, `Φ`, `d_{1,2}`) keep these meanings in every docstring below,
-except in the general lemmas `quad2_nonneg`, `quad3_nonneg` and `blackCaplet_sqrt_variance`, whose
-letters are free arguments; hypothesis names (`hident`, `hZ`, `hmart`, `hR`) and local symbols (`μ`,
-`m`, `m_S`, `R_S`, `yⁱ`, `Dⁱ`, ...) are introduced where first used. This module records what
-follows without the SDE calculus.
+nominal and real short rates are Gaussian (Hull–White) and the price index `I_t` is lognormal with
+constant volatility `σ_I` (log-drift `n_t − r_t`, the nominal minus real short rate), with values
+`I₀`, `I_S`, `I_T` at times `0`, `S`, `T`. `σ_I, σ_r, σ_n` are the volatilities of the index and of
+the real and nominal short rates, `a_r, a_n` their mean reversions, `ρ_{rI}, ρ_{nI}, ρ_{nr}` the
+correlations of the driving Brownian motions (real rate–index, nominal rate–index, nominal–real
+rate), and `B_x(t,T) = (1 − e^{−a_x(T−t)})/a_x` (`x ∈ {r, n}`) the Hull–White loadings (not to be
+confused with the money-market account `B_T`). `Qn` is the nominal pricing measure with money-market
+account `B_T` and expectation `𝔼^{Qn}`; `Q^T` and `𝔼^T` are the nominal `T`-forward measure and its
+expectation. `Pⁿ(t,T)` and `Pʳ(t,T)` are the nominal and real zero-coupon bond prices,
+`F(t,T) = I_t·Pʳ(t,T)/Pⁿ(t,T)` is the forward index (a `Q^T`-martingale in `t`) and `F = F(0,T)` its
+time-0 value, the curve forward. `jyVariance` is the integrated log-variance `V(0,T)` of `F(·,T)`
+(defined below); `V` is a log-variance (a free input of the caplet statement), `F₀` the `Q^T`-mean
+of the lognormal index law `I_T = F₀·exp(−V/2 + √V·Z)`, `Z ~ N(0,1)` under `Q^T`, `K` a caplet
+strike, `Φ` the standard normal distribution function and `d_{1,2} = (log(F/K) ± V/2)/√V`. These
+symbols (`t`, `T`, `S`, `I_t`, `I₀`, `I_S`, `I_T`, `σ_·`, `a_·`, `ρ_{··}`, `B_x(t,T)`, `Qn`, `B_T`,
+`𝔼^{Qn}`, `Q^T`, `𝔼^T`, `Pⁿ(t,T)`, `Pʳ(t,T)`, `F(t,T)`, `F`, `V`, `V(0,T)`, `F₀`, `Z`, `K`, `Φ`,
+`d_{1,2}`) keep these meanings in every docstring below, except in the general lemmas
+`quad2_nonneg`, `quad3_nonneg` and `blackCaplet_sqrt_variance`, whose letters are free arguments;
+hypothesis names (`hident`, `hZ`, `hmart`, `hR`) and local symbols (`μ`, `m`, `m_S`, `R_S`, `yⁱ`,
+`Dⁱ`, ...) are introduced where first used. This module records what follows without the SDE
+calculus.
 
 ## Main definitions
 
@@ -380,11 +381,11 @@ it equals `ρ_{nr}` when `a_n = a_r` and in general differs from it), and `yⁿ 
 deviation of each short rate at `S` from its time-0 forward rate `fⁱ(0,S)`, as in
 `integral_exp_hwD_forwardMeasure`), with means `mⁱ` and variances `Vⁱ` (`0 ≤ Vⁿ`, `0 ≤ Vʳ`,
 `ρ² ≤ 1`) and covariance `Cov = ρ·√(Vⁿ·Vʳ)` (`hCov`). `Bⁿ = B_n(S,T)` and `Bʳ = B_r(S,T)` are the
-Hull–White loadings over `[S,T]` (free reals here; they enter only through `hR`), and
-`Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the hypotheses of `jyYoyForward_eq_bondRatio` (including
-`hmart`), and assuming the bond ratio `R_S = Pʳ(S,T)/Pⁿ(S,T)` has the Hull–White reconstitution form
-`hR` (`R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times
-`exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
+Hull–White loadings over `[S,T]` (free reals here; among the hypotheses they enter only through
+`hR`), and `Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the hypotheses of `jyYoyForward_eq_bondRatio`
+(including `hmart`), and assuming the bond ratio `R_S = Pʳ(S,T)/Pⁿ(S,T)` has the Hull–White
+reconstitution form `hR` (`R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))`
+times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
