@@ -212,18 +212,20 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
   simpa [bsTerminal] using h2.symm
 
 /-- **ZC inflation caplet: the priced payoff is `Pⁿ(0,T)` times the Black caplet on the curve
-forward.** For `F₀ > 0`, `V > 0`, `K > 0`, under `hident`, `hZ` and `0 < Pⁿ(0,T) = 𝔼^{Qn}[1/B_T]`
-with `B_T` positive and measurable, and `Qn` a probability measure (inherited from the section
-variable of `value_caplet_black76`): `𝔼^{Qn}[(I_T − K)⁺/B_T] = Pⁿ(0,T)·blackCaplet F K √V 1 1`, i.e.
-`Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with `d₁ = bsd1 F K 0 √V 1`, `d₂ = bsd2 F K 0 √V 1`. That `Q^T` is a
-probability measure follows from `hZ`. The caplet is the contract `caplet () 0 0 1 K` of
-`MathFin.Contracts.value_caplet_black76` with deflator `fun _ => 1/B_T` and observed index
-`fun _ _ => I_T`; both are time-constant, so the contract's reset and payment dates `0, 0` are
-placeholders and the payment date `T` enters only through `B_T`, hence `zeroCurve Qn D 0 = Pⁿ(0,T)`;
-`jyForwardIndex_lognormal_eq_curves` gives `F₀ = F`. Strike convention: the market payoff
-`N[(I_T/I₀ − 1) − κ]⁺` (notional `N`, `κ` the total, non-annualised strike over `[0,T]`) is
-`(N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`; an annual quoted strike `k` is `K = I₀(1+k)^T`. `V` is a
-free input here; the statement does not identify it with `jyVariance`. -/
+forward.** For `F₀ > 0` (the mean of the lognormal index law), `V > 0`, `K > 0`, under `hident`
+(`𝔼^{Qn}[I_T/B_T] = I₀·Pʳ(0,T)`), `hZ` (`I_T = bsTerminal F₀ 0 √V 1 Z` with `Z ~ N(0,1)` under
+`Q^T`) and `0 < Pⁿ(0,T) = 𝔼^{Qn}[1/B_T]` with `B_T` positive and measurable, and `Qn` a probability
+measure (inherited from the section variable of `value_caplet_black76`):
+`𝔼^{Qn}[(I_T − K)⁺/B_T] = Pⁿ(0,T)·blackCaplet F K √V 1 1` with `F = I₀·Pʳ(0,T)/Pⁿ(0,T)` the curve
+forward, i.e. `Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with `d₁ = bsd1 F K 0 √V 1`, `d₂ = bsd2 F K 0 √V 1`.
+That `Q^T` is a probability measure follows from `hZ`. The caplet is the contract
+`caplet () 0 0 1 K` of `MathFin.Contracts.value_caplet_black76` with deflator `D = fun _ => 1/B_T`
+and observed index `fun _ _ => I_T`; both are time-constant, so the contract's reset and payment
+dates `0, 0` are placeholders and the payment date `T` enters only through `B_T`, hence
+`zeroCurve Qn D 0 = Pⁿ(0,T)`; `jyForwardIndex_lognormal_eq_curves` gives `F₀ = F`. Strike
+convention: the market payoff `N[(I_T/I₀ − 1) − κ]⁺` (notional `N`, `κ` the total, non-annualised
+strike over `[0,T]`) is `(N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`; an annual quoted strike `k` is
+`K = I₀(1+k)^T`. `V` is a free input here; the statement does not identify it with `jyVariance`. -/
 theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)
@@ -356,16 +358,16 @@ theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
   field_simp [(hISpos ω).ne']
 
 /-- **YoY forward in the printed convexity shape (Bagaria ch. 17 §17.4, eq. 17.10; Brigo–Mercurio
-§16.3).** Let `Z1, Z2` be independent standard normals under `μ` (`hZ1`, `hZ2`, `hindep`), `ρ` a
-correlation of the two rate deviations at `S` (a free parameter of the statement; it equals `ρ_{nr}`
-when `a_n = a_r` and in general differs from it), and `yⁿ = mⁿ + √Vⁿ·Z1`,
+§16.3).** Let `μ = Q^T`, and `Z1, Z2` independent standard normals under `μ` (`hZ1`, `hZ2`,
+`hindep`), `ρ` a correlation of the two rate deviations at `S` (a free parameter of the statement;
+it equals `ρ_{nr}` when `a_n = a_r` and in general differs from it), and `yⁿ = mⁿ + √Vⁿ·Z1`,
 `yʳ = mʳ + √Vʳ·(ρ·Z1 + √(1−ρ²)·Z2)` the two Gaussian rate deviations of `yoyConvexity_eq`, with
 means `mⁱ` and variances `Vⁱ` (`0 ≤ Vⁿ`, `0 ≤ Vʳ`, `ρ² ≤ 1`) and covariance `Cov = ρ·√(Vⁿ·Vʳ)`
 (`hCov`). `Bⁿ = B_n(S,T)` and `Bʳ = B_r(S,T)` are the Hull–White loadings over `[S,T]` (free reals
 here; they enter only through `hR`), and `Dⁱ = hwD Bⁱ Vⁱ = −Bⁱ²Vⁱ/2`. Under the hypotheses of
-`jyYoyForward_eq_bondRatio`, and assuming the bond ratio has the Hull–White reconstitution form `hR`
-(`R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))` times
-`exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
+`jyYoyForward_eq_bondRatio` (including `hmart`), and assuming the bond ratio has the Hull–White
+reconstitution form `hR` (`R_S` is the naive ratio of forwards `Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T))`
+times `exp(Dʳ − Dⁿ − Bʳyʳ + Bⁿyⁿ)`),
 
   `𝔼^T[I_T/I_S] = (Pʳ(0,T)·Pⁿ(0,S)/(Pʳ(0,S)·Pⁿ(0,T)))·exp(−Bʳmʳ + Bⁿmⁿ + Bⁿ²Vⁿ − BʳBⁿ·Cov)`,
 
