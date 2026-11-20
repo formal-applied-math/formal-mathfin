@@ -177,7 +177,7 @@ family = "default"
 label = "thm:stefan-uniqueness"
 title = "Stefan uniqueness with accumulating jumps"
 statement = "Physical Stefan problem uniqueness when jumps accumulate at time zero (open problem)."
-uses = ["def:brownian-motion"]
+uses = ["def:supercooled-stefan-solution"]
 area = "valuation/default"
 family = "default"
 
@@ -474,7 +474,7 @@ area = "market"
 label = "thm:semistatic-ftap"
 title = "Semistatic FTAP with entropy"
 statement = "A semistatic no-arbitrage criterion for the existence of an equivalent martingale measure of finite entropy calibrated to option prices (open problem)."
-uses = ["thm:dmw-ftap", "thm:market-carr-madan"]
+uses = ["def:calibrated-martingale-measures", "def:semistatic-strategy", "thm:dmw-ftap"]
 area = "valuation/general"
 
 [[node]]
@@ -547,7 +547,7 @@ area = "choice/portfolio"
 label = "thm:time-inconsistent-equilibrium"
 title = "Relaxed equilibria under time inconsistency"
 statement = "Relaxed equilibria exist with action-dependent diffusion under time inconsistency (open problem)."
-uses = ["thm:sde-strong-solution"]
+uses = ["def:relaxed-controlled-diffusion"]
 area = "choice/dynamic"
 
 [[node]]
@@ -646,7 +646,7 @@ family = "model-free"
 label = "thm:rough-heston-pathwise-uniqueness"
 title = "Rough-Heston pathwise uniqueness"
 statement = "Pathwise uniqueness holds for the square-root rough-Heston variance equation (open problem)."
-uses = ["thm:sde-strong-solution"]
+uses = ["def:stochastic-volterra-equation"]
 area = "valuation/volatility"
 family = "volatility"
 
@@ -662,7 +662,7 @@ family = "volatility"
 label = "thm:schrodinger-spx-vix"
 title = "Schrödinger calibration of SPX/VIX"
 statement = "Integrable Schrödinger potentials exist for continuum SPX/VIX calibration (open problem)."
-uses = ["thm:model-free-variance"]
+uses = ["def:calibrated-martingale-measures", "thm:model-free-variance"]
 area = "valuation/volatility"
 family = "volatility"
 
@@ -739,3 +739,54 @@ title = "Delbaen–Schachermayer: no free lunch with vanishing risk"
 statement = "For a locally bounded semimartingale price process, no free lunch with vanishing risk holds if and only if there is an equivalent local martingale measure; the library proves only that an equivalent martingale measure excludes simple arbitrage (thm:continuous-ftap)."
 uses = ["thm:continuous-ftap", "thm:semimartingale-integral", "thm:dmw-multi-asset"]
 area = "market"
+
+# The objects the catalogued open problems need before they can be stated in Lean
+# (docs/research-problems/problems.json, `formalization.lean_statement.needs`). A problem that
+# cannot be stated yet stays in the catalogue; these nodes are what the library builds toward.
+
+[[node]]
+label = "def:stochastic-volterra-equation"
+title = "Stochastic Volterra equations"
+statement = "A solution of X_t = x₀ + ∫₀ᵗ K(t−s) b(X_s) ds + ∫₀ᵗ K(t−s) σ(X_s) dB_s for a kernel K ∈ L²_loc, possibly singular at 0: a continuous adapted process equal to the right side almost surely at every t, the Itô integral taken for each t of its own integrand s ↦ K(t−s) σ(X_s). Rough volatility is stated in it."
+uses = ["def:ito-integral-clm", "thm:sde-strong-solution"]
+area = "valuation/volatility"
+family = "volatility"
+
+[[node]]
+label = "def:supercooled-stefan-solution"
+title = "Physical solutions of the supercooled Stefan problem"
+statement = "For an initial density g, a nondecreasing càdlàg loss Λ_t = ∫₀^∞ P(τˣ ≤ t) g(x) dx, where τˣ is the first time x + B − Λ reaches 0, whose jumps obey the physical minimal-jump rule: the mean-field model of default contagion through a common loss."
+uses = ["def:brownian-motion"]
+area = "valuation/default"
+family = "default"
+
+[[node]]
+label = "def:relaxed-controlled-diffusion"
+title = "Relaxed controlled diffusions"
+statement = "Relaxed Markov policies π(x, du) on a compact action set, the controlled generator L^π f = ∫_U (b·∇f + ½ tr(a D²f)) π(·, du) with action-dependent covariance a(x, u), and the reward of a policy along its diffusion: the setting of time-inconsistent control."
+uses = ["thm:sde-strong-solution"]
+area = "choice/dynamic"
+
+[[node]]
+label = "def:calibrated-martingale-measures"
+title = "Calibrated martingale measures of finite entropy"
+statement = "Laws Q of the prices at two dates with prescribed marginals (read from call prices), the martingale condition E_Q[Y | X] = X, and finite relative entropy H(Q | P) against a reference law: the feasible set of entropic calibration."
+uses = ["def:emm", "thm:market-carr-madan"]
+ground = "Mathlib: InformationTheory.klDiv, condExp"
+area = "valuation/general"
+
+[[node]]
+label = "def:semistatic-strategy"
+title = "Semistatic trading strategies"
+statement = "A dynamic position h(X)(Y − X) in the underlying together with a static payoff g(Y) bought at its market price ∫ g dν, and semistatic arbitrage: the strategies of model-independent pricing and robust hedging."
+uses = ["def:emm", "thm:market-carr-madan"]
+area = "valuation/general"
+
+[[node]]
+label = "thm:kyle-equilibrium-unique"
+title = "Uniqueness of the Kyle equilibrium"
+statement = "In the one-period Gaussian Kyle model every equilibrium among Borel strategies is Kyle's affine one (resolution reported by Monteiro–Tourky, 2026; unchecked here)."
+uses = ["thm:kyle-equilibrium", "thm:glosten-milgrom-quote"]
+lean = "MathFinFrontier.kyle_equilibrium_unique"
+area = "choice/trading"
+family = "mechanisms"

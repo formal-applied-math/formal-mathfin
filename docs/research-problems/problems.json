@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "updated_at": "2026-10-21",
+  "schema_version": 2,
+  "updated_at": "2026-11-19",
   "scope": "Research problems in mathematical finance, independent of immediate Lean implementation readiness.",
   "organization_reference": {
     "title": "Ulam AI / UnsolvedMath",
@@ -12,7 +12,8 @@
     "solved": "A resolution supported by the recorded evidence; a faithful kernel-checked proof qualifies.",
     "resolution_reported": "A proposed resolution was located but has not been independently checked in this catalogue.",
     "formalization": "Independent of mathematical status and scoped to this repository.",
-    "difficulty": "Unassessed unless supported by a named assessment; GitHub difficulty:hard denotes required expertise, not a prediction of solvability."
+    "difficulty": "Unassessed unless supported by a named assessment; GitHub difficulty:hard denotes required expertise, not a prediction of solvability.",
+    "lean_statement": "Whether the question can be stated in Lean against the current library: stated (a sorry-closed theorem in MathFinFrontier/, named by `lean`), statable (every object exists; not yet written), blocked (needs the frontier nodes listed in `needs`), not_a_proposition (the question asks for a theory, hypotheses or a criterion; `needs` lists the objects candidate answers use), or proved. It never decides whether a problem is catalogued: a blocked problem stays, and its `needs` are what the library builds next."
   },
   "problems": [
     {
@@ -32,7 +33,16 @@
       "formalization": {
         "status": "not_started",
         "scope": "this repository",
-        "declarations": []
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:rough-heston-pathwise-uniqueness",
+          "needs": [
+            "def:stochastic-volterra-equation"
+          ],
+          "lean": null,
+          "note": "The library has the Itô integral and Lipschitz SDEs; it lacks the solution notion of a stochastic Volterra equation (#532)."
+        }
       },
       "known_results": [
         "Weak existence and uniqueness in law are available for this affine Volterra model.",
@@ -103,7 +113,16 @@
       "formalization": {
         "status": "not_started",
         "scope": "this repository",
-        "declarations": []
+        "declarations": [],
+        "lean_statement": {
+          "status": "blocked",
+          "blueprint": "thm:stefan-uniqueness",
+          "needs": [
+            "def:supercooled-stefan-solution"
+          ],
+          "lean": null,
+          "note": "Needs the physical solutions of the supercooled Stefan problem (#533); Brownian motion and hitting times exist."
+        }
       },
       "known_results": [
         "Muñoz reduces global uniqueness to short-time uniqueness and rules out accumulation of jumps at positive times for integrable initial data.",
@@ -182,7 +201,16 @@
       "formalization": {
         "status": "not_started",
         "scope": "this repository",
-        "declarations": []
+        "declarations": [],
+        "lean_statement": {
+          "status": "not_a_proposition",
+          "blueprint": "thm:time-inconsistent-equilibrium",
+          "needs": [
+            "def:relaxed-controlled-diffusion"
+          ],
+          "lean": null,
+          "note": "The question asks for an existence theory with its hypotheses, not one proposition; the needed objects make candidate answers statable (#534)."
+        }
       },
       "known_results": [
         "Wang–Yu–Zhang–Zhou prove existence through vanishing entropy regularization for drift control and explicitly leave controlled diffusion to future work.",
@@ -252,7 +280,16 @@
       "formalization": {
         "status": "not_started",
         "scope": "this repository",
-        "declarations": []
+        "declarations": [],
+        "lean_statement": {
+          "status": "not_a_proposition",
+          "blueprint": "thm:schrodinger-spx-vix",
+          "needs": [
+            "def:calibrated-martingale-measures"
+          ],
+          "lean": null,
+          "note": "The question asks for sufficient hypotheses; the feasible set is the shared object (#535)."
+        }
       },
       "known_results": [
         "Nutz–Wiesel establish integrable potentials for a two-marginal martingale bridge under their assumptions, while explicitly identifying the additional SPX/VIX constraints as unresolved.",
@@ -344,7 +381,17 @@
       "formalization": {
         "status": "not_started",
         "scope": "this repository",
-        "declarations": []
+        "declarations": [],
+        "lean_statement": {
+          "status": "not_a_proposition",
+          "blueprint": "thm:semistatic-ftap",
+          "needs": [
+            "def:calibrated-martingale-measures",
+            "def:semistatic-strategy"
+          ],
+          "lean": null,
+          "note": "The question asks for a criterion; a candidate criterion is statable once both objects exist (#535, #536)."
+        }
       },
       "known_results": [
         "Nutz–Wiesel–Zhao assume nonemptiness of this class in (1.3), then prove the entropy-minimization and semistatic-utility results. They explicitly ask for a trading criterion for that assumption.",
@@ -418,7 +465,14 @@
         "declarations": [
           "Stopping.brownianUsualLogBoundary_convexOn",
           "brownianUsualStockBoundary_strictConvexOn"
-        ]
+        ],
+        "lean_statement": {
+          "status": "proved",
+          "blueprint": null,
+          "needs": [],
+          "lean": null,
+          "note": "Proved in MathFin/; see declarations."
+        }
       },
       "known_results": [
         "Solved by Robert Martin; the repository records the imported Lean proof."
@@ -473,7 +527,14 @@
           "fullCertificateFormula_iff",
           "extendedCertificateFormula_iff_bsSmile_convex",
           "butterflyFreeFormula_iff_isNormalizedCallPrice"
-        ]
+        ],
+        "lean_statement": {
+          "status": "proved",
+          "blueprint": "thm:svi-market-realisation",
+          "needs": [],
+          "lean": null,
+          "note": "Proved in MathFin/; see declarations."
+        }
       },
       "known_results": [
         "Solved by Robert Martin; the repository records the imported Lean proof."
@@ -523,9 +584,16 @@
       "mathematical_status": "resolution_reported",
       "difficulty": "unassessed",
       "formalization": {
-        "status": "not_started",
+        "status": "stated",
         "scope": "this repository",
-        "declarations": []
+        "declarations": [],
+        "lean_statement": {
+          "status": "stated",
+          "blueprint": "thm:kyle-equilibrium-unique",
+          "needs": [],
+          "lean": "MathFinFrontier.kyle_equilibrium_unique",
+          "note": "Stated after Monteiro–Tourky, Theorem 1.1 (uniqueness direction), closed by sorry; a proof settles the problem (#537)."
+        }
       },
       "known_results": [
         "Monteiro–Tourky report uniqueness without restricting insider strategies to affine ones."
@@ -554,13 +622,18 @@
         "conclusion": "Do not publish this as an unqualified open problem. Track the reported resolution and review status separately."
       },
       "related_problems": [],
-      "issue_number": null,
-      "issue_url": null,
+      "issue_number": 537,
+      "issue_url": "https://github.com/formal-applied-math/formal-mathfin/issues/537",
       "history": [
         {
           "date": "2026-10-21",
           "status": "resolution_reported",
           "reason": "ANU Working Paper 708 found during the resolution search."
+        },
+        {
+          "date": "2026-11-19",
+          "status": "resolution_reported",
+          "reason": "Stated in Lean from Theorem 1.1 of the reported resolution (MathFinFrontier/OpenProblems/KyleUniqueness.lean)."
         }
       ]
     }

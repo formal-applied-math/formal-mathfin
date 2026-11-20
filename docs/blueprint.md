@@ -246,6 +246,7 @@ graph TD
   sviMarketRealisation["A butterfly-free SVI slice is a market"]:::proved
   kellyIsLogOptimal["The Kelly wealth is the numéraire portfolio of the betting market"]:::proved
   subgraph frontier_choiceDynamic["⏳ frontier · Choice · Dynamic choice"]
+    relaxedControlledDiffusion["Relaxed controlled diffusions"]:::frontier
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
     timeInconsistentEquilibrium["Relaxed equilibria under time inconsistency"]:::frontier
@@ -263,6 +264,7 @@ graph TD
   end
   subgraph frontier_choiceTrading["⏳ frontier · Choice · Market microstructure"]
     kyleEquilibrium["Kyle single-period equilibrium"]:::frontier
+    kyleEquilibriumUnique["Uniqueness of the Kyle equilibrium"]:::frontier
     propagatorNoArbitrage["Transient-impact propagator no-arbitrage"]:::frontier
   end
   subgraph frontier_market["⏳ frontier · Positions and markets"]
@@ -330,6 +332,7 @@ graph TD
     perpetualAmerican["Perpetual American option"]:::frontier
   end
   subgraph frontier_valuationDefault["⏳ frontier · Valuation · Credit"]
+    supercooledStefanSolution["Physical solutions of the supercooled Stefan problem"]:::frontier
     blackCoxDefault["Black–Cox first-passage default"]:::frontier
     cvaIsPrice["CVA is the price of the default loss"]:::frontier
     mertonCreditSpread["Merton structural credit spread"]:::frontier
@@ -348,6 +351,8 @@ graph TD
     siegelParadox["Siegel's paradox"]:::frontier
   end
   subgraph frontier_valuationGeneral["⏳ frontier · Valuation · Arbitrage pricing"]
+    calibratedMartingaleMeasures["Calibrated martingale measures of finite entropy"]:::frontier
+    semistaticStrategy["Semistatic trading strategies"]:::frontier
     semistaticFtap["Semistatic FTAP with entropy"]:::frontier
     varianceOptimalHedging["Variance-optimal hedging"]:::frontier
   end
@@ -383,6 +388,7 @@ graph TD
     lmmForwardMartingale["LIBOR market model forward martingale"]:::frontier
   end
   subgraph frontier_valuationVolatility["⏳ frontier · Valuation · Volatility models"]
+    stochasticVolterraEquation["Stochastic Volterra equations"]:::frontier
     batesCf["Bates characteristic function"]:::frontier
     cevCall["CEV European call"]:::frontier
     dupireLocalVol["Dupire local volatility"]:::frontier
@@ -827,7 +833,15 @@ graph TD
   kellyCriterion --> kellyIsLogOptimal
   logOptimalNumeraireOnePeriod --> kellyIsLogOptimal
   oneDateMarket --> kellyIsLogOptimal
+  emm --> calibratedMartingaleMeasures
+  marketCarrMadan --> calibratedMartingaleMeasures
   standardNormalCdf --> realErf
+  sdeStrongSolution --> relaxedControlledDiffusion
+  emm --> semistaticStrategy
+  marketCarrMadan --> semistaticStrategy
+  itoIntegralClm --> stochasticVolterraEquation
+  sdeStrongSolution --> stochasticVolterraEquation
+  brownianMotion --> supercooledStefanSolution
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
   snellEnvelope --> americanPutPremium
@@ -903,6 +917,8 @@ graph TD
   bsCall --> kouJumpDiffusion
   expectedShortfallCoherent --> kusuoka
   coherentRiskMeasure --> kusuoka
+  kyleEquilibrium --> kyleEquilibriumUnique
+  glostenMilgromQuote --> kyleEquilibriumUnique
   oneFactorCopulaDefault --> largePoolLoss
   gaussianFactorCopula --> largePoolLoss
   standardNormalCdf --> largePoolLoss
@@ -938,23 +954,25 @@ graph TD
   brownianMotion --> reflectionPrinciple
   coherentRiskMeasure --> riskMeasureFamilies
   riskParityFoc --> riskParityNAsset
-  sdeStrongSolution --> roughHestonPathwiseUniqueness
+  stochasticVolterraEquation --> roughHestonPathwiseUniqueness
   bsCall --> sabrHagan
+  calibratedMartingaleMeasures --> schrodingerSpxVix
   modelFreeVariance --> schrodingerSpxVix
   sdeStrongSolution --> sdeContinuousSolution
   marketCompleteness --> secondFtapConverse
   secondFtap --> secondFtapConverse
   itoIntegralClm --> semimartingaleIntegral
   levyCharacterization --> semimartingaleIntegral
+  calibratedMartingaleMeasures --> semistaticFtap
+  semistaticStrategy --> semistaticFtap
   dmwFtap --> semistaticFtap
-  marketCarrMadan --> semistaticFtap
   itoFormulaC2 --> siegelParadox
   quantile --> sklarGeneral
-  brownianMotion --> stefanUniqueness
+  supercooledStefanSolution --> stefanUniqueness
   stochasticFubini --> stochasticFubiniLevy
   stochasticFubini --> stochasticFubiniProcess
   survivalFunction --> survivalModel
-  sdeStrongSolution --> timeInconsistentEquilibrium
+  relaxedControlledDiffusion --> timeInconsistentEquilibrium
   margrabe --> twoAssetOptionFormulas
   bsCall --> twoAssetOptionFormulas
   bsCall --> varianceGammaCall
@@ -1150,7 +1168,12 @@ graph TD
 | `thm:quotes-market-realisation` Arbitrage-free call quotes are the prices of a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aquotes-market-realisation%22%20in%3Abody) |
 | `thm:svi-market-realisation` A butterfly-free SVI slice is a market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asvi-market-realisation%22%20in%3Abody) |
 | `thm:kelly-is-log-optimal` The Kelly wealth is the numéraire portfolio of the betting market | ✅ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akelly-is-log-optimal%22%20in%3Abody) |
+| `def:calibrated-martingale-measures` Calibrated martingale measures of finite entropy | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acalibrated-martingale-measures%22%20in%3Abody) |
 | `def:real-erf` erf / erfc / erfinv for Mathlib | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Areal-erf%22%20in%3Abody) |
+| `def:relaxed-controlled-diffusion` Relaxed controlled diffusions | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Arelaxed-controlled-diffusion%22%20in%3Abody) |
+| `def:semistatic-strategy` Semistatic trading strategies | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asemistatic-strategy%22%20in%3Abody) |
+| `def:stochastic-volterra-equation` Stochastic Volterra equations | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Astochastic-volterra-equation%22%20in%3Abody) |
+| `def:supercooled-stefan-solution` Physical solutions of the supercooled Stefan problem | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Asupercooled-stefan-solution%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
 | `thm:american-put-premium` American put early-exercise premium | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-premium%22%20in%3Abody) |
@@ -1199,6 +1222,7 @@ graph TD
 | `thm:kou-jump-diffusion` Kou double-exponential jump-diffusion | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akou-jump-diffusion%22%20in%3Abody) |
 | `thm:kusuoka` Kusuoka representation | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akusuoka%22%20in%3Abody) |
 | `thm:kyle-equilibrium` Kyle single-period equilibrium | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akyle-equilibrium%22%20in%3Abody) |
+| `thm:kyle-equilibrium-unique` Uniqueness of the Kyle equilibrium | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akyle-equilibrium-unique%22%20in%3Abody) |
 | `thm:large-pool-loss` Large homogeneous pool loss law | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alarge-pool-loss%22%20in%3Abody) |
 | `thm:law-iterated-logarithm` Law of the iterated logarithm | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Alaw-iterated-logarithm%22%20in%3Abody) |
 | `thm:liquidation-first-passage` Liquidation before maturity as first passage | ⏳ | [linked](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aliquidation-first-passage%22%20in%3Abody) |
