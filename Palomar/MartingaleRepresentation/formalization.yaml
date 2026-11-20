@@ -36,7 +36,7 @@ sources:
       - Steven E. Shreve
     id: karatzas-shreve-1991
     type: book
-    relationship: adapts
+    relationship: background
     license: unknown
     author_endorsement: not-contacted
     location: Springer, second edition (1991), Section 3.4
