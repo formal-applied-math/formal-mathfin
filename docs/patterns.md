@@ -969,10 +969,9 @@ a general search; most are one-line and defeq-driven.
 | "(deterministic) timeout at whnf, 200000 heartbeats" on `le_iSup₂`/`iSup₂_le` over `MeasurableSpace` | pin the family explicitly, e.g. `le_iSup₂ (f := fun u (_ : u ≤ T) ↦ MeasurableSpace.comap (B u) inferInstance) …` — left unpinned, higher-order unification searches through `sSup`/`generateFrom` and blows the budget. |
 | a lemma with an *instance*-implicit `[MeasurableSpace α]` (e.g. `measurable_of_tendsto_metrizable`) silently resolves to the ambient space instead of a non-ambient target σ-algebra | apply it with `@` and pass the target σ-algebra positionally. Contrast `measurable_iff_comap_le`, whose measurable-space arguments are plain implicits and unify correctly on their own. |
 
-## Martingale-representation infrastructure (2026-08-06 batch)
+## Martingale-representation infrastructure
 
-Patterns from the martingale-representation program's first four tasks
-(`docs/plans/2026-08-04-martingale-representation.md`): locality and totality results for the Itô
+Patterns from the martingale-representation program: locality and totality results for the Itô
 integral, and the orthogonality argument that identifies the representation.
 
 ### `𝓕_a`-linearity of a stochastic integral, by simple-process density

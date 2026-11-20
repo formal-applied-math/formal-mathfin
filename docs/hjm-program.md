@@ -1,297 +1,105 @@
-# HJM interest-rate models — a formalization program
+# The Heath–Jarrow–Morton drift condition
 
-**Status:** design ratified 2026-07-18. **Ambition:** the full landmark — the HJM
-drift condition with the bond dynamics *derived*, nothing assumed.
-**Axis:** a formalization landmark (a cross-tower *stochastic Fubini*) that yields
-a finance crown (the no-arbitrage drift restriction). Naming the axis first, per
-`feedback_question_the_goal`: the deliverable is Fubini-as-a-shared-primitive; HJM
-is its first flagship consumer.
+Status of one open program: the HJM drift condition, with the bond dynamics derived from a
+stochastic Fubini theorem. The umbrella issue is
+[#138](https://github.com/formal-applied-math/formal-mathfin/issues/138). The program sits in the
+term-structure [model family](organization.md#kinds-of-randomness-the-model-families); its
+frontier nodes are in [`blueprint_frontier.toml`](blueprint_frontier.toml)
+(`thm:hjm-log-bond-dynamics`, `thm:hjm-bond-dynamics`, `thm:hjm-drift-condition`,
+`thm:hjm-affine-models`, `thm:hjm-short-rate`, `thm:hjm-musiela`).
 
-Tracking issue: **#138** (umbrella). Child issues: **#139–#158** (numbered in §6).
+## The goal
 
----
-
-## 1. The crown theorem
-
-Work on a filtered space `(Ω, F, (F_t), Q)` carrying a `Q`-Brownian motion `W`
-(risk-neutral / bank-account numéraire). The state is the **entire forward-rate
-curve** `f(t,T)` for `t ≤ T`, an Itô process in `t` for each fixed maturity `T`:
-
-```
-df(t,T) = α(t,T) dt + σ(t,T) dW_t         (t-dynamics, T fixed)
-```
-
-**HJM drift condition (Heath–Jarrow–Morton 1992).** The discounted bond
-`P(·,T)/B(·)` is a `Q`-martingale for every maturity `T` (no arbitrage) **iff**
+Let `W` be a Brownian motion under the pricing measure. The state is the forward-rate curve
+`f(t,T)`, `t ≤ T`, an Itô process in `t` for each maturity `T`:
+`df(t,T) = α(t,T) dt + σ(t,T) dW_t`. With the bond `P(t,T) = exp(−∫_t^T f(t,u) du)`, the short
+rate `r(t) = f(t,t)` and the bank account `B(t) = exp(∫₀ᵗ r)`, the Heath–Jarrow–Morton drift
+condition says that the discounted bonds `P(·,T)/B` are martingales for every `T` exactly when
 
 ```
-α(t,T) = σ(t,T) · ∫_t^T σ(t,u) du          for all t ≤ T.
+α(t,T) = σ(t,T) · ∫_t^T σ(t,u) du .
 ```
 
-The forward-rate drift is completely pinned by its own volatility structure. This
-is the theorem worth having; everything below is the atomic path to it.
+The target is this equivalence with the bond dynamics derived rather than assumed. The route has
+five identities. Writing `α*` and `σ*` for the integrals of `α` and `σ` over `[t,T]`:
 
-## 2. Objects
+1. The log-bond has `dY = (r − α*) dt − σ* dW`, where `Y = log P`. The interchange of
+   `∫_t^T (σ(t,u) dW_t) du` with `(∫_t^T σ(t,u) du) dW_t` is the stochastic Fubini theorem, and
+   the moving lower limit contributes the term `r(t) dt`.
+2. Itô's formula for the exponential gives `dP/P = (r − α* + ½σ*²) dt − σ* dW`.
+3. Dividing by the bank account gives `dZ/Z = (−α* + ½σ*²) dt − σ* dW` for `Z = P/B`.
+4. `Z` is a local martingale exactly when its drift vanishes, `α* = ½σ*²`.
+5. Differentiating in `T` gives `α = σσ*`; integrating from `t` to `T` using `σ*(t,t) = 0` gives
+   the converse.
 
-| object | definition |
+The martingale statement needs an integrability condition beyond the local-martingale form; the
+first target is the local-martingale equivalence.
+
+## The shared primitive
+
+An Itô, Wiener or compensated-Poisson integral is a continuous linear map out of an `L²` space, and
+a continuous linear map commutes with a Bochner integral
+(`ContinuousLinearMap.integral_comp_comm`). The stochastic Fubini theorem is that commutation plus
+one analytic fact, the pointwise representative of an `L²`-valued Bochner integral. It is proved
+once for any continuous linear map, and each integral is an instance.
+
+## What is proved
+
+* `StochasticFubini.coeFn_integral_ae_eq` and `StochasticFubini.stochFubini_ofCLM`
+  (`Probability/Brownian/Ito/StochasticFubini.lean`): for a continuous linear
+  `I : Lp ℝ 2 m →L[ℝ] F` and a Bochner-integrable family `φ : A → Lp ℝ 2 m` with jointly
+  integrable representatives `ψ`, `∫ u, I (φ u) ∂ν = I g` for any `g` representing
+  `x ↦ ∫ u, ψ u x ∂ν`. Corpus entry `sc-stochastic-fubini-clm`.
+* `StochasticFubini.stochFubini_ito` and `StochasticFubini.stochFubini_wiener`
+  (`Probability/Brownian/Ito/StochasticFubiniIto.lean`): the instances at the Itô isometry on
+  `[0,T]` and at `wienerIntegralLp`. Corpus entries `sc-stochastic-fubini-ito` and
+  `sc-stochastic-fubini-wiener`.
+* `HJM.HJMModel` and its derived objects `bond`, `shortRate`, `integratedRate`, `bankAccount`,
+  `discountedBond`, `starDrift`, `starVol` (`Models/Rates/HJM.lean`), with `bond_self`,
+  `bond_pos`, `bankAccount_pos`, `discountedBond_pos`, and `bond_of_flat` (on a flat curve the bond
+  is `zcb r t T`).
+* `value_fixedFlows_hjm` and `value_fixedFlows_hjm_flat` (`Models/Rates/HJMBond.lean`): a schedule
+  of fixed cash flows is worth `∑ P(0, tᵢ) cᵢ` given the pricing hypothesis `𝔼[D tᵢ] = P(0, tᵢ)`,
+  and unconditionally on a flat deterministic curve. The hypothesis is what the drift condition
+  would deliver, so the first of these is a `reduced_core` entry (`mf-hjm-fixed-flows`; the flat
+  case is `mf-hjm-flat-curve-fixed-flows`).
+
+## What is open
+
+* The Lévy instance of stochastic Fubini, through `itoLevyIntegralL2`. No declaration exists yet.
+* The pathwise lift of Fubini to all times `t` on the Itô integral process (a continuous
+  modification), which the bond dynamics need.
+* The refactor of the integrated-rate step of the Vasicek bond price onto the Wiener instance.
+* The log-bond dynamics, the bond and discounted-bond dynamics, and the drift condition in
+  integrated, pointwise and converse form. None of these is stated in Lean yet.
+* The consequences: the short-rate model induced by `r(t) = f(t,t)`, Ho–Lee (constant volatility
+  gives `α(t,T) = σ²(T − t)`), the Vasicek and Hull–White affine term structure
+  (`vasicekBondPrice_affine`, which the bridge must land on, not re-derive), and the Musiela
+  parametrization `r(t,x) = f(t,t+x)`, a stochastic PDE in its own right.
+
+## Open issues
+
+| issue | content |
 |---|---|
-| bond | `P(t,T) = exp(−∫_t^T f(t,u) du)` |
-| short rate | `r(t) = f(t,t)` |
-| bank account | `B(t) = exp(∫_0^t r(s) ds)` |
-| discounted bond | `Z(t,T) = P(t,T)/B(t)` |
-| integrated drift | `α*(t,T) = ∫_t^T α(t,u) du` |
-| integrated vol | `σ*(t,T) = ∫_t^T σ(t,u) du` |
+| [#138](https://github.com/formal-applied-math/formal-mathfin/issues/138) | umbrella |
+| [#142](https://github.com/formal-applied-math/formal-mathfin/issues/142) | Stochastic Fubini, Itô, terminal |
+| [#143](https://github.com/formal-applied-math/formal-mathfin/issues/143) | Stochastic Fubini, Itô, process |
+| [#144](https://github.com/formal-applied-math/formal-mathfin/issues/144) | Stochastic Fubini, Wiener, and the Vasicek refactor |
+| [#145](https://github.com/formal-applied-math/formal-mathfin/issues/145) | Stochastic Fubini, Lévy (also unblocks #132, #133) |
+| [#146](https://github.com/formal-applied-math/formal-mathfin/issues/146), [#147](https://github.com/formal-applied-math/formal-mathfin/issues/147), [#148](https://github.com/formal-applied-math/formal-mathfin/issues/148) | log-bond dynamics: fixed lower limit, moving-boundary term, assembly |
+| [#149](https://github.com/formal-applied-math/formal-mathfin/issues/149), [#150](https://github.com/formal-applied-math/formal-mathfin/issues/150) | bond and discounted-bond dynamics |
+| [#151](https://github.com/formal-applied-math/formal-mathfin/issues/151), [#152](https://github.com/formal-applied-math/formal-mathfin/issues/152), [#153](https://github.com/formal-applied-math/formal-mathfin/issues/153), [#154](https://github.com/formal-applied-math/formal-mathfin/issues/154) | drift condition: integrated, pointwise, converse, equivalence |
+| [#155](https://github.com/formal-applied-math/formal-mathfin/issues/155), [#156](https://github.com/formal-applied-math/formal-mathfin/issues/156), [#157](https://github.com/formal-applied-math/formal-mathfin/issues/157), [#158](https://github.com/formal-applied-math/formal-mathfin/issues/158) | short rate, Ho–Lee, Vasicek and Hull–White, Musiela |
 
-Coefficient hypotheses: `α, σ` predictable in `s`, jointly measurable in `(s,T)`,
-with `∫_0^T ∫_0^T (|α| + σ²) < ∞` — enough for the Itô integrals and the two
-Fubini interchanges. These live in an `HJMModel` bundle (Tier 0).
+The Itô-jump consumers of the Lévy instance are
+[#132](https://github.com/formal-applied-math/formal-mathfin/issues/132) (the Itô–Lévy formula)
+and [#133](https://github.com/formal-applied-math/formal-mathfin/issues/133) (the Merton PIDE).
+The model bundle (#139) and the tower-agnostic primitive (#141) are closed.
 
-## 3. The mathematical spine
+## References
 
-Five identities carry the whole result. Signs verified against Björk, *Arbitrage
-Theory in Continuous Time*, ch. 23.
-
-**(A) Log-bond dynamics.** `Y(t,T) := log P(t,T) = −∫_t^T f(t,u) du`. The lower
-limit *and* the integrand both move with `t`; the stochastic Leibniz rule gives
-
-```
-d(∫_t^T f(t,u)du) = −f(t,t) dt + ∫_t^T df(t,u) du
-                  = −r(t) dt + α*(t,T) dt + σ*(t,T) dW_t
-```
-
-so `dY(t,T) = [r(t) − α*(t,T)] dt − σ*(t,T) dW_t`. The interchange
-`∫_t^T (σ(t,u) dW_t) du = (∫_t^T σ(t,u) du) dW_t` **is** the stochastic Fubini
-theorem (§4). The `−f(t,t)dt = −r(t)dt` lower-limit term is where the short rate
-*emerges* — conceptually the crux of the assembly.
-
-**(B) Bond dynamics.** `P = exp(Y)`, Itô-for-exp:
-`dP/P = dY + ½ d⟨Y⟩ = [r − α* + ½σ*²] dt − σ* dW`.
-
-**(C) Discounted-bond dynamics.** `B` is finite-variation, `dB/B = r dt`, so
-`dZ/Z = dP/P − r dt = [−α*(t,T) + ½σ*(t,T)²] dt − σ*(t,T) dW`.
-
-**(D) Drift condition, integrated form.** `Z` is a positive continuous
-(local) martingale iff its drift vanishes:
-`α*(t,T) = ½ σ*(t,T)²` for a.e. `t`, all `T`.
-
-**(E) Drift condition, differential form (the crown).** Differentiate (D) in `T`
-(FTC + chain rule): `∂_T α* = α(t,T)`, `∂_T[½σ*²] = σ*(t,T)·σ(t,T)`, hence
-
-```
-α(t,T) = σ(t,T) · σ*(t,T).
-```
-
-The converse integrates `α = σσ* = ½ ∂_T(σ*²)` from `t` to `T` using
-`σ*(t,t)=0`, recovering `α* = ½σ*²`, hence the martingale property.
-
-## 4. Architecture: stochastic Fubini as a shared cross-tower primitive
-
-The interchange in (A) is not an HJM lemma. It is the statement **"an
-integral-CLM commutes with a parameter Bochner-integral,"** and Mathlib already
-proves that fact for *any* continuous linear map:
-
-```
-ContinuousLinearMap.integral_comp_comm (L : E →L[𝕜] Fₗ) (φ_int : Integrable φ μ) :
-    ∫ x, L (φ x) ∂μ = L (∫ x, φ x ∂μ)
-    -- Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
-```
-
-Every stochastic-integral tower in the library already exposes its integral **as
-a CLM** — the shared `extendOfNorm`/CLM abstraction that unified the Wiener, Itô,
-and Lévy towers (`Probability/Analysis/ExtendOfNormIsometry.lean`):
-
-| tower | integral CLM | file |
-|---|---|---|
-| Wiener | `wienerIntegralLp : Lp ℝ 2 (Ioc 0 T) →L[ℝ] Lp ℝ 2 μ` | `WienerIntegralL2` |
-| Itô | `itoIntegralCLM : L²(predictable) →L[ℝ] Lp ℝ 2 μ` | `ItoIntegralCLM` |
-| Lévy | `itoLevyIntegralL2 : levyClosure N →L[ℝ] Lp ℝ 2 P` | `PoissonCompensatedIntegralOperator` |
-
-So stochastic Fubini is **one tower-agnostic primitive + one-line instances** —
-not a wrapper leaf plus a separate lemma. The primitive bundles the commute with
-its only non-trivial obligation:
-
-```
-stochFubini_ofCLM (I : L²(m) →L[ℝ] L²(P)) (φ : A → L²(m)) (hφ : Integrable φ μ) :
-    ∫_A I(φ u) dμ(u) = I(fun s ↦ ∫_A φ u s dμ(u))       -- I ∈ {Wiener, Itô, Lévy}
-```
-
-Its proof is `integral_comp_comm` *inline* (no named wrapper) plus the one genuine
-analytic step, the **L²-representative fact**: the Bochner integral
-`∫_A [φ(·,u)] dμ(u)` in `L²(m)` is represented a.e. by `s ↦ ∫_A φ(s,u) du` (loogle
-Mathlib first — `integral_integral_swap` may already give it). Two deliberate
-non-choices keep it elegant: **no** `clm_comm_paramIntegral` wrapper (renaming a
-single Mathlib lemma is the avoid-wrapper anti-pattern — folded inline), and
-**no** `StochasticIntegralTower` typeclass (`I` as an explicit CLM argument is
-already maximal generality; a class would bundle an isometry the theorem never
-uses). The hypothesis `Integrable φ μ = ∫_A ‖φ(·,u)‖_{L²} dμ(u) < ∞` is the sharp
-Veraar condition, and on a finite maturity interval `A=[t,T]` follows from joint
-square-integrability by Cauchy–Schwarz — so no generality is lost.
-
-This is the same move as the Lévy roadmap's *"the Summit dissolved, not climbed"*:
-the shared abstraction that already exists is exactly what makes the hard theorem
-cheap. **Consumers beyond HJM:**
-
-- **Itô–Lévy formula** (`#132`) and **Merton PIDE** (`#133`) consume the *Lévy*
-  instance — jump term-structure comes almost free once the primitive exists.
-- **Vasicek** integrated-rate computation (`VasicekBondPrice`) refactors onto the
-  *Wiener* instance — a coherence proof-of-reuse that pays the abstraction back
-  into existing code (`docs/bridges.md`).
-
-## 5. Honest scope
-
-**Consumed (library / Mathlib), not re-proved:** `ContinuousLinearMap.integral_comp_comm`;
-`ito_formula_expBrownian` (Itô-for-exp, `Probability/Brownian/Ito/ItoFormulaGBM`); the
-martingale ⇔ zero-drift core; the three tower CLMs; FTC/Leibniz calculus.
-
-**Genuinely new:** (a) the L²-representative fact inside `stochFubini_ofCLM` (its
-one analytic step, possibly already in Mathlib); (b) the process/pathwise lift
-onto `ItoIntegralProcess`; (c) the moving-boundary stochastic-Leibniz assembly
-(where `r(t)` emerges); (d) the drift-condition assembly; (e) the bridges.
-
-**Nothing in the crown is assumed.** With the CLM reframing the bond dynamics are
-*derived* through F4, so `C4` (the iff) is a genuine `full` result. The only
-deferred summit is `G4` Musiela (an SPDE in its own right); it ships `placeholder`
-and gets its own follow-up. Fullest-generality integrability side-conditions may
-be tightened iteratively — each node declares what it assumes.
-
-## 6. The atomic issue DAG
-
-```
-H0 ─┬─► F1 ─► F3 ─► F4 ─► B1 ─┐
-    │         ├─► F5 (Wiener + Vasicek refactor)   ├─► B3 ─► D1 ─► D2 ─► C1 ─► C2 ─► C4
-    │         └─► F6 (Lévy → #132/#133)      B2 ───┘                        └─► C3 ─┘
-    └───────────────────────────────────────────────────────► G1, G2, G3, G4 (bridges)
-```
-
-Legend: `id · benchmark-id — title` *(labels · status · formalization_status)*.
-
-**Issue numbers:** H0 #139 · F1 #141 (the `stochFubini_ofCLM` primitive; #140
-dissolved into it) · F3 #142 · F4 #143 · F5 #144 · F6 #145 · B1 #146 · B2 #147 ·
-B3 #148 · D1 #149 · D2 #150 · C1 #151 · C2 #152 · C3 #153 · C4 #154 · G1 #155 ·
-G2 #156 · G3 #157 · G4 #158 (umbrella #138).
-
-### Tier 0 — objects · `Models/Rates/HJM/Model.lean`
-- **H0 · `mf-hjm-model`** — the `HJMModel` bundle (`W, f(t,T), α, σ` + adapted /
-  measurable / integrable fields) and `hjmBond`, `hjmShortRate`, `bankAccount`,
-  `discountedBond`, `starDrift α*`, `starVol σ*`. Defs + basic well-definedness.
-  *(new-defs, area:valuation/term · ready · scaffolding)*
-
-### Tier 1 — stochastic Fubini, the shared primitive · `Probability/Brownian/Ito/StochasticFubini*.lean`
-- **F1 · `sc-stochastic-fubini-clm`** (#141, folds in the dissolved #140) — the
-  tower-agnostic primitive `stochFubini_ofCLM (I : L²(m) →L[ℝ] L²(P)) …`. Proof =
-  `integral_comp_comm` inline + the L²-representative fact (`∫_A [φ(·,u)] dμ`
-  represented by `s ↦ ∫_A φ(s,u) du`) — the one analytic step, maybe already in
-  Mathlib. No wrapper, no typeclass. **the keystone.** *(foundations · ready · full)*
-- **F3 · `sc-stochastic-fubini-ito`** — the one-line Itô instance of F1 at
-  `I := itoIntegralCLM`: `∫_A (∫_0^T φ dW) du = ∫_0^T (∫_A φ du) dW`. *(foundations · ready · full)*
-- **F4 · `sc-stochastic-fubini-ito-process`** — the pathwise all-`t` lift on
-  `ItoIntegralProcess` (continuous modification). the form HJM's bond dynamics
-  need. *(foundations · blocked-design · full)*
-- **F5 · `sc-stochastic-fubini-wiener`** — the Wiener instance + refactor the
-  `VasicekBondPrice` integrated-rate step to consume it (coherence). *(foundations, fixed-income · ready · full)*
-- **F6 · `sc-stochastic-fubini-levy`** — the Lévy instance via `itoLevyIntegralL2`;
-  unblocks `#132` / `#133`. *(foundations · ready · full)*
-
-### Tier 2 — log-bond dynamics · `Models/Rates/HJM/BondDynamics.lean`
-- **B1 · `mf-hjm-logbond-fixed-limit`** — fixed lower limit
-  `−∫_{t0}^T df(t,u) du` via F4. *(fixed-income · blocked-design)*
-- **B2 · `mf-hjm-logbond-leibniz`** — the moving-boundary correction
-  `+r(t)dt = f(t,t)dt`; the stochastic-Leibniz node. *(fixed-income · blocked-design)*
-- **B3 · `mf-hjm-logbond-dynamics`** — assemble
-  `dY = [r − α*] dt − σ* dW`. *(fixed-income · blocked-design)*
-
-### Tier 3 — bond & discounted-bond dynamics · `Models/Rates/HJM/DiscountedBond.lean`
-- **D1 · `mf-hjm-bond-dynamics`** — Itô-for-exp on `P = exp Y` (consume
-  `ito_formula_expBrownian`): `dP/P = [r − α* + ½σ*²]dt − σ*dW`. *(fixed-income · blocked-design)*
-- **D2 · `mf-hjm-discounted-bond-dynamics`** — subtract `r dt`:
-  `dZ/Z = [−α* + ½σ*²]dt − σ*dW`. *(fixed-income · blocked-design)*
-
-### Tier 4 — the drift condition, the crown · `Models/Rates/HJM/DriftCondition.lean`
-- **C1 · `mf-hjm-drift-integrated`** — martingale ⟹ `α* = ½σ*²` (consume
-  martingale ⇔ zero-drift). *(fixed-income · blocked-design)*
-- **C2 · `mf-hjm-drift-condition`** — differentiate in `T` ⟹ **`α = σσ*`**
-  (crown, forward direction). *(fixed-income · blocked-design)*
-- **C3 · `mf-hjm-drift-converse`** — `α = σσ*` ⟹ integrate ⟹ martingale ⟹
-  no-arbitrage. *(fixed-income · blocked-design)*
-- **C4 · `mf-hjm-drift-iff`** — package the equivalence: discounted-bond
-  martingale ↔ HJM drift condition. the headline. *(fixed-income · blocked-design)*
-
-### Tier 5 — bridges (tower integration, finance-facing) · `Models/Rates/HJM/Bridges.lean`
-- **G1 · `mf-hjm-short-rate`** — `r(t) = f(t,t)` and the induced short-rate SDE. *(fixed-income · blocked-design)*
-- **G2 · `mf-hjm-ho-lee`** — `σ` constant ⟹ the Ho–Lee affine term structure. *(fixed-income · blocked-design)*
-- **G3 · `mf-hjm-vasicek-bridge`** — `σ(t,T) = σ e^{−κ(T−t)}` recovers the
-  existing `VasicekBondPrice` affine term structure. **the seam into existing
-  work.** *(fixed-income · blocked-design)*
-- **G4 · `mf-hjm-musiela`** — the Musiela parametrization `r(t,x) = f(t,t+x)`;
-  its own SPDE summit. *(fixed-income · blocked-design · placeholder)*
-
-## 7. Module layout
-
-```
-MathFin/Probability/Brownian/Ito/StochasticFubini.lean          -- F1 (stochFubini_ofCLM + its L²-representative step)
-MathFin/Probability/Brownian/Ito/StochasticFubiniIto.lean        -- F3, F4  (+ F5 Wiener instance)
-MathFin/Probability/Brownian/Ito/StochasticFubiniLevy.lean  -- F6  (near the Lévy operator)
-MathFin/Models/Rates/HJM/Model.lean                  -- H0
-MathFin/Models/Rates/HJM/BondDynamics.lean           -- B1, B2, B3
-MathFin/Models/Rates/HJM/DiscountedBond.lean         -- D1, D2
-MathFin/Models/Rates/HJM/DriftCondition.lean         -- C1, C2, C3, C4
-MathFin/Models/Rates/HJM/Bridges.lean                -- G1, G2, G3, G4
-```
-
-Each `module`-header file carries `@[expose] public section`; each imports a
-`MathFin` module and re-exports, not `import Mathlib` (per the module-system
-rule). File splits may consolidate if a node proves small.
-
-## 8. Benchmarks, ledger, audit, values cadence
-
-- Each `full` / `library_wrapper` node lands a benchmark entry
-  (`sc-stochastic-fubini-*` in `stochastic_calculus.json`, `mf-hjm-*` in
-  `mathematical_finance.json`) that imports the module and re-exports the named
-  lemma in 5–25 lines.
-- After every node: regenerate `MathFin/AxiomAuditGen.lean`
-  (`python3 -m tools.verify.axiom_audit_gen --write`), add the coverage row, and
-  run `python3 -m tools.verify.ledger status` → `verify` on the stale entries.
-- `#guard_msgs`-pin the load-bearing constants in `AxiomAudit.lean`
-  (`stochFubini_ofCLM`, the Itô-process Fubini, `mf-hjm-drift-condition`).
-- The values-review cadence gate (`test_values_review_is_current`) fires at +12
-  entries; refresh `docs/values-review.md` with the ranked backlog when it does.
-
-## 9. Build order
-
-1. **Keystone first:** `F1` (the `stochFubini_ofCLM` primitive) → `F3` (its Itô
-   instance) — every downstream tier waits on it. `F1`'s one hard step is the
-   L²-representative fact (maybe already in Mathlib).
-2. `F4` (process lift) + `H0` (objects) in parallel.
-3. Critical path to the crown: `B1/B2 → B3 → D1 → D2 → C1 → C2 → C4`.
-4. Bridges `G1 → G2 → G3` (the Vasicek seam is the payoff); `G4` Musiela deferred.
-5. Tower payback in parallel once `F3/F4` land: `F5` (Vasicek refactor), `F6`
-   (Lévy → `#132/#133`).
-
-## 10. Risks & open questions
-
-- **The L²-representative fact** (inside `F1`/`stochFubini_ofCLM`) is the analytic
-  crux — if Mathlib's `Lp`/Bochner-representative API (`integral_integral_swap`)
-  doesn't line up cleanly, this is the step that could grow. Mitigation: it is
-  fully general and reusable, so the investment is never HJM-only.
-- **B2 moving-boundary Leibniz** mixes a deterministic boundary derivative with a
-  stochastic integrand differential; needs care that it is not a hidden second
-  Fubini. Scope each assumption explicitly.
-- **Martingale vs local-martingale** in (D): the clean statement is
-  local-martingale ⇔ zero-drift; upgrading to a true martingale (hence genuine
-  no-arbitrage) needs an integrability/Novikov-type side condition. State the
-  local-martingale form as the crown; note the upgrade as a declared refinement.
-- **G3 Vasicek bridge** must land on the *existing* `vasicekBondPrice_affine`
-  statement, not a re-derivation — else it is a wrapper, not a seam.
-
-## 11. References
-
-- Heath, Jarrow, Morton (1992), *Bond pricing and the term structure of interest
-  rates*, Econometrica 60(1).
-- Björk, *Arbitrage Theory in Continuous Time*, 3rd ed., ch. 23–25 (HJM, short
-  rate, Musiela).
-- Filipović, *Term-Structure Models: A Graduate Course*.
-- In-repo: `Pricing/Numeraire`, `Pricing/ForwardMeasure`,
-  `Models/Rates/ForwardRate`, `Models/Rates/VasicekBondPrice`,
-  `Probability/Brownian/Ito/ItoFormulaGBM`, `Probability/Brownian/Ito/ItoIntegralCLM`,
-  `Probability/Analysis/ExtendOfNormIsometry`, `Probability/Jumps/PoissonCompensatedIntegralOperator`.
-- Mathlib: `ContinuousLinearMap.integral_comp_comm`.
+* Heath, Jarrow, Morton (1992), *Bond pricing and the term structure of interest rates*,
+  Econometrica 60(1).
+* Björk, *Arbitrage Theory in Continuous Time*, 3rd ed., ch. 23–25.
+* Filipović, *Term-Structure Models: A Graduate Course*.
+* Veraar (2012), *The stochastic Fubini theorem revisited*, Thm 2.2.

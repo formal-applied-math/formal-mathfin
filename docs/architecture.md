@@ -1,98 +1,58 @@
 # Architecture
 
-The library's shape is deliberate. Three principles drive every decision:
+This page owns two things: the order of the layers, and the rules that decide where a module
+goes. The mathematics each layer holds is in [`organization.md`](organization.md) and
+[`mathematical-architecture.md`](mathematical-architecture.md); the principles for definitions and
+statements are in [`design.md`](design.md).
 
-1. **Name the structural fact, don't repeat the algebra.** When a single
-   mathematical principle generates many theorems, that principle gets its
-   own module and the consumers delegate. Where a principle is
-   load-bearing, downstream proofs collapse to one or two lines.
-2. **Be honest about the proof depth.** Not every lemma is a deep theorem.
-   Algebraic closed-form bookkeeping is necessary but not sufficient — the
-   library is organised in three tiers so the difference is visible.
-3. **Layers, and imports that point one way.** `Probability/` → `Contracts/` →
-   `Pricing/` → the limbs (`Models/`, `Risk/`, `Choice/`, `Insurance/`, `Markets/`),
-   with limb-to-limb imports only along the declared edges of `tools/verify/layers.py`.
-   Probability becomes load-bearing only when the modules above it consume it, so a
-   join — a constructor such as `X.of_isPreBrownian`, an equality between two encodings —
-   is built in the module that uses it.
+## Layers
 
-The rest of this document spells out these three principles and catalogues
-the modules that implement them.
+`Probability/` → `Contracts/` → `Pricing/` → the limbs `Models/`, `Risk/`, `Choice/`,
+`Insurance/`, `Markets/`. Imports point that way. A limb reaches another limb only along an edge
+declared in `tools/verify/layers.py` (`layers.EDGES`, each with its reason), and
+`tests/test_architecture.py` holds the imports against the direction at zero. Every module lives in
+one layer, and every module imports a library module or is imported by one.
 
-## The three-tier honesty model
+This is the single statement of the layer order; other documents link here rather than repeat it.
+Probability is load-bearing only when the modules above it consume it, so a join, such as a
+constructor `X.of_isPreBrownian` or an equality between two encodings, is built in the module that
+uses it. There is no separate bridges directory.
 
-The library divides cleanly into three tiers. Their proof shape makes the
-tier visible.
+## Principles
 
-### Tier 1 — Foundational math
+1. **Name the structural fact, do not repeat the algebra.** When one mathematical principle
+   generates many theorems, it gets its own module and the consumers delegate; downstream proofs
+   then collapse to one or two lines.
+2. **Be honest about proof depth.** Algebraic closed-form bookkeeping is necessary but not deep. The
+   corpus records the difference as a formalization status, below.
+3. **A principle must be load-bearing.** A master file whose identity no consumer uses is a
+   docstring pretending to be a module.
 
-Multi-hundred-line proofs in genuine probability + integration +
-chain-rule calculus. The hard machinery the rest of the library leans on.
+## Proof depth and the corpus statuses
 
-Modules: `Probability/*` (Wiener integral, Brownian martingales, quadratic
-variation, Doob L^p convergence, Itô drift, Girsanov), `Pricing/*` (FTAP
-variants, pricing kernels), `Models/Binomial/Model`, `Models/Binomial/CRRConvergence`,
-`Models/BlackScholes/Call`, `Models/BlackScholes/Put`, `Models/BlackScholes/Forward`, the
-various `*Greeks`, `DoobLpMaximalInequality`, `WienerIntegralL2`.
+Each corpus entry declares `full`, `library_wrapper` or `reduced_core` (see the
+[glossary](glossary.md#status)); delivery claims count only the first two, and
+[`coverage.md`](coverage.md) audits them. Proof shape differs along the same line.
 
-Proof shape: many tactics, real lemma deployment, multi-page derivations.
-`#print axioms` is clean; nothing imported from outside Mathlib / Degenne's
-`brownian-motion`.
-
-### Tier 2 — Principle modules
-
-A small set of named structural facts whose consumer files *delegate*. A
-principle is load-bearing when its instances are *provable equalities*
-(Garman, PriceBounds, ConvexPricingFunctional, GreekSigns) rather than
-docstring claims.
-
-Catalogue is the [structural-principle table below](#structural-principle-modules).
-
-Proof shape: the master file does the work (a clean derivation or
-characterisation); consumers compose with one or two lines.
-
-### Tier 3 — Closed-form verifications
-
-Bookkeeping that textbook closed-form formulas have their claimed
-algebraic properties — e.g. `risk_parity_equal_contribution`,
-`blackLitterman_*`, `tangentTwo_satisfies_FOC`, `gaussianVaR_translation`
-and other VaR axioms, scale-invariance of Sortino / Treynor / IR.
-
-Proof shape: `unfold; field_simp; ring` (or close to it). The proof
-*looks* the way it is. The mathematical content of each is in the
-*definition*; the lemma confirms the closed form has the claimed property.
-
-This tier is necessary — without it, a textbook formula is just a string —
-but it is not "deep." Tier 3 entries should not be conflated with Tier 1
-in delivery claims. See [`coverage.md`](coverage.md) for the audit that
-separates them.
+* **Foundational proofs** (`full`): multi-page derivations in probability, integration and calculus,
+  such as the Wiener integral, Brownian martingales, Doob `L^p` convergence, Itô drift, Girsanov,
+  the FTAP variants, the binomial and Black–Scholes closed forms. Axiom-clean, with nothing from
+  outside Mathlib and BrownianMotion.
+* **Principle modules** (`full`): the structural-principle table below. The master file does the
+  work and consumers compose in one or two lines.
+* **Closed-form verifications** (`full`, shallow): that a textbook formula has its claimed algebraic
+  property, for example `risk_parity_equal_contribution`, `gaussianVaR_translation`, the scale
+  invariance of the Sharpe ratio. The proof is `unfold; field_simp; ring` or close to it, and the
+  content is in the definition. These are necessary, since otherwise a formula is a string, but
+  they should not be conflated with the first kind in a claim.
+* **Reduced cores** (`reduced_core`): a result that proves less than the theorem it is named after.
+  Run `python3 -m tools.verify.coverage_report` for the current list; the Limitations section of
+  the [README](../README.md) and each entry's `formalization_scope` say what is missing.
 
 ## The structural-principle modules
 
-A "principle" must be load-bearing. If a master file declares an identity
-but no consumer file uses it, the master is a docstring pretending to be a
-module. Where a principle generates corollaries (a master is *used*),
-proofs in the consumer files collapse to one or two lines.
 
-This is enforced by audit, not just asserted. A 2026-05-23 pass checked each
-principle against the actual import graph and wired up the ones whose
-load-bearing claim had outrun their consumers:
-
-- `ExponentialDiscount` — `ForwardRate`, `Mortality`, `HazardCurve` now cite
-  `rate_eq_neg_log_deriv` for the rate-recovery direction `rate = −d/dt log Q`
-  (`Mortality`/`HazardCurve` previously stated this only in prose) and route
-  positivity through `discount_pos`.
-- `GarmanNormalForm` — `Black76` (`black_futures_price_eq_bsVGarman`) and
-  `Dividends` (`bs_dividends_price_eq_bsVGarman`) carry consumer-side
-  corollaries chaining their pricing theorem to the Garman equality, so the
-  "one formula at different `(A, DF)`" unification is cited from both ends.
-- `ConvexPricingFunctional` — `PricingKernel.stateprice_call_butterfly_nonneg`
-  feeds the FTAP-derived (provably non-negative) state prices into
-  `callPrice_finiteState_butterfly_nonneg`, giving "no-arbitrage ⟹ butterfly
-  spreads cost ≥ 0" — the principle's first downstream consumer.
-- `StandardGaussianMGF` — already load-bearing transitively: `Forward`
-  consumes it directly and `LognormalMoments` reaches it through the
-  `nthMoment_terminal` hub.
+Every path in this table exists under `MathFin/`.
 
 | Principle module | The fact | Where it's load-bearing |
 |---|---|---|
@@ -122,39 +82,21 @@ load-bearing claim had outrun their consumers:
 | `Models/BlackScholes/ChooserComposition.lean` | **Chooser option as call + put portfolio via PCP at chooser date**: closed-form `chooserPrice := bsV(K, T) + bsP(K · e^{−r(T − t_1)}, t_1)`, and linearity-of-expectation `chooser_integral_decomp`. | The "chooser = call + put with adjusted strike" identity is *not* just an algebraic decomposition — it's the BS pricing identification produced by combining `chooser_via_pcp` (algebra) with `integral_add` (linearity of expectation). |
 | `Models/Credit/KMVMertonStructural.lean` | **KMV-Merton `kmvPD` as actual risk-neutral default probability**: combines `riskNeutralProb_S_T_gt_K` with the algebraic survival identity `1 − kmvPD = Φ(bsd2)` to show `kmvPD = 1 − Q({V_T > F}).toReal`. Merton equity is `bs_call_formula` read at `(V_0, F, σ_V)`. | Connects the algebraic kmvPD definition to the actual `Q(V_T ≤ F)` probability via the same BS structure. |
 | `Models/Credit/CDSTimeVarying.lean` | **CDS fair-spread cash-flow balance for time-varying hazard**: `c · annuity(T) = (1 − R) · losses(T)` via integral identities. Plus the discrete multi-period survival factorisation `∏ exp(−h_i Δt_i) = exp(−∑ h_i Δt_i)`. | Generalises constant-hazard `c = h(1 − R)` to the cash-flow-balance form that holds for any deterministic hazard curve. |
-| `Risk/UtilityDerivation.lean` | **Acceptance under expected utility, and why it is not coherent**: acceptance under a utility is unchanged by affine changes of the utility and closed under mixing lotteries; under log utility it is the Kelly-growth condition (`acceptableUnderUtility_log_iff_kellyGrowth`) and it is **not** a cone (`not_exists_isCoherentRiskMeasure_log_acceptance`), so no coherent risk measure has it as acceptance set. | Separates convex from coherent risk at the utility primitive. (Until 2026-10-21 this row and the module claimed the ADEH characterisation; the acceptance set is convex, not a cone.) |
+| `Risk/UtilityDerivation.lean` | **Acceptance under expected utility, and why it is not coherent**: acceptance under a utility is unchanged by affine changes of the utility and closed under mixing lotteries; under log utility it is the Kelly-growth condition (`acceptableUnderUtility_log_iff_kellyGrowth`) and it is **not** a cone (`not_exists_isCoherentRiskMeasure_log_acceptance`), so no coherent risk measure has it as acceptance set. | Separates convex from coherent risk at the utility primitive. |
 | `Models/BlackScholes/BSCallHypFromBrownian.lean` | **`BSCallHyp` / `BachelierHyp` derivable from a pre-Brownian motion**: core scaling lemma `scaled_isPreBrownian_eval_law` shows `W T.toNNReal / √T ∼ N(0, 1)` under `IsPreBrownianReal W Q`. Constructors `BSCallHyp.of_isPreBrownian` and `BachelierHyp.of_isPreBrownian` then discharge the BS / Bachelier hypotheses additively. | First architectural bridge between the Brownian machinery of `Probability/` and pricing-module consumption. Existing pricing modules continue to work unchanged; downstream consumers gain an optional BM-based constructor. |
 | `Models/BlackScholes/PricingFromBrownian.lean` | **Full BS / Bachelier / Digital / Power / Dividends / StockNumeraire / KMV pricing pipeline derivable from a pre-Brownian motion**: 11 one-line composite corollaries showing that every pricing entry-point that consumes `BSCallHyp` or `BachelierHyp` can be driven from a single primitive (`IsPreBrownianReal W Q`). | Demonstrates that the entire BS-family pricing infrastructure is *structurally* a corollary of "you have a Brownian motion." |
 | `Models/ModelFree/VarianceSwapFromQV.lean` + `VarianceSwapEquipartition.lean` + `VarianceSwapLimit.lean` | **Variance-swap fair strike as a QV limit**: under refinement, `E[Σ (X-increments)²]` converges to `σ² · T`. Chain of (a) per-increment QV identity, (b) finite-`n` equipartition closed form, (c) limit as `n → ∞`. | First downstream use of `Probability/Brownian/BrownianQuadraticVariation.lean`. The companion log-payoff form and this QV form are two functionals of the same BS price process, both yielding `σ²` (after `1/T` rescaling). |
 | `Pricing/PricingKernel.lean` | **Pricing kernel from two-state FTAP backward direction**: discounted EMM weights as state prices, the standard pricing kernel `V_0(X) = e^{−rT}(q_up · X_up + q_down · X_down)`. | The stochastic-discount-factor framework instantiated in the simplest finite-state market — every claim's no-arb price is a single linear functional, derived from no-arbitrage rather than assumed. |
 
-The discipline: a "principle" must be load-bearing. If a master file
-declares an identity but no consumer file uses it, the master is a
-docstring pretending to be a module.
+## Joins
 
-## The bridge methodology
-
-Tier 1 probability (Brownian motion construction, Wiener integral, Doob L^p,
-quadratic variation) is only useful to the library when the modules above it
-can *consume* it. Until that bridge exists, it is dead code from the pricing
-modules' perspective.
-
-Bridges are **additive**, not replacing: the consuming module
-introduces a constructor `XHyp.of_isPreBrownian` (or similar) that
-discharges an existing hypothesis (`BSCallHyp`, `BachelierHyp`,
-`BrownianMartingaleHyp`, …) from a single Brownian-motion primitive.
-Existing pricing modules continue to work unchanged. New downstream
-consumers gain an optional BM-based path.
-
-The first complete bridge programme is documented in
-[`bridges.md`](bridges.md): `BSCallHypFromBrownian`,
-`PricingFromBrownian`, the variance-swap QV chain, `DiscreteIto`,
-`FTAPTwoState`, etc. Each "phase" in the bridge log
-adds one constructor and one or more one-line corollaries downstream.
-
-Anti-pattern recognised early: a `Probability/` file with great
-machinery but zero downstream consumers is a docstring pretending to be a
-module. Bridges promote it to actually load-bearing.
+Probability such as the Brownian construction, the Wiener integral, Doob `L^p` and quadratic
+variation is useful to the pricing modules only when they consume it. A join is additive: the
+consuming module introduces a constructor `XHyp.of_isPreBrownian` that discharges an existing
+hypothesis (`BSCallHyp`, `BachelierHyp`, `BrownianMartingaleHyp`) from a single Brownian-motion
+primitive, and existing modules continue to work unchanged. The joins between limbs and the
+design reasons are in [`organization.md`](organization.md) and [`design.md`](design.md) §4. The
+historical audit that first listed them is [`bridges.md`](bridges.md).
 
 ## Naming and organisation
 
@@ -173,9 +115,9 @@ module. Bridges promote it to actually load-bearing.
 
 ## What the library does not prove
 
-The corpus marks each result it states but does not prove in full as a `reduced_core`, and
-`python3 -m tools.verify.coverage_report` gives the current count; [`coverage.md`](coverage.md)
-records each one's scope. As of 2026-10-23 there are 16, in four groups.
+The corpus marks each result it states but does not prove in full as `reduced_core`.
+`python3 -m tools.verify.coverage_report` gives the current list, and [`coverage.md`](coverage.md)
+records each one's scope. They fall in four groups.
 
 - **Brownian path properties.** The reflection principle, nowhere differentiability and the law of
   the iterated logarithm are recorded as fields of a structure, not derived. (BrownianMotion's own

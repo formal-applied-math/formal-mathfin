@@ -9,6 +9,25 @@ checks.
 If you want to contribute rather than read, [`onboarding.md`](onboarding.md) is the next step
 after this one.
 
+## 0. Read without installing
+
+A build takes 5 to 15 minutes the first time, and none of the following needs one.
+
+- The [docs site](https://formal-applied-math.github.io/formal-mathfin/) has a search box on every
+  page. It is a ranked, client-side search over the library's modules and declarations. The
+  [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) lists the
+  proved results the most other results build on. Each area of the library has a page of its own,
+  and each module has a page with its docstring and declarations.
+- [`MathFinExamples/Applications/`](../MathFinExamples/Applications) holds nine worked examples
+  (a binomial tree, put–call parity, a bootstrapped discount curve, a risk report, and others).
+  Each file states what the library supplies and what it does not. GitHub renders them, so they
+  can be read in the browser.
+- [`MathFinExamples/Tour.lean`](../MathFinExamples/Tour.lean) restates five representative
+  theorems in a few lines each.
+
+Sections 3 and 4 explain how to read what these pages show. Install only when you want to check a
+proof or write one (section 2).
+
 ## 1. What Lean checks
 
 Lean is a proof assistant: a programming language in which a theorem is a type and a proof is a
@@ -72,12 +91,43 @@ Authors: Raphael Coelho
 -/
 module
 
-public import Mathlib
+public import MathFin.Init
+public import Mathlib.Algebra.CharP.Defs
+public import Mathlib.Analysis.Complex.Exponential
+public import Mathlib.Tactic.LinearCombination
+
+/-!
+# Binomial-tree option pricing (Cox-Ross-Rubinstein style)
+
+…
+
+## Main definitions
+…
+## Main results
+…
+## References
+…
+## Tags
+…
+-/
+
+@[expose] public section
+
+namespace MathFin
 ```
 
-The header names the authors. `module` and `public import` say which other files this one builds
-on; here, all of Mathlib. A block `/-! … -/` that follows is the module's documentation, in
-Markdown, and states what the file proves.
+The header names the authors. `module` marks the file as part of Lean's module system, and each
+`public import` names a file this one builds on: the library's own `MathFin.Init`, and the few
+Mathlib files the proofs need rather than all of Mathlib. The block `/-! … -/` is the module's
+documentation, in Markdown. It has the same sections in every file: a title, `Main definitions`,
+`Main results`, `References` (keys into [`references.bib`](references.bib)) and `Tags` (search
+terms and subject codes). It states what the file proves, and reading it first is usually enough
+to decide whether the file is the one you want.
+
+`@[expose] public section` makes everything below it visible to the files that import this one;
+without it a declaration is private to its file. `namespace MathFin` puts the names that follow
+under the prefix `MathFin`, so `crrUpProb` is `MathFin.crrUpProb` and `open MathFin` lets you write
+the short form.
 
 ```lean
 /-- The risk-neutral up-probability `q = (e^r - d) / (u - d)`. -/
@@ -148,11 +198,11 @@ shared by every theorem below it. The discrete fundamental theorem of asset pric
 [`Pricing/FTAP/FTAPDiscrete.lean`](../MathFin/Pricing/FTAP/FTAPDiscrete.lean) reads
 
 ```lean
-variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
+variable {Ω : Type*} [Fintype Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
   (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
 
-theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+theorem ftap_discrete [Finite Ω] [Nonempty Ω] (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q
 ```
 
@@ -171,23 +221,45 @@ discusses this further.
 
 ## 5. Finding a theorem
 
-- **By topic.** The library is organized by area: `Probability/` for stochastic calculus, `Pricing/`
-  for no-arbitrage theory, then the models (`Models/BlackScholes/`, `Models/Binomial/`,
-  `Models/Rates/`), `Choice/Portfolio/`, `Risk/` and so on. Each module's documentation lists what it proves.
-- **By source.** Each benchmark file in [`benchmarks/`](../benchmarks) lists results from the
-  literature, with the reference, a description of what the entry proves, and the name of the Lean
-  theorem. The same corpus is published as a
-  [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
-- **By dependency.** [`blueprint.md`](blueprint.md) draws the chain from Brownian motion to the
-  Black–Scholes formula, each node linked to its proof.
-- **Inside Lean.** In any file that imports the library, `#check binomialNoArb_crr` prints a
-  theorem's statement in the infoview, and the tactic `exact?` searches Mathlib and the library for
-  a lemma that closes the current goal. Mathlib's [documentation](https://leanprover-community.github.io/mathlib4_docs/)
-  and the search engine [Loogle](https://loogle.lean-lang.org) cover Mathlib.
+Try these in order; each is more work than the one before and finds more.
+
+1. **Site search.** Type a word from the topic (`forward measure`, `Itô`, `VaR`, `put-call`) into
+   the search box of the [docs site](https://formal-applied-math.github.io/formal-mathfin/). It
+   matches names, docstrings and statements.
+2. **Landmarks and area pages.** The [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html)
+   lists the proved results the most other results build on, linked to their proofs. The area pages
+   and module pages group the rest. [`blueprint.md`](blueprint.md) draws the chain from Brownian
+   motion to the Black–Scholes formula, each node linked to its proof. [`organization.md`](organization.md)
+   explains how the areas relate.
+3. **The corpus.** Each benchmark file in [`benchmarks/`](../benchmarks) lists results from the
+   literature, with the reference, a description of what the entry proves, and the name of the
+   Lean theorem; the [corpus page](https://formal-applied-math.github.io/formal-mathfin/corpus.html)
+   shows the same entries. To find a textbook result, search by its source. The corpus is also
+   published as a [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
+4. **The declaration index.** From a clone, [`tools/verify/find.py`](../tools/verify/find.py)
+   searches every declaration of `MathFin/` by name, docstring and statement:
+
+   ```bash
+   python3 -m tools.verify.find forward measure        # words in a name or docstring
+   python3 -m tools.verify.find --kind def numeraire   # only definitions
+   python3 -m tools.verify.find --mentions IsEMM       # everything stated about IsEMM
+   python3 -m tools.verify.find --used-by MathFin.IsExpQMartingale
+   ```
+
+   It reads `decl-index.json` at the repository root. Download that file as the `decl-index`
+   artifact of the latest `build` run on `main`, or generate it with `lake exe mathfin_index
+   decl-index.json`. Add `--types` to print each statement.
+5. **grep.** `grep -rn "theorem .*parity" MathFin/` finds a name pattern directly in the source.
+6. **Inside Lean.** In any file that imports the library, `#check binomialNoArb_crr` prints a
+   theorem's statement in the infoview, and the tactic `exact?` searches Mathlib and the library
+   for a lemma that closes the current goal; `apply?` lists lemmas that apply to it. Mathlib's
+   [documentation](https://leanprover-community.github.io/mathlib4_docs/) and the search engine
+   [Loogle](https://loogle.lean-lang.org) cover Mathlib.
 
 ## 6. Exercises
 
-Create a file `Scratch.lean` at the root of the repository, start it with
+Create a file `Scratch.lean` at the root of the repository (a scratch file: do not commit it),
+start it with
 
 ```lean
 import MathFin
@@ -195,8 +267,9 @@ import MathFin
 open MathFin
 ```
 
-and replace each `sorry` below with a proof. The infoview shows the goal as you go. Solutions are
-in [`MathFinTest/Manual.lean`](../MathFinTest/Manual.lean).
+and replace each `sorry` below with a proof. Open the file in VS Code and the infoview shows the
+goal as you go; from a terminal, `lake env lean Scratch.lean` checks it and prints every error and
+every remaining `sorry`. Solutions are in [`MathFinTest/Manual.lean`](../MathFinTest/Manual.lean).
 
 **1. A tree with no arbitrage.** Take `u = 2`, `d = 1/2` and `r = 0`. Show the tree has no
 arbitrage. *Hint:* a proof of a structure is written `⟨proof₁, proof₂, proof₃⟩`, one per field, and
@@ -250,10 +323,15 @@ Exercise 5 is a statement about prices only where `BinomialNoArb` holds.
 
 ## 7. Where to go next
 
-- The [README](../README.md#main-results) lists the main results, with links to their proofs.
+- [`MathFinExamples/Applications/`](../MathFinExamples/Applications) is the worked set: each file
+  uses the library from outside it, the way a desk or a course would, and says what the library
+  supplies and what it leaves out. Read one near your own area, then change its numbers.
 - [`MathFinExamples/Tour.lean`](../MathFinExamples/Tour.lean) walks through five representative
   proofs.
+- The [README](../README.md#main-results) lists the main results, with links to their proofs.
+- [`blueprint.md`](blueprint.md) shows what is proved and what is stated and open, and
+  [`organization.md`](organization.md) shows how the whole library is structured.
+- To add a result, read [`onboarding.md`](onboarding.md) and [`design.md`](design.md).
 - [Theorem Proving in Lean 4](https://lean-lang.org/theorem_proving_in_lean4/) and
   [Mathematics in Lean](https://leanprover-community.github.io/mathematics_in_lean/) are the
   standard introductions to Lean itself.
-- To add a result, read [`onboarding.md`](onboarding.md) and [`design.md`](design.md).

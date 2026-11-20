@@ -34,6 +34,14 @@ def test_site_builds(tmp_path):
     assert 'id="MathFin.bsCall_pos"' in mod
     assert 'class="mf" href="../m/MathFin.Models.BlackScholes.Call.html#MathFin.bsCall"' in mod
     assert "used by 1" in mod
+    llms = (out / "llms.txt").read_text(encoding="utf-8")
+    assert llms.startswith("# MathFin\n\n> ") and "\n## " in llms
+    for word in ("full", "library_wrapper", "reduced_core", "lean-toolchain", "lake-manifest.json",
+                 "formalization_scope", "search.json"):
+        assert word in llms, word
+    idx = (out / "index.html").read_text(encoding="utf-8")
+    assert "<h3>Learn</h3>" in idx and "<h3>Build</h3>" in idx and "<h3>Research</h3>" in idx
+    assert "docs/glossary.md" in idx  # the nav links the glossary
     rows = json.loads((out / "search.json").read_text(encoding="utf-8"))
     assert {r["n"] for r in rows} == {"MathFin.bsCall", "MathFin.bsCall_pos"}
 

@@ -42,6 +42,14 @@ from .corpus import iter_entries
 from .decl_index import DeclIndex, IndexedDecl
 
 REPO_URL = "https://github.com/formal-applied-math/formal-mathfin"
+SITE_URL = "https://formal-applied-math.github.io/formal-mathfin/"
+DATASET_URL = "https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems"
+GLOSSARY = f"{REPO_URL}/blob/main/docs/glossary.md"
+
+
+def term(word: str, text: str = "") -> str:
+    """A link to ``word``'s entry in the glossary (anchor: lowercase, spaces as hyphens)."""
+    return f'<a href="{GLOSSARY}#{word.lower().replace(" ", "-")}">{text or word}</a>'
 MATHLIB_FIND = "https://leanprover-community.github.io/mathlib4_docs/find/?pattern={}#doc"
 SKIP_KINDS = frozenset({"constructor", "recursor", "quot"})
 ASSETS = Path(__file__).with_name("site_assets")
@@ -301,11 +309,12 @@ class Site:
 
 NAV = [("index.html", "Map"), ("landmarks.html", "Landmarks"), ("blueprint.html", "Blueprint"),
        ("tree.html", "Tree"), ("joints.html", "Bridges"), ("corpus.html", "Corpus"),
-       ("subjects.html", "Subjects"), ("references.html", "References")]
+       ("subjects.html", "Subjects"), ("references.html", "References"),
+       (GLOSSARY, "Glossary")]
 
 
 def page(title: str, body: str, base: str, current: str = "", desc: str = "") -> str:
-    nav = "".join(f'<a href="{base}{u}"{" aria-current=page" if u == current else ""}>{t}</a>'
+    nav = "".join(f'<a href="{u if u.startswith("http") else base + u}"{" aria-current=page" if u == current else ""}>{t}</a>'
                   for u, t in NAV)
     scripts = "".join(f'<script src="{s}" defer></script>' for s in SCRIPTS)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -461,7 +470,24 @@ def build_home(site: Site, out: Path, blueprint: list[dict]) -> None:
 <p class="lede">A Lean&nbsp;4 library on Mathlib and Rémy Degenne's BrownianMotion: stochastic
 calculus, arbitrage and pricing, term structure and credit, portfolios and risk, each statement
 checked by Lean's kernel. There is no <code>sorry</code>, and every theorem the corpus cites is pinned,
-by the build, to Lean's three standard axioms.</p>
+by the build, to Lean's three standard axioms (<code>propext</code>, <code>Classical.choice</code>,
+<code>Quot.sound</code>).</p>
+<div class="cards paths">
+<div class="card"><h3>Learn</h3><div class="sub">Start from the <a href="landmarks.html">landmark
+results</a>, then read a <a href="s/valuation-diffusions.html">section</a> and its module pages, where each
+statement is shown as Lean elaborates it. The <a href="{REPO_URL}/blob/main/docs/beginners-manual.md">beginners' manual</a>
+teaches Lean through the library, and <a href="{REPO_URL}/tree/main/MathFinExamples">worked examples</a>
+use it.</div></div>
+<div class="card"><h3>Build</h3><div class="sub">Depend on it from a Lean project with a <code>[[require]]</code>
+entry for <code>{REPO_URL}</code> pinned to a release tag; the
+<a href="{REPO_URL}#using-the-library-in-a-project">README</a> has the lines. To add a theorem, read
+<a href="{REPO_URL}/blob/main/CONTRIBUTING.md">CONTRIBUTING</a> and the
+<a href="{REPO_URL}/blob/main/docs/onboarding.md">onboarding guide</a>, or use the search above.</div></div>
+<div class="card"><h3>Research</h3><div class="sub">The <a href="blueprint.html">blueprint</a> lists what is
+proved and what is stated and open; the <a href="tree.html">program tree</a> shows where a new result
+would attach. The <a href="{REPO_URL}/tree/main/docs/research-problems">open-problem catalogue</a> lists
+questions in the field.</div></div>
+</div>
 <div class="tiles">
 <div class="tile"><div class="v">{len(mods)}</div><div class="k">modules</div></div>
 <div class="tile"><div class="v">{n_decl:,}</div><div class="k">public declarations <small>· {n_thm:,} theorems</small></div></div>
@@ -652,8 +678,8 @@ def build_blueprint(site: Site, out: Path, nodes_json: list[dict], frontier: lis
         for area, fs in sorted(loose.items()))
     proved = sum(1 for n in nodes_json if n.get("leanOk"))
     body = f"""<h1>Blueprint</h1>
-<p class="lede ink2">The program's spine: {proved} results proved in Lean, their dependencies read off
-the proof terms (never drawn by hand), and the {len(frontier)} results on the frontier, stated and
+<p class="lede ink2">The program's {term("spine")}: {proved} results proved in Lean, their dependencies read off
+the proof terms (never drawn by hand), and the {len(frontier)} results on the {term("frontier")}, stated and
 not yet formalized. Arrows run from a result to the results that use it. Click a node for its statement.</p>
 {legend([("--good", "proved in Lean", ""), ("--s1", "upstream (Mathlib)", ""),
          ("--muted", "frontier", "dash")])}
@@ -662,7 +688,7 @@ not yet formalized. Arrows run from a result to the results that use it. Click a
 the Lean declaration that proves it, and the issues that advance it.</p></aside>
 {"".join(cards)}
 <h2>Frontier on upstream ground</h2>
-<p class="ink2">Stated results that build on Mathlib alone, with no proved node above to grow from;
+<p class="ink2">Stated results whose {term("ground")} is Mathlib alone, with no proved node above to grow from;
 each card says what it draws on and links to its open issues. Every other frontier result reaches
 the proved blueprint through its uses (<code>blueprint_issues check</code> enforces it).</p>
 {loose_html}"""
@@ -735,7 +761,7 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     proved = sum(1 for n in nodes_json if n.get("leanOk", True))
     body = f"""<h1>The program tree</h1>
 <p class="lede ink2">The library as a tree: probability and statistics are the roots, positions
-and markets the trunk, and valuation, choice and risk the three limbs. On a limb, a result's
+and markets the {term("trunk")}, and valuation, choice and risk the three {term("limb", "limbs")}. On a limb, a result's
 height is its distance from the trunk: one step if its statement mentions a market object, two if
 it mentions an object one step away, and so on. The dark wood is what its proof uses, so a result
 the library has not yet connected stands high or floats beside its limb. Colour is the model
@@ -845,8 +871,8 @@ def build_joints(site: Site, out: Path, nodes_json: list[dict], frontier: list[d
                         + "".join(thm(n) for n in sorted(names)) + "</ul></details>")
 
     body = f"""<h1>Markets and bridges</h1>
-<p class="lede ink2">The library is one structure when every model family is priced in a market,
-and when the limbs share statements. Both are read from what the theorems state, never from where
+<p class="lede ink2">The library is one structure when every {term("model family", "model family")} is priced
+in a market (it has a {term("socket")}), and when the limbs share statements (a {term("joint")}). Both are read from what the theorems state, never from where
 a module sits; the <a href="tree.html">tree</a> draws the same measure.</p>
 <h2>Families priced in a market <span class="muted">{len(r.sockets)} of
 {len(taxonomy.families())}</span></h2>
@@ -967,7 +993,7 @@ def build_landmarks(site: Site, out: Path, landmarks: list[dict], nodes_json: li
     cards = "".join(landmark_card(site, link, e, anchors) for e in landmarks)
     toc = "".join(f'<li><a href="#{esc(e["decl"])}">{esc(e["title"])}</a></li>' for e in landmarks)
     body = f"""<h1>Landmarks</h1>
-<p class="lede ink2">The headline results, one per line of the README's main results. Each shows the
+<p class="lede ink2">The {term("landmark", "landmark")} results, one per line of the README's main results. Each shows the
 statement exactly as Lean elaborates it, read from the declaration index, with what the statement
 does not cover stated next to it. The prose above a statement is a reading aid; the statement is the claim.</p>
 <ul class="toc">{toc}</ul>{cards}"""
@@ -1007,7 +1033,8 @@ def build_corpus(site: Site, out: Path) -> None:
 <p class="lede ink2">{len(site.all_entries)} theorem statements, each a Lean snippet that restates a
 result and checks it against the library. The status says how faithful the statement is to its
 source: a <b>full statement</b> is the theorem itself, a <b>library wrapper</b> restates a Mathlib
-result, a <b>reduced core</b> proves less than the source and its description says what.</p>
+result, a <b>reduced core</b> proves less than the source and its description says what
+(see {term("status")}).</p>
 <div class="tiles">{"".join(f'<div class="tile"><div class="v">{st[s]}</div><div class="k">{STATUS[s]}</div></div>' for s in STATUS if st[s])}</div>
 <h2>By area</h2>
 {legend([(STATUS_VAR[s], STATUS[s], "sq") for s in STATUS if st[s]])}
@@ -1092,6 +1119,78 @@ def build_references(site: Site, out: Path) -> None:
                                               "references.html"), encoding="utf-8")
 
 
+def build_llms(site: Site, out: Path, blueprint: list[dict], n_search: int) -> None:
+    """``llms.txt`` (the llms.txt convention): what the library is, how to read a corpus entry's
+    status, and where the machine-readable pieces are. Counts come from the site's own data."""
+    mods = site.modules()
+    n_thm = sum(1 for m in mods for d in site.decls.get(m, ()) if d.kind in ("theorem", "lemma"))
+    st = status_counts(site.all_entries)
+    proved = sum(1 for n in blueprint if n.get("leanOk"))
+    gh = f"{REPO_URL}/blob/main"
+    text = f"""# MathFin
+
+> A Lean 4 library of formally verified mathematical finance, built on Mathlib and the BrownianMotion
+> package. {len(mods)} modules, {n_thm:,} public theorems and lemmas, a corpus of {len(site.all_entries)}
+> theorem statements. No `sorry`; every theorem the corpus cites is pinned by the build to
+> `propext`, `Classical.choice` and `Quot.sound`.
+
+The library covers stochastic calculus, arbitrage and pricing, term structure and credit, portfolios
+and risk, choice and insurance. It is organized around one object, a price system (positions in a
+market and the pricing measures that price them), and three questions about it: valuation, risk and
+choice. This site is generated from the Lean environment's declaration index.
+
+## Pins and dependency
+
+- [lean-toolchain]({gh}/lean-toolchain): the Lean version.
+- [lake-manifest.json]({gh}/lake-manifest.json): the Mathlib and BrownianMotion revisions.
+- [README, Using the library in a project]({REPO_URL}#using-the-library-in-a-project): add a
+  `[[require]]` entry named `MathFin` with `git = "{REPO_URL}"` and `rev` set to a release tag,
+  then `lake update`, `lake exe cache get`, `lake build`, and `import MathFin`.
+
+## Reading a corpus entry
+
+Each corpus entry carries a status in `metadata.formalization_status`:
+
+- `full`: the theorem as stated.
+- `library_wrapper`: restates a Mathlib or BrownianMotion lemma.
+- `reduced_core`: proves less than the result it is named after.
+
+Cite only `full` and `library_wrapper` entries as the named theorem. Read the entry's `description`
+and `metadata.formalization_scope` for what it proves and what it leaves out. The corpus has
+{st["full"]} `full`, {st["library_wrapper"]} `library_wrapper` and {st["reduced_core"]} `reduced_core` entries.
+
+## Machine-readable resources
+
+- [search.json]({SITE_URL}search.json): {n_search:,} public declarations as `n` (name), `u` (page
+  URL, relative to the site root), `k` (kind), `m` (module), `d` (first sentence of the docstring) and
+  `h` (lowercased search text).
+- [Hugging Face dataset]({DATASET_URL}): the corpus, one row per entry with `lean_code`, status,
+  description, `formalization_scope`, `cell`, `family` and `subjects`.
+- Declaration index: `decl-index.json`, produced by `lake exe mathfin_index`; query it with
+  `python3 -m tools.verify.find`. It is the `decl-index` artifact of the latest `build` workflow run
+  on `main`.
+
+## Pages
+
+- [Landmarks]({SITE_URL}landmarks.html): the headline theorems with their exact Lean statements.
+- [Blueprint]({SITE_URL}blueprint.html): {proved} results proved in Lean and the stated results on the
+  frontier, with dependencies read from proof terms.
+- [Program tree]({SITE_URL}tree.html): the library as roots, trunk and limbs.
+- [Markets and bridges]({SITE_URL}joints.html): which model families are priced in a market.
+- [Corpus]({SITE_URL}corpus.html): the theorem statements by status and area.
+- [Subjects]({SITE_URL}subjects.html), [References]({SITE_URL}references.html).
+
+## Repository documentation
+
+- [Organization]({gh}/docs/organization.md): how the library is arranged.
+- [Glossary]({gh}/docs/glossary.md): the terms used on this site.
+- [CONTRIBUTING]({gh}/CONTRIBUTING.md) and [onboarding]({gh}/docs/onboarding.md): adding a theorem.
+- [Research problems]({gh}/docs/research-problems/README.md): the open-problem catalogue.
+- [AGENTS.md]({gh}/AGENTS.md): notes for agents that read, cite or change the repository.
+"""
+    (out / "llms.txt").write_text(text, encoding="utf-8")
+
+
 def build(index_path: str | Path, out: str | Path, issues_path: str | Path | None = None,
           frontier_index: str | Path | None = None) -> int:
     site = Site.load(index_path)
@@ -1138,6 +1237,7 @@ def build(index_path: str | Path, out: str | Path, issues_path: str | Path | Non
     build_corpus(site, out)
     build_subjects(site, out)
     build_references(site, out)
+    build_llms(site, out, blueprint, len(search))
     (out / ".nojekyll").write_text("", encoding="utf-8")
     return len(mods)
 

@@ -195,11 +195,19 @@ mathematical claim: "full" ({full} theorems), "library_wrapper" ({wrap}),
 and "reduced_core" ({reduced}). The first two categories comprise the
 delivery-ready collection ({ready} of {total}).
 
-## Dependencies
+## Citing an entry
 
-Compilation requires Lean {_toolchain()}, specific Mathlib and
-BrownianMotion commits, accessible via the reproducible Docker image — see
-the source repository for pins and instructions.
+Cite only `full` and `library_wrapper` entries as the named theorem. A `reduced_core` entry proves
+less than the result it is named after: read its `description` and `formalization_scope` for what it
+proves.
+
+## Dependencies and checking `lean_code`
+
+Compilation requires Lean {_toolchain()}. The source repository's `lean-toolchain` fixes the Lean
+version and `lake-manifest.json` the Mathlib and BrownianMotion revisions. A snippet that imports
+`MathFin.…` resolves against a checkout of the repository at the release tag: check it out, run
+`lake exe cache get && lake build`, and check the snippet with `lake env lean` from the checkout
+root. The repository also publishes a Docker image that carries the build.
 
 ## Attribution
 

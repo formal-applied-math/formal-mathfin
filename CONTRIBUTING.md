@@ -1,161 +1,162 @@
 # Contributing
 
-This is a Lean 4 library of formally verified mathematical-finance theorems. The
-canonical verification is `lake build` from the repo root.
+This is a Lean 4 library of formally verified mathematical-finance theorems. A plain
+`lake build` from the repository root is the canonical verification. Please follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
-
-**New here?** [`docs/onboarding.md`](docs/onboarding.md) is the step-by-step
-first-contribution walkthrough. [`docs/troubleshooting.md`](docs/troubleshooting.md)
-covers common setup failures. Issues tagged
+This file holds the rules. [`docs/onboarding.md`](docs/onboarding.md) walks through a first
+contribution from clone to merged pull request, and
+[`docs/troubleshooting.md`](docs/troubleshooting.md) lists setup failures with their fixes.
+Issues labelled
 [`good first issue`](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
-are the recommended entry points. Maintainers can use the
-[`docs/issue-labels.md`](docs/issue-labels.md) taxonomy to classify new issues
-consistently.
+are the entry points; [`docs/issue-labels.md`](docs/issue-labels.md) explains the labels.
+Terms such as corpus, entry, frontier and ledger are defined in
+[`docs/glossary.md`](docs/glossary.md).
 
-## Getting set up
+## 1. Find what the library already has
 
-The fastest path is Docker (pinned Lean toolchain + Mathlib + BrownianMotion):
+Before writing a theorem, a definition, a tool or a doc, search for it. Search in this order:
 
-```bash
-# Log in to GHCR (one-time per machine — needs gh with read:packages scope):
-TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
-echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
+1. The library itself. The declaration index is the environment's own record of every MathFin
+   declaration (statement, docstring, uses). Search it with
+   `python3 -m tools.verify.find forward measure`, `--mentions IsEMM` or
+   `--used-by MathFin.X`; `python3 -m tools.verify.find --help` shows where to get a current
+   index. Then grep `MathFin/` and read the module docstrings of the area you are entering.
+2. BrownianMotion, Degenne's package, which the Brownian and Itô material builds on.
+3. Mathlib (`scripts/loogle.sh`, or grep the pinned sources).
 
-# Pull the prebuilt image (~3 min vs ~15 min local build)
-docker compose -f docker/docker-compose.yml pull verify
+New work extends or instantiates what it finds. If an existing statement is too narrow,
+generalise it and make the old one an instance. Do not build a parallel object beside it. When a
+duplicate is removed, every caller moves to the surviving name, benchmark snippets included, and
+no alias is left behind.
 
-# Sanity check: build the whole library
-docker compose -f docker/docker-compose.yml run --rm --entrypoint bash verify -lc 'lake build'
-```
+## 2. Where a result lives
 
-For host authoring, install elan + the pinned Lean toolchain, then VS Code with
-the Lean extension. The Lake project at repo root is what VS Code's LSP sees;
-no extra config needed.
+One concept has one home. The source tree is layered, and imports point one way
+(`tools/verify/layers.py`, enforced by `tests/test_architecture.py`):
 
-## PR checklist
+- `Probability/`: the roots (martingales, Brownian and Itô calculus, Girsanov, jumps, Gaussian
+  and other laws, dependence). It imports only Mathlib, BrownianMotion and itself, and is
+  Mathlib-shaped.
+- `Contracts/`: the payoff language, with no model.
+- `Pricing/`: the pricing functional (EMMs, the FTAPs, state prices, numéraires, replication,
+  superhedging, the value of a contract).
+- the limbs `Models/`, `Risk/`, `Choice/`, `Insurance/`, `Markets/`.
 
-Before opening a PR use the PR template (`.github/PULL_REQUEST_TEMPLATE.md`).
-The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger status` →
-`lake build` → the declaration index and its ratchet checks, in that order. A red gate at any
-step blocks merge. The run summary lists the declarations the PR adds, removes, renames, and
-whose statements it changes: a golf or refactor PR should change no statement.
+A limb imports another limb only through a declared edge in `layers.EDGES`. A theorem that joins
+two places lives in the module that uses it; there is no bridges directory.
+[`docs/organization.md`](docs/organization.md) explains the organization.
 
-## Adding a theorem
+Every module imports a library module or is imported by one, and is imported by another module
+or cited by a corpus entry. A new module stands on what the library has (the normal law `Phi`,
+`valueAtRisk`, `bsV`, the numéraire, `zcb`, and so on). A formula the library can derive is
+derived, not posited. A module that connects to nothing needs a bridge: a proved theorem tying it
+to the library's objects.
 
-1. **Pick a home.** The library is layered under `MathFin/`, and imports point one way
-   (`tools/verify/layers.py`):
-   - `Probability/` — the roots: discrete martingales, Brownian and Itô calculus, Girsanov,
-     jumps, Gaussian and other laws, dependence. It imports only Mathlib, BrownianMotion and
-     itself, and is Mathlib-shaped: what it holds is a candidate for upstreaming.
-   - `Contracts/` — the payoff language: payoffs, contracts, instruments, with no model.
-   - `Pricing/` — the pricing functional: EMMs, the FTAPs, state prices, numéraires,
-     replication, completeness, superhedging, and the value of a contract.
-   - the limbs: `Models/` (Black–Scholes, binomial, rates, credit, jumps, volatility models,
-     model-free results, forwards), `Risk/`, `Choice/` (utility, portfolios, performance),
-     `Insurance/`, `Markets/` (microstructure, execution, DeFi).
+Worked demonstrations go in `MathFinExamples/` and API checks in `MathFinTest/`. Both import only
+`MathFin`, and nothing in `MathFin/` imports them. [`docs/design.md`](docs/design.md) states the
+rules for definitions and statements: a term called a price, an expectation or a probability
+carries the conditions that make it one.
 
-   A limb imports another limb only through a declared edge in `layers.EDGES` (a DeFi position
-   priced as a Black–Scholes covered call is `Markets → Models`). A theorem that joins two
-   places lives in the module that uses it; there is no bridges directory.
-2. **Connect it.** A new module stands on what the library already has: the one normal law
-   (`Phi`, `quantile`), `valueAtRisk`, `bsV`, the numéraire, `zcb`, the Vasicek bond lemma and
-   so on. A model whose formula the library can derive is derived, not posited, and an object
-   the library already encodes is reused or proved equal to the existing one. The rule is
-   enforced by `tests/test_architecture.py`. Every module imports a library module or is
-   imported by one, and is imported by another module or cited by a corpus entry. A module
-   that connects to nothing needs a bridge: a proved theorem tying it to the rest.
-3. **Author the proof in a real `.lean` file**, not in a JSON snippet.
-   Non-trivial proofs need the full `lake build` memory budget + incremental
-   compilation + LSP authoring. The benchmark JSONs are for re-export shims
-   (5-25 lines) that `import MathFin.<Layer>.<…>.<Module>` and reference
-   the named lemma. Trivial library wrappers (single-line `:= someLemma`)
-   can stay inline in the JSON.
-4. **Iterate fast via the REPL daemon.** Per-file checks in 5-30 sec
-   instead of 5-15 min:
-   ```bash
-   docker compose -f docker/docker-compose.yml up -d lean-repl
-   docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
-   ./scripts/lean-check.sh MathFin/<Layer>/…/<Module>.lean
-   ```
-5. **Confirm axioms-cleanliness.** Every `full` theorem must depend only on
-   the three standard Mathlib axioms:
-   ```lean
-   #print axioms myTheorem
-   -- expected: [propext, Classical.choice, Quot.sound]
-   ```
-   Anything more (e.g. `sorryAx`) means the proof has a gap.
-6. **Update the audit.** Add a row to `docs/coverage.md` describing the
-   theorem, the file path, and its faithfulness status:
-   - `full` — derived from honest hypotheses.
-   - `library_wrapper` — direct application of a named Mathlib /
-     BrownianMotion lemma whose statement matches the benchmark.
-   - `reduced_core` — narrower algebraic/analytic check, or specification
-     structure that pins down the textbook statement without deriving it.
-   - `placeholder` — must be 0; if you need a placeholder, the proof isn't
-     ready to merge.
-7. **Run the full build.** `lake build` (or the docker equivalent) — clean
-   build is required.
-8. **Run the regression tests:**
-   ```bash
-   docker compose -f docker/docker-compose.yml run --rm \
-       --entrypoint python3 verify -m pytest tests/ -q
-   ```
+## 3. Module header and attribution
 
-   The suites must pass, among them:
-   - `tests/test_architecture.py` — every module in a layer, imports pointing one way, and
-     every module connected and used.
-   - `tests/test_router.py` — Lean-only routing, no `sorry`, `@[expose]` rule,
-     `formalization_status` declared on every entry.
-   - `tests/test_ledger.py` — ledger freshness and globally unique ids.
-   - `tests/test_values.py` — no forbidden tactics, no `rfl`-backed `full`
-     entries, blueprint-spine ⊆ curated `AxiomAudit`, byte-fresh
-     `AxiomAuditGen.lean`, and every MathFin theorem a benchmark proof cites
-     axiom-pinned in one of the two audit files. A new `library_wrapper`
-     entry also needs a row in `UPSTREAM_CITATIONS`
-     (`tools/verify/axiom_audit_gen.py`) naming the upstream theorems it
-     re-exports, fully qualified.
+A module opens with the copyright block, then the `module` keyword, its `public import`s, the
+module docstring, and `@[expose] public section`. `MathFin/Models/Binomial/Model.lean` is a
+complete example. Without `@[expose] public section` the declarations are module-private:
+importers see nothing while the build stays green (`tests/test_router.py` checks this). A module
+that imports no other library module starts with `public import MathFin.Init`.
 
-## Style
+Put your own name on both the `Copyright (c) YEAR <name>` and the `Authors: <name>` line. The
+copyright is yours, and a header copied from a neighbouring module carries someone else's name.
+Commit under your own name. Contributions are merged with a merge commit, never squashed, so the
+history credits you. If your git name differs from the one in your headers, add a line to
+`.mailmap`. Add yourself under Contributors in `README.md` in your first pull request
+(`tests/test_attribution.py` checks both).
 
-- One theorem per file when the theorem is non-trivial. Helper lemmas can
-  live in the same file as `private`.
-- Default to no comments. Add one only when the *why* is non-obvious (a
-  hidden invariant, a workaround for a specific Mathlib bug, behaviour that
-  would surprise a reader). Identifiers should carry the *what*.
-- File headers follow Mathlib convention: copyright + license + authors, then a
-  module docstring in Mathlib's layout: `# Title`, a summary, `## Main definitions`
-  and/or `## Main results` listing the public declarations, then `## References`
-  (keys of `docs/references.bib`, as `* [Author, *Title*][Key], §2.3`) and `## Tags`
-  (search terms, then subject codes from `docs/subjects.toml`, e.g. `JEL G13, MSC 91G20`).
-  `python3 -m tools.verify.doc_standard` checks the layout; a new module that lacks a
-  section raises a ratchet count and fails CI. A module that imports no other library
-  module starts with `public import MathFin.Init`. Put your
-  own name on both the `Copyright` and the `Authors:` line: the copyright to
-  your contribution is yours, and a header copied from a neighbouring module
-  carries someone else's name.
-- Commit under your own name. Contributions are merged with a merge commit,
-  never squashed, so your commits reach `main` as you wrote them and the
-  history credits you. If your git name differs from the one in your headers,
-  add a line to `.mailmap`. Add yourself to the Contributors list in
-  `README.md` in your first pull request (CI checks it).
-- Match the surrounding code's tactic style. `field_simp; ring` for
-  algebraic close-outs. `bs_identity` for BS-family derivations. See
-  `docs/patterns.md` for the distilled pattern catalogue.
-- Before adding a definition or a hypothesis structure, read `docs/design.md`.
-  In particular, a theorem that calls a term a price, an expectation or a
-  probability carries the conditions that make it one: Lean's `x / 0 = 0` and
-  the zero integral of a non-integrable function look like real values.
-- Worked demonstrations go in `MathFinExamples/` and API checks in
-  `MathFinTest/`. Both import only `MathFin`, and nothing in `MathFin/` imports
-  them.
+## 4. The documentation standard
 
-## Upstream contributions
+Every module docstring has Mathlib's layout, checked by `tools/verify/doc_standard.py`:
+`# Title`, a summary, `## Main definitions` and `## Main results` listing the public
+declarations, then `## References` and `## Tags`. A reference cites a key of
+`docs/references.bib` as `* [Author, *Title*][Key], §2.3`. Tags are search terms followed by
+subject codes from `docs/subjects.toml`, for example `MSC 91G20, JEL G13`. A missing section
+raises a ratchet count and fails CI.
 
-Drafts for Mathlib and Degenne's BrownianMotion are written in a worktree of the
-target repository, not in this one; `docs/upstreaming.md` records what has been
-submitted and how.
+## 5. The corpus entry
 
-When a MathFin result is general enough to belong upstream, draft it
-here first, get a sign-off on the Lean side, then open the PR against the
-target repo. Keep the in-tree copy until the upstream PR lands.
+A theorem that belongs in the corpus gets an entry in the benchmark file for its area
+(`benchmarks/*.json`, for example `black_scholes.json` or `risk_measures.json`). The proof stays in
+`MathFin/`; the entry is a 5 to 25 line snippet that imports the module, restates the statement and
+cites the library lemma. Only a single-line wrapper may stay inline.
+
+- `metadata.formalization_status` is `full`, `library_wrapper` or `reduced_core`. `full` is derived
+  from honest hypotheses. `library_wrapper` applies a named Mathlib or BrownianMotion lemma whose
+  statement matches. `reduced_core` is a narrower check and says so. A `full` entry whose proof is
+  a definitional `rfl` is rejected.
+- `description` states what the Lean proves, not the textbook theorem it is named after, and
+  `metadata.formalization_scope` discloses any narrowing in full. Both are published in the
+  dataset, so neither may claim more than the statement.
+- The verification ledger (`verification_ledger.json`) records the input hash under which each
+  entry last verified. After any `MathFin/` or benchmark edit, run
+  `python3 -m tools.verify.ledger status`; re-verify stale rows with
+  `python3 -m tools.verify.ledger verify` (the REPL daemon must be up).
+- A `library_wrapper` entry also needs a row in `UPSTREAM_CITATIONS`
+  (`tools/verify/axiom_audit_gen.py`) naming, fully qualified, the upstream theorems it uses.
+- Regenerate the exhaustive axiom audit after any benchmark edit:
+  `python3 -m tools.verify.axiom_audit_gen --write`.
+- Every `full` theorem depends only on `propext`, `Classical.choice` and `Quot.sound`. Check with
+  `#print axioms myTheorem`; `sorryAx` means a gap.
+
+`python3 -m tools.verify.coverage_report` prints the current split by status.
+
+## 6. The blueprint link
+
+The [blueprint](docs/blueprint.md) is the map of results. A math issue (`type:proof`,
+`type:research`, `open-problem`) carries a body line `Blueprint: <label>` naming the node it
+advances. A result that is not on the blueprint gets an entry in `docs/blueprint_frontier.toml`
+first. A pull request that delivers a frontier node tags the declaration in
+`MathFin/Blueprint.lean` under the same label and deletes the frontier entry.
+`python3 -m tools.verify.blueprint_issues check` holds both directions.
+
+## 7. Gates
+
+Run the whole `tests/` directory (`python3 -m pytest tests/ -q`, inside the Docker image or in a
+Python 3.12 environment) and `lake build && lake lint`. CI runs the tests and
+`ledger status` before the Lean build, then the declaration index and ratchet checks. The main
+files:
+
+- `tests/test_router.py`: Lean-only code, no `sorry`, `@[expose] public section`, a declared
+  `formalization_status` on every entry.
+- `tests/test_values.py`: no forbidden tactics or text in `MathFin/`, no `rfl`-backed `full`
+  entry, the blueprint spine inside the curated audit, and a byte-fresh `AxiomAuditGen.lean`.
+- `tests/test_ledger.py`: every entry has a ledger row, and ids are unique.
+- `tests/test_architecture.py`: every module in a layer, imports pointing one way, every module
+  connected and used.
+- `tests/test_doc_standard.py`: the docstring layout of section 4.
+- `tests/test_ratchet.py`: no debt count (long files, duplicate statements, off-blueprint entries,
+  layer violations) rises above its baseline in `ratchet.json`.
+- `tests/test_attribution.py`: header names and the Contributors list, from git history.
+- `tests/test_blueprint_issues.py` and `tests/test_taxonomy.py`: the issue and taxonomy links.
+
+The pull request run summary lists the declarations a change adds, removes and renames, and whose
+statements it changes. A golf or refactor change should change no statement. Use the pull request
+template (`.github/PULL_REQUEST_TEMPLATE.md`).
+
+## 8. Style
+
+- One theorem per file when it is non-trivial; helper lemmas live in the same file as `private`.
+- Write no comments by default. Add one when the reason is not visible: a hidden invariant, a
+  workaround for a specific Mathlib behaviour. Identifiers carry the what.
+- Match the surrounding tactic style. [`docs/patterns.md`](docs/patterns.md) catalogues the
+  patterns and the Mathlib house-style golf idioms (a bare proof term over `by exact`, no
+  hand-written coercions, minimal typeclass assumptions, fewer `have`s).
+- Automation (`grind`, `nlinarith`, search tools) scouts; the merged proof shows why the statement
+  is true. An opaque premise dump is not merged.
+- Before finishing, read each docstring and description you touched against its statement. The
+  build is green when the prose claims more than the statement proves, so nothing else catches it.
+
+## 9. Upstream contributions
+
+Drafts for Mathlib and BrownianMotion are written in a worktree of the target repository.
+[`docs/upstreaming.md`](docs/upstreaming.md) records what has been submitted. Keep the in-tree
+copy until the upstream pull request lands.

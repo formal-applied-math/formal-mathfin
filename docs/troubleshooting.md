@@ -1,300 +1,227 @@
-# Build & environment troubleshooting
+# Troubleshooting
 
-Quick reference for common failures. Each entry follows: **symptom → cause → fix**.
+Each entry reads symptom, cause, fix. General failures come first. The last section covers the
+Docker image, the REPL daemon and one maintainer machine. For the setup itself see
+[onboarding.md](onboarding.md); the rules are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
----
+## The toolchain does not match
 
-## GHCR `docker pull` fails with "unauthorized"
+Symptom: errors such as "failed to read file ... incompatible header" or "unknown package", or
+Mathlib rebuilds from source.
 
-**Symptom:** `docker compose pull verify` returns `unauthorized: unauthenticated`.
+Cause: the Lean version in use differs from `lean-toolchain`, or `.lake/` holds packages from an
+earlier `lake-manifest.json`.
 
-**Cause:** You are not logged in to the GitHub Container Registry, or your
-OAuth token does not have the `read:packages` scope.
+Fix: use the elan-managed toolchain the repository pins (run `lean --version` inside the
+repository and compare with `lean-toolchain`). After a pull that changes `lean-toolchain` or
+`lake-manifest.json`, run `lake exe cache get` and `lake build` again. If `.lake/` is corrupt, delete it and repeat.
 
-**Fix:**
-```bash
-# Refresh the gh auth scope first if needed:
-gh auth refresh -h github.com -s read:packages
+## `lake exe cache get` fails
 
-# Then log in:
-TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
-echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
+Symptom: the command errors on a download, or reports files it could not fetch.
 
-# Retry the pull:
-docker compose -f docker/docker-compose.yml pull verify
-```
+Cause: a transient failure of the cache mirror, or a network proxy.
 
----
+Fix: retry; CI retries it with a pause. If it keeps failing, `lake build` still works and builds
+Mathlib from source, which takes hours, so retry the cache first.
 
-## "unknown constant" after editing a single-file bind mount
+## The first build is slow
 
-**Symptom:** `lean-check.sh` or a benchmark run returns `unknown constant
-'MathFin.SomeModule.someDecl'` — even though `lake build` succeeds and the
-file looks correct.
+Symptom: `lake build` runs for a long time on a fresh clone.
 
-**Cause:** Single-file bind mounts (`MathFin.lean`, `lakefile.lean`,
-`lake-manifest.json`, `lean-toolchain`, `mathfin.toml`) pin the inode at
-container start. Rename-based writes — Claude's Edit/Write tools, `sed -i`,
-`mv` — replace the host inode, so a running container silently reads the old
-content.
+Cause: without the Mathlib cache, Mathlib compiles from source, and BrownianMotion and `MathFin`
+always compile from source.
 
-**Fix:** Re-sync the file into the running container:
-```bash
-docker exec -i docker-lean-repl-1 sh -c 'cat > /app/MathFin.lean' < MathFin.lean
-# Or restart the service:
-docker compose -f docker/docker-compose.yml restart lean-repl
-```
+Fix: run `lake exe cache get` before `lake build`. Later builds are incremental. Check a single
+module with `lake build MathFin.Models.Binomial.Model`. A fast edit-check loop is the REPL daemon
+(see the last section).
 
-Directory-mounted trees (`MathFin/`, `benchmarks/`, etc.) are not affected —
-edits to files inside those directories are visible immediately.
+## Out of memory
 
----
+Symptom: a build or a check is killed (exit code 137, "Killed"), or the machine freezes.
 
-## Container exits with code 137 (OOM kill)
+Cause: a Lean process with Mathlib loaded needs several gigabytes, and two of them at once
+overcommit a small machine.
 
-**Symptom:** A `docker compose run` or the `lean-repl` service exits with
-`exit code 137` and nothing in the logs after "Checking …".
+Fix: run one Lean-loaded process at a time. Stop the REPL daemon before a `lake build`, and do not
+run two builds together. Lower the Lake job count with `lake build -j 2` on a machine with little
+memory, or run the build on a larger machine.
 
-**Cause:** Two Lean-loaded processes ran simultaneously, overcommitting
-available RAM. The library is ~4–5 GB when loaded; two processes exceed the
-WSL/host cap and the kernel OOM-kills the container.
+## Importers do not see my declarations
 
-**Fix:**
-1. Check whether the `lean-repl` daemon is already running:
-   ```bash
-   docker compose -f docker/docker-compose.yml ps
-   ```
-2. If the daemon is up, **stop it** before running `lake build` or `verify`:
-   ```bash
-   docker compose -f docker/docker-compose.yml down lean-repl
-   # Now run the build:
-   docker compose -f docker/docker-compose.yml run --rm --entrypoint bash verify -lc 'lake build'
-   ```
-3. Never run `leanchecker`, a `verify` run, and the `lean-repl` daemon at the same time.
+Symptom: `lake build` is green, but a benchmark snippet or another module reports an unknown
+identifier or constant for a declaration in your new module.
 
-If you need parallel heavy work, use a remote machine via SSH tunnel:
-```bash
-ssh -L 7878:localhost:7878 <bigger-box>
-# lean-check.sh / bench-check.sh speak to the remote daemon transparently.
-```
+Cause: the module lacks `@[expose] public section` after its docstring, so every declaration in it
+is module-private. `tests/test_router.py` fails on this.
 
----
+Fix: add `@[expose] public section` right after the module docstring, as in
+`MathFin/Models/Binomial/Model.lean`. Also check that the module is listed in `MathFin.lean` and
+that the importing file uses `public import`.
 
-## Daemon up but `lean-check.sh` is slow (falls back to cold path)
+## The ledger shows stale or missing entries
 
-**Symptom:** `lean-check.sh` prints "daemon not reachable, falling back to
-`lake env lean`" and takes 5–15 min instead of 5–30 s.
+Symptom: `python3 -m tools.verify.ledger status` prints STALE or MISSING, or
+`tests/test_ledger.py` fails.
 
-**Cause:** The daemon is not running, or its TCP port is not yet bound.
+Cause: the ledger records, per entry, a hash of the snippet code, the transitive `MathFin` modules
+it imports and the toolchain pins. Any change to those inputs makes the entry stale. A merge can
+also drop a row, because git's text merge combines changes to a flat map without a conflict.
 
-**Fix:**
-```bash
-# Start the daemon and wait for READY:
-docker compose -f docker/docker-compose.yml up -d lean-repl
-docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
-# Now re-run lean-check.sh — it will use the fast path.
-```
-
-The daemon takes ~5 min to start (Mathlib + BrownianMotion + MathFin olean
-load). You pay that cost once per session.
-
----
-
-## `lake build` and `lean-repl` slot contention
-
-**Symptom:** Running `lake build` while the daemon is up causes one of them
-to stall or OOM.
-
-**Cause:** Both `lake build` and the daemon load the Mathlib environment
-into memory. Two simultaneous loads overcommit RAM.
-
-**Fix:** The `lean_interact_cache` Docker volume and the `lake_build_cache`
-named volume are shared; never run a build in one service while the other is
-up.
+Fix: with the REPL daemon up, run `python3 -m tools.verify.ledger verify`, which re-verifies only
+the stale entries, then `status` again. Do not edit `MathFin/` while it runs: rows verified after
+the edit record the earlier hash and are stale again. Set up the merge driver and hook once per
+clone so merges do not drop rows:
 
 ```bash
-# Take down the daemon before a manual build:
-docker compose -f docker/docker-compose.yml down lean-repl
-docker compose -f docker/docker-compose.yml run --rm --entrypoint bash verify -lc 'lake build'
-# Bring the daemon back up after:
-docker compose -f docker/docker-compose.yml up -d lean-repl
-```
-
----
-
-## `lake build` succeeds but the daemon still reports errors for a file
-
-**Symptom:** `lake build` exits clean, but `lean-check.sh` reports errors for
-a file that imports a module you just changed.
-
-**Cause:** The daemon does not write `.olean`s for downstream imports. Once a
-proof works in the daemon, the oleans are not updated until `lake build` (or a
-daemon restart) runs.
-
-**Fix:** After editing a module that other files import, restart the daemon or
-run a quick `lake build` to regenerate the oleans, then re-probe.
-
----
-
-## Ledger shows stale entries after an edit
-
-**Symptom:** `python3 -m tools.verify.ledger status` prints `STALE` for one
-or more entries after you edited a `MathFin/` file or benchmark snippet.
-
-**Cause:** The ledger hashes the snippet code + transitive imports + toolchain
-pins; any change to those inputs marks the entry stale.
-
-**Fix:**
-```bash
-# With the daemon running:
-python3 -m tools.verify.ledger verify   # re-verifies only the stale entries
-
-# Check afterwards:
-python3 -m tools.verify.ledger status   # should show all FRESH
-```
-
-Do not push with stale ledger entries — the CI `ledger status` gate will fail.
-
----
-
-## `ledger verify` times out on entry after entry (the timeout spiral)
-
-**Symptom:** a corpus-scale `python3 -m tools.verify.ledger verify` starts failing on
-timeouts and then keeps failing, with each entry reported at just over the cap.
-Entries you know are cheap take as long as ones you know are hard.
-
-**Cause:** `LEAN_ELAB_TIMEOUT` defaults to `180` (`docker/docker-compose.yml:137`),
-which is fine for authoring a single file and too tight for a sweep. The failure
-mode is a **spiral**, not an isolated timeout: a timeout kills the REPL, so the next
-entry pays a ~120s reload out of its own budget and times out too, killing the REPL
-again. Measured on 2026-08-07: entries reported at 182–201s under the 180s cap ran at
-27–47s at `LEAN_ELAB_TIMEOUT=600`, and a warm entry in the same sweep ran at 31.7s.
-The entries were never the problem; the cap interacting with the restart cost was.
-
-**Fix:** raise the cap and restart the daemon before the sweep.
-```bash
-docker compose -f docker/docker-compose.yml down lean-repl
-LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
-# wait for the daemon to answer a real lean-check (log-grep and port probes both lie),
-# then:
-python3 -m tools.verify.ledger verify
-```
-
-Once a sweep has spiralled, re-running it without raising the cap reproduces it. Stop
-the sweep, fix the cap, and re-run rather than grinding through the remaining entries.
-
----
-
-## The daemon stops answering after a long session (the memory wedge)
-
-**Symptom:** `lean-check.sh` returns **nothing at all** and the request never completes.
-The container is up, the log shows the request arriving, and no result line follows. An
-agent driving the daemon looks like it has hung.
-
-**Cause:** the daemon accumulates memory across many check/gate cycles and eventually
-sits at its `mem_limit`. Measured on 2026-08-06 after ~15h uptime: `docker stats`
-showed `5.861GiB / 6GiB` at 31% CPU, with a request logged at 02:30:01 and no result
-ever emitted. This is not the two-Lean-processes hazard the memory doctrine warns
-about; it is one long-lived process reaching the ceiling on its own.
-
-**Diagnosis:** `docker stats --no-stream | grep lean` and compare against the compose
-`mem_limit`. An **empty** `lean-check` response is the tell. An *error* means the daemon
-answered; silence means it could not.
-
-**Fix:** restart it. There is nothing to salvage.
-```bash
-docker compose -f docker/docker-compose.yml down lean-repl
-LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
-```
-Memory after a restart sat at ~939MiB, so the headroom is real once reclaimed. On a long
-session, restart proactively rather than waiting for the wedge.
-
----
-
-## An in-container step fails with "Read-only file system" writing to `docs/`
-
-**Symptom:** something like
-`sh: 1: cannot create /app/docs/blueprint_nodes.json: Read-only file system`, while the
-same command's Lean work succeeded.
-
-**Cause:** compose bind-mounts `tools/`, `benchmarks/`, `tests/`, `mathfin.toml` and the
-Lake pieces. **`docs/` is not mounted.** Anything run inside the container that writes
-there fails, even though reading the repo works.
-
-**Fix:** capture the container's stdout on the host instead of redirecting inside it.
-```bash
-docker compose -f docker/docker-compose.yml run --rm -T --entrypoint sh verify \
-  -c 'lake exe blueprint_export MathFin.Blueprint' > docs/blueprint_nodes.json
-```
-Validate the captured output before overwriting a tracked file — compose can print
-container-lifecycle noise, so write to a scratch path first and check it parses.
-
-Note `lake exe blueprint_export` loads the MathFin environment, so it is a Lean process
-and needs the daemon **down** under the memory doctrine.
-
----
-
-## Entries are stale again right after a successful `ledger verify`
-
-**Symptom:** `ledger verify` reports "26 verified, 0 failed", and `ledger status` immediately
-afterwards still shows a handful stale — including entries the sweep just reported OK.
-
-**Cause:** you edited a `MathFin/` file while the sweep was running. The sweep stamps each entry
-with the input-hash it computed when it started, so every entry verified after your edit records
-the *pre-edit* hash. `status` recomputes and correctly calls them stale. Measured 2026-08-07: a
-one-line comment move inside `ItoFormulaLocalized.lean` mid-sweep left 10 of 26 entries stale.
-
-Note the gate behaved correctly — this costs time, not correctness. There is no path here to a
-false green.
-
-**Fix:** re-run `ledger verify`; it picks up only the newly-stale ones. Better, treat a sweep as a
-quiet period: finish the source edits, then start it. If you must edit during one, expect to pay
-for the entries already past.
-
----
-
-## A merge left the ledger describing a tree nobody verified
-
-**Symptom:** right after a `git merge` or rebase, `ledger status` reports MISSING rows, or
-`tests/test_ledger.py::test_every_benchmark_entry_has_a_ledger_row` fails naming an entry that
-plainly exists in `benchmarks/`.
-
-**Cause:** `verification_ledger.json` is a flat `{id: row}` map. Git's default text merge combines
-two branches without conflicting whenever they touch different regions of the file, so a row can be
-dropped (or carried across) with no conflict marker and no warning. Observed 2026-08-07: the #173
-merge dropped `mf-vnm-expected-utility` while the corpus side kept the entry, and main went red.
-
-Note the ledger is self-healing against *wrong* rows — `classify` recomputes every input hash from
-the working tree, so a carried-over row whose inputs changed reports STALE. The damaging case is a
-**missing** row, and the gates catch that too. What failed was not detection but *timing*: main has
-no branch protection, so a locally-created merge commit reached it without pre-merge CI.
-
-**Fix:**
-```bash
-# one-time per clone — git config is not versioned
 git config merge.mathfin-ledger.name "semantic merge for verification_ledger.json"
 git config merge.mathfin-ledger.driver "python3 tools/verify/ledger_merge.py %O %A %B %L %P"
 git config core.hooksPath .githooks
-
-# after any merge that touched benchmarks/ or MathFin/
-python3 -m tools.verify.ledger status
-python3 -m tools.verify.ledger verify   # daemon up; re-runs only what is stale/missing
 ```
-`.gitattributes` already routes the file at the driver; the two `git config` lines are what make it
-take effect. Treat the ledger as regenerable output — if a merge touched it, re-derive rather than
-hand-resolve.
+
+The driver unions disjoint verifications and drops an entry the two sides verified under
+different inputs, so it re-verifies. If the driver was not set up, re-derive the ledger with
+`status` and `verify` and do not resolve it by hand.
+
+## A gate fails
+
+Symptom: a file in `tests/` fails, or CI is red before the Lean build.
+
+Fix by test:
+
+- `tests/test_values.py`, stale `AxiomAuditGen.lean`: run
+  `python3 -m tools.verify.axiom_audit_gen --write`.
+- `tests/test_values.py`, forbidden text: remove `sorry`, `admit`, `native_decide`, `polyrith`,
+  `?`-suggestion tactics, `hammer`, `loogle` or `leansearch` from `MathFin/`. Comments are
+  exempt.
+- `tests/test_values.py`, `rfl`-backed `full` entry: a definition closed by `rfl` is `reduced_core`,
+  not `full`; the proof must do real work, or the status changes.
+- `tests/test_doc_standard.py`: a module docstring lacks a section or cites a key missing from
+  `docs/references.bib`; run `python3 -m tools.verify.doc_standard`.
+- `tests/test_ratchet.py`: a debt count rose. The failure names the count; fix the cause rather
+  than raising the baseline in `ratchet.json`.
+- `tests/test_architecture.py`: a module is not in a layer, an import points against the layers,
+  or a module is not connected to the library. See CONTRIBUTING, section 2.
+- `tests/test_blueprint_issues.py`: an open math issue lacks its `Blueprint: <label>` line, or a
+  frontier node has no issue. Run `python3 -m tools.verify.blueprint_issues check`.
+- `tests/test_attribution.py`: a module header names someone other than its author, or the author
+  is missing from Contributors in `README.md`.
+
+## `docker compose pull verify` is denied or rate-limited
+
+Symptom: the pull returns `denied` or `toomanyrequests`.
+
+Cause: the image `ghcr.io/formal-applied-math/mathfin-verify` is public and needs no login, so
+this is a rate limit on anonymous pulls or a stale credential in your Docker configuration.
+
+Fix: retry later, or log in to `ghcr.io` with a personal access token that has the
+`read:packages` scope (`docker login ghcr.io`), or run `docker logout ghcr.io` if a stale
+credential is the cause.
 
 ---
 
-## CI fails on `test_values.py` after a benchmark edit
+## Maintainer's machine and Docker notes
 
-**Symptom:** `tests/test_values.py` fails with "stale AxiomAuditGen" or a
-forbidden-text/rfl-backed-full violation.
+The notes below concern the Docker image, the persistent REPL daemon (`scripts/lean-check.sh`,
+`scripts/bench-check.sh`) and the memory limits of the maintainer's machine. They do not apply to
+a plain `lake build`.
 
-**Fix:**
-1. For stale audit: regenerate with `python3 -m tools.verify.axiom_audit_gen --write`.
-2. For forbidden text (`sorry`/`admit`/`native_decide`/`polyrith`/`?`-tactics/
-   `hammer`/`loogle`/`leansearch` in `MathFin/` source): remove the tactic.
-   Comments are exempt.
-3. For `rfl`-backed `full`: the proof must do real work — a definition +
-   single `rfl` is `reduced_core`, not `full`.
+### Memory settings
+
+The compose services default to four CPUs (`VERIFY_CPUSET`) and a 6 GB memory limit, so that a
+runaway elaboration is killed in the container (exit code 137) and not on the host. The
+maintainer's machine has about 15 GB of memory and runs a single Lean-loaded process at a time:
+the daemon is the usual occupant, and `verify` runs, `leanchecker` and builds run with the
+daemon down (`docker compose -f docker/docker-compose.yml down lean-repl`). Do not run
+`docker compose build` locally: it repeats the whole Mathlib layer. The image is published by the
+`publish-image.yml` workflow, and locally you only pull it. Corpus-scale sweeps and the
+kernel replay run on CI runners, which have more memory.
+
+### "unknown constant" after editing a single-file bind mount
+
+Symptom: `lean-check.sh` or a benchmark run reports an unknown constant for a declaration that
+exists and builds.
+
+Cause: compose mounts some single files (`MathFin.lean`, `lakefile.lean`, `lake-manifest.json`,
+`lean-toolchain`, `mathfin.toml`). A single-file mount pins the inode, and a rename-based write
+(an editor save, `sed -i`, `mv`) replaces the host file, so a running container keeps the old
+content. Directory mounts (`MathFin/`, `benchmarks/`) are not affected.
+
+Fix: restart the service (`docker compose -f docker/docker-compose.yml restart lean-repl`), or
+copy the file into the running container with `docker exec -i <container> sh -c 'cat >
+/app/MathFin.lean' < MathFin.lean`, where `<container>` is the name `docker compose ps` shows.
+
+### `lean-check.sh` is slow or falls back to the cold path
+
+Symptom: the script reports that the daemon is unreachable and takes minutes.
+
+Cause: the daemon is not running, or has not finished loading. The first load takes several
+minutes.
+
+Fix: start it and poll its log until READY appears (a streaming `logs -f | grep -m1` can hang, so
+poll instead). A timeout right after a restart is usually a cold start; retry once it is warm.
+
+```bash
+docker compose -f docker/docker-compose.yml up -d lean-repl
+docker compose -f docker/docker-compose.yml logs lean-repl | grep READY
+```
+
+### The daemon and `lake build` contend
+
+Symptom: one of them stalls or is killed when both run.
+
+Cause: both load the Mathlib environment, and they share the build-cache volume with one Lake
+writer at a time.
+
+Fix: stop the daemon before a build and restart it afterwards.
+
+### The daemon reports errors the build does not
+
+Symptom: `lake build` is clean, but `lean-check.sh` reports errors in a file that imports a
+module you changed.
+
+Cause: the daemon does not write `.olean` files for downstream imports.
+
+Fix: run `lake build` or restart the daemon after changing a module that other files import.
+
+### Timeouts on entry after entry during `ledger verify`
+
+Symptom: a corpus-scale `ledger verify` fails on timeouts just above the cap, and keeps failing.
+
+Cause: `LEAN_ELAB_TIMEOUT` defaults to 180 seconds in the compose file, enough to author one file
+and too tight for a sweep. A timeout kills the REPL, the next entry pays the reload out of its own
+budget and times out too, and the failure repeats.
+
+Fix: stop the sweep, raise the cap, restart the daemon and rerun.
+
+```bash
+docker compose -f docker/docker-compose.yml down lean-repl
+LEAN_ELAB_TIMEOUT=600 docker compose -f docker/docker-compose.yml up -d lean-repl
+python3 -m tools.verify.ledger verify
+```
+
+For a large sweep use the `ledger-sweep.yml` workflow on a runner instead
+(`gh workflow run ledger-sweep.yml --ref <branch> -f scope=stale`).
+
+### The daemon stops answering after a long session
+
+Symptom: `lean-check.sh` returns nothing, and the log shows the request but no result.
+
+Cause: the daemon's memory grows over many checks until it sits at the container limit. An empty
+response, not an error, is the sign.
+
+Diagnosis: `docker stats --no-stream` shows memory at the `mem_limit`.
+
+Fix: restart the daemon. On a long session, restart it before it wedges.
+
+### "Read-only file system" when a container step writes to `docs/`
+
+Symptom: a command inside the container fails writing a file under `docs/`.
+
+Cause: compose mounts `tools/`, `benchmarks/`, `tests/`, `mathfin.toml` and the Lake files, but not
+`docs/`.
+
+Fix: write the output on the host, for example
+`docker compose -f docker/docker-compose.yml run --rm -T --entrypoint sh verify -c 'lake exe blueprint_export MathFin.Blueprint' > docs/blueprint_nodes.json`.
+Check that the captured output parses before overwriting a tracked file, because compose may print
+lifecycle messages. `blueprint_export` loads the environment, so run it with the daemon down.
