@@ -1401,22 +1401,6 @@
   "label": "thm:sdf-capm-hansen-jagannathan",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
- {"uses":
-  ["def:market",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "The zero-coupon bond price is a price",
-  "text":
-  "In any market whose numéraire is the money market $e^{rt}$, under any\n  probability measure, the flat-rate value $\\sum_i w_i e^{-rT_i}$ of a zero-coupon portfolio\n  is the market price of the schedule of fixed cash flows $w_i$ at $T_i$; and in any market whose\n  numéraire is $(1+y)^{\\lfloor t\\rfloor}$ the annually compounded price $\\sum_i c_i/(1+y)^{t_i}$\n  of a coupon bond is the price of its cash flows. The numéraire is deterministic, so the\n  deflator is a discount curve (`value_fixedFlows_deterministic`), and the deterministic bond\n  market is a market priced by every probability measure\n  (`isPricingMeasure_deterministicMarket`). Stochastic short rates are not covered.",
-  "name": "MathFin.Rates.bondPortfolioValue_eq_price",
-  "module": "MathFin.Models.Rates.DeterministicMarket",
-  "line": 164,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:zero-coupon-bond-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses": [],
   "title": "The Kelly fraction is a critical point of the growth rate",
   "text":
@@ -1465,18 +1449,6 @@
   "label": "thm:vasicek-bond-pde",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/AffineTermStructurePDE.lean"},
- {"uses": ["def:survival-function", "def:hazard-survival"],
-  "title": "Marshall–Olkin first-to-default",
-  "text":
-  "With independent exponential clocks $T_0, T_1, T_2$ of positive rates and\n  default times $\\min(T_0,T_2)$, $\\min(T_1,T_2)$ (a common shock $T_2$), the first default\n  survives past $t \\ge 0$ with probability $e^{-(\\lambda_0+\\lambda_1+\\lambda_2)t}$: its\n  survival function is the credit survival curve of the constant hazard\n  $\\lambda_0+\\lambda_1+\\lambda_2$. The default-indicator covariance is\n  `covariance_indicator_marshallOlkin`; it is not normalised to a correlation.",
-  "name": "MathFin.marshallOlkin_firstToDefault_survivalFunction",
-  "module": "MathFin.Insurance.SurvivalUnification",
-  "line": 171,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:marshall-olkin",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/SurvivalUnification.lean"},
  {"uses":
   ["def:gbm", "def:brownian-motion", "def:contract", "def:contract-value"],
   "title": "Black–Scholes pricing under the physical measure",
@@ -1599,17 +1571,16 @@
   ["def:market",
    "def:contract",
    "def:pricing-functional",
-   "thm:bond-immunization",
-   "thm:zero-coupon-bond-price"],
-  "title": "Immunization for market prices",
+   "def:contract-value"],
+  "title": "The zero-coupon bond price is a price",
   "text":
-  "In a family of markets $M_r$ with numéraire $e^{rt}$, if two zero-coupon\n  portfolios have equal duration-weighted values at $r$, the derivative in $r$ of the difference\n  of the market prices of their cash-flow schedules is zero.",
-  "name": "MathFin.Rates.price_immunization_first_order",
+  "In any market whose numéraire is the money market $e^{rt}$, under any\n  probability measure, the flat-rate value $\\sum_i w_i e^{-rT_i}$ of a zero-coupon portfolio\n  is the market price of the schedule of fixed cash flows $w_i$ at $T_i$; and in any market whose\n  numéraire is $(1+y)^{\\lfloor t\\rfloor}$ the annually compounded price $\\sum_i c_i/(1+y)^{t_i}$\n  of a coupon bond is the price of its cash flows. The numéraire is deterministic, so the\n  deflator is a discount curve (`value_fixedFlows_deterministic`), and the deterministic bond\n  market is a market priced by every probability measure\n  (`isPricingMeasure_deterministicMarket`). Stochastic short rates are not covered.",
+  "name": "MathFin.Rates.bondPortfolioValue_eq_price",
   "module": "MathFin.Models.Rates.DeterministicMarket",
   "line": 179,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:immunization-market-price",
+  "label": "thm:zero-coupon-bond-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses": ["def:survival-function"],
@@ -1696,23 +1667,18 @@
   "label": "thm:markov-path-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/MarkovPathMeasure.lean"},
- {"uses":
-  ["def:market",
-   "def:contract",
-   "def:pricing-functional",
-   "thm:key-rate-duration",
-   "thm:zero-coupon-bond-price"],
-  "title": "Key-rate durations for market prices",
+ {"uses": ["def:survival-function", "def:hazard-survival"],
+  "title": "Marshall–Olkin first-to-default",
   "text":
-  "In a family of markets $M_y$ with numéraire $(1+y)^{\\lfloor t\\rfloor}$, at a\n  flat curve $y$ with $1 + y \\ne 0$ the key-rate partials of a coupon bond sum to the derivative\n  in $y$ of the market price of its cash-flow schedule.",
-  "name": "MathFin.Rates.sum_deriv_keyRate_eq_deriv_price",
-  "module": "MathFin.Models.Rates.DeterministicMarket",
-  "line": 201,
+  "With independent exponential clocks $T_0, T_1, T_2$ of positive rates and\n  default times $\\min(T_0,T_2)$, $\\min(T_1,T_2)$ (a common shock $T_2$), the first default\n  survives past $t \\ge 0$ with probability $e^{-(\\lambda_0+\\lambda_1+\\lambda_2)t}$: its\n  survival function is the credit survival curve of the constant hazard\n  $\\lambda_0+\\lambda_1+\\lambda_2$. The default-indicator covariance is\n  `covariance_indicator_marshallOlkin`; it is not normalised to a correlation.",
+  "name": "MathFin.marshallOlkin_firstToDefault_survivalFunction",
+  "module": "MathFin.Insurance.SurvivalUnification",
+  "line": 205,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:key-rate-market-price",
+  "label": "thm:marshall-olkin",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/SurvivalUnification.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1732,21 +1698,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
  {"uses":
-  ["def:coherent-risk-measure",
-   "thm:superhedging-price-lower-bound",
-   "def:convex-risk-measure"],
-  "title": "The superhedging price is a coherent risk measure",
-  "text":
-  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
-  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
-  "module": "MathFin.Risk.Superhedging",
-  "line": 209,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:superhedging-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
- {"uses":
   ["def:value-at-risk",
    "def:quantile",
    "def:portfolio-variance",
@@ -1762,6 +1713,21 @@
   "label": "thm:gaussian-portfolio-var",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/GaussianRiskMarkowitz.lean"},
+ {"uses":
+  ["def:coherent-risk-measure",
+   "thm:superhedging-price-lower-bound",
+   "def:convex-risk-measure"],
+  "title": "The superhedging price is a coherent risk measure",
+  "text":
+  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
+  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 209,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-coherent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1812,6 +1778,22 @@
   "label": "thm:quadratic-variation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
+ {"uses":
+  ["def:standard-normal-cdf",
+   "def:contract",
+   "def:contract-value",
+   "thm:forward-measure"],
+  "title": "Black's caplet formula, given a lognormal forward rate",
+  "text":
+  "If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward\n  measure (a hypothesis, not derived from a rate model), the caplet is worth\n  $P(0,T_1)\\,\\delta\\,[F\\Phi(d_1) - K\\Phi(d_2)]$.",
+  "name": "MathFin.Contracts.value_caplet_black76",
+  "module": "MathFin.Models.Rates.Caplet",
+  "line": 241,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:black76-caplet",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
  {"uses": ["def:coin-flip-measure"],
   "title": "Binomial barrier prices via reflection",
   "text":
@@ -1824,6 +1806,23 @@
   "label": "thm:binomial-barrier-reflection",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:bond-immunization",
+   "thm:zero-coupon-bond-price"],
+  "title": "Immunization for market prices",
+  "text":
+  "In a family of markets $M_r$ with numéraire $e^{rt}$, if two zero-coupon\n  portfolios have equal duration-weighted values at $r$, the derivative in $r$ of the difference\n  of the market prices of their cash-flow schedules is zero.",
+  "name": "MathFin.Rates.price_immunization_first_order",
+  "module": "MathFin.Models.Rates.DeterministicMarket",
+  "line": 245,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:immunization-market-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility satisfies independence and continuity",
   "text":
@@ -1867,22 +1866,6 @@
   "label": "def:gaussian-factor-copula",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
- {"uses":
-  ["def:standard-normal-cdf",
-   "def:contract",
-   "def:contract-value",
-   "thm:forward-measure"],
-  "title": "Black's caplet formula, given a lognormal forward rate",
-  "text":
-  "If the simple rate $L(T_0,T_1)$ is lognormal under the $T_1$-forward\n  measure (a hypothesis, not derived from a rate model), the caplet is worth\n  $P(0,T_1)\\,\\delta\\,[F\\Phi(d_1) - K\\Phi(d_2)]$.",
-  "name": "MathFin.Contracts.value_caplet_black76",
-  "module": "MathFin.Models.Rates.Caplet",
-  "line": 254,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:black76-caplet",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
  {"uses": ["def:portfolio-variance", "thm:kkt-sufficiency"],
   "title": "Markowitz mean–variance optimality",
   "text":
@@ -1895,6 +1878,35 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["thm:carr-madan"],
+  "title": "Breeden–Litzenberger formula",
+  "text":
+  "For a price process whose time-$s$ marginal is integrable and any smooth\n  compactly supported $\\psi$, $\\int \\psi''(K)\\,C(s,K)\\,dK = E[\\psi(X_s)]$, where $C(s,K) =\n  E[(X_s - K)^+]$ is the call surface at zero rates: $\\partial_K^2 C(s,\\cdot)$ is the law of\n  $X_s$ as a distribution. The weak form, for an arbitrary law.",
+  "name": "MathFin.Dupire.breedenLitzenberger_weak",
+  "module": "MathFin.Models.LocalVol.Dupire",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:breeden-litzenberger",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:key-rate-duration",
+   "thm:zero-coupon-bond-price"],
+  "title": "Key-rate durations for market prices",
+  "text":
+  "In a family of markets $M_y$ with numéraire $(1+y)^{\\lfloor t\\rfloor}$, at a\n  flat curve $y$ with $1 + y \\ne 0$ the key-rate partials of a coupon bond sum to the derivative\n  in $y$ of the market price of its cash-flow schedule.",
+  "name": "MathFin.Rates.sum_deriv_keyRate_eq_deriv_price",
+  "module": "MathFin.Models.Rates.DeterministicMarket",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:key-rate-market-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -1925,18 +1937,6 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
- {"uses": ["thm:carr-madan"],
-  "title": "Breeden–Litzenberger formula",
-  "text":
-  "For a price process whose time-$s$ marginal is integrable and any smooth\n  compactly supported $\\psi$, $\\int \\psi''(K)\\,C(s,K)\\,dK = E[\\psi(X_s)]$, where $C(s,K) =\n  E[(X_s - K)^+]$ is the call surface at zero rates: $\\partial_K^2 C(s,\\cdot)$ is the law of\n  $X_s$ as a distribution. The weak form, for an arbitrary law.",
-  "name": "MathFin.Dupire.breedenLitzenberger_weak",
-  "module": "MathFin.Models.LocalVol.Dupire",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:breeden-litzenberger",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
