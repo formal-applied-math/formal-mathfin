@@ -218,11 +218,12 @@ variable of `value_caplet_black76`): `𝔼^{Qn}[(I_T − K)⁺/B_T] = Pⁿ(0,T)�
 `Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with `d₁ = bsd1 F K 0 √V 1`, `d₂ = bsd2 F K 0 √V 1`. That `Q^T` is a
 probability measure follows from `hZ`. The caplet is the contract `caplet () 0 0 1 K` of
 `MathFin.Contracts.value_caplet_black76` with deflator `fun _ => 1/B_T` and observed index
-`fun _ _ => I_T`, and `Pⁿ(0,T)` plays `zeroCurve Qn D 0`; `jyForwardIndex_lognormal_eq_curves` gives
-`F₀ = F`. Strike convention: the market payoff `N[(I_T/I₀ − 1) − κ]⁺` (notional `N`, `κ` the total,
-non-annualised strike over `[0,T]`) is `(N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`; an annual quoted
-strike `k` is `K = I₀(1+k)^T`. `V` is a free input here; the statement does not identify it with
-`jyVariance`. -/
+`fun _ _ => I_T`; both are time-constant, so the contract's reset and payment dates `0, 0` are
+placeholders and the payment date `T` enters only through `B_T`, hence `zeroCurve Qn D 0 = Pⁿ(0,T)`;
+`jyForwardIndex_lognormal_eq_curves` gives `F₀ = F`. Strike convention: the market payoff
+`N[(I_T/I₀ − 1) − κ]⁺` (notional `N`, `κ` the total, non-annualised strike over `[0,T]`) is
+`(N/I₀)·(I_T − K)⁺` with `K = I₀(1+κ)`; an annual quoted strike `k` is `K = I₀(1+k)^T`. `V` is a
+free input here; the statement does not identify it with `jyVariance`. -/
 theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     (Pn0T Pr0T I0 F0 V K : ℝ) (Z : Ω → ℝ)
     (hBTpos : ∀ ω, 0 < BT ω) (hBTmeas : Measurable BT) (hPn0T : 0 < Pn0T)

@@ -1702,7 +1702,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Reduced core. jyZcCaplet_price in MathFin/Models/Rates/JarrowYildirim.lean applies MathFin.Contracts.value_caplet_black76 (the caplet contract with the index as the observed rate and deflator 1/B_T) together with ZCSwap.forwardIndex_eq (through jyForwardIndex_lognormal_eq_curves); the headline adds no Jarrow-Yildirim content beyond these existing results under model hypotheses. Not derived: the index-linked bond pricing hident (the time-0 case of the forward-index martingale, Bagaria eq. 17.6), the lognormality of the index under the nominal T-forward measure (hypothesis hZ), its SDE-level derivation, and the real-rate drift shift. V is a free positive input; this statement does not identify it with jyVariance."
+        "formalization_scope": "Reduced core. jyZcCaplet_price in MathFin/Models/Rates/JarrowYildirim.lean applies MathFin.Contracts.value_caplet_black76 (the caplet contract with the index as the observed rate and deflator 1/B_T, both time-constant: the contract's dates are placeholders and the payment date T enters through B_T) together with ZCSwap.forwardIndex_eq (through jyForwardIndex_lognormal_eq_curves); the headline adds no Jarrow-Yildirim content beyond these existing results under model hypotheses. Not derived: the index-linked bond pricing hident (the time-0 case of the forward-index martingale, Bagaria eq. 17.6), the lognormality of the index under the nominal T-forward measure (hypothesis hZ), its SDE-level derivation, and the real-rate drift shift. V is a free positive input; this statement does not identify it with jyVariance."
       }
     },
     {
