@@ -35,3 +35,16 @@ def test_rejoins_hyphenated_lines():
 def test_pdf_paths():
     assert s.pdf_url("2101.00001", 2).endswith("/arxiv/pdf/2101/2101.00001v2.pdf")
     assert s.pdf_url("math/0501001", 1).endswith("/math/pdf/0501/0501001v1.pdf")
+
+
+def test_index_and_search(tmp_path):
+    txt = tmp_path / "txt"
+    path = s.local_path(txt, "2101.00001", 2).with_suffix(".txt")
+    path.parent.mkdir(parents=True)
+    path.write_text("Intro on convex-\nity of boundaries.\fUniqueness remains open\nin general.\f")
+    papers = [{"id": "2101.00001", "version": 2, "title": "A paper", "published": "2021-01-01",
+               "primary": "q-fin.MF", "categories": ["q-fin.MF"]}]
+    assert s.index(papers, txt, tmp_path / "c.db") == {"papers": 1, "pages": 2}
+    [hit] = s.search(tmp_path / "c.db", '"remains open"')
+    assert (hit["id"], hit["page"]) == ("2101.00001", 2)
+    assert s.search(tmp_path / "c.db", "convexity")[0]["page"] == 1  # hyphenation rejoined
