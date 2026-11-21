@@ -20,13 +20,28 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def test_formalization_yaml_is_fresh():
-    generated = F.emit_yaml(F.build_doc(ROOT))
-    path = os.path.join(ROOT, "formalization.yaml")
-    assert os.path.isfile(path), "formalization.yaml missing — run --write"
-    current = open(path, encoding="utf-8").read()
-    assert current == generated, (
-        "formalization.yaml is stale — run "
-        "`python3 -m tools.formalization_yaml --write`")
+    # the root entry's document and every further Palomar entry's (docs/palomar.md)
+    for rel, generated in F.documents(ROOT).items():
+        path = os.path.join(ROOT, rel)
+        assert os.path.isfile(path), f"{rel} missing — run --write"
+        current = open(path, encoding="utf-8").read()
+        assert current == generated, (
+            f"{rel} is stale — run `python3 -m tools.formalization_yaml --write`")
+
+
+def test_every_entry_has_its_palomar_files():
+    # an entry's folder holds the four files the submission names, and its config points at the
+    # folder's own Challenge and Solution modules
+    for entry in F._load_meta(ROOT).get("entries", []):
+        d = os.path.join(ROOT, entry["dir"])
+        for name in ("Challenge.lean", "Solution.lean", "comparator.json"):
+            assert os.path.isfile(os.path.join(d, name)), f"{entry['dir']}/{name} missing"
+        cfg = json.load(open(os.path.join(d, "comparator.json"), encoding="utf-8"))
+        module = entry["dir"].replace("/", ".")
+        assert cfg["challenge_module"] == f"{module}.Challenge"
+        assert cfg["solution_module"] == f"{module}.Solution"
+        assert cfg["theorem_names"], f"{entry['dir']}: no theorem is compared"
+        assert set(cfg["permitted_axioms"]) <= {"propext", "Quot.sound", "Classical.choice"}
 
 
 def test_generator_is_foundry_independent():

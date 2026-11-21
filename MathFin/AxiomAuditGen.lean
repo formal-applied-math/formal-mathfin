@@ -1,34 +1,43 @@
 /-
   GENERATED FILE — do not edit by hand.
 
-  Exhaustive axiom audit: every constant declared in MathFin/ that a benchmark
-  snippet's proof cites is #guard_msgs-pinned to its exact axiom set, so no
-  benchmark-cited theorem can pick up `sorryAx` (a `sorry`) or a non-standard
-  axiom without breaking `lake build`.
-
-  The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
-  narrative); THIS file is its machine-written closure over the benchmark
-  corpus (1124 MathFin constants, 29 upstream). Citations
-  are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
-  unqualified under `open`, by dot notation on a hypothesis, or declared
-  outside the MathFin namespace is pinned like any other. Statement-position
-  defs are exercised by elaboration + the verification ledger. The second
-  section pins the Mathlib and BrownianMotion constants that library_wrapper
-  entries cite (UPSTREAM_CITATIONS in the generator).
-
   Regenerate:  python3 -m tools.verify.axiom_audit_gen --write
   Freshness:   tests/test_values.py::test_axiom_audit_gen_is_fresh
-  (Excluded from CI kernel replay like AxiomAudit: whole-library closure.)
 -/
-import MathFin
-import BrownianMotion.Gaussian.BrownianMotion
-import BrownianMotion.StochasticIntegral.DoobLp
-import BrownianMotion.StochasticIntegral.LocalMartingale
-import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
-import Mathlib.Probability.ConditionalExpectation
-import Mathlib.Probability.Martingale.Convergence
-import Mathlib.Probability.Martingale.OptionalStopping
-import Mathlib.Probability.Martingale.Upcrossing
+module
+
+public import MathFin
+public import BrownianMotion.Gaussian.BrownianMotion
+public import BrownianMotion.StochasticIntegral.DoobLp
+public import BrownianMotion.StochasticIntegral.LocalMartingale
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic
+public import Mathlib.Probability.ConditionalExpectation
+public import Mathlib.Probability.Martingale.Convergence
+public import Mathlib.Probability.Martingale.OptionalStopping
+public import Mathlib.Probability.Martingale.Upcrossing
+
+/-!
+# Exhaustive axiom audit
+
+Every constant declared in MathFin/ that a benchmark snippet's proof cites is
+#guard_msgs-pinned to its exact axiom set, so no benchmark-cited theorem can
+pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
+`lake build`.
+
+The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
+narrative); THIS file is its machine-written closure over the benchmark
+corpus (1126 MathFin constants, 29 upstream). Citations
+are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
+unqualified under `open`, by dot notation on a hypothesis, or declared
+outside the MathFin namespace is pinned like any other. Statement-position
+defs are exercised by elaboration + the verification ledger. The second
+section pins the Mathlib and BrownianMotion constants that library_wrapper
+entries cite (UPSTREAM_CITATIONS in the generator).
+
+(Excluded from CI kernel replay like AxiomAudit: whole-library closure.)
+-/
+
+@[expose] public section
 
 -- The `#guard_msgs` docstrings below are Lean's own output, matched as printed.
 set_option linter.style.longLine false
@@ -4334,6 +4343,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.valueAtRisk_sum_bernoulli_superadditive_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.valueAtRisk_sum_bernoulli_superadditive_iff
+
+/-- info: 'MathFin.valueAtRisk_sum_le_of_capCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.valueAtRisk_sum_le_of_capCall
+
+/-- info: 'MathFin.valueAtRisk_sum_le_of_dual' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.valueAtRisk_sum_le_of_dual
 
 /-- info: 'MathFin.valueFunction_satisfies_approxHJ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

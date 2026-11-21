@@ -12,9 +12,15 @@ A library of mathematical finance in [Lean 4](https://lean-lang.org), built on
 differential equations), no-arbitrage theory, derivative pricing, fixed income, portfolio theory,
 risk measures and actuarial mathematics.
 
-The corpus records 870 results from the literature in [`benchmarks/`](benchmarks), each with a
-Lean statement and proof. Of these, 831 are proved in full, 18 restate a lemma from Mathlib or
-BrownianMotion, and 21 are reduced cores that prove less than the result they are named after.
+The library is meant to be read, used and extended: to learn the mathematics from statements a
+machine has checked, to build on them in other Lean projects, and to see what is proved, what is
+stated and open, and where a new result would fit. It is written for mathematicians and for AI
+agents alike.
+
+The [corpus](docs/glossary.md#corpus) records 906 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 866 are proved in
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 22 are
+[reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
@@ -34,6 +40,31 @@ theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
 
 The hypothesis `hna`, that the $`n`$-step tree is free of arbitrage for every $`n \ge 1`$, holds
 whenever $`|r|\sqrt{T} < \sigma`$ ([`binomialNoArb_crr`](MathFin/Models/Binomial/CRRConvergence.lean)).
+
+## Where to start
+
+- **To learn.** The [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html)
+  prints the headline theorems exactly as Lean states them, with nothing to install; the
+  [documentation site](https://formal-applied-math.github.io/formal-mathfin/) has a page for every
+  area and module and a search over every declaration. The
+  [beginners' manual](docs/beginners-manual.md) teaches Lean through the library, with checked
+  exercises, and [`MathFinExamples/Applications/`](MathFinExamples/Applications) applies it to
+  concrete problems, from a capped call to a chain-ladder reserve. The
+  [glossary](docs/glossary.md) explains the library's own vocabulary.
+- **To use it.** [Using the library in a project](#using-the-library-in-a-project) below gives the
+  dependency lines. Cite an entry as the named theorem only when its status is `full` or
+  `library_wrapper`, and read its `description` for what it proves.
+- **To contribute.** [`CONTRIBUTING.md`](CONTRIBUTING.md) gives the rules and
+  [`docs/onboarding.md`](docs/onboarding.md) walks through a first pull request.
+- **To do research.** The [blueprint](docs/blueprint.md) maps what is proved and the
+  [frontier](docs/glossary.md#frontier) of results stated next;
+  [`docs/research-problems/`](docs/research-problems/README.md) catalogues open problems of the
+  field with precise statements; [`docs/organization.md`](docs/organization.md) explains how the
+  pieces fit.
+- **For AI agents.** [`AGENTS.md`](AGENTS.md) covers using and developing the library, and the
+  site publishes [`llms.txt`](https://formal-applied-math.github.io/formal-mathfin/llms.txt) and a
+  JSON search index. The corpus is also a
+  [Hugging Face dataset](https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems).
 
 ## Main results
 
@@ -118,13 +149,11 @@ investor prefers (choice: marginal utility is a state-price density). The model 
 diffusions, volatility, jumps, term structures, default, mortality and claims, market
 mechanisms) are a second axis; probability and statistics are the tools.
 
-[`docs/organization.md`](docs/organization.md) gives the account, and says how much of the
-library already hangs from the trunk: the library measures that from its own statements
-(`tools/verify/chain_reach.py`), and states each missing link as a Lean theorem in the bridge
-library [`MathFinFrontier`](MathFinFrontier.lean), carried by an issue. The module directories,
-the [blueprint](docs/blueprint.md), the issue labels and the
-[documentation site](https://formal-applied-math.github.io/formal-mathfin/) read the structure
-from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
+[`docs/organization.md`](docs/organization.md) gives the account. The module directories, the
+[blueprint](docs/blueprint.md), the issue labels and the
+[documentation site](https://formal-applied-math.github.io/formal-mathfin/) all read the structure
+from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
+[program tree](https://formal-applied-math.github.io/formal-mathfin/tree.html) draws it.
 
 | | Topics |
 |---|---|
@@ -137,15 +166,16 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml).
 
 ## Limitations
 
-- **Reduced cores.** Twenty-one of the results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-two of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
     theorems on Markov chains.
-  - Two rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
+  - Three rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
     several assets assumes a conditional one-period fundamental theorem (for one asset the theorem
     is proved without it). Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing
-    identity that the drift condition would deliver.
+    identity that the drift condition would deliver. The backward-looking caplet assumes the
+    lognormal law of the compounded overnight rate.
   - Eight prove a special case or check transcribed closed forms against each other: the first
     arrival of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call
     on the maximum at zero strike, the Heynen–Kat barrier at zero correlation, Haug's and
@@ -224,9 +254,10 @@ requires this repository.
 
 ## Verification
 
-A successful `lake build` checks every proof in the library. In this repository `sorry` appears only
-in [`Challenge.lean`](Challenge.lean), whose two theorems are left unproved on purpose for the
-comparator.
+A successful `lake build` checks every proof in the library. Outside it, `sorry` appears in two
+places, on purpose: [`Challenge.lean`](Challenge.lean), whose two theorems are left unproved for
+the comparator, and [`MathFinFrontier/`](MathFinFrontier), which states open problems in Lean.
+Nothing in `MathFin` imports either.
 
 - **Axioms.** [`MathFin/AxiomAudit.lean`](MathFin/AxiomAudit.lean) and the generated
   [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean) pin the `#print axioms` output of the
@@ -249,23 +280,14 @@ comparator.
 
 ## Documentation
 
-- [The docs site](https://formal-applied-math.github.io/formal-mathfin/): a map of the library, the
-  landmarks, the blueprint as a graph, the corpus, and a page per module.
-- [`docs/beginners-manual.md`](docs/beginners-manual.md): Lean and the library for mathematicians,
-  with exercises.
-- [`MathFinExamples/Applications/`](MathFinExamples/Applications): the library applied to concrete
-  problems, from a capped call to a minimum-variance portfolio.
-- [`docs/coverage.md`](docs/coverage.md): a dated log of status changes and corrections.
-- [`docs/mathematical-architecture.md`](docs/mathematical-architecture.md): the principles the
-  library is organized around.
-- [`docs/open-problems.md`](docs/open-problems.md): a survey of open problems in mathematical
-  finance.
-- [`docs/status.md`](docs/status.md) and [`docs/roadmap.md`](docs/roadmap.md): where the program
-  stands and where it is going. [`docs/README.md`](docs/README.md) indexes the rest.
+[`docs/README.md`](docs/README.md) indexes every document by what a reader wants to do. The ones
+most readers need are listed under [Where to start](#where-to-start);
+[`docs/coverage.md`](docs/coverage.md) is the dated log of status changes and corrections.
 
 ## Contributing
 
-Contributions are welcome. [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to add a theorem, and
+Contributions are welcome, from people and from agents working for them.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to add a theorem, and
 [`docs/onboarding.md`](docs/onboarding.md) walks through a first contribution. Issues labelled
 [good first issue](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 are the usual starting point.

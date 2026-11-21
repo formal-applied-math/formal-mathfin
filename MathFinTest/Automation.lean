@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # What the library's automation closes
@@ -12,6 +14,8 @@ import MathFin
 here is a fact a user should get from one tactic call; it stops building if a tag is dropped or
 an interface lemma goes missing. The grind set `pricing` is registered in `MathFin/Init.lean`.
 -/
+
+@[expose] public section
 
 open MathFin
 

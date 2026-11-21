@@ -3,10 +3,15 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Open problem MF-OP-008: the one-period Gaussian Kyle equilibrium is unique
+
+Catalogue record `MF-OP-008` (`docs/research-problems/README.md`); frontier node
+`thm:kyle-equilibrium-unique`; statement `MathFinFrontier.kyle_equilibrium_unique`.
 
 Kyle (1985) found an affine equilibrium of his one-period model: the insider trades
 `φ(v) = (σ/τ)(v - m)` and the market makers price the order flow at `p(y) = m + (τ/(2σ)) y`.
@@ -24,6 +29,8 @@ and every order `x`; market efficiency holds almost surely. Expected profits are
 integrals. They take no junk values here: given market efficiency, `p(x + U)` is integrable for
 every `x` (the paper's Lemma 2.3), so the integrals are the expected profits.
 -/
+
+@[expose] public section
 
 open MeasureTheory ProbabilityTheory
 open scoped NNReal

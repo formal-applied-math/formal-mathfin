@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Using the library: put–call parity as a check on quoted prices
@@ -49,6 +51,8 @@ The shape of the file (the problem as data with an `unmodelled` list, the model 
 its hypotheses, one certified statement) follows the capped-call example
 (`MathFinExamples/Applications/CappedCall.lean`). The quotes below are illustrative.
 -/
+
+@[expose] public section
 
 namespace MathFin.Examples.PutCallParity
 

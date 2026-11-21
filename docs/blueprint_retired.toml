@@ -1,4 +1,5 @@
-# Labels the blueprint no longer carries as nodes, and the node each was folded into.
+# Labels the blueprint no longer carries as nodes, and the node each was folded into
+# (docs/blueprint.md, "How to read the graph and the table").
 #
 # The blueprint is a map of the field's landmarks (docs/specs/2026-11-08-organization-design.md,
 # section 5): a waypoint, that is a proof step, a hypothesis bundle, a special case of a landmark

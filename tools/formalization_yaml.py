@@ -14,8 +14,12 @@ is used; files with neither retain the legacy domain/textbook label.
 Per the standard, mechanically-git-derivable facts (toolchain, pins, commit,
 build status) are intentionally NOT duplicated here.
 
-  python3 -m tools.formalization_yaml --write     # regenerate formalization.yaml
-  python3 -m tools.formalization_yaml --check      # exit 1 if stale (CI gate)
+  python3 -m tools.formalization_yaml --write     # regenerate every formalization.yaml
+  python3 -m tools.formalization_yaml --check      # exit 1 if any is stale (CI gate)
+
+Each further Palomar entry (`[[entries]]` in the side-car, docs/palomar.md) gets its own
+`<dir>/formalization.yaml`: the repository's document, with the entry's own title, abstract,
+classification, sources and main results in place of the root entry's.
 
 Stdlib only (hand-rolled YAML emitter; tomllib for the side-car).
 """
@@ -316,31 +320,9 @@ def build_doc(root: str) -> dict:
     # {formalizes, adapts, independently-proves, background, other}, and result
     # origin is derived from `sources` rather than a top-level provenance block.
     # Optional fields are omitted rather than emitted empty.
-    sources = []
-    for src in meta.get("sources", []):
-        row = {
-            "title": src.get("title", ""),
-            "authors": src.get("authors", []),
-            "id": src.get("id", ""),
-            "type": src.get("type", ""),
-            "relationship": src.get("relationship", "background"),
-            "license": src.get("license", "unknown"),
-            "author_endorsement": src.get("author_endorsement", "not-contacted"),
-        }
-        if src.get("location"):
-            row["location"] = src["location"]
-        if src.get("note"):
-            row["note"] = src["note"]
-        sources.append(row)
+    sources = _source_rows(meta.get("sources", []))
 
-    main_results = []
-    for m in meta.get("main_results", []):
-        row = {"declaration": m.get("declaration", ""), "file": m.get("file", ""),
-               "sorry_count": 0, "axioms": AXIOMS}
-        if m.get("literature"):
-            row["literature_dependencies"] = [{"statement": m["literature"],
-                                               "source": m.get("source", "")}]
-        main_results.append(row)
+    main_results = _main_result_rows(meta.get("main_results", []))
 
     alignment_statements = []
     file_sources = _file_sources(root)
@@ -450,6 +432,61 @@ def build_doc(root: str) -> dict:
     return doc
 
 
+def _source_rows(srcs: list) -> list:
+    """The v0.4 `sources` rows of the side-car's source tables."""
+    rows = []
+    for src in srcs:
+        row = {
+            "title": src.get("title", ""),
+            "authors": src.get("authors", []),
+            "id": src.get("id", ""),
+            "type": src.get("type", ""),
+            "relationship": src.get("relationship", "background"),
+            "license": src.get("license", "unknown"),
+            "author_endorsement": src.get("author_endorsement", "not-contacted"),
+        }
+        if src.get("location"):
+            row["location"] = src["location"]
+        if src.get("note"):
+            row["note"] = src["note"]
+        rows.append(row)
+    return rows
+
+
+def _main_result_rows(results: list) -> list:
+    rows = []
+    for m in results:
+        row = {"declaration": m.get("declaration", ""), "file": m.get("file", ""),
+               "sorry_count": 0, "axioms": AXIOMS}
+        if m.get("literature"):
+            row["literature_dependencies"] = [{"statement": m["literature"],
+                                               "source": m.get("source", "")}]
+        rows.append(row)
+    return rows
+
+
+def build_entry_doc(root: str, entry: dict) -> dict:
+    """The document of one further Palomar entry: the repository's, with the entry's own title,
+    abstract, classification, sources and main results."""
+    doc = build_doc(root)
+    doc["project"] = {**doc["project"], "name": entry["name"],
+                      "description": " ".join(entry["description"].split())}
+    cls = entry.get("classification", {})
+    doc["classification"] = {"arxiv": cls.get("arxiv", []), "msc2020": cls.get("msc2020", [])}
+    doc["sources"] = _source_rows(entry.get("sources", []))
+    doc["status"] = {**doc["status"], "main_results": _main_result_rows(entry.get("main_results", []))}
+    return doc
+
+
+def documents(root: str) -> dict[str, str]:
+    """Every generated `formalization.yaml`, keyed by its path relative to `root`."""
+    docs = {"formalization.yaml": emit_yaml(build_doc(root))}
+    for entry in _load_meta(root).get("entries", []):
+        docs[os.path.join(entry["dir"], "formalization.yaml")] = emit_yaml(
+            build_entry_doc(root, entry))
+    return docs
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--write", action="store_true", help="regenerate formalization.yaml")
@@ -457,22 +494,26 @@ def main() -> int:
     ap.add_argument("--root", default=ROOT)
     args = ap.parse_args()
 
-    text = emit_yaml(build_doc(args.root))
-    out = os.path.join(args.root, "formalization.yaml")
+    docs = documents(args.root)
 
     if args.write:
-        with open(out, "w", encoding="utf-8") as f:
-            f.write(text)
-        print(f"wrote {out}")
+        for rel, text in docs.items():
+            with open(os.path.join(args.root, rel), "w", encoding="utf-8") as f:
+                f.write(text)
+            print(f"wrote {rel}")
         return 0
     if args.check:
-        current = open(out, encoding="utf-8").read() if os.path.isfile(out) else ""
-        if current != text:
-            print("formalization.yaml is STALE — run "
-                  "`python3 -m tools.formalization_yaml --write`", file=sys.stderr)
+        stale = [rel for rel, text in docs.items()
+                 if not os.path.isfile(os.path.join(args.root, rel))
+                 or open(os.path.join(args.root, rel), encoding="utf-8").read() != text]
+        for rel in stale:
+            print(f"{rel} is STALE — run `python3 -m tools.formalization_yaml --write`",
+                  file=sys.stderr)
+        if stale:
             return 1
-        print("formalization.yaml is fresh")
+        print("every formalization.yaml is fresh")
         return 0
+    text = docs["formalization.yaml"]
     sys.stdout.write(text)
     return 0
 

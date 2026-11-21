@@ -116,21 +116,6 @@ noncomputable def detEmbed (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
 
 
 open WienerIntegralL2 ItoIntegralCLM in
-/-- The simple process `𝟙_{(lo, hi] × Ω}` is the indicator of the rectangle, trim-a.e. -/
-lemma ae_simpleAssemblyHorizon_iocSPHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (i : StepIndex T) :
-    ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas),
-      (simpleAssemblyHorizon (μ := μ) T hBmeas
-        (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ) : ℝ≥0 × Ω → ℝ) z =
-      (Set.Ioc i.1.1 i.1.2 ×ˢ (Set.univ : Set Ω)).indicator (fun _ ↦ (1 : ℝ)) z := by
-  filter_upwards [MemLp.coeFn_toLp (memLp_uncurry_trimMeasure (μ := μ) T hBmeas
-      (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val)] with z hz
-  calc _ = Function.uncurry
-          ⇑(iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val z :=
-        hz
-    _ = _ := by rw [uncurry_iocSPHorizon_eq]
-
-open WienerIntegralL2 ItoIntegralCLM in
 /-- The embedded step indicator `𝟙_{(lo, hi]}` is the `T`-bounded simple process
 `𝟙_{(lo, hi] × Ω}`. -/
 lemma detEmbed_stepIndicatorLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (i : StepIndex T) :
@@ -150,7 +135,8 @@ lemma detEmbed_stepIndicatorLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
     ((Lp.compMeasurePreservingₗᵢ ℝ ((↑) : ℝ≥0 → ℝ) (measurePreserving_coe_timeMeasureHorizon T))
       (stepIndicatorLp T i))
     (measurePreserving_fst_trimMeasure (μ := μ) T hBmeas)
-  filter_upwards [h2, hB, ae_simpleAssemblyHorizon_iocSPHorizon (μ := μ) T hBmeas i]
+  filter_upwards [h2, hB, ae_simpleAssemblyHorizon_iocSPHorizon (μ := μ) hBmeas i.2.1 i.2.2
+      (F := Set.univ) MeasurableSet.univ]
     with z hz2 hz3 hz5
   refine (hz2.trans hz3).trans (Eq.trans ?_ hz5.symm)
   change i.interval.indicator (fun _ ↦ (1 : ℝ)) (z.1 : ℝ) = _
@@ -170,30 +156,9 @@ lemma itoSimpleLp_iocSPHorizon (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (i : StepIndex T) :
     ItoIntegralL2.itoSimpleLp hB hBmeas
       (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val =
-        wienerIncrementLp B hB i := by
-  refine MemLp.toLp_congr _ _ (Filter.Eventually.of_forall fun ω ↦ ?_)
-  have hI : (ElementaryPredictableSet.IocProd i.1.1 i.1.2
-      (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)
-      (B := Set.univ) MeasurableSet.univ).I = {(i.1.1, i.1.2)} := ite_eq_left i.2.1
-  unfold ItoIntegralL2.itoSimple
-  have hsub :
-      (iocSPHorizon hBmeas i.2.1 i.2.2 (F := Set.univ) MeasurableSet.univ).val.value.support ⊆
-      {(i.1.1, i.1.2)} := fun p hp ↦ by
-    by_contra hp_not'
-    have hp_not : p ∉ (ElementaryPredictableSet.IocProd i.1.1 i.1.2
-      (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)
-      (B := Set.univ) MeasurableSet.univ).I := by rwa [hI]
-    apply Finsupp.mem_support_iff.mp hp
-    change ((ElementaryPredictableSet.IocProd i.1.1 i.1.2
-      (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)
-      (B := Set.univ) MeasurableSet.univ).indicator (1 : ℝ)).value p = 0
-    simp [ElementaryPredictableSet.indicator, Finsupp.onFinset_apply, hp_not]
-  rw [Finsupp.sum_of_support_subset _ hsub (fun p v ↦ v ω * (B p.2 ω - B p.1 ω))
-    (fun p _ ↦ by simp), Finset.sum_singleton]
-  simp only [iocSPHorizon, ElementaryPredictableSet.indicator, Finsupp.onFinset_apply, hI,
-    Finset.mem_singleton, ite_true]
-  change Set.univ.indicator (fun _ ↦ (1 : ℝ)) ω * (B i.1.2 ω - B i.1.1 ω) = _
-  simp
+        wienerIncrementLp B hB i :=
+  MemLp.toLp_congr _ _ (Filter.Eventually.of_forall fun ω ↦ by
+    rw [itoSimple_iocSPHorizon, Set.indicator_univ])
 
 open WienerIntegralL2 ItoIntegralCLM in
 /-- **The Wiener integral is the Itô integral of the deterministic integrand.** On `L²((0, T])`

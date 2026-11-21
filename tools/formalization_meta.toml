@@ -8,7 +8,8 @@
 # these.
 
 [project]
-name = "formal-mathfin"
+# v0.4 / Palomar: `name` is the public entry title of the root (ADEH) entry.
+name = "The Artzner–Delbaen–Eber–Heath representation of coherent risk measures on a finite state space"
 authors = ["Raphael Coelho"]
 license = "Apache-2.0"
 # v0.4 / Palomar: the people answerable for this formalization.
@@ -100,3 +101,136 @@ source = "artzner-delbaen-eber-heath-1999"
 reviewers = ["Raphael Coelho"]
 
 acknowledgements = "Built on Mathlib and Rémy Degenne's BrownianMotion package."
+
+# Further Palomar entries (docs/palomar.md), one folder each. `tools/formalization_yaml.py` writes
+# `<dir>/formalization.yaml`: the repository's document above, with the entry's own `name` (the
+# public entry title), `description` (the public abstract), classification, sources and main
+# results. The root files above are the ADEH entry.
+[[entries]]
+dir = "Palomar/FTAP"
+name = "The fundamental theorems of asset pricing in discrete time, one risky asset"
+description = """\
+The fundamental theorems of asset pricing in discrete time for one risky asset, formalized in \
+Lean 4 on Mathlib. The first registered theorem is the one-asset case of the \
+Dalang–Morton–Willinger theorem: on an arbitrary filtered probability space and a finite horizon, \
+an adapted real price process admits no arbitrage (no bounded predictable strategy has an almost \
+surely nonnegative gain that is not almost surely zero) if and only if some probability measure \
+equivalent to the reference measure makes the price, stopped at the horizon, a martingale. No \
+integrability of the price, finiteness of the space or measurable-selection hypothesis is \
+assumed. The proof replaces the measure by an equivalent one under which the price is integrable, \
+finds in each period a conditional weight in (0, 1] that balances the price increment, applies \
+the weights backward and normalises the total mass once, at the end. The second registered \
+theorem is the second fundamental theorem on a finite space: when the reference measure gives \
+every state positive mass, every event is observable at the horizon and there is no arbitrage, every bounded \
+claim is replicable if and only if the equivalent martingale measure is unique. The several-asset \
+Dalang–Morton–Willinger theorem is not claimed. The development sits in formal-mathfin, a library \
+of formally verified mathematical finance built on Mathlib and Rémy Degenne's BrownianMotion \
+package."""
+
+[entries.classification]
+arxiv = ["q-fin.MF", "math.PR"]
+msc2020 = ["91G20", "91G30", "60G42"]
+
+[[entries.sources]]
+id = "dalang-morton-willinger-1990"
+title = "Equivalent martingale measures and no-arbitrage in stochastic securities market models"
+authors = ["Robert C. Dalang", "Andrew Morton", "Walter Willinger"]
+type = "article"
+location = "Stochastics and Stochastic Reports 29 (1990) 185-201; doi:10.1080/17442509008833613"
+relationship = "formalizes"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The first registered theorem is the case of one risky asset of this paper's theorem, on a general filtered probability space and a finite horizon, with arbitrage tested by bounded predictable strategies. The several-asset case is not claimed."
+
+[[entries.sources]]
+id = "harrison-pliska-1981"
+title = "Martingales and stochastic integrals in the theory of continuous trading"
+authors = ["J. Michael Harrison", "Stanley R. Pliska"]
+type = "article"
+location = "Stochastic Processes and their Applications 11 (1981) 215-260; doi:10.1016/0304-4149(81)90026-0"
+relationship = "formalizes"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The second registered theorem is the finite-space second fundamental theorem of this paper: under no arbitrage, completeness is equivalent to uniqueness of the equivalent martingale measure. Stated for one risky asset."
+
+[[entries.sources]]
+id = "follmer-schied-stochastic-finance"
+title = "Stochastic Finance: An Introduction in Discrete Time"
+authors = ["Hans Föllmer", "Alexander Schied"]
+type = "book"
+location = "De Gruyter, Chapter 5"
+relationship = "adapts"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The proofs follow this book's one-asset argument for the first theorem and its proof of the second, with one change in the first: the one-period weights are left unnormalised and the total mass is normalised once, at the end, since a conditional one-period density of mean one can fail to exist."
+
+[[entries.main_results]]
+declaration = "MathFin.OneAsset.noArbitrage_iff_exists_isEMM"
+file = "MathFin/Pricing/FTAP/OneAssetDMW.lean"
+literature = "Dalang-Morton-Willinger theorem, one risky asset (Dalang, Morton and Willinger 1990)"
+source = "dalang-morton-willinger-1990"
+
+[[entries.main_results]]
+declaration = "MathFin.ftap_two"
+file = "MathFin/Pricing/FTAP/FTAPComplete.lean"
+literature = "Second fundamental theorem of asset pricing on a finite space (Harrison and Pliska 1981)"
+source = "harrison-pliska-1981"
+
+[[entries]]
+dir = "Palomar/MartingaleRepresentation"
+name = "The martingale representation theorem for Brownian motion"
+description = """\
+The martingale representation theorem for one-dimensional Brownian motion, in terminal form, \
+formalized in Lean 4 on Mathlib. The Itô integral is not taken as a primitive: it is \
+characterized as a continuous linear map from the predictable square-integrable integrands on \
+the horizon (0, T] to the square-integrable random variables, sending the indicator of each \
+predictable rectangle (s, t] x F, with F observable at time s, to the increment B_t - B_s on F. \
+The first registered theorem shows that exactly one such map exists, so the later statements are \
+about the Itô integral itself; the second is the Itô isometry. The third is the representation \
+theorem: for a process with the finite-dimensional laws of Brownian motion, measurable \
+coordinates and continuous paths, every square-integrable random variable that is measurable for \
+the natural filtration at the horizon, up to a null set, is almost surely its mean plus the Itô \
+integral of an integrand, and that integrand is unique up to a null predictable set. The process \
+form of the theorem and the local-martingale form are not claimed in the registered statements. \
+The proof identifies the range of the Itô isometry by the totality of step-integrand Doléans \
+exponentials in the square-integrable variables of the Brownian filtration. The development sits \
+in formal-mathfin, a library of formally verified mathematical finance built on Mathlib and Rémy \
+Degenne's BrownianMotion package."""
+
+[entries.classification]
+arxiv = ["math.PR", "q-fin.MF"]
+msc2020 = ["60H05", "60G44", "60J65"]
+
+[[entries.sources]]
+id = "ito-1951-multiple-wiener-integral"
+title = "Multiple Wiener integral"
+authors = ["Kiyosi Itô"]
+type = "article"
+location = "Journal of the Mathematical Society of Japan 3 (1951) 157-169; doi:10.2969/jmsj/00310157"
+relationship = "formalizes"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "The representation of square-integrable functionals of Brownian motion as their mean plus an Itô integral goes back to this paper's chaos expansion. The registered theorem is the terminal form for one-dimensional Brownian motion on a finite horizon and its natural filtration."
+
+[[entries.sources]]
+id = "karatzas-shreve-1991"
+title = "Brownian Motion and Stochastic Calculus"
+authors = ["Ioannis Karatzas", "Steven E. Shreve"]
+type = "book"
+location = "Springer, second edition (1991), Section 3.4"
+relationship = "background"
+license = "unknown"
+author_endorsement = "not-contacted"
+note = "Textbook treatment of the representation of Brownian martingales; the registered statement is its terminal form for one-dimensional Brownian motion."
+
+[[entries.main_results]]
+declaration = "MathFin.exists_itoIntegral_representation"
+file = "MathFin/Probability/Brownian/MartingaleRepresentation.lean"
+literature = "Martingale representation theorem for Brownian motion, terminal form (Itô 1951)"
+source = "ito-1951-multiple-wiener-integral"
+
+[[entries.main_results]]
+declaration = "MathFin.ItoIntegralCLM.itoIntegralCLM_norm"
+file = "MathFin/Probability/Brownian/Ito/ItoIntegralCLM.lean"
+literature = "Itô isometry on a finite horizon"
+source = "karatzas-shreve-1991"

@@ -1,12 +1,41 @@
 # External sources
 
-Formalisations and papers this library has learned from. For each: what was
-taken, what was not, and where the credit lives in the code.
+The one place for external credit: the formalisations, packages and texts this library depends on
+or has learned from. For each, what was taken, how (a dependency, a port, a design idea, an
+alignment of the corpus) and where it lives in the library.
 
-**The rule.** An external formalisation is a *source*, not a template. We design
-in our own idiom and cite by name. We do not copy code; if we ever do, the copied
-region is marked in-file, its licence header is retained, and a `NOTICE` entry is
-added.
+**The rule.** An external formalisation is a source, not a template. Where the library designs in
+its own idiom it cites by name and takes no code. Where it ports code, the module header names the
+original author and the licence is kept (see Martin below).
+
+## Mathlib and BrownianMotion
+
+The library is built on Mathlib and on BrownianMotion, the formalization of Brownian motion and
+stochastic integration led by Rémy Degenne. Both are dependencies, pinned in `lake-manifest.json`,
+not ported code. Mathlib supplies measure theory, conditional expectation, martingales and convex
+analysis; BrownianMotion supplies the Brownian motion, filtrations and the stochastic-integration
+infrastructure that `MathFin/Probability/Brownian/` extends. Where a statement is already in
+either, the library uses it rather than restating it.
+
+## Saporito, *Stochastic Processes*
+
+Yuri F. Saporito, *Stochastic Processes*. The stochastic-processes part of the benchmark
+(for example `martingales.json`, `continuous_martingales.json`, `brownian_motion.json` and
+`stochastic_calculus.json`) follows its chapters; each entry's `reference` names the source. This is an alignment of statements to a textbook, not a port; the proofs are in
+`MathFin/Probability/`.
+
+## Martin, AmericanPutConvexity and ButterflyFreeSVI
+
+Robert Martin's [AmericanPutConvexity](https://github.com/robertmartin8/AmericanPutConvexity)
+(Apache-2.0) and the manuscript *Log-convexity of the exercise boundary of an American put option*
+are ported into `MathFin/Models/BlackScholes/American/`, with the module headers naming him as
+author. The result, its statements and its provenance are on
+[`american-put-boundary.md`](american-put-boundary.md).
+
+His [ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI) is ported into
+`MathFin/Models/ModelFree/SVI/`: the polynomial-sign certificate that characterises when the
+Black–Scholes call with a raw SVI volatility is convex in the strike. The modules carry his name
+and the landmark `MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex` records its scope.
 
 ## Bilokon, *The Contract Is Not the Model* (2026)
 
@@ -36,8 +65,10 @@ Cite the tradition, not only the nearest author.
 `test_contracts_corpus_entries_cite_source`);
 `docs/specs/2026-08-16-contracts-tower-design.md` section 6.
 
-## AFP `Survival_Model`
+## Ito, AFP `Actuarial Mathematics`
 
-Consulted for the actuarial survival layer (2026-07-11). Our design, our Lean; the
-AFP entry was a source for the mathematical content, not a port. See the
-`MathFin/Insurance/` module docstrings.
+Yosuke Ito's entry in the Archive of Formal Proofs, in particular its `Survival_Model` theory, is
+the source for the classical result set of the actuarial survival layer. It is not a port: the
+design and the Lean are the library's, and `MathFin/Insurance/SurvivalModel.lean` lines its
+declarations up with the AFP names for readers coming from Isabelle. See the module docstrings in
+`MathFin/Insurance/`.

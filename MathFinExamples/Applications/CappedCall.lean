@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Using the library: from a term sheet to a checked price
@@ -46,6 +48,8 @@ certificate, and certifying one aggregate statement follow Paul Bilokon, *The Co
 Model* (working paper, 2026), and its code <https://github.com/thalesians/lean_contracts>. No code
 is taken from it. The sheet below is illustrative, not a real instrument.
 -/
+
+@[expose] public section
 
 namespace MathFin.Examples.CappedCall
 

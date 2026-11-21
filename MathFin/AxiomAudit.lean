@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho, Yang Ye
 -/
-import MathFin
+module
+
+public import MathFin
 
 /-!
 # Axiom audit — the "axioms-clean" claim, build-enforced
@@ -29,6 +31,8 @@ depend on a *subset* of the three (or none); those are pinned to their
 actual set below. The invariant we enforce is "no `sorryAx`, no axiom
 outside the standard three", which the pinned messages capture exactly.
 -/
+
+@[expose] public section
 
 -- The `#guard_msgs` docstrings below are Lean's own output, matched as printed.
 set_option linter.style.longLine false

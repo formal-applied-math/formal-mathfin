@@ -18,7 +18,7 @@ graph does not show, the prose is wrong, not the graph (this caught
 The not-yet-formalized frontier (no Lean declarations to tag) is declared in
 docs/blueprint_frontier.toml, grouped by area in the graph and visibly
 ⏳-classed. Below the graph, a generated table lists every node with a live
-link to the issues and pull requests naming it (`Blueprint: <label>` in their
+search link (`issues`) to the issues and pull requests naming it (`Blueprint: <label>` in their
 body — the one place the link is stored; tools/verify/blueprint_issues.py
 checks both directions).
 """
@@ -115,15 +115,15 @@ def render(nodes: list[dict], frontier: list) -> str:
         "  classDef frontier fill:#fff3cd,stroke:#d39e00,color:#111;",
         "```",
         "",
-        "| node | status | issues and pull requests |",
+        "| node | status | issues |",
         "|---|---|---|",
     ]
     status = {"proved": "✅", "upstream": "✅ upstream", "partial": "🚧"}
     for n in ordered:
         lines.append(f"| `{n['label']}` {n.get('title') or ''} | {status[node_class(n)]} "
-                     f"| [linked]({issues_url(n['label'])}) |")
+                     f"| [issues]({issues_url(n['label'])}) |")
     for f in sorted(frontier, key=lambda f: f.label):
-        lines.append(f"| `{f.label}` {f.title} | ⏳ | [linked]({issues_url(f.label)}) |")
+        lines.append(f"| `{f.label}` {f.title} | ⏳ | [issues]({issues_url(f.label)}) |")
     return "\n".join(lines)
 
 
