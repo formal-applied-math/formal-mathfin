@@ -36,7 +36,7 @@ Everything the cátedra shares already exists:
 | The rooms | one GitHub issue per problem, and one per missing object | discussion, attempt notes, decisions |
 | The map | `docs/blueprint_frontier.toml`, `MathFin/Blueprint.lean` | what each problem builds on, and what it needs |
 | The library | `MathFin/` | where a solved problem lands, proved and tagged |
-| The corpus | `/home/raphael/Documents/arxiv-qfin/` (11,923 q-fin PDFs, local, never committed) | what the Scout reads |
+| The corpus | the local literature corpus: the q-fin arXiv papers and the field's open-access papers outside arXiv, built by the private `mathfin-corpus` repo, never committed | what the Scout reads |
 | The pin | `lake comparator` (`.github/workflows/comparator.yml`) | proof that a delivered theorem states exactly the frontier statement |
 
 ## The chairs
@@ -48,8 +48,9 @@ always a file, a pull request or an issue comment, never just a chat message.
 
 ### 1. Scout: finds problems
 
-- **Input:** the scan's passages (`arxiv_scan scan` over the local corpus, each passage with a
-  paper id and a page), plus explicit lists (surveys, problem sessions, book chapters).
+- **Input:** passages from the local literature corpus, each with a paper id and a page (the
+  openness scan and the full-text search of the private `mathfin-corpus` repo), plus explicit
+  lists (surveys, problem sessions, book chapters).
 - **Work:**
   1. **Triage each passage:** is it a precise mathematical question, is it stated as open, what
      exactly is open? Drop roadmap sentences ("we conclude with open questions").
