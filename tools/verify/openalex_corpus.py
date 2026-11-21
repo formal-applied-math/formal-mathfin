@@ -171,15 +171,16 @@ def fetch_host(jobs: list[tuple[dict, str]], root: Path, robots: Robots, delay: 
 
 def fetch(works: list[dict], root: Path, workers: int = 16) -> dict:
     """Download each work's first direct PDF link, hosts in parallel and each host politely.
-    Resumable: present files count as done, and a link that was refused (robots.txt, 4xx, not a
-    PDF) is not asked again; a network error is retried. `root/fetched.jsonl` gets one line per
+    Resumable: present files count as done, and a link that was refused (robots.txt, a 4xx other
+    than 429, not a PDF) is not asked again; a network error, a rate limit or a server error is
+    retried. `root/fetched.jsonl` gets one line per
     attempt as it happens."""
     root.mkdir(parents=True, exist_ok=True)
     log_path = root / "fetched.jsonl"
     refused = set()
     if log_path.exists():
         refused = {r["id"] for r in map(json.loads, log_path.open())
-                   if not r["status"].startswith(("ok", "error"))}
+                   if not r["status"].startswith(("ok", "error", "http-429", "http-5"))}
     by_host: dict[str, list[tuple[dict, str]]] = {}
     for w in works:
         links = pdf_links(w)
