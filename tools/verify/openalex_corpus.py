@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -170,24 +171,34 @@ def fetch_host(jobs: list[tuple[dict, str]], root: Path, robots: Robots, delay: 
 
 def fetch(works: list[dict], root: Path, workers: int = 16) -> dict:
     """Download each work's first direct PDF link, hosts in parallel and each host politely.
-    Resumable (present files count as done); `root/fetched.jsonl` has one line per attempt."""
+    Resumable: present files count as done, and a link that was refused (robots.txt, 4xx, not a
+    PDF) is not asked again; a network error is retried. `root/fetched.jsonl` gets one line per
+    attempt as it happens."""
     root.mkdir(parents=True, exist_ok=True)
+    log_path = root / "fetched.jsonl"
+    refused = set()
+    if log_path.exists():
+        refused = {r["id"] for r in map(json.loads, log_path.open())
+                   if not r["status"].startswith(("ok", "error"))}
     by_host: dict[str, list[tuple[dict, str]]] = {}
     for w in works:
         links = pdf_links(w)
-        if links:
+        if links and wid(w) not in refused:
             by_host.setdefault(urllib.parse.urlparse(links[0]).netloc, []).append((w, links[0]))
-    robots, status = Robots(), {}
-    with ThreadPoolExecutor(workers) as pool, (root / "fetched.jsonl").open("a") as log:
-        results = pool.map(lambda jobs: list(fetch_host(jobs, root, robots)),
-                           sorted(by_host.values(), key=len, reverse=True))
-        for rows in results:
-            for r in rows:
-                log.write(json.dumps(r) + "\n")
-                key = r["status"].split(" ")[0]
-                status[key] = status.get(key, 0) + 1
-            log.flush()
-            print(json.dumps(status), file=sys.stderr)
+    robots, status, lock = Robots(), {}, threading.Lock()
+    with log_path.open("a") as log:
+        def run(jobs: list[tuple[dict, str]]) -> None:
+            for r in fetch_host(jobs, root, robots):
+                with lock:
+                    log.write(json.dumps(r) + "\n")
+                    log.flush()
+                    key = r["status"].split(" ")[0]
+                    status[key] = status.get(key, 0) + 1
+                    if sum(status.values()) % 500 == 0:
+                        print(json.dumps(status), file=sys.stderr, flush=True)
+        with ThreadPoolExecutor(workers) as pool:
+            list(pool.map(run, sorted(by_host.values(), key=len, reverse=True)))
+    print(json.dumps(status), file=sys.stderr, flush=True)
     return status
 
 
