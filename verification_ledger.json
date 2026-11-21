@@ -745,13 +745,6 @@
       "input_hash": "735cff6f171f3bc19b42babeac3f1c292ab9c59f451cf054db1b421a5f478f71",
       "verified_at_commit": "54c0176d"
     },
-    "mf-bgk-discrete-barrier-shift": {
-      "benchmark_file": "exotic_options.json",
-      "date": "2026-11-20",
-      "elapsed_s": 2.7,
-      "input_hash": "174309ecfe719c7e388147cc9df0ae7c9b600d48c7f1b1fcb35d50112106924a",
-      "verified_at_commit": "c42cc27b"
-    },
     "mf-binary-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-19",
