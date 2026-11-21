@@ -549,6 +549,10 @@ public import MathFin.Models.BlackScholes.BinaryBarrierOption
 -- Also consumes the bivariate normal CDF (Probability/Gaussian/BivariateNormalCDF),
 -- like Stulz/Heynen-Kat below
 public import MathFin.Models.BlackScholes.PartialTimeBarrierOption
+-- Spatial and time-volatility scaling of the Black–Scholes call
+public import MathFin.Models.BlackScholes.ScalingInvariance
+-- Broadie–Glasserman–Kou barrier shift for discretely monitored down-and-out calls
+public import MathFin.Models.BlackScholes.DiscreteBarrierCorrection
 public import MathFin.Models.BlackScholes.PowerOption
 public import MathFin.Models.ModelFree.BreedenLitzenberger
 public import MathFin.Models.BlackScholes.BisectionIV

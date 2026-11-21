@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1115 MathFin constants, 29 upstream). Citations
+corpus (1126 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -1472,6 +1472,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.abcdWienerIntegral_hasLaw
 
+/-- info: 'MathFin.abs_knockIn_sub_bgkKnockIn_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.abs_knockIn_sub_bgkKnockIn_le
+
 /-- info: 'MathFin.abs_sharpeRatio_le_of_discountFactor' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.abs_sharpeRatio_le_of_discountFactor
@@ -1599,6 +1603,18 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.beta_singleIndex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.beta_singleIndex
+
+/-- info: 'MathFin.bgkDownOutCall_timeScale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bgkDownOutCall_timeScale
+
+/-- info: 'MathFin.bgkDownOutCall_zero_barrier' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bgkDownOutCall_zero_barrier
+
+/-- info: 'MathFin.bgkKnockIn_zero_barrier' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bgkKnockIn_zero_barrier
 
 /-- info: 'MathFin.binomialOptionPriceOnePeriod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -1756,6 +1772,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_satisfies_bs_pde_via_feynmanKac
 
+/-- info: 'MathFin.bsV_scale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bsV_scale
+
 /-- info: 'MathFin.bsV_spot_strictConvexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_spot_strictConvexOn
@@ -1771,6 +1791,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.bsV_strike_strictConvexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_strike_strictConvexOn
+
+/-- info: 'MathFin.bsV_timeScale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bsV_timeScale
 
 /-- info: 'MathFin.bs_asset_or_nothing_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3756,6 +3780,22 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ptCA_down_monitored_full_life
 
+/-- info: 'MathFin.ptDownOutCall_eq_image' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ptDownOutCall_eq_image
+
+/-- info: 'MathFin.ptDownOutCall_eq_image_printed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ptDownOutCall_eq_image_printed
+
+/-- info: 'MathFin.ptDownOutCall_scale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ptDownOutCall_scale
+
+/-- info: 'MathFin.ptDownOutCall_zero_barrier' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.ptDownOutCall_zero_barrier
+
 /-- info: 'MathFin.putCall_parity_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.putCall_parity_from_no_arbitrage
@@ -4039,6 +4079,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.swaption_payer_receiver_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.swaption_payer_receiver_parity
+
+/-- info: 'MathFin.tendsto_bgkDownOutCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_bgkDownOutCall
 
 /-- info: 'MathFin.tendsto_bisectMid_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

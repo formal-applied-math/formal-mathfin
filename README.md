@@ -17,9 +17,9 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 906 results from the literature in
+The [corpus](docs/glossary.md#corpus) records 907 results from the literature in
 [`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 866 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 22 are
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 23 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -166,7 +166,7 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
 
 ## Limitations
 
-- **Reduced cores.** Twenty-two of the results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-three of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
@@ -312,7 +312,8 @@ Raphael Coelho maintains the library, with contributions from:
   cubic splines, FX smile quotes, SABR chain-rule Greeks, the continuous lookback and the shout
   floor, Marchenko–Pastur edges and historical VaR for concentrated liquidity; the Bachelier spread
   call, the Nelson–Siegel–Svensson decay limit, the backward-looking caplet, the lognormal
-  volatility swap and the Heston transform at maturity.
+  volatility swap, the Heston transform at maturity and the Broadie–Glasserman–Kou barrier shift
+  for discrete monitoring.
 - [Adam Kiezun](https://github.com/akiezun): whole-life insurance on the survival function, the
   life table, two-life annuities, Thiele's reserve equation, Bühlmann credibility, sampled stopping
   rules, CDS recovery timing, the stop-loss recursion, discrete Almgren–Chriss liquidation, and
