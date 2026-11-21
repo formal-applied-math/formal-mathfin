@@ -5141,6 +5141,20 @@
       "input_hash": "c37268e64b46312e0fac01eed7e66b02c0b27188adba4d26857993ba2bdedc7b",
       "verified_at_commit": "c047ee3"
     },
+    "mf-var-sum-capped-call-dual-bound": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-20",
+      "elapsed_s": 3.0,
+      "input_hash": "4e26dfa2c57c59f0288fe3cb4c68e06fa702a08fcf1e4ecdfcdd25d240ac0c12",
+      "verified_at_commit": "ee1d84f"
+    },
+    "mf-var-sum-dual-bound-weak-duality": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-20",
+      "elapsed_s": 2.2,
+      "input_hash": "1c5741b5ba5e13a6a401e655f67d2b21d9776402df716c9cfbf18a6b9c210ee1",
+      "verified_at_commit": "ee1d84f"
+    },
     "mf-variance-swap-drift-immunity": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-16",
