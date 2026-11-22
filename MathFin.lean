@@ -686,6 +686,7 @@ public import MathFin.Models.Rates.ForwardMeasure
 -- Inflation is FX: the zero-coupon inflation swap and the YoY convexity
 public import MathFin.Models.Rates.Inflation
 public import MathFin.Models.Rates.OvernightCompounding
+public import MathFin.Models.Rates.JarrowYildirim
 -- ABCD instantaneous volatility: closed-form integrated variance over a window
 public import MathFin.Models.Rates.ABCDVolatility
 -- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price

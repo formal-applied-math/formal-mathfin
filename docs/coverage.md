@@ -26,6 +26,29 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Jarrow–Yildirim: the ZC inflation caplet and the YoY forward (2026-11-20)
+
+Two `reduced_core` entries in `benchmarks/interest_rates.json` (module
+`Models/Rates/JarrowYildirim.lean`), each composing existing results under model hypotheses (the
+module's variance lemmas are module-only, not corpus entries). Corpus 904 → 906 on the merged tree
+(reduced_core 22 → 24, interest_rates 3 → 5 reduced; 882 delivery-ready, unchanged).
+
+- **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
+  inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the
+  lognormal law of the index under the nominal `T`-forward measure. Not derived: the index-linked
+  bond pricing hident (the time-0 case of the forward-index martingale, Bagaria eq. 17.6), the
+  lognormality of the index under the nominal T-forward measure (hypothesis hZ), its SDE-level
+  derivation, and the real-rate drift shift. V is a free positive input; this statement does not
+  identify it with jyVariance.
+- **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the time-0 price of the
+  year-on-year payment, from the forward identity `jyYoyForward_eq_convexity` (the
+  conditional-expectation (martingale) hypothesis for the forward index plus the tower step
+  `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`) and the numéraire change.
+  Not derived: the martingale property of the forward index under Q^T (the conditional-expectation
+  hypothesis), the Hull-White reconstitution form hR of the bond ratio, the means, variances and
+  covariance of the rate deviations and the Hull-White loadings B^n, B^r (free inputs), their
+  SDE-level derivation, and the real-rate drift shift.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged
