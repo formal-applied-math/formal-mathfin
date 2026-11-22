@@ -319,7 +319,8 @@ Raphael Coelho maintains the library, with contributions from:
   cubic splines, FX smile quotes, SABR chain-rule Greeks, the continuous lookback and the shout
   floor, Marchenko–Pastur edges and historical VaR for concentrated liquidity; the Bachelier spread
   call, the Nelson–Siegel–Svensson decay limit, the backward-looking caplet, the lognormal
-  volatility swap and the Heston transform at maturity.
+  volatility swap, the Jarrow–Yildirim inflation caplet and year-on-year forward, the
+  average-strike Asian conditioning bound and the Heston transform at maturity.
 - [Adam Kiezun](https://github.com/akiezun): whole-life insurance on the survival function, the
   life table, two-life annuities, Thiele's reserve equation, Bühlmann credibility, sampled stopping
   rules, CDS recovery timing, the stop-loss recursion, discrete Almgren–Chriss liquidation, and
