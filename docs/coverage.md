@@ -30,8 +30,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 Two `reduced_core` entries in `benchmarks/interest_rates.json` (module
 `Models/Rates/JarrowYildirim.lean`), each composing existing results under model hypotheses (the
-module's variance lemmas are module-only, not corpus entries). Corpus 904 → 906 on the merged tree
-(reduced_core 22 → 24, interest_rates 3 → 5 reduced; 882 delivery-ready, unchanged).
+module's variance lemmas are module-only, not corpus entries). Corpus 906 → 908 on the merged tree
+(reduced_core 22 → 24, interest_rates 3 → 5 reduced; delivery-ready 882 → 884).
 
 - **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
   inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the
