@@ -17,9 +17,9 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 906 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 864 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 24 are
+The [corpus](docs/glossary.md#corpus) records 911 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 866 are proved in
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 27 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -166,24 +166,28 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
 
 ## Limitations
 
-- **Reduced cores.** Twenty-four of the results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-seven of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
     theorems on Markov chains.
-  - Five rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
+  - Six rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
     several assets assumes a conditional one-period fundamental theorem (for one asset the theorem
     is proved without it). Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing
     identity that the drift condition would deliver. The backward-looking caplet assumes the
     lognormal law of the compounded overnight rate. The Jarrow–Yildirim zero-coupon inflation
     caplet assumes the index-linked bond pricing on the real curve and the lognormal law of the
     index under the nominal forward measure, and the year-on-year payment assumes the martingale
-    property of the forward index and the Hull–White reconstitution form of the bond ratio.
-  - Eight prove a special case or check transcribed closed forms against each other: the first
+    property of the forward index and the Hull–White reconstitution form of the bond ratio. The
+    average-strike conditioning lower bound assumes the conditional-mean identification of the
+    terminal payoff with its Gaussian conditional mean.
+  - Ten prove a special case or check transcribed closed forms against each other: the first
     arrival of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call
     on the maximum at zero strike, the Heynen–Kat barrier at zero correlation, Haug's and
     Rubinstein–Reiner's barrier formulas, a piecewise-linear interpolation of call quotes weaker
-    than Kahalé's, and the transcribed Goldman–Sosin–Gatto lookback, bounded below by the call.
+    than Kahalé's, the transcribed Goldman–Sosin–Gatto lookback bounded below by the call, the
+    Gaussian positive part of a signed exponential sum, and the one-fixing average-strike
+    conditioning bound as the Black–Scholes forward-start call.
 - **Girsanov.** Only bounded θ. Novikov's condition is not proved.
 - **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
   proved, and the hedge is not identified (Clark–Ocone,
