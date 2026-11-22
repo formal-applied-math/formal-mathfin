@@ -679,7 +679,14 @@ split by area. What each bridge proves, by area:
   now exhibit the measure and driver. The Goldman–Sosin–Gatto continuous floating-strike lookback
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
   monotonicity argument on its removable-singularity carry term
-  (`mf-continuous-lookback-floating-strike`, `reduced_core`).
+  (`mf-continuous-lookback-floating-strike`, `reduced_core`). For the discrete arithmetic
+  average-strike Asian call, the Gaussian positive part of a single-crossing exponential sum,
+  the Jensen conditioning lower bound for an integrable payoff given the conditional-mean
+  property, and the one-fixing case as the forward-start call at the Black–Scholes price
+  (`mf-asian-avgstrike-expsum-gaussian-positive-part`,
+  `mf-asian-avgstrike-conditioning-lower-bound`, `mf-asian-avgstrike-one-fixing-market-price`,
+  all `reduced_core`: the conditional-mean identification under Brownian motion and the
+  closeness of the bound to the price are not proved).
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
   Black–Scholes(–Merton) put (`mf-american-put-ge-bsm-european-put`; the early-exercise premium's
   positivity is not proved); its value is unchanged by null-set horizon changes
