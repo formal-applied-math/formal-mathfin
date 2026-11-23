@@ -43,7 +43,7 @@ One `full` entry in `benchmarks/commodities.json`. Corpus 906 → 907 on the mer
   (`fxForward_eq_spot_iff`); the term-structure trichotomy — strictly increasing iff
   `δ < r` (`fxForward_strictMono_iff`), strictly decreasing iff `r < δ`
   (`fxForward_strictAnti_iff`), flat iff `r = δ` (`fxForward_const_iff`) — and the
-  spot-minus-forward basis `S − F(T)` (Hull ch. 3's sign convention; the issue body's
+  spot-minus-forward basis `S − F(T)` (Hull ch. 3's sign convention; #88's
   `b(T) = S − F(T)`; `TheoryOfStorage.lean`'s carry identity `F − S = C − Y` is the same gap
   negated) vanishing at `T = 0` (`fxForward_basis_zero`) and tending to `0` as `T → 0⁺`
   (`fxForward_basis_tendsto_zero`). Pure `Real.exp` monotonicity; no new definitions, and
