@@ -227,6 +227,45 @@ theorem hasDerivAt_swapOut_zero (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
   field_simp
   ring
 
+omit [Fintype ι] [DecidableEq ι] in
+/-- **The equal-weight two-token invariant is the constant-product invariant**: at `n = 2` with
+`w = ![1/2, 1/2]`, the squared constant-mean invariant is the product of the two reserves,
+so the surface `V = √(x·y)` is the Uniswap curve `x·y = k` written in squared form. -/
+theorem constantMeanInvariant_two_sq_eq (x y : ℝ) (hx : 0 < x) (hy : 0 < y) :
+    (constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1/2, 1/2]) ^ 2 = x * y := by
+  have hx2 : (x ^ ((1 : ℝ) / 2)) ^ 2 = x := by
+    rw [← Real.rpow_natCast (x ^ ((1 : ℝ) / 2)) 2, ← Real.rpow_mul hx.le]
+    norm_num
+  have hy2 : (y ^ ((1 : ℝ) / 2)) ^ 2 = y := by
+    rw [← Real.rpow_natCast (y ^ ((1 : ℝ) / 2)) 2, ← Real.rpow_mul hy.le]
+    norm_num
+  unfold constantMeanInvariant
+  rw [Fin.prod_univ_two]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [mul_pow, hx2, hy2]
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- **The equal-weight two-token spot price is the constant-product internal price**: the
+marginal rate of the two-token equal-weight pool is `internalPrice x y = y / x`. -/
+theorem spotPrice_two_eq_internalPrice (x y : ℝ) :
+    spotPrice (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 = internalPrice x y := by
+  unfold spotPrice internalPrice
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  field_simp
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- **The equal-weight two-token out-amount is the constant-product swap output**: the
+whitepaper's Out-Given-In at `w i = w j = 1/2` is `swapOutput x y Δ = y * Δ / (x + Δ)`. -/
+theorem swapOut_two_eq_swapOutput (x y : ℝ) (hx : 0 < x) (hΔ : 0 < Δ) :
+    swapOut (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 Δ = swapOutput x y Δ := by
+  have hhalf : ((1 : ℝ) / 2) / ((1 : ℝ) / 2) = 1 :=
+    div_self (by norm_num : ((1 : ℝ) / 2) ≠ 0)
+  have hsum : 0 < x + Δ := by linarith
+  unfold swapOut swapOutput
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hhalf]
+  field_simp
+  ring
+
 end DeFi
 
 end MathFin
