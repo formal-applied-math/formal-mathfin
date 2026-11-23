@@ -159,10 +159,9 @@ private theorem out_pair_pow_eq (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ
       = B j ^ w j * ((B i + Δ) ^ w i * (B i / (B i + Δ)) ^ w i) from by ring, hbi]
   ring
 
-omit [Fintype ι] in
 /-- Splitting a product of powers over an updated reserve vector: the updated token
 contributes its new power, the rest are unchanged. -/
-private theorem prod_update_pow (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s : Finset ι)
+theorem prod_update_pow (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s : Finset ι)
     (h : a ∈ s) :
     ∏ k ∈ s, Function.update f a c k ^ w k = c ^ w a * ∏ k ∈ s.erase a, f k ^ w k := by
   have hfun : (fun k ↦ Function.update f a c k ^ w k)
