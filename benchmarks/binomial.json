@@ -876,6 +876,35 @@
       }
     },
     {
+      "id": "mf-american-put-premium",
+      "name": "American Put Early-Exercise Premium (Strict, Binomial Market)",
+      "description": "In the binomial market at unit step under the risk-neutral coin flips (a pricing measure), the price of the European put with strike K and horizon N is strictly below the market's American price of the put, whenever some node of the tree - j up-moves and i down-moves below the root, at least one step remaining - has immediate exercise max(K - S, 0) strictly above the one-period discounted continuation of the American price. Every node of the tree is reached with positive probability (the risk-neutral up-probability is in (0,1) under no-arbitrage), so the hypothesis is a strictly-optimal exercise node of positive probability.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Binomial.AmericanPutPremium\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.Contracts.Binomial\n\n/-- **In the binomial market the European put is strictly worth less than the American put\nwhenever some node makes immediate exercise strictly optimal.** -/\ntheorem binomial_market_put_strict_premium {S₀ u d ρ K : ℝ} {q p : ℝ≥0}\n    (hq : q ≤ 1) (hp0 : 0 < p) (hp : p < 1) (hS₀ : 0 < S₀) (hna : BinomialNoArb u d ρ)\n    (hqcrr : crrUpProb u d ρ = q) (N : ℕ)\n    (hw : ∃ j i : ℕ, j + i + 1 ≤ N ∧\n      binomialOptionPriceOnePeriod u d ρ\n        (americanPrice u d ρ (fun S' ↦ max (K - S') 0) (N - j - i - 1) (S₀ * u ^ j * d ^ i * u))\n        (americanPrice u d ρ (fun S' ↦ max (K - S') 0) (N - j - i - 1) (S₀ * u ^ j * d ^ i * d))\n      < max (K - S₀ * u ^ j * d ^ i) 0) :\n    (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).price (coinFlipMeasure q hq)\n        (europeanPut K (N : ℝ≥0))\n    < (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).americanPrice\n        (coinFlipMeasure q hq) (europeanPutPayoff K) (N : ℝ≥0) :=\n  price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation\n    hq hp0 hp hS₀ hna hqcrr N hw"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, 11th ed., Pearson (2021), ch. 11 'Early exercise: puts' (slide-deck text run on disk; the closed forms are derived in the tree, not transcribed); J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financ. Econ. 7 (1979) 229-263; S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), 4.4",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 11, Early exercise: puts"
+          },
+          {
+            "key": "CoxRossRubinstein1979"
+          },
+          {
+            "key": "ShreveSCFI",
+            "locator": "4.4"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation (MathFin/Models/Binomial/AmericanPutPremium.lean) composes the two market bridges price_pay_eq_binomialPrice_of_isPricingMeasure and americanPrice_market_europeanPutPayoff with the tree-level theorem binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation: the American-minus-European premium dominates its one-period discounted continuation (americanPrice_premium_supermartingale), so along any path the root premium bounds the node premium times the discount and risk-neutral path weight (americanPrice_premium_mul_weight_le), and a strictly-optimal exercise node forces a strictly positive premium at the root. Deep in the money (S * u^n <= K) the closed forms are also proved: American = K - S, European = K * e^{-rn} - S, premium = K * (1 - e^{-rn}) > 0 for r > 0, n >= 1 (binomialPrice_lt_americanPrice_put_of_deep_in_the_money). SCOPE: the binomial tree at unit step, the price at time 0, the put payoff only; the market-level statement needs the physical law to be i.i.d. flips with 0 < p < 1; the continuous-time strict premium is not part of this entry."
+      }
+    },
+    {
       "id": "mf-trinomial-moment-matching",
       "name": "Trinomial Lattice Branch Weights: Unique Moment Matching, a Validity Window, and a Lattice Variance Bound",
       "domain": "mathematical_finance",

@@ -213,6 +213,7 @@ import MathFin.Models.Binomial.BarrierReflection
 import MathFin.Models.Binomial.BarrierMarket
 import MathFin.Pricing.AmericanPrice
 import MathFin.Models.Binomial.AmericanMarket
+import MathFin.Models.Binomial.AmericanPutPremium
 import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Choice.Performance.KellyNumeraire
 import MathFin.Risk.JointElicitability
@@ -1065,6 +1066,20 @@ attribute [blueprint "thm:binomial-american-market"
   Bellman price of the tree with $\lfloor T/h \rfloor$ steps: stopping on the grid is discrete
   stopping, whose value is the Snell envelope's (Snell's theorem). -/)]
   MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff
+
+attribute [blueprint "thm:american-put-premium"
+  (title := "American put early-exercise premium")
+  (statement := /-- In the binomial tree under no-arbitrage, if at some node — every node is
+  reached with positive probability, the risk-neutral up-probability lying in $(0, 1)$ —
+  immediate exercise of the put is worth strictly more than the one-period discounted
+  continuation of the American price, then the American put is worth strictly more than the
+  European put of the same strike and expiry at the root: in the binomial market at unit step
+  under the risk-neutral coin flips (a pricing measure), the price of the European put with
+  horizon $N$ is strictly below the market's American price of the put, both being the tree
+  prices, and the premium at the root bounds every path-weighted premium below it. Deep in the
+  money the closed forms hold: the American price $K - S$, the European price
+  $K e^{-rN} - S$, the premium $K (1 - e^{-rN})$. -/)]
+  MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
 
 -- ===== valuation/volatility: Volatility =====
 

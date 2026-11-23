@@ -65,14 +65,6 @@ area = "valuation/insurance"
 family = "insurance"
 
 [[node]]
-label = "thm:american-put-premium"
-title = "American put early-exercise premium"
-statement = "In the binomial model with a positive interest rate, the American put is worth strictly more than the European put with the same strike and expiry whenever immediate exercise is worth more than continuation at some node reached with positive probability."
-uses = ["thm:snell-envelope"]
-area = "valuation/american"
-family = "trees"
-
-[[node]]
 label = "thm:barrier-lookback-closed-forms"
 title = "Barrier and lookback closed forms"
 statement = "In the Black–Scholes model the down-and-out call and the floating-strike lookback call have closed-form prices, obtained from the reflection principle for Brownian motion with drift."

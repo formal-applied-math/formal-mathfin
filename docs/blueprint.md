@@ -192,6 +192,7 @@ graph TD
   vasicekMarket["The Vasicek bond market"]:::proved
   americanPutBoundaryConvex["Convexity of the American put exercise boundary"]:::proved
   americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
+  americanPutPremium["American put early-exercise premium"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
   binomialKnockInMarket["The binomial market prices the knock-in by reflection"]:::proved
   bsAmericanMarket["The Black–Scholes market's American put is the canonical American put"]:::proved
@@ -333,7 +334,6 @@ graph TD
     zakaiUniquenessSingularControl["Zakai uniqueness under singular control"]:::frontier
   end
   subgraph frontier_valuationAmerican["⏳ frontier · Valuation · American options and optimal stopping"]
-    americanPutPremium["American put early-exercise premium"]:::frontier
     americanPutSuperhedgingPrice["The American put value is the superhedging price"]:::frontier
     perpetualAmerican["Perpetual American option"]:::frontier
     robustAmericanIrregularDuality["Robust American hedging with irregular payoffs"]:::frontier
@@ -592,6 +592,15 @@ graph TD
   gbm --> americanPutDominatesEuropean
   market --> americanPutDominatesEuropean
   pricingFunctional --> americanPutDominatesEuropean
+  americanPrice --> americanPutPremium
+  coinFlipMeasure --> americanPutPremium
+  contract --> americanPutPremium
+  contractValue --> americanPutPremium
+  emm --> americanPutPremium
+  market --> americanPutPremium
+  pricingFunctional --> americanPutPremium
+  pricingMeasure --> americanPutPremium
+  binomialAmericanMarket --> americanPutPremium
   brownianMotion --> bachelierCall
   contract --> bachelierCall
   contractValue --> bachelierCall
@@ -871,7 +880,6 @@ graph TD
   itoIntegralClm --> zakaiEquation
   aaveLiquidationKmv --> aaveHealthFactorBound
   vasicekBondPde --> affineTermStructure
-  snellEnvelope --> americanPutPremium
   americanPutDominatesEuropean --> americanPutSuperhedgingPrice
   marketCompleteness --> americanPutSuperhedgingPrice
   emm --> aptPricing
@@ -1163,6 +1171,7 @@ graph TD
 | `thm:vasicek-market` The Vasicek bond market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-market%22%20in%3Abody) |
 | `thm:american-put-boundary-convex` Convexity of the American put exercise boundary | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-boundary-convex%22%20in%3Abody) |
 | `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
+| `thm:american-put-premium` American put early-exercise premium | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-premium%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
 | `thm:binomial-knock-in-market` The binomial market prices the knock-in by reflection | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-knock-in-market%22%20in%3Abody) |
 | `thm:bs-american-market` The Black–Scholes market's American put is the canonical American put | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-american-market%22%20in%3Abody) |
@@ -1225,7 +1234,6 @@ graph TD
 | `def:zakai-equation` The Zakai equation | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Azakai-equation%22%20in%3Abody) |
 | `thm:aave-health-factor-bound` Aave multi-asset health factor: a liquidation bound | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaave-health-factor-bound%22%20in%3Abody) |
 | `thm:affine-term-structure` Affine term structure | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
-| `thm:american-put-premium` American put early-exercise premium | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-premium%22%20in%3Abody) |
 | `thm:american-put-superhedging-price` The American put value is the superhedging price | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-superhedging-price%22%20in%3Abody) |
 | `thm:apt-pricing` APT exact-factor pricing | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aapt-pricing%22%20in%3Abody) |
 | `thm:balancer-invariant` Balancer constant-mean AMM | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abalancer-invariant%22%20in%3Abody) |

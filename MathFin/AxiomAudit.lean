@@ -2905,6 +2905,21 @@ end MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.americanPrice_eq_snellEnvelope
 
+/-- info: 'MathFin.binomialPrice_lt_americanPrice_put_of_deep_in_the_money' depends on axioms: [propext,
+  Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.binomialPrice_lt_americanPrice_put_of_deep_in_the_money
+
+/-- info: 'MathFin.binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation' depends on axioms: [propext,
+  Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation
+
+/-- info: 'MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation' depends on axioms: [propext,
+  Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
+
 /-- info: 'MathFin.Rates.isPricingMeasure_deterministicMarket' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Rates.isPricingMeasure_deterministicMarket
