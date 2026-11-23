@@ -35,10 +35,10 @@ the lemmas, and `mf-change-of-numeraire` already covers the node. Corpus 906 →
   `(numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q] numeraireDensity BT NT B0 N0`: the
   docstring's `dQ^N/dQ` reading, proved by Mathlib's `Measure.rnDeriv_withDensity`.
 - **`numeraireMeasure_absolutelyContinuous`** — `Q^N ≪ Q`, with no hypothesis beyond the
-  definition (`Measure.withDensity_absolutelyContinuous`).
-- **`numeraireMeasure_absolutelyContinuous'`** — with positive numéraires (`B0 > 0`, `N0 > 0`)
-  also `Q ≪ Q^N`: the density is then strictly positive at every state
-  (`Measure.withDensity_absolutelyContinuous'`).
+  definition (`withDensity_absolutelyContinuous`).
+- **`numeraireMeasure_absolutelyContinuous'`** — with measurable, positive numéraires
+  (`B0 > 0`, `N0 > 0`) also `Q ≪ Q^N`: the density is then strictly positive at every state
+  (`withDensity_absolutelyContinuous'`).
 
 The `## Honest scope` note of `MathFin/Pricing/ForwardMeasure.lean` now cites the stochastic-rate
 instance, the Hull–White `S`-forward measure of `Models/Rates/TimingAdjustment`
