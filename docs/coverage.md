@@ -26,6 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The numéraire density is the Radon–Nikodym derivative (2026-11-23)
+
+Three additive lemmas on `MathFin/Pricing/Numeraire.lean`. No corpus entry: the issue asks for
+the lemmas, and `mf-change-of-numeraire` already covers the node. Corpus 906 → 906.
+
+- **`numeraireMeasure_rnDeriv`** — for σ-finite `Q` and measurable numéraire terminals,
+  `(numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q] numeraireDensity BT NT B0 N0`: the
+  docstring's `dQ^N/dQ` reading, proved by Mathlib's `Measure.rnDeriv_withDensity`.
+- **`numeraireMeasure_absolutelyContinuous`** — `Q^N ≪ Q`, with no hypothesis beyond the
+  definition (`Measure.withDensity_absolutelyContinuous`).
+- **`numeraireMeasure_absolutelyContinuous'`** — with positive numéraires (`B0 > 0`, `N0 > 0`)
+  also `Q ≪ Q^N`: the density is then strictly positive at every state
+  (`Measure.withDensity_absolutelyContinuous'`).
+
+The `## Honest scope` note of `MathFin/Pricing/ForwardMeasure.lean` now cites the stochastic-rate
+instance, the Hull–White `S`-forward measure of `Models/Rates/TimingAdjustment`
+(`HullWhite.shortRate_hasLaw_forwardMeasure`,
+`HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve`). Not delivered here: a change of
+numéraire between two numéraire measures; the lemmas are named for that reuse.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged
