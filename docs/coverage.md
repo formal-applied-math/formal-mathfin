@@ -47,7 +47,9 @@ One `full` entry in `benchmarks/commodities.json`. Corpus 906 → 907 on the mer
   `b(T) = S − F(T)`; `TheoryOfStorage.lean`'s carry identity `F − S = C − Y` is the same gap
   negated) vanishing at `T = 0` (`fxForward_basis_zero`) and tending to `0` as `T → 0⁺`
   (`fxForward_basis_tendsto_zero`). Pure `Real.exp` monotonicity; no new definitions, and
-  nothing probabilistic. Not proved: normal backwardation (futures below the expected spot
+  nothing probabilistic. Hull's cost of carry is read as the financing rate alone (zero
+  storage cost), and ch. 18's normal/inverted terminology, stated there for futures
+  prices, is applied to this forward curve; neither identification is a proved claim. Not proved: normal backwardation (futures below the expected spot
   under the physical measure) — a different statement about a different object; and the
   second-maturity basis-risk decomposition of hedging, which needs a contract object the
   library does not have. Cited: Hull ch. 3, ch. 5 and ch. 18 (11th ed. slide decks, slides 5, 23 and 26
