@@ -8,6 +8,7 @@ module
 public import MathFin.Models.Binomial.Model
 public import MathFin.Models.Binomial.American
 public import MathFin.Models.Binomial.Bermudan
+public import MathFin.Models.Binomial.Market
 public import MathFin.Models.Binomial.AmericanMarket
 
 /-!
@@ -429,3 +430,50 @@ theorem binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation
   linarith
 
 end MathFin
+
+/-! ### The premium read in the binomial market -/
+
+namespace MathFin.Contracts.Binomial
+
+open MeasureTheory
+open scoped NNReal
+
+/-- **In the binomial market, the European put is strictly worth less than the American put
+whenever some node makes immediate exercise strictly optimal.** Under the risk-neutral coin
+flips — a pricing measure of the binomial market (`isPricingMeasure_coinFlipMeasure`) — the
+price of the European put `europeanPut K` is its tree price
+(`price_pay_eq_binomialPrice_of_isPricingMeasure`), the American price of the exercise right
+`europeanPutPayoff K` is the tree's `americanPrice`
+(`americanPrice_market_europeanPutPayoff`), and the tree-level gap at a strictly-optimal
+exercise node (`binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation`)
+makes the market prices differ strictly. The market is taken at unit step with horizon `N`. -/
+theorem price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
+    {S₀ u d ρ K : ℝ} {q p : ℝ≥0} (hq : q ≤ 1) (hp0 : 0 < p) (hp : p < 1) (hS₀ : 0 < S₀)
+    (hna : MathFin.BinomialNoArb u d ρ) (hqcrr : MathFin.crrUpProb u d ρ = q) (N : ℕ)
+    (hw : ∃ j i : ℕ, j + i + 1 ≤ N ∧
+      MathFin.binomialOptionPriceOnePeriod u d ρ
+        (MathFin.americanPrice u d ρ (fun S' ↦ max (K - S') 0) (N - j - i - 1)
+          (S₀ * u ^ j * d ^ i * u))
+        (MathFin.americanPrice u d ρ (fun S' ↦ max (K - S') 0) (N - j - i - 1)
+          (S₀ * u ^ j * d ^ i * d))
+      < max (K - S₀ * u ^ j * d ^ i) 0) :
+    (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).price (coinFlipMeasure q hq)
+        (europeanPut K (N : ℝ≥0))
+    < (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).americanPrice
+        (coinFlipMeasure q hq) (europeanPutPayoff K) (N : ℝ≥0) := by
+  have hQ : (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).IsPricingMeasure (N : ℝ≥0)
+      (coinFlipMeasure q hq) :=
+    isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ zero_le_one hp0 hp N
+  have hE := price_pay_eq_binomialPrice_of_isPricingMeasure (h := 1) hS₀ hna hqcrr one_pos
+    (T := (N : ℝ≥0)) (N := N) (hTN := by push_cast; simp)
+    (a := europeanPutPayoff K (N : ℝ≥0)) (g := fun S' ↦ max (K - S') 0) (hg := fun _ ↦ rfl) hQ
+  have hA := americanPrice_market_europeanPutPayoff (h := 1) one_pos hq hqcrr
+    (coinFlipMeasure p hp.le) S₀ K (N : ℝ≥0)
+  conv at hA => rw [show ⌊((N : ℝ≥0) : ℝ) / 1⌋₊ = N from by push_cast; simp]
+  unfold europeanPut
+  rw [hE, hA]
+  exact MathFin.binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation
+    hna N hw
+
+end MathFin.Contracts.Binomial
+
