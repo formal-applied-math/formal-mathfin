@@ -2040,6 +2040,13 @@
       "input_hash": "c5140c7a408ac746c16c5fe299a872f2714ce168c7b46ef4e031f52091a15eef",
       "verified_at_commit": "b0d5578"
     },
+    "mf-contango-basis-convergence": {
+      "benchmark_file": "commodities.json",
+      "date": "2026-11-23",
+      "elapsed_s": 4.6,
+      "input_hash": "b420e3934db529105c92f690c2e7a3cf8ed3700c503f7da30dd01f42c38f9d8f",
+      "verified_at_commit": "12dc92c"
+    },
     "mf-continuous-emm-sampled": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-16",
