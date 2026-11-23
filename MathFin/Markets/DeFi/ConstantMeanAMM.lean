@@ -140,6 +140,66 @@ theorem swapOut_lt_reserve (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : �
         mul_lt_mul_of_pos_left h1 (hB j)
     _ = B j := mul_one _
 
+omit [Fintype ι] [DecidableEq ι] in
+/-- The two factors the trade touches: the input token's power at the grown reserve times the
+output token's power at the shrunk reserve is the pair's product of powers before the trade,
+the constant-mean content of the whitepaper's Out-Given-In derivation. -/
+private theorem out_pair_pow_eq (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
+    (hB : ∀ k, 0 < B k) (hw : ∀ k, 0 < w k) (hΔ : 0 < Δ) :
+    (B i + Δ) ^ w i * (B j - swapOut B w i j Δ) ^ w j = B i ^ w i * B j ^ w j := by
+  have hsum : 0 < B i + Δ := by linarith [hB i]
+  have hr : 0 < B i / (B i + Δ) := div_pos (hB i) hsum
+  have hrw : B j - swapOut B w i j Δ = B j * (B i / (B i + Δ)) ^ (w i / w j) := by
+    unfold swapOut; ring
+  have hwi : w i / w j * w j = w i := div_mul_cancel₀ (w i) (hw j).ne'
+  have hbi : (B i + Δ) ^ w i * (B i / (B i + Δ)) ^ w i = B i ^ w i := by
+    rw [← Real.mul_rpow hsum.le hr.le, mul_comm, div_mul_cancel₀ _ hsum.ne']
+  rw [hrw, Real.mul_rpow (hB j).le (Real.rpow_pos_of_pos hr _).le, ← Real.rpow_mul hr.le, hwi,
+    show (B i + Δ) ^ w i * (B j ^ w j * (B i / (B i + Δ)) ^ w i)
+      = B j ^ w j * ((B i + Δ) ^ w i * (B i / (B i + Δ)) ^ w i) from by ring, hbi]
+  ring
+
+omit [Fintype ι] in
+/-- Splitting a product of powers over an updated reserve vector: the updated token
+contributes its new power, the rest are unchanged. -/
+private theorem prod_update_pow (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s : Finset ι)
+    (h : a ∈ s) :
+    ∏ k ∈ s, Function.update f a c k ^ w k = c ^ w a * ∏ k ∈ s.erase a, f k ^ w k := by
+  have hfun : (fun k ↦ Function.update f a c k ^ w k)
+      = Function.update (fun k ↦ f k ^ w k) a (c ^ w a) := by
+    funext k
+    by_cases hka : k = a
+    · subst hka
+      simp
+    · simp [hka]
+  rw [hfun, Finset.prod_update_of_mem h, Finset.sdiff_singleton_eq_erase]
+
+/-- **Trades preserve the constant-mean invariant**: after a swap of `Δ` of token `i` in for
+`swapOut B w i j Δ` of token `j` out, the weighted product of the new reserves equals the
+weighted product of the old. This is the pricing rule of the constant-mean pool: the swap is
+the trade that keeps the weighted product fixed. -/
+theorem swap_preserves_constantMean (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
+    (hB : ∀ k, 0 < B k) (hw : ∀ k, 0 < w k) (hij : i ≠ j) (hΔ : 0 < Δ) :
+    ∏ k, swapReserves B w i j Δ k ^ w k = constantMeanInvariant B w := by
+  have hE : (Finset.univ.erase j).erase i = (Finset.univ.erase i).erase j :=
+    Finset.ext fun k ↦ by simp [Finset.mem_erase, and_comm]
+  have hL : ∏ k, swapReserves B w i j Δ k ^ w k
+      = (B j - swapOut B w i j Δ) ^ w j * ((B i + Δ) ^ w i
+          * ∏ k ∈ (Finset.univ.erase i).erase j, B k ^ w k) := by
+    unfold swapReserves
+    rw [prod_update_pow w _ j _ Finset.univ (Finset.mem_univ j),
+      prod_update_pow w _ i (B i + Δ) (Finset.univ.erase j)
+        (Finset.mem_erase.2 ⟨hij, Finset.mem_univ _⟩), hE]
+  have hR : constantMeanInvariant B w
+      = B i ^ w i * (B j ^ w j * ∏ k ∈ (Finset.univ.erase i).erase j, B k ^ w k) := by
+    unfold constantMeanInvariant
+    rw [← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ i),
+      ← Finset.mul_prod_erase (Finset.univ.erase i) _
+        (Finset.mem_erase.2 ⟨hij.symm, Finset.mem_univ _⟩)]
+  have hpair := out_pair_pow_eq B w i j hB hw hΔ
+  rw [hL, hR, ← mul_assoc, ← mul_assoc, ← hpair]
+  rw [mul_comm ((B j - swapOut B w i j Δ) ^ w j) ((B i + Δ) ^ w i)]
+
 end DeFi
 
 end MathFin
