@@ -2043,9 +2043,9 @@
     "mf-contango-basis-convergence": {
       "benchmark_file": "commodities.json",
       "date": "2026-11-23",
-      "elapsed_s": 4.6,
-      "input_hash": "b420e3934db529105c92f690c2e7a3cf8ed3700c503f7da30dd01f42c38f9d8f",
-      "verified_at_commit": "12dc92c"
+      "elapsed_s": 4.0,
+      "input_hash": "eeb97d354e5143585910c08381dd6f51e83762f6ad7d5aaaa9c62aceaf000147",
+      "verified_at_commit": "7cd981b"
     },
     "mf-continuous-emm-sampled": {
       "benchmark_file": "no_arbitrage.json",
