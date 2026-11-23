@@ -99,6 +99,7 @@ import MathFin.Insurance.EsscherPremium
 import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
+import MathFin.Markets.DeFi.ConstantMeanAMM
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket

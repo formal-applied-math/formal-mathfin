@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1115 MathFin constants, 29 upstream). Citations
+corpus (1120 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -660,9 +660,17 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.clHistoricalVaR_le_value
 
+/-- info: 'MathFin.DeFi.constantMeanInvariant_two_sq_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantMeanInvariant_two_sq_eq
+
 /-- info: 'MathFin.DeFi.coveredCall_sub_v3PositionValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.coveredCall_sub_v3PositionValue
+
+/-- info: 'MathFin.DeFi.hasDerivAt_swapOut_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.hasDerivAt_swapOut_zero
 
 /-- info: 'MathFin.DeFi.impermanentLoss_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -683,6 +691,18 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.price_lpPayoff
+
+/-- info: 'MathFin.DeFi.spotPrice_two_eq_internalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.spotPrice_two_eq_internalPrice
+
+/-- info: 'MathFin.DeFi.swapOut_two_eq_swapOutput' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_two_eq_swapOutput
+
+/-- info: 'MathFin.DeFi.swap_preserves_constantMean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swap_preserves_constantMean
 
 /-- info: 'MathFin.DeFi.v3PositionValue_at_lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

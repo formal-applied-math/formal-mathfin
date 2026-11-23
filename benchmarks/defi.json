@@ -236,6 +236,27 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-balancer-invariant",
+      "name": "Balancer Constant-Mean Invariant and Spot Price",
+      "domain": "mathematical_finance",
+      "description": "In a constant-mean (Balancer) pool with reserves B k > 0 and weights w k > 0, trading Delta of token i in for the out-amount of token j out preserves the weighted product prod_k B k ^ w k of the reserves (swap_preserves_constantMean), where the out-amount is the whitepaper's Out-Given-In formula B j * (1 - (B i / (B i + Delta)) ^ (w i / w j)). The spot price (B j / w j) / (B i / w i) is derived, not posited: it is the marginal rate, the derivative at zero trade of the out-amount in the in-amount (hasDerivAt_swapOut_zero). At two tokens with equal weights the pool is the library's constant-product pool: the invariant squared is x * y, the spot price is internalPrice x y = y / x, and the out-amount is swapOutput x y Delta = y * Delta / (x + Delta). Fees are not modelled.",
+      "code": {
+        "lean": "import MathFin.Markets.DeFi.ConstantMeanAMM\n\nopen MathFin MathFin.DeFi\n\n/-- A Balancer trade preserves the constant-mean invariant, the spot price is the marginal\nrate of the out-amount in the in-amount, and the equal-weight two-token pool is the library's\nconstant-product pool. -/\ntheorem balancer_constantMean {ι : Type*} [Fintype ι] [DecidableEq ι] (B w : ι → ℝ) (i j : ι)\n    {Δ : ℝ} (hB : ∀ k, 0 < B k) (hw : ∀ k, 0 < w k) (hij : i ≠ j) (hΔ : 0 < Δ) :\n    (∏ k, swapReserves B w i j Δ k ^ w k = constantMeanInvariant B w ∧\n      HasDerivAt (swapOut B w i j) (spotPrice B w i j) 0) ∧\n    (constantMeanInvariant (![B i, B j] : Fin 2 → ℝ) ![1 / 2, 1 / 2]) ^ 2 = B i * B j ∧\n    spotPrice (![B i, B j] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1 = internalPrice (B i) (B j) ∧\n    swapOut (![B i, B j] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1 Δ\n      = swapOutput (B i) (B j) Δ :=\n  ⟨⟨swap_preserves_constantMean B w i j (Δ := Δ) hB hw hij hΔ,\n      hasDerivAt_swapOut_zero B w i j (hB i)⟩,\n    constantMeanInvariant_two_sq_eq (B i) (B j) (hB i) (hB j),\n    spotPrice_two_eq_internalPrice (B i) (B j),\n    swapOut_two_eq_swapOutput (B i) (B j) Δ (hB i) hΔ⟩\n"
+      },
+      "metadata": {
+        "reference": "F. Martinelli, N. Mushegian, Balancer: a non-custodial portfolio manager, liquidity provider, and price sensor, v2019-09-19 (2019), \"Theory\": Value Function (V = prod B_t^W_t), Spot Price (Eq. 2, printed with in/out exchanged), Trading Formulas / Out-Given-In (A_o = B_o (1 - (B_i/(B_i+A_i))^(W_i/W_o)))",
+        "citations": [
+          {
+            "key": "MartinelliMushegian2019",
+            "locator": "\"Theory\": Value Function; Spot Price; Out-Given-In"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.DeFi.swap_preserves_constantMean and MathFin.DeFi.hasDerivAt_swapOut_zero (MathFin/Markets/DeFi/ConstantMeanAMM.lean) with the equal-weight two-token reduction to ConstantProductAMM.lean (constantMeanInvariant_two_sq_eq: the invariant squared is x * y; spotPrice_two_eq_internalPrice: the spot price is internalPrice x y; swapOut_two_eq_swapOutput: the out-amount is swapOutput x y Delta). The out-amount is transcribed from the whitepaper's Out-Given-In formula with the fee factor one; invariant preservation and the marginal-price formula are proved. SCOPE: the weights need only be positive, not sum to one (that normalization is what makes V a portfolio value, and the constant-value-share theorem is not formalized); fees, the In-Given-Out and In-Given-Price formulas, and liquidity provision (single-asset deposit/withdrawal) are not covered. The whitepaper prints the spot price as SP^o_i = (B_i/W_i)/(B_o/W_o), the cost in the in-token of one unit of the out-token; this entry's (B j / w j)/(B i / w i) is the same ratio with the direction made explicit as the marginal out-amount per unit in."
+      }
     }
   ]
 }

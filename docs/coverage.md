@@ -26,6 +26,30 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Balancer constant-mean invariant and spot price (2026-11-23)
+
+One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (866 → 867 full).
+
+- **`mf-balancer-invariant`** (MathFin/Markets/DeFi/ConstantMeanAMM.lean): the constant-mean
+  (weighted-product) invariant `V = ∏ k, B k ^ w k` of a Balancer pool with reserves
+  `B k > 0` and weights `w k > 0`. Proved: a trade of `Δ` of token `i` in for the whitepaper's
+  Out-Given-In out-amount of token `j` out preserves the weighted product of the reserves
+  (`swap_preserves_constantMean`, on the post-trade reserve vector `swapReserves`), the
+  out-amount is positive and bounded by the output reserve (`swapOut_pos`,
+  `swapOut_lt_reserve`), and the spot price `(B j / w j) / (B i / w i)` is derived as the
+  marginal rate — the derivative at zero trade of the out-amount in the in-amount
+  (`hasDerivAt_swapOut_zero`). The equal-weight two-token instance is proved equal to the
+  library's constant-product pool: the invariant squared is `x * y`
+  (`constantMeanInvariant_two_sq_eq`), the spot price is `internalPrice x y`
+  (`spotPrice_two_eq_internalPrice`), and the out-amount is `swapOutput x y Δ`
+  (`swapOut_two_eq_swapOutput`), all three in `Markets/DeFi/ConstantProductAMM.lean`.
+  Cited: Martinelli & Mushegian, *Balancer* whitepaper, v2019-09-19 ("Theory": Value
+  Function, Spot Price, Out-Given-In; the spot price there is printed with in/out exchanged,
+  `SPⁱₒ = (Bᵢ/Wᵢ)/(Bₒ/Wₒ)`, the same ratio reciprocated). Disclosed out of scope: fees
+  (the fee factor is one); the weights need only be positive — the sum-to-one normalization
+  that makes `V` a portfolio value, the constant-value-share theorem, In-Given-Out,
+  In-Given-Price and liquidity provision are not formalized. Axioms-clean, `full`.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

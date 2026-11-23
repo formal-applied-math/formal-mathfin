@@ -3192,3 +3192,33 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.chainPrediction
+
+/-! ### Constant-mean AMM: the Balancer invariant and spot price (2026-11-23) -/
+
+/-- info: 'MathFin.DeFi.swap_preserves_constantMean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swap_preserves_constantMean
+
+/-- info: 'MathFin.DeFi.hasDerivAt_swapOut_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.hasDerivAt_swapOut_zero
+
+/-- info: 'MathFin.DeFi.constantMeanInvariant_two_sq_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantMeanInvariant_two_sq_eq
+
+/-- info: 'MathFin.DeFi.spotPrice_two_eq_internalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.spotPrice_two_eq_internalPrice
+
+/-- info: 'MathFin.DeFi.swapOut_two_eq_swapOutput' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_two_eq_swapOutput
+
+/-- info: 'MathFin.DeFi.swapOut_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_pos
+
+/-- info: 'MathFin.DeFi.swapOut_lt_reserve' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_lt_reserve

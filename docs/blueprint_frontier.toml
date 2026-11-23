@@ -209,6 +209,8 @@ statement = "In Balancer's constant-mean automated market maker, trades preserve
 uses = ["thm:impermanent-loss"]
 area = "valuation/model-free"
 family = "mechanisms"
+core = ["mf-balancer-invariant"]
+
 
 [[node]]
 label = "thm:compound-exchange-rate-bridge"
