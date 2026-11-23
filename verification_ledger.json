@@ -647,6 +647,13 @@
       "input_hash": "9c797bbaa1341f818290f386230df2da8d5d65237a4add141a2c4f4975cedc72",
       "verified_at_commit": "f9c3292"
     },
+    "mf-american-put-premium": {
+      "benchmark_file": "binomial.json",
+      "date": "2026-11-23",
+      "elapsed_s": 4.1,
+      "input_hash": "de448033ca9cdcc9b623430a934185cb8fb30bace61d8fd0255876078f8a1b43",
+      "verified_at_commit": "4724137"
+    },
     "mf-american-put-right-augmentation-invariance": {
       "benchmark_file": "american_put_boundary.json",
       "date": "2026-11-20",
