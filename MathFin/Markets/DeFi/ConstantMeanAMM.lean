@@ -256,7 +256,7 @@ theorem spotPrice_two_eq_internalPrice (x y : ℝ) :
 omit [Fintype ι] [DecidableEq ι] in
 /-- **The equal-weight two-token out-amount is the constant-product swap output**: the
 whitepaper's Out-Given-In at `w i = w j = 1/2` is `swapOutput x y Δ = y * Δ / (x + Δ)`. -/
-theorem swapOut_two_eq_swapOutput (x y : ℝ) (hx : 0 < x) (hΔ : 0 < Δ) :
+theorem swapOut_two_eq_swapOutput (x y Δ : ℝ) (hx : 0 < x) (hΔ : 0 < Δ) :
     swapOut (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 Δ = swapOutput x y Δ := by
   have hhalf : ((1 : ℝ) / 2) / ((1 : ℝ) / 2) = 1 :=
     div_self (by norm_num : ((1 : ℝ) / 2) ≠ 0)
