@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1120 MathFin constants, 29 upstream). Citations
+corpus (1123 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -2368,9 +2368,21 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.fxForward_basis_zero
 
+/-- info: 'MathFin.fxForward_const_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_const_iff
+
 /-- info: 'MathFin.fxForward_contango_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.fxForward_contango_iff
+
+/-- info: 'MathFin.fxForward_eq_spot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_eq_spot_iff
+
+/-- info: 'MathFin.fxForward_strictAnti_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_strictAnti_iff
 
 /-- info: 'MathFin.fxForward_strictMono_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
