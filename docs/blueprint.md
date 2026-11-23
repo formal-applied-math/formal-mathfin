@@ -67,6 +67,7 @@ graph TD
   copula["Copula"]:::proved
   emm["Equivalent martingale measure"]:::proved
   expectedUtility["Expected utility"]:::proved
+  fxForward["The cost-of-carry forward"]:::proved
   gbm["Geometric Brownian motion"]:::proved
   hazardSurvival["Survival curve of a hazard rate"]:::proved
   hestonTransform["The explicit Heston transform"]:::proved
@@ -129,6 +130,7 @@ graph TD
   firstFtap["First fundamental theorem on a finite space (Harrison–Pliska)"]:::proved
   forwardMeasure["Forward measure"]:::proved
   frechetHoeffding["Fréchet–Hoeffding bounds"]:::proved
+  futuresBasisConvergence["Contango, backwardation and basis convergence"]:::proved
   gaussianQuantile["Gaussian quantile function"]:::proved
   girsanovBrownianCharacterisation["Girsanov's theorem"]:::proved
   hansenJagannathanBound["The Hansen–Jagannathan bound"]:::proved
@@ -353,7 +355,6 @@ graph TD
     twoAssetOptionFormulas["Stulz and Heynen–Kat two-asset formulas"]:::frontier
   end
   subgraph frontier_valuationForwards["⏳ frontier · Valuation · Forwards, FX and commodities"]
-    futuresBasisConvergence["Contango, backwardation and basis convergence"]:::frontier
     futuresForwardConvexity["Futures–forward convexity adjustment"]:::frontier
     siegelParadox["Siegel's paradox"]:::frontier
   end
@@ -449,6 +450,7 @@ graph TD
   stiemke --> firstFtap
   changeOfNumeraire --> forwardMeasure
   copula --> frechetHoeffding
+  fxForward --> futuresBasisConvergence
   quantile --> gaussianQuantile
   brownianMotion --> girsanovBrownianCharacterisation
   sharpeRatio --> hansenJagannathanBound
@@ -680,6 +682,7 @@ graph TD
   oneDateMarket --> insuredMarket
   contract --> interestRateParity
   contractValue --> interestRateParity
+  fxForward --> interestRateParity
   market --> interestRateParity
   pricingFunctional --> interestRateParity
   brownianMotion --> itoProductRule
@@ -917,7 +920,6 @@ graph TD
   sdeContinuousSolution --> feynmanKacVariableCoefficient
   itoFormulaC2 --> feynmanKacVariableCoefficient
   bsCall --> forwardStartCall
-  interestRateParity --> futuresBasisConvergence
   affineTermStructure --> futuresForwardConvexity
   continuousFtap --> girsanovContinuousEmm
   itoFormulaC2 --> girsanovContinuousEmm
@@ -1038,6 +1040,7 @@ graph TD
 | `def:copula` Copula | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acopula%22%20in%3Abody) |
 | `def:emm` Equivalent martingale measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aemm%22%20in%3Abody) |
 | `def:expected-utility` Expected utility | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aexpected-utility%22%20in%3Abody) |
+| `def:fx-forward` The cost-of-carry forward | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Afx-forward%22%20in%3Abody) |
 | `def:gbm` Geometric Brownian motion | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Agbm%22%20in%3Abody) |
 | `def:hazard-survival` Survival curve of a hazard rate | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Ahazard-survival%22%20in%3Abody) |
 | `def:heston-transform` The explicit Heston transform | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aheston-transform%22%20in%3Abody) |
@@ -1100,6 +1103,7 @@ graph TD
 | `thm:first-ftap` First fundamental theorem on a finite space (Harrison–Pliska) | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afirst-ftap%22%20in%3Abody) |
 | `thm:forward-measure` Forward measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-measure%22%20in%3Abody) |
 | `thm:frechet-hoeffding` Fréchet–Hoeffding bounds | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afrechet-hoeffding%22%20in%3Abody) |
+| `thm:futures-basis-convergence` Contango, backwardation and basis convergence | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afutures-basis-convergence%22%20in%3Abody) |
 | `thm:gaussian-quantile` Gaussian quantile function | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agaussian-quantile%22%20in%3Abody) |
 | `thm:girsanov-brownian-characterisation` Girsanov's theorem | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-brownian-characterisation%22%20in%3Abody) |
 | `thm:hansen-jagannathan-bound` The Hansen–Jagannathan bound | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahansen-jagannathan-bound%22%20in%3Abody) |
@@ -1255,7 +1259,6 @@ graph TD
 | `thm:expected-utility-risk-aversion` Expected utility and risk aversion | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-risk-aversion%22%20in%3Abody) |
 | `thm:feynman-kac-variable-coefficient` Variable-coefficient Feynman–Kac | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afeynman-kac-variable-coefficient%22%20in%3Abody) |
 | `thm:forward-start-call` Forward-start call | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-start-call%22%20in%3Abody) |
-| `thm:futures-basis-convergence` Contango, backwardation and basis convergence | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afutures-basis-convergence%22%20in%3Abody) |
 | `thm:futures-forward-convexity` Futures–forward convexity adjustment | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afutures-forward-convexity%22%20in%3Abody) |
 | `thm:girsanov-continuous-emm` Girsanov EMM from the Itô tower | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-continuous-emm%22%20in%3Abody) |
 | `thm:glivenko-cantelli` Glivenko–Cantelli theorem | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aglivenko-cantelli%22%20in%3Abody) |

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -38,6 +38,7 @@ import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 import MathFin.Models.Forwards.SchwartzOneFactor
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Forwards.FxForwardParity
+import MathFin.Models.Forwards.ContangoBackwardation
 import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Pricing.Numeraire
@@ -1228,6 +1229,28 @@ attribute [blueprint "thm:interest-rate-parity"
   lognormal law at drift $r_d - r_f$ this $F$ is also the expected terminal spot
   (`covered_eq_uncovered_interest_parity`). -/)]
   MathFin.market_covered_interest_parity
+
+attribute [blueprint "def:fx-forward"
+  (title := "The cost-of-carry forward")
+  (statement := /-- $\mathsf{fxForward}(S, r_d, r_f, T) = Se^{(r_d-r_f)T}$: the forward, for
+  delivery at $T$, of one unit of an asset at spot $S$ carrying a continuously compounded rate
+  $r_d$ against a carry yield $r_f$. One object, three readings: covered interest parity's FX
+  forward (foreign rate in the yield slot), the dividend-yield forward at effective rate
+  $r - q$, and the commodity cost-of-carry forward with convenience yield $\delta$. Derived
+  from no-arbitrage (`covered_interest_parity`) and equal to the risk-neutral expected
+  terminal (`uncovered_interest_parity`). -/)]
+  MathFin.fxForward
+
+attribute [blueprint "thm:futures-basis-convergence"
+  (title := "Contango, backwardation and basis convergence")
+  (statement := /-- For the cost-of-carry forward $F(T) = Se^{(r-\delta)T}$ with $S > 0$ — the
+  library's `fxForward`, the convenience yield $\delta$ in the foreign-rate slot — the forward
+  is above the spot exactly when $\delta < r$ (contango) and below it exactly when
+  $r < \delta$ (backwardation, `fxForward_backwardation_iff`), the maturity curve is strictly
+  increasing exactly when $r > \delta$ (`fxForward_strictMono_iff`), and the spot-minus-forward
+  basis $S - F(T)$ vanishes at $T = 0$ and tends to $0$ as $T \to 0^+$
+  (`fxForward_basis_tendsto_zero`). -/)]
+  MathFin.fxForward_contango_iff
 
 attribute [blueprint "thm:key-rate-duration"
   (title := "Key-rate durations")
