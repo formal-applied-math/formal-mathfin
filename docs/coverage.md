@@ -50,7 +50,7 @@ One `full` entry in `benchmarks/commodities.json`. Corpus 906 → 907 on the mer
   nothing probabilistic. Not proved: normal backwardation (futures below the expected spot
   under the physical measure) — a different statement about a different object; and the
   second-maturity basis-risk decomposition of hedging, which needs a contract object the
-  library does not have. Cited: Hull ch. 3 and ch. 5 (11th ed. slide decks, slides 5 and 23
+  library does not have. Cited: Hull ch. 3, ch. 5 and ch. 18 (11th ed. slide decks, slides 5, 23 and 26
   of the respective chapter files), Kaldor (1939), Working (1949).
 
 ### Marchenko-Pastur support edges (2026-11-08)

@@ -124,11 +124,11 @@
         "lean": "import MathFin.Models.Forwards.ContangoBackwardation\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **The market structure of the cost-of-carry forward** `fxForward S r δ T = S·e^{(r−δ)T}`\nwith spot `S > 0`: contango iff `δ < r`, backwardation iff `r < δ`, the forward meets the\nspot iff `r = δ` (at maturity `1`); strictly increasing iff `δ < r`, strictly decreasing iff\n`r < δ`, flat iff `r = δ`; basis `S − F(T)` zero at `T = 0`, tending to `0` as `T → 0⁺`.\nBundles the eight theorems of `MathFin/Models/Forwards/ContangoBackwardation.lean`. -/\ntheorem contango_backwardation_basis_cluster (S r δ : ℝ) (hS : 0 < S) :\n    (S < fxForward S r δ 1 ↔ δ < r) ∧ (fxForward S r δ 1 < S ↔ r < δ) ∧\n    (fxForward S r δ 1 = S ↔ r = δ) ∧ (StrictMono (fxForward S r δ) ↔ δ < r) ∧\n    (StrictAnti (fxForward S r δ) ↔ r < δ) ∧ ((∀ T : ℝ, fxForward S r δ T = S) ↔ r = δ) ∧\n    Tendsto (fun T : ℝ ↦ S - fxForward S r δ T) (𝓝[>] 0) (𝓝 0) ∧\n    S - fxForward S r δ 0 = 0 :=\n  ⟨fxForward_contango_iff S r δ 1 hS one_pos, fxForward_backwardation_iff S r δ 1 hS one_pos,\n   fxForward_eq_spot_iff S r δ 1 hS one_pos, fxForward_strictMono_iff S r δ hS,\n   fxForward_strictAnti_iff S r δ hS, fxForward_const_iff S r δ hS,\n   fxForward_basis_tendsto_zero S r δ, fxForward_basis_zero S r δ⟩\n"
       },
       "metadata": {
-        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (11th ed.), ch. 5 (cost of carry: the convenience yield y on a consumption asset is defined so that F₀ = S₀e^{(c−y)T}) and ch. 3 (basis defined as the spot price minus the futures price); N. Kaldor, Speculation and economic stability, Review of Economic Studies 7 (1939) 1–27; H. Working, The theory of price of storage, American Economic Review 39 (1949) 1254–1262",
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives (11th ed.), ch. 5 (cost of carry: the convenience yield y on a consumption asset is defined so that F₀ = S₀e^{(c−y)T}) and ch. 3 (basis defined as the spot price minus the futures price); ch. 18 (normal and inverted markets); N. Kaldor, Speculation and economic stability, Review of Economic Studies 7 (1939) 1–27; H. Working, The theory of price of storage, American Economic Review 39 (1949) 1254–1262",
         "citations": [
           {
             "key": "Hull",
-            "locator": "ch. 3; ch. 5"
+            "locator": "ch. 3; ch. 5; ch. 18"
           },
           {
             "key": "Kaldor1939"
