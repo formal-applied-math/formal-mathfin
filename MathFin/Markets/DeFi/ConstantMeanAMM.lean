@@ -200,6 +200,33 @@ theorem swap_preserves_constantMean (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
   rw [hL, hR, ← mul_assoc, ← mul_assoc, ← hpair]
   rw [mul_comm ((B j - swapOut B w i j Δ) ^ w j) ((B i + Δ) ^ w i)]
 
+omit [Fintype ι] [DecidableEq ι] in
+/-- **The spot price is the marginal rate.** At zero trade size the out-amount pays
+`(B j / w j) / (B i / w i)` units of token `j` per unit of token `i`: the derivative of the
+out-amount in the input at `Δ = 0` is `spotPrice B w i j`. This derives the reserve-to-weight
+ratio formula from the constant-mean surface; the whitepaper prints the same ratio with in
+and out exchanged. -/
+theorem hasDerivAt_swapOut_zero (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
+    (hBi : 0 < B i) :
+    HasDerivAt (swapOut B w i j) (spotPrice B w i j) 0 := by
+  have hunit : B i / (B i + (0 : ℝ)) = 1 := by
+    rw [add_zero, div_self hBi.ne']
+  have hz : B i + (0 : ℝ) ≠ 0 := by simpa using hBi.ne'
+  have hadd : HasDerivAt (fun t ↦ B i + t) 1 0 := (hasDerivAt_id' (0 : ℝ)).const_add (B i)
+  have hu : HasDerivAt (fun t ↦ B i / (B i + t)) (-(B i) / (B i) ^ 2) 0 := by
+    have h := HasDerivAt.fun_div (hasDerivAt_const (0 : ℝ) (B i)) hadd hz
+    convert h using 1
+    ring
+  have hrpow0 := hu.rpow_const (p := w i / w j) (Or.inl (by rw [hunit]; exact one_ne_zero))
+  rw [hunit, Real.one_rpow, mul_one] at hrpow0
+  have hrpow : HasDerivAt (fun t ↦ (B i / (B i + t)) ^ (w i / w j))
+      (-(B i) / (B i) ^ 2 * (w i / w j)) 0 := hrpow0
+  have hfin := (HasDerivAt.fun_sub (hasDerivAt_const (0 : ℝ) (1 : ℝ)) hrpow).const_mul (B j)
+  unfold spotPrice swapOut
+  convert hfin using 1
+  field_simp
+  ring
+
 end DeFi
 
 end MathFin
