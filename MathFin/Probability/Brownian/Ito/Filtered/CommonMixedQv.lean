@@ -114,7 +114,7 @@ theorem IndependentPair.weighted_crossVariation_L2 (h : IndependentPair ℱ B Z 
   have hiz (n : ℕ) : Integrable (fun ω => eZ n ω ^ 2) μ :=
     ((memLp_weightedSquareSum h.right hw hC hbdd T n).sub hi).integrable_sq
   have hir (n : ℕ) : Integrable (fun ω => eR n ω ^ 2) μ :=
-    ((hR.memLp_weightedSquareSum hw hC hbdd T n).sub hi).integrable_sq
+    ((memLp_weightedSquareSum hR hw hC hbdd T n).sub hi).integrable_sq
   have heq (n : ℕ) (ω : Ω) : weightedCrossSum B Z w T n ω =
       (25/24 : ℝ) * eR n ω - (3/8 : ℝ) * eB n ω - (2/3 : ℝ) * eZ n ω := by
     rw [weightedCrossSum_rotation]
@@ -155,7 +155,7 @@ theorem IndependentPair.memLp_weightedCrossSum (h : IndependentPair ℱ B Z μ)
       (2/3 : ℝ) * weightedSquareSum Z w T n ω :=
     funext (weightedCrossSum_rotation B Z w T n)
   rw [he]
-  exact (((hR.memLp_weightedSquareSum hw hC hbdd T n).const_mul (25/24)).sub
+  exact (((memLp_weightedSquareSum hR hw hC hbdd T n).const_mul (25/24)).sub
     ((memLp_weightedSquareSum h.left hw hC hbdd T n).const_mul (3/8))).sub
     ((memLp_weightedSquareSum h.right hw hC hbdd T n).const_mul (2/3))
 
