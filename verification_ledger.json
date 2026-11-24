@@ -3226,16 +3226,16 @@
     "mf-heston-characteristic-function": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-24",
-      "elapsed_s": 46.4,
-      "input_hash": "3c949f0b5f5f40b6a6d0f0dfbcd8516100e82d07172a6f548fa380e044429505",
-      "verified_at_commit": "336378b"
+      "elapsed_s": 57.8,
+      "input_hash": "0cad8fe89fd12d8048c649d242852bafbf76a54a1cd713ab4ff311148c53758d",
+      "verified_at_commit": "83ec5d15"
     },
     "mf-heston-linear-flow-real-moment": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-24",
-      "elapsed_s": 42.2,
-      "input_hash": "6aec001f799c9e85062ac0a9094cbc66a41baaa5799ada43fd4ccc382ca47777",
-      "verified_at_commit": "336378b"
+      "elapsed_s": 48.6,
+      "input_hash": "542443d07bbf3cef5ef2d27a1dc2ea55f4943ca04939a1834c8f415cdcb9560f",
+      "verified_at_commit": "83ec5d15"
     },
     "mf-heston-small-vol-of-vol-blackscholes-limit": {
       "benchmark_file": "black_scholes.json",
@@ -6229,9 +6229,9 @@
     "sc-ito-two-state-two-drivers": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-24",
-      "elapsed_s": 47.3,
-      "input_hash": "b4b7b40f29fef289f803d2463d3ad7516742707f1490ad6e2334365bb128ee3d",
-      "verified_at_commit": "27f5b0d"
+      "elapsed_s": 57.0,
+      "input_hash": "526cedde464f1c5e6bebc98a2b36a7effbd533b4db4bb77d662c3765a75b37a9",
+      "verified_at_commit": "83ec5d15"
     },
     "sc-levy-bilinear-pairing": {
       "benchmark_file": "stochastic_calculus.json",
@@ -6313,9 +6313,9 @@
     "sc-stochastic-integral-filtration-lift": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-24",
-      "elapsed_s": 46.5,
-      "input_hash": "66fbd767a714a7272c300788621243281cf280478cb2ecec31c39d8320eac6f0",
-      "verified_at_commit": "27f5b0d"
+      "elapsed_s": 55.4,
+      "input_hash": "0d500630bfb2029b866a55e4f263541d955402d2ef4e6a59436878bad0f99513",
+      "verified_at_commit": "83ec5d15"
     },
     "sc-thm-6.1.1": {
       "benchmark_file": "stochastic_calculus.json",
