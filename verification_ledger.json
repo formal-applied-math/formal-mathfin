@@ -3223,6 +3223,20 @@
       "input_hash": "b123369f38ae66cb7717049ac059e2ad41a7db1e4b2098c904dac9197960c7aa",
       "verified_at_commit": "4adf630"
     },
+    "mf-heston-characteristic-function": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-24",
+      "elapsed_s": 46.4,
+      "input_hash": "3c949f0b5f5f40b6a6d0f0dfbcd8516100e82d07172a6f548fa380e044429505",
+      "verified_at_commit": "336378b"
+    },
+    "mf-heston-linear-flow-real-moment": {
+      "benchmark_file": "black_scholes.json",
+      "date": "2026-11-24",
+      "elapsed_s": 42.2,
+      "input_hash": "6aec001f799c9e85062ac0a9094cbc66a41baaa5799ada43fd4ccc382ca47777",
+      "verified_at_commit": "336378b"
+    },
     "mf-heston-small-vol-of-vol-blackscholes-limit": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-20",
@@ -6212,6 +6226,13 @@
       "input_hash": "6cc1463863dba6d5ecaed9c4fcd45e60998ff81752752f7ff3447154b402552d",
       "verified_at_commit": "c047ee3"
     },
+    "sc-ito-two-state-two-drivers": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-11-24",
+      "elapsed_s": 47.3,
+      "input_hash": "b4b7b40f29fef289f803d2463d3ad7516742707f1490ad6e2334365bb128ee3d",
+      "verified_at_commit": "27f5b0d"
+    },
     "sc-levy-bilinear-pairing": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-16",
@@ -6288,6 +6309,13 @@
       "elapsed_s": 2.9,
       "input_hash": "e3d47828fea489e37128b5db65c2eb0833637eabb06bc2576f494c6592e0e100",
       "verified_at_commit": "9a596c5"
+    },
+    "sc-stochastic-integral-filtration-lift": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-11-24",
+      "elapsed_s": 46.5,
+      "input_hash": "66fbd767a714a7272c300788621243281cf280478cb2ecec31c39d8320eac6f0",
+      "verified_at_commit": "27f5b0d"
     },
     "sc-thm-6.1.1": {
       "benchmark_file": "stochastic_calculus.json",
