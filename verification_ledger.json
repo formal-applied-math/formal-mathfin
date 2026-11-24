@@ -3226,9 +3226,9 @@
     "mf-heston-characteristic-function": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-24",
-      "elapsed_s": 57.8,
-      "input_hash": "0cad8fe89fd12d8048c649d242852bafbf76a54a1cd713ab4ff311148c53758d",
-      "verified_at_commit": "83ec5d15"
+      "elapsed_s": 56.5,
+      "input_hash": "08742f5439263ad052c87830b0af259e82ea903290d1c92d4b475e35ceb8d366",
+      "verified_at_commit": "5f240c1d"
     },
     "mf-heston-linear-flow-real-moment": {
       "benchmark_file": "black_scholes.json",
@@ -6229,9 +6229,9 @@
     "sc-ito-two-state-two-drivers": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-11-24",
-      "elapsed_s": 57.0,
-      "input_hash": "526cedde464f1c5e6bebc98a2b36a7effbd533b4db4bb77d662c3765a75b37a9",
-      "verified_at_commit": "83ec5d15"
+      "elapsed_s": 57.3,
+      "input_hash": "aa22965577e62663e344f9d47c1fb3b5bf5ea505fe82bfbc2e22310eccd024f3",
+      "verified_at_commit": "5f240c1d"
     },
     "sc-levy-bilinear-pairing": {
       "benchmark_file": "stochastic_calculus.json",
