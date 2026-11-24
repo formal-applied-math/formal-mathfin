@@ -26,6 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The Ho–Lee bond price (2026-11-24)
+
+One `full` entry in `benchmarks/interest_rates.json`. Corpus 906 → 907 on the merged tree
+(866 full before, 867 after; 884 → 885 delivery-ready).
+
+- **`mf-holee-bond-price`** (MathFin/Models/Rates/HoLeeBondPrice.lean): the zero-coupon bond price
+  `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` of the Ho–Lee short rate `dr = θ(t) dt + σ dB` (continuous `θ`,
+  no mean reversion, the `κ = 0` case that `HullWhiteCalibration` excludes), equal to
+  `A(T)·exp(−T·r₀)` with the linear loading `B(T) = T` and
+  `A(T) = exp(−∫₀ᵀ θ(s)(T−s) ds + σ²T³/6)` (`bondPrice_affine`). It is the instance
+  `m = M(T)`, `c = σ`, `f = (T−u)` of `integral_exp_neg_add_mul_wienerIntegralLp`
+  (`bondPrice_eq`), with the kernel variance `∫₀ᵀ (T−u)² du = T³/3`
+  (`integral_integratedKernel_sq`) and the mean identity `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds =
+  r₀T + ∫₀ᵀ θ(s)(T−s) ds` by integration by parts (`integratedMean_eq`). Cited: Ho & Lee (1986),
+  Brigo & Mercurio 2nd ed. §3.3.1. Disclosed out of scope: the integrated short rate is carried
+  in its Wiener representation, as in the Vasicek and Hull–White files, so the Ho–Lee SDE and
+  the swap of time integrals behind that representation are cited, not proved; the bond price at
+  `t > 0`, calibration of `θ` to an initial curve and a change of measure are not treated.
+  Axioms-clean, `full`.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

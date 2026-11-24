@@ -17,8 +17,8 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 906 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 866 are proved in
+The [corpus](docs/glossary.md#corpus) records 907 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 867 are proved in
 full, 18 restate a lemma from Mathlib or BrownianMotion, and 22 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
@@ -304,6 +304,7 @@ Raphael Coelho maintains the library, with contributions from:
 - [Aleksey Salkutsan](https://github.com/kernelpanic888): forward rate agreements and downside
   performance metrics.
 - [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
+- [WorldianAI](https://github.com/WorldianAI): the Ho–Lee bond price.
 - [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
   calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
   normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
