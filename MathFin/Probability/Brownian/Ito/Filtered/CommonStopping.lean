@@ -151,26 +151,26 @@ lemma abs_stopFactor_le (τ : Ω → ℝ≥0) (p : ℝ≥0 × Ω) : |stopFactor 
 /-- The kernel truncated at `τ`: `(s, ω) ↦ 𝟙_{s ≤ τ ω} φ(s, ω)`, as a contraction of
 `L²(trim_T)`. -/
 noncomputable def stopKernel (T : ℝ≥0) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
-  mulBddCLM (trimMeasure_T (μ := μ) T ℱ) (measurable_stopFactor hτ) (abs_stopFactor_le τ)
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
+  mulBddCLM (trimMeasureT (μ := μ) T ℱ) (measurable_stopFactor hτ) (abs_stopFactor_le τ)
 
 omit [IsProbabilityMeasure μ] in
 lemma coeFn_stopKernel (T : ℝ≥0) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(stopKernel T hτ φ) =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ stopFactor τ p * φ p :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(stopKernel T hτ φ) =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ stopFactor τ p * φ p :=
   coeFn_mulBddCLM _ _ _ φ
 
 /-! ### Bands `𝟙_{(a,b]}·φ` and their integrals -/
 
 /-- Restriction of a kernel to the time band `(a, b]`. -/
 noncomputable def band (T a b : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   restrictAfterCLM T a hBmeas φ - restrictAfterCLM T b hBmeas φ
 
 omit [IsProbabilityMeasure μ] in
 lemma coeFn_band (T a b : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(band T a b hBmeas φ) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(band T a b hBmeas φ) =ᵐ[trimMeasureT (μ := μ) T ℱ]
       fun p ↦ (if a < p.1 then φ p else 0) - (if b < p.1 then φ p else 0) := by
   filter_upwards [Lp.coeFn_sub (restrictAfterCLM T a hBmeas φ) (restrictAfterCLM T b hBmeas φ),
     coeFn_restrictAfterCLM T a hBmeas φ, coeFn_restrictAfterCLM T b hBmeas φ] with p h1 h2 h3
@@ -179,8 +179,8 @@ lemma coeFn_band (T a b : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
 
 omit [IsProbabilityMeasure μ] in
 lemma band_vanishes (T a b c : ℝ≥0) (hca : c ≤ a) (hab : a ≤ b)
-    (hBmeas : ∀ u, Measurable (B u)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), p.1 ≤ c → band T a b hBmeas φ p = 0 := by
+    (hBmeas : ∀ u, Measurable (B u)) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), p.1 ≤ c → band T a b hBmeas φ p = 0 := by
   filter_upwards [coeFn_band T a b hBmeas φ] with p hp hpc
   rw [hp, ite_eq_right (not_lt.mpr (hpc.trans hca)), ite_eq_right (not_lt.mpr ((hpc.trans
         hca).trans hab)),
@@ -188,7 +188,7 @@ lemma band_vanishes (T a b c : ℝ≥0) (hca : c ≤ a) (hab : a ≤ b)
 
 omit [IsProbabilityMeasure μ] in
 lemma restrictAfter_band (T a b t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     restrictAfterCLM T t hBmeas (band T a b hBmeas φ) = band T (max a t) (max b t) hBmeas φ := by
   refine Lp.ext ?_
   filter_upwards [coeFn_restrictAfterCLM T t hBmeas (band T a b hBmeas φ),
@@ -203,7 +203,7 @@ lemma restrictAfter_band (T a b t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
 omit [IsProbabilityMeasure μ] in
 lemma restrictAfter_smulAdapted (T a t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (Z : Ω → ℝ) (hZm : Measurable[ℱ a] Z) (C : ℝ) (hZb : ∀ ω, |Z ω| ≤ C)
-    (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     restrictAfterCLM T t hBmeas (smulAdapted T a hBmeas Z hZm C hZb ψ)
       = smulAdapted T a hBmeas Z hZm C hZb (restrictAfterCLM T t hBmeas ψ) := by
   refine Lp.ext ?_
@@ -228,15 +228,15 @@ include hB
 
 /-- `(φ●B)_t = ∫₀ᵀ φ dB − ∫₀ᵀ 𝟙_{(t,T]} φ dB`. -/
 lemma itoProcessCLM_eq_sub_restrictAfter (T t : ℝ≥0) (htT : t ≤ T)
-    (hBmeas : ∀ u, Measurable (B u)) (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (hBmeas : ∀ u, Measurable (B u)) (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     itoProcessCLM hB T t hBmeas ψ
-      = itoIntegralCLM_T hB T ψ - itoIntegralCLM_T hB T (restrictAfterCLM T t hBmeas ψ) := by
+      = itoIntegralCLMT hB T ψ - itoIntegralCLMT hB T (restrictAfterCLM T t hBmeas ψ) := by
   rw [itoIntegralCLM_T_restrictAfterCLM hB T t htT hBmeas ψ, sub_sub_cancel]
 
 /-- `∫₀ᵀ 𝟙_{(a,b]} φ dB = (φ●B)_b − (φ●B)_a`. -/
 lemma itoIntegralCLM_T_band (T a b : ℝ≥0) (haT : a ≤ T) (hbT : b ≤ T)
-    (hBmeas : ∀ u, Measurable (B u)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    itoIntegralCLM_T hB T (band T a b hBmeas φ)
+    (hBmeas : ∀ u, Measurable (B u)) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    itoIntegralCLMT hB T (band T a b hBmeas φ)
       = itoProcessCLM hB T b hBmeas φ - itoProcessCLM hB T a hBmeas φ := by
   rw [band, map_sub, itoIntegralCLM_T_restrictAfterCLM hB T a haT hBmeas φ,
     itoIntegralCLM_T_restrictAfterCLM hB T b hbT hBmeas φ]
@@ -248,7 +248,7 @@ lemma itoIntegralCLM_T_band (T a b : ℝ≥0) (haT : a ≤ T) (hbT : b ≤ T)
 theorem itoProcessCLM_smulAdapted_band (T a b t : ℝ≥0) (hab : a ≤ b) (hbT : b ≤ T)
     (htT : t ≤ T) (hBmeas : ∀ u, Measurable (B u))
     (Z : Ω → ℝ) (hZm : Measurable[ℱ a] Z) (C : ℝ) (hZb : ∀ ω, |Z ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (itoProcessCLM hB T t hBmeas (smulAdapted T a hBmeas Z hZm C hZb (band T a b hBmeas φ))
         : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ Z ω * (itoProcessCLM hB T (min b t) hBmeas φ ω
@@ -277,15 +277,15 @@ theorem itoProcessCLM_smulAdapted_band (T a b t : ℝ≥0) (hab : a ≤ b) (hbT 
   rw [itoProcessCLM_eq_sub_restrictAfter hB T t htT hBmeas, restrictAfter_smulAdapted,
     restrictAfter_band]
   filter_upwards [Lp.coeFn_sub
-      (itoIntegralCLM_T hB T (smulAdapted T a hBmeas Z hZm C hZb (band T a b hBmeas φ)))
-      (itoIntegralCLM_T hB T
+      (itoIntegralCLMT hB T (smulAdapted T a hBmeas Z hZm C hZb (band T a b hBmeas φ)))
+      (itoIntegralCLMT hB T
         (smulAdapted T a hBmeas Z hZm C hZb (band T (max a t) (max b t) hBmeas φ))),
     e1, e2, ae_sub_eq_sub key] with ω h0 h1 h2 h3
   rw [h0, Pi.sub_apply, h1, h2, ← mul_sub, h3]
 
 /-- `(ψ●B)_0 = 0`. -/
 lemma itoProcessCLM_zero_time (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) : itoProcessCLM hB T 0 hBmeas ψ = 0 :=
+    (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) : itoProcessCLM hB T 0 hBmeas ψ = 0 :=
   itoProcessCLM_eq_zero_of_vanishes_before hB T 0 zero_le hBmeas ψ (by
     filter_upwards [ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T ℱ] with p hp h0
     exact absurd (lt_of_lt_of_le hp.1 h0) (lt_irrefl _))
@@ -412,8 +412,8 @@ lemma abs_gridFactor_le (T : ℝ≥0) (N k : ℕ) (τ : Ω → ℝ≥0) (ω : Ω
 
 /-- The step kernel `∑ₖ 𝟙_{aₖ < τ}·𝟙_{(aₖ, aₖ₊₁]}·φ`. -/
 noncomputable def stepKernel (T : ℝ≥0) (N : ℕ) (hBmeas : ∀ u, Measurable (B u))
-    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   ∑ k ∈ Finset.range N, smulAdapted T (gridPt T N k) hBmeas (gridFactor T N k τ)
     (measurable_gridFactor hτ T N k) 1 (abs_gridFactor_le T N k τ)
     (band T (gridPt T N k) (gridPt T N (k + 1)) hBmeas φ)
@@ -428,14 +428,14 @@ def stepFactor (T : ℝ≥0) (N : ℕ) (τ : Ω → ℝ≥0) (p : ℝ≥0 × Ω)
 
 omit [IsProbabilityMeasure μ] in
 lemma coeFn_stepKernel (T : ℝ≥0) (N : ℕ) (hBmeas : ∀ u, Measurable (B u))
-    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(stepKernel T N hBmeas hτ φ) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(stepKernel T N hBmeas hτ φ) =ᵐ[trimMeasureT (μ := μ) T ℱ]
       fun p ↦ stepFactor T N τ p * φ p := by
   have hterm : ∀ k ∈ Finset.range N,
       ⇑(smulAdapted T (gridPt T N k) hBmeas (gridFactor T N k τ)
         (measurable_gridFactor hτ T N k) 1 (abs_gridFactor_le T N k τ)
         (band T (gridPt T N k) (gridPt T N (k + 1)) hBmeas φ))
-      =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ (if gridPt T N k < τ p.2 then (1 : ℝ) else 0)
+      =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ (if gridPt T N k < τ p.2 then (1 : ℝ) else 0)
         * bandInd (gridPt T N k) (gridPt T N (k + 1)) p.1 * φ p := by
     intro k _
     have hmono := gridPt_mono T N (Nat.le_succ k)
@@ -535,12 +535,12 @@ lemma stopFactor_eq_zero {τ : Ω → ℝ≥0} {p : ℝ≥0 × Ω} (h : τ p.2 <
 
 /-- **Kernel convergence.** The step kernels converge to the stopped kernel in `L²(trim_T)`. -/
 theorem tendsto_stepKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Tendsto (fun n : ℕ ↦ stepKernel T (n + 1) hBmeas hτ φ) atTop (𝓝 (stopKernel T hτ φ)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
   set F : ℕ → ℝ≥0 × Ω → ℝ := fun n p ↦
     ((stepKernel T (n + 1) hBmeas hτ φ - stopKernel T hτ φ : Lp ℝ 2 _) p) ^ 2 with hF
-  have hcoe : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), ∀ n : ℕ,
+  have hcoe : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), ∀ n : ℕ,
       F n p = ((stepFactor T (n + 1) τ p - stopFactor τ p) * φ p) ^ 2 := by
     rw [ae_all_iff]
     intro n
@@ -549,8 +549,8 @@ theorem tendsto_stepKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     simp only [hF]
     rw [h1, Pi.sub_apply, h2, h3]
     ring
-  have hint : Tendsto (fun n ↦ ∫ p, F n p ∂(trimMeasure_T (μ := μ) T ℱ)) atTop (𝓝 0) := by
-    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasure_T (μ := μ) T ℱ)
+  have hint : Tendsto (fun n ↦ ∫ p, F n p ∂(trimMeasureT (μ := μ) T ℱ)) atTop (𝓝 0) := by
+    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasureT (μ := μ) T ℱ)
       (F := F) (f := fun _ => (0 : ℝ)) (fun p ↦ 4 * (φ p) ^ 2)
       (fun n => (Lp.aestronglyMeasurable _).pow 2)
       ((Lp.memLp φ).integrable_sq.const_mul 4)
@@ -583,7 +583,7 @@ theorem tendsto_stepKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
         exact tendsto_const_nhds.congr' (this.mono fun n hn => hn.symm))
     simpa using key
   have hsq : ∀ n : ℕ, ‖stepKernel T (n + 1) hBmeas hτ φ - stopKernel T hτ φ‖ ^ 2
-      = ∫ p, F n p ∂(trimMeasure_T (μ := μ) T ℱ) := fun n => MathFin.lp_two_norm_sq _
+      = ∫ p, F n p ∂(trimMeasureT (μ := μ) T ℱ) := fun n => MathFin.lp_two_norm_sq _
   have h2 : Tendsto (fun n : ℕ ↦ ‖stepKernel T (n + 1) hBmeas hτ φ - stopKernel T hτ φ‖ ^ 2)
       atTop (𝓝 0) := by
     simp_rw [hsq]; exact hint
@@ -596,7 +596,7 @@ include hB
 /-- The integral of a step kernel, as a finite sum of band increments. -/
 theorem itoProcessCLM_stepKernel (T t : ℝ≥0) (htT : t ≤ T) {N : ℕ} (hN : 0 < N)
     (hBmeas : ∀ u, Measurable (B u)) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (itoProcessCLM hB T t hBmeas (stepKernel T N hBmeas hτ φ) : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ ∑ k ∈ Finset.range N, gridFactor T N k τ ω *
         (itoProcessCLM hB T (min (gridPt T N (k + 1)) t) hBmeas φ ω
@@ -623,7 +623,7 @@ theorem itoProcessCLM_stepKernel (T t : ℝ≥0) (htT : t ≤ T) {N : ℕ} (hN :
 step kernel is the continuous integral at `σ_N ∧ t`. -/
 theorem stepKernel_integral_eq (T t : ℝ≥0) (htT : t ≤ T) (hT : 0 < T) {N : ℕ} (hN : 0 < N)
     (hBmeas : ∀ u, Measurable (B u)) (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω)
-    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (itoProcessCLM hB T t hBmeas (stepKernel T N hBmeas hτ φ) : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ itoContinuousMod T hBmeas φ (min (gridStop T N τ ω) t) ω := by
   have hmod : ∀ k ∈ Finset.range (N + 1),
@@ -661,7 +661,7 @@ theorem stepKernel_integral_eq (T t : ℝ≥0) (htT : t ≤ T) (hT : 0 < T) {N :
 continuous version of the integral evaluated at the random time `t ∧ τ`. -/
 theorem itoProcessCLM_stopKernel (T t : ℝ≥0) (htT : t ≤ T) (hBmeas : ∀ u, Measurable (B u))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (itoProcessCLM hB T t hBmeas (stopKernel T hτ φ) : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ itoContinuousMod T hBmeas φ (min t (τ ω)) ω := by
   rcases eq_or_lt_of_le (zero_le : (0 : ℝ≥0) ≤ t) with ht0 | ht0
@@ -725,7 +725,7 @@ the continuous integral of the truncated kernel equals the continuous integral s
 `τ`: `(𝟙_{[[0,τ]]}φ ● B)_t = (φ●B)_{t ∧ τ}`. -/
 theorem itoContinuousMod_stopKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hBmeas (stopKernel T hτ φ) t ω
       = itoContinuousMod T hBmeas φ (min t (τ ω)) ω := by
   refine ae_forall_eq_of_continuousOn'
@@ -744,8 +744,8 @@ theorem itoContinuousMod_stopKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B
 /-- Terminal form: `∫₀ᵀ 𝟙_{s ≤ τ} φ dB = (φ●B)_{T ∧ τ}` almost surely. -/
 theorem itoIntegralCLM_T_stopKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    (itoIntegralCLM_T hB T (stopKernel T hτ φ) : Ω → ℝ)
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    (itoIntegralCLMT hB T (stopKernel T hτ φ) : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ itoContinuousMod T hBmeas φ (min T (τ ω)) ω := by
   rw [← itoProcessCLM_terminal_eq hB T hBmeas]
   exact itoProcessCLM_stopKernel hB T T le_rfl hBmeas hBcont hτ φ

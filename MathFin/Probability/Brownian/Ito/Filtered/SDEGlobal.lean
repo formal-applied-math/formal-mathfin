@@ -96,10 +96,12 @@ theorem integrable_sq_of_Lp {α : Type*} {m : MeasurableSpace α} {ν : Measure 
     (Z : Lp ℝ 2 ν) : Integrable (fun z => (Z z) ^ 2) ν :=
   (Lp.memLp Z).integrable_sq
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_nonneg (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     0 ≤ bandEnergy T hBmeas Z t :=
   setIntegral_nonneg (measurableSet_band_pred hBmeas t) (fun _ _ => sq_nonneg _)
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_mono (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {t t' : ℝ≥0}
     (h : t ≤ t') : bandEnergy T hBmeas Z t ≤ bandEnergy T hBmeas Z t' :=
   setIntegral_mono_set (integrable_sq_of_Lp Z).integrableOn
@@ -110,6 +112,7 @@ theorem monotone_bandEnergy (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Monotone (bandEnergy T hBmeas Z) :=
   fun _ _ h => bandEnergy_mono T hBmeas Z h
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_le_norm_sq (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     bandEnergy T hBmeas Z t ≤ ‖Z‖ ^ 2 := by
   rw [MathFin.lp_two_norm_sq]
@@ -122,6 +125,7 @@ theorem bandEnergy_self (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
   filter_upwards [ae_fst_mem_Ioc_trimMeasure (μ := μ) T hBmeas] with z hz hzn
   exact absurd (Set.mk_mem_prod hz (Set.mem_univ z.2)) hzn
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_add_le (X Y : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     bandEnergy T hBmeas (X + Y) t
       ≤ 2 * bandEnergy T hBmeas X t + 2 * bandEnergy T hBmeas Y t := by
@@ -168,6 +172,7 @@ theorem timeMeasure_T_restrict_Ioc {t : ℝ≥0} (htT : t ≤ T) :
   rw [timeMeasureHorizon, Measure.restrict_restrict measurableSet_Ioc,
     Set.inter_eq_left.mpr (Set.Ioc_subset_Ioc_right htT)]
 
+omit [IsProbabilityMeasure μ] in
 /-- A predictable function square-integrable for `trimMeasure` is square-integrable for the
 underlying product measure. -/
 theorem memLp_prod_of_trim {f : ℝ≥0 × Ω → ℝ}

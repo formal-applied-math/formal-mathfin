@@ -42,12 +42,15 @@ namespace MathFin.Heston
 open MeasureTheory Set
 open scoped Topology
 
+/-- Net log-spot carry weighted by the complex exponent. -/
 def laplaceCarry (p : Parameters) (u : Complex) : Complex :=
   ((p.r : Complex) - (p.q : Complex)) * u
 
+/-- Integrated constant coefficient of the complex affine transform. -/
 def globalLaplaceC (p : Parameters) (u w : Complex) (t : Real) : Complex :=
   laplaceCarry p u * (t : Complex) + modelA p * ∫ s in (0 : Real)..t, globalLaplaceD p u w s
 
+/-- Exponential-affine transform at log-spot x, variance v and maturity t. -/
 def globalAffineTransform (p : Parameters) (u w : Complex) (x v t : Real) : Complex :=
   Complex.exp (globalLaplaceC p u w t + u * (x : Complex) +
     globalLaplaceD p u w t * (v : Complex))

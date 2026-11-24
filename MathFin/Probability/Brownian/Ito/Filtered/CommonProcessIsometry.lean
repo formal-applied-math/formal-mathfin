@@ -106,8 +106,8 @@ omit hB in
 
 private lemma trimMeasure_T_restrict_band {t T : ℝ≥0} (htT : t ≤ T)
     (_hBmeas : ∀ u, Measurable (B u)) :
-    (trimMeasure_T (μ := μ) T ℱ).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω))
-      = trimMeasure_T (μ := μ) t ℱ := by
+    (trimMeasureT (μ := μ) T ℱ).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω))
+      = trimMeasureT (μ := μ) t ℱ := by
   rw [trimMeasure_T_eq_restrict T ℱ,
       Measure.restrict_restrict_of_subset
         (Set.prod_mono (Set.Ioc_subset_Ioc le_rfl htT) subset_rfl),
@@ -118,21 +118,21 @@ omit hB in
 private lemma integral_trimMeasure_T {t : ℝ≥0} (_hBmeas : ∀ u, Measurable (B u))
     {f : ℝ≥0 × Ω → ℝ}
     (hf : StronglyMeasurable[ℱ.predictable] f) :
-    ∫ z, f z ∂(trimMeasure_T (μ := μ) t ℱ)
+    ∫ z, f z ∂(trimMeasureT (μ := μ) t ℱ)
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), f z ∂(timeMeasure.prod μ) := by
-  rw [show trimMeasure_T (μ := μ) t ℱ
-        = ((timeMeasure_T t).prod μ).trim ℱ.predictable_le_prod from rfl,
+  rw [show trimMeasureT (μ := μ) t ℱ
+        = ((timeMeasureT t).prod μ).trim ℱ.predictable_le_prod from rfl,
       integral_trim ℱ.predictable_le_prod hf,
-      show ((timeMeasure_T t).prod μ : Measure (ℝ≥0 × Ω))
+      show ((timeMeasureT t).prod μ : Measure (ℝ≥0 × Ω))
           = (timeMeasure.prod μ).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)) from by
-        rw [timeMeasure_T, Measure.restrict_prod_eq_prod_univ]; rfl]
+        rw [timeMeasureT, Measure.restrict_prod_eq_prod_univ]; rfl]
 
 omit [IsProbabilityMeasure μ] in
 
 private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ ℱ) :
     ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)),
-        (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure_T (μ := μ) T ℱ)
+        (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasureT (μ := μ) T ℱ)
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - max (p.1 : ℝ) q.1) := by
@@ -167,7 +167,7 @@ private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ ℱ) :
     ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)),
-          (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure_T (μ := μ) T ℱ) := by
+          (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasureT (μ := μ) T ℱ) := by
   rw [band_integral_uncurry_sq hB htT hBmeas V]
   have hLHS : ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
       = ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ := by
@@ -191,8 +191,8 @@ private lemma measurableSet_band (t : ℝ≥0) (_hBmeas : ∀ u, Measurable (B u
 omit hB in
 
 private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) →L[ℝ]
-      Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) →L[ℝ]
+      Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   LinearMap.mkContinuous
     { toFun := fun φ ↦ ((Lp.memLp φ).indicator (measurableSet_band t hBmeas).nullMeasurableSet).toLp
         ((Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ))
@@ -229,10 +229,10 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
 omit [IsProbabilityMeasure μ] hB in
 
 private lemma truncCLM_norm_sq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ‖truncCLM (μ := μ) T t hBmeas φ‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T ℱ) := by
+          ∂(trimMeasureT (μ := μ) T ℱ) := by
   rw [MathFin.lp_two_norm_sq, ← integral_indicator (measurableSet_band t hBmeas)]
   refine integral_congr_ae ?_
   filter_upwards [((Lp.memLp φ).indicator (measurableSet_band t
@@ -244,10 +244,10 @@ private lemma truncCLM_norm_sq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
   · rw [Set.indicator_of_notMem hzm, Set.indicator_of_notMem hzm]; norm_num
 
 theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
-          ∂(trimMeasure_T (μ := μ) T ℱ) := by
+          ∂(trimMeasureT (μ := μ) T ℱ) := by
   rw [← truncCLM_norm_sq T t hBmeas φ]
   refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T ℱ)
     ((continuous_pow 2).comp (itoProcessCLM hB T t hBmeas).continuous.norm)
@@ -258,7 +258,7 @@ theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, M
       itoSimpleProcessLp_band_isometry hB htT hBmeas V.val]
   refine integral_congr_ae ?_
   filter_upwards [ae_restrict_of_ae (memLp_uncurry_trim_T T ℱ V.val).coeFn_toLp] with z hz
-  rw [show (simpleAssembly_T (μ := μ) T ℱ V : ℝ≥0 × Ω → ℝ) z
+  rw [show (simpleAssemblyT (μ := μ) T ℱ V : ℝ≥0 × Ω → ℝ) z
         = Function.uncurry ⇑V.val z from hz]
 
 end CommonProcessGeneral

@@ -76,13 +76,13 @@ structure GoodProcess (ℱ : Filtration ℝ≥0 mΩ) (μ : Measure Ω) (T : ℝ�
 holds `trim_T`-almost everywhere (for predictable properties). -/
 lemma ae_trim_of_ae_ae {T : ℝ≥0} {P : ℝ≥0 × Ω → Prop}
     (hP : MeasurableSet[ℱ.predictable] {p | P p})
-    (h : ∀ᵐ s ∂(timeMeasure_T T), ∀ᵐ ω ∂μ, P (s, ω)) :
-    ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), P p := by
-  have hprod : ∀ᵐ p ∂((timeMeasure_T T).prod μ), P p := by
+    (h : ∀ᵐ s ∂(timeMeasureT T), ∀ᵐ ω ∂μ, P (s, ω)) :
+    ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), P p := by
+  have hprod : ∀ᵐ p ∂((timeMeasureT T).prod μ), P p := by
     rw [Measure.ae_prod_iff_ae_ae (ℱ.predictable_le_prod _ hP)]
     exact h
   rw [ae_iff] at hprod ⊢
-  rw [trimMeasure_T, trim_measurableSet_eq _
+  rw [trimMeasureT, trim_measurableSet_eq _
     (show MeasurableSet[ℱ.predictable] {a | ¬ P a} from hP.compl)]
   exact hprod
 
@@ -99,11 +99,11 @@ lemma bandInd_sq {a b : ℝ≥0} (hab : a ≤ b) (s : ℝ≥0) : bandInd a b s ^
 /-! ### The constant kernel and the Brownian increments -/
 
 /-- The constant kernel `1`. -/
-noncomputable def oneKernel (T : ℝ≥0) : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+noncomputable def oneKernel (T : ℝ≥0) : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   (memLp_const (1 : ℝ)).toLp (fun _ ↦ (1 : ℝ))
 
 lemma coeFn_oneKernel (T : ℝ≥0) :
-    ⇑(oneKernel (μ := μ) (ℱ := ℱ) T) =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun _ ↦ (1 : ℝ) :=
+    ⇑(oneKernel (μ := μ) (ℱ := ℱ) T) =ᵐ[trimMeasureT (μ := μ) T ℱ] fun _ ↦ (1 : ℝ) :=
   (memLp_const (1 : ℝ)).coeFn_toLp
 
 omit [IsProbabilityMeasure μ] in
@@ -122,7 +122,7 @@ lemma coe_stepSP' {T : ℝ≥0} (hWmeas : ∀ t, Measurable (W t)) {a b : ℝ≥
   rw [Finsupp.sum_single_index (by simp)]
 
 lemma oneKernel_eq (hWmeas : ∀ t, Measurable (W t)) (T : ℝ≥0) :
-    oneKernel (μ := μ) (ℱ := ℱ) T = simpleAssembly_T (μ := μ) T ℱ
+    oneKernel (μ := μ) (ℱ := ℱ) T = simpleAssemblyT (μ := μ) T ℱ
       (stepSP hWmeas (zero_le : (0 : ℝ≥0) ≤ T) le_rfl (φ := fun _ ↦ (1 : ℝ))
         measurable_const (M := 1) (fun _ ↦ by simp)) := by
   refine Lp.ext ?_
@@ -158,15 +158,15 @@ theorem itoProcessCLM_oneKernel (hW : BrownianOn ℱ W μ) (T t : ℝ≥0) (htT 
 /-- The freezing defect kernel `𝟙_{(tⱼ,tⱼ₊₁]}·(φ − h(tⱼ))`. -/
 noncomputable def defectKernel (T : ℝ≥0) (n j : ℕ) (hWmeas : ∀ u, Measurable (W u))
     (h : ℝ≥0 → Ω → ℝ) (hha : ∀ t, Measurable[ℱ t] (h t)) (C : ℝ) (hhb : ∀ t ω, |h t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   band T (unifPart T n j) (unifPart T n (j + 1)) hWmeas φ
     - smulAdapted T (unifPart T n j) hWmeas (h (unifPart T n j)) (hha _) C (fun ω ↦ hhb _ ω)
       (band T (unifPart T n j) (unifPart T n (j + 1)) hWmeas (oneKernel (μ := μ) (ℱ := ℱ) T))
 
 lemma coeFn_defectKernel (T : ℝ≥0) (n j : ℕ) (hWmeas : ∀ u, Measurable (W u))
     (h : ℝ≥0 → Ω → ℝ) (hha : ∀ t, Measurable[ℱ t] (h t)) (C : ℝ) (hhb : ∀ t ω, |h t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(defectKernel T n j hWmeas h hha C hhb φ) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(defectKernel T n j hWmeas h hha C hhb φ) =ᵐ[trimMeasureT (μ := μ) T ℱ]
       fun p ↦ bandInd (gridPt T n j) (gridPt T n (j + 1)) p.1 * (φ p - h (unifPart T n j) p.2) := by
   have hmono := upart_mono T n (Nat.le_succ j)
   have e1 := Lp.coeFn_sub (band T (unifPart T n j) (unifPart T n (j + 1)) hWmeas φ)
@@ -196,8 +196,8 @@ lemma coeFn_defectKernel (T : ℝ≥0) (n j : ℕ) (hWmeas : ∀ u, Measurable (
 theorem itoIntegralCLM_T_defectKernel (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0) {n j : ℕ} (hj : j < n)
     (h : ℝ≥0 → Ω → ℝ) (hha : ∀ t, Measurable[ℱ t] (h t)) (C : ℝ) (hhb : ∀ t ω, |h t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    (itoIntegralCLM_T hW T (defectKernel T n j hW.measurable h hha C hhb φ) : Ω → ℝ)
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    (itoIntegralCLMT hW T (defectKernel T n j hW.measurable h hha C hhb φ) : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ (itoContinuousMod T hW.measurable φ (unifPart T n (j + 1)) ω
           - itoContinuousMod T hW.measurable φ (unifPart T n j) ω)
         - h (unifPart T n j) ω * (W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω) := by
@@ -208,9 +208,9 @@ theorem itoIntegralCLM_T_defectKernel (hW : BrownianOn ℱ W μ)
   have hsm := itoProcessCLM_smulAdapted_band hW T _ _ T hab hbT le_rfl hW.measurable
     (h (unifPart T n j)) (hha _) C (fun ω ↦ hhb _ ω) (oneKernel (μ := μ) (ℱ := ℱ) T)
   rw [min_eq_left hbT, min_eq_left haT, itoProcessCLM_terminal_eq] at hsm
-  filter_upwards [Lp.coeFn_sub (itoIntegralCLM_T hW T
+  filter_upwards [Lp.coeFn_sub (itoIntegralCLMT hW T
       (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable φ))
-      (itoIntegralCLM_T hW T (smulAdapted T (unifPart T n j) hW.measurable (h (unifPart T n j))
+      (itoIntegralCLMT hW T (smulAdapted T (unifPart T n j) hW.measurable (h (unifPart T n j))
         (hha _) C (fun ω ↦ hhb _ ω)
         (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable (oneKernel (μ := μ) (ℱ :=
               ℱ) T)))),
@@ -226,11 +226,11 @@ theorem itoIntegralCLM_T_defectKernel (hW : BrownianOn ℱ W μ)
 /-- `‖𝟙_{(tⱼ,tⱼ₊₁]}(φ − h(tⱼ))‖² = ∫ 𝟙_{(tⱼ,tⱼ₊₁]}(h − h(tⱼ))²`. -/
 lemma norm_defectKernel_sq (T : ℝ≥0) (n j : ℕ) (hWmeas : ∀ u, Measurable (W u))
     {h : ℝ≥0 → Ω → ℝ} (hha : ∀ t, Measurable[ℱ t] (h t)) {C : ℝ} (hhb : ∀ t ω, |h t ω| ≤ C)
-    {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ : ⇑φ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
+    {φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ : ⇑φ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
     ‖defectKernel T n j hWmeas h hha C hhb φ‖ ^ 2
       = ∫ p, bandInd (gridPt T n j) (gridPt T n (j + 1)) p.1
-          * (h p.1 p.2 - h (unifPart T n j) p.2) ^ 2 ∂(trimMeasure_T (μ := μ) T ℱ) := by
+          * (h p.1 p.2 - h (unifPart T n j) p.2) ^ 2 ∂(trimMeasureT (μ := μ) T ℱ) := by
   rw [MathFin.lp_two_norm_sq]
   refine integral_congr_ae ?_
   filter_upwards [coeFn_defectKernel T n j hWmeas h hha C hhb φ, hφ] with p h1 h2
@@ -239,24 +239,24 @@ lemma norm_defectKernel_sq (T : ℝ≥0) (n j : ℕ) (hWmeas : ∀ u, Measurable
 /-- **The freezing defects vanish in mean square:** `∑ⱼ ‖𝟙_{(tⱼ,tⱼ₊₁]}(φ − h(tⱼ))‖² → 0`. -/
 theorem tendsto_sum_norm_defectKernel_sq (T : ℝ≥0) (hWmeas : ∀ u, Measurable (W u))
     {h : ℝ≥0 → Ω → ℝ} {C : ℝ} (hh : GoodProcess ℱ μ T h C)
-    {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ : ⇑φ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
+    {φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ : ⇑φ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∑ j ∈ Finset.range n,
       ‖defectKernel T n j hWmeas h hh.adapted C hh.bdd φ‖ ^ 2) atTop (𝓝 0) := by
   set F : ℕ → ℝ≥0 × Ω → ℝ := fun n p ↦ ∑ j ∈ Finset.range n,
     (defectKernel T n j hWmeas h hh.adapted C hh.bdd φ p) ^ 2 with hF
   have hsum : ∀ n, ∑ j ∈ Finset.range n, ‖defectKernel T n j hWmeas h hh.adapted C hh.bdd φ‖ ^ 2
-      = ∫ p, F n p ∂(trimMeasure_T (μ := μ) T ℱ) := by
+      = ∫ p, F n p ∂(trimMeasureT (μ := μ) T ℱ) := by
     intro n
     simp only [hF]
     rw [integral_finsetSum _ fun j _ => (Lp.memLp _).integrable_sq]
     exact Finset.sum_congr rfl fun j _ => MathFin.lp_two_norm_sq _
-  have hcoe : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), ∀ n : ℕ,
+  have hcoe : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), ∀ n : ℕ,
       F n p = ∑ j ∈ Finset.range n, bandInd (gridPt T n j) (gridPt T n (j + 1)) p.1
         * (h p.1 p.2 - h (unifPart T n j) p.2) ^ 2 := by
     rw [ae_all_iff]
     intro n
-    have hall : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), ∀ j ∈ Finset.range n,
+    have hall : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), ∀ j ∈ Finset.range n,
         defectKernel T n j hWmeas h hh.adapted C hh.bdd φ p
           = bandInd (gridPt T n j) (gridPt T n (j + 1)) p.1 * (φ p - h (unifPart T n j) p.2) :=
       (Filter.eventually_all_finset _).mpr fun j _ => coeFn_defectKernel T n j hWmeas h _ C _ φ
@@ -264,8 +264,8 @@ theorem tendsto_sum_norm_defectKernel_sq (T : ℝ≥0) (hWmeas : ∀ u, Measurab
     simp only [hF]
     refine Finset.sum_congr rfl fun j hj => ?_
     rw [h1 j hj, h2, mul_pow, bandInd_sq (gridPt_mono T n (Nat.le_succ j))]
-  have hint : Tendsto (fun n ↦ ∫ p, F n p ∂(trimMeasure_T (μ := μ) T ℱ)) atTop (𝓝 0) := by
-    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasure_T (μ := μ) T ℱ)
+  have hint : Tendsto (fun n ↦ ∫ p, F n p ∂(trimMeasureT (μ := μ) T ℱ)) atTop (𝓝 0) := by
+    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasureT (μ := μ) T ℱ)
       (F := F) (f := fun _ => (0 : ℝ)) (fun _ ↦ (2 * C) ^ 2)
       (fun n => by
         simp only [hF]
@@ -310,8 +310,8 @@ theorem tendsto_sum_norm_defectKernel_sq (T : ℝ≥0) (hWmeas : ∀ u, Measurab
             (Lp.stronglyMeasurable (defectKernel T n j hWmeas h hh.adapted C hh.bdd
                   φ)).measurable.pow_const 2
         · have h1 := ae_ae_of_ae_trim' hcoe
-          have h2 : ∀ᵐ s ∂(timeMeasure_T T), s ∈ Set.Ioc 0 T := by
-            rw [timeMeasure_T]; exact ae_restrict_mem measurableSet_Ioc
+          have h2 : ∀ᵐ s ∂(timeMeasureT T), s ∈ Set.Ioc 0 T := by
+            rw [timeMeasureT]; exact ae_restrict_mem measurableSet_Ioc
           filter_upwards [h1, h2] with s hs1 hs2
           filter_upwards [hs1, hh.cont] with ω hω1 hω2
           have hu : ContinuousOn (fun r ↦ (h s ω - h r ω) ^ 2) (Set.Icc 0 T) :=
@@ -498,7 +498,7 @@ theorem tendsto_bilinear_of_freezing {w h₁ h₂ X Y a₁ a₂ : ℕ → ℕ �
 /-- Brownian increments over a band are integrals of the constant kernel. -/
 lemma incrW_ae_eq (hW : BrownianOn ℱ W μ) (T : ℝ≥0) {n j : ℕ} (hj : j < n) :
     (fun ω ↦ W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω) =ᵐ[μ]
-      ⇑(itoIntegralCLM_T hW T (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable
+      ⇑(itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable
         (oneKernel (μ := μ) (ℱ := ℱ) T))) := by
   have hbT := upart_le T (Nat.succ_le_of_lt hj)
   have haT := (upart_mono T n (Nat.le_succ j)).trans hbT
@@ -525,10 +525,10 @@ lemma sum_integral_incrW_sq_le (hW : BrownianOn ℱ W μ) (T : ℝ≥0) (n : ℕ
 
 /-- The increment of the continuous integral over a band. -/
 lemma incrM_ae_eq (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
-    (T : ℝ≥0) {n j : ℕ} (hj : j < n) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (T : ℝ≥0) {n j : ℕ} (hj : j < n) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (fun ω ↦ itoContinuousMod T hW.measurable φ (unifPart T n (j + 1)) ω
         - itoContinuousMod T hW.measurable φ (unifPart T n j) ω) =ᵐ[μ]
-      ⇑(itoIntegralCLM_T hW T (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable φ))
+      ⇑(itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable φ))
             := by
   have hbT := upart_le T (Nat.succ_le_of_lt hj)
   have haT := (upart_mono T n (Nat.le_succ j)).trans hbT
@@ -541,7 +541,7 @@ lemma incrM_ae_eq (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : �
 
 lemma memLp_defect (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
     (T : ℝ≥0) {n j : ℕ} (hj : j < n) {h : ℝ≥0 → Ω → ℝ} {C : ℝ} (hh : GoodProcess ℱ μ T h C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     MemLp (fun ω ↦ (itoContinuousMod T hW.measurable φ (unifPart T n (j + 1)) ω
         - itoContinuousMod T hW.measurable φ (unifPart T n j) ω)
       - h (unifPart T n j) ω * (W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω)) 2 μ :=
@@ -549,7 +549,7 @@ lemma memLp_defect (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : 
 
 lemma integral_defect_sq (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
     (T : ℝ≥0) {n j : ℕ} (hj : j < n) {h : ℝ≥0 → Ω → ℝ} {C : ℝ} (hh : GoodProcess ℱ μ T h C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∫ ω, ((itoContinuousMod T hW.measurable φ (unifPart T n (j + 1)) ω
         - itoContinuousMod T hW.measurable φ (unifPart T n j) ω)
       - h (unifPart T n j) ω * (W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω)) ^ 2 ∂μ
@@ -561,8 +561,8 @@ lemma integral_defect_sq (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fu
 
 lemma tendsto_sum_integral_defect_sq (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0) {h : ℝ≥0 → Ω → ℝ} {C : ℝ}
-    (hh : GoodProcess ℱ μ T h C) {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ : ⇑φ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
+    (hh : GoodProcess ℱ μ T h C) {φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ : ⇑φ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∑ j ∈ Finset.range n,
       ∫ ω, ((itoContinuousMod T hW.measurable φ (unifPart T n (j + 1)) ω
           - itoContinuousMod T hW.measurable φ (unifPart T n j) ω)
@@ -575,15 +575,15 @@ lemma tendsto_sum_integral_defect_sq (hW : BrownianOn ℱ W μ)
 omit [IsProbabilityMeasure μ] in
 lemma stronglyMeasurable_timeIntegral (T : ℝ≥0) {g : ℝ≥0 → Ω → ℝ}
     (hg : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ g p.1 p.2)) :
-    StronglyMeasurable (fun ω ↦ ∫ s, g s ω ∂(timeMeasure_T T)) :=
-  StronglyMeasurable.integral_prod_left' (μ := timeMeasure_T T)
+    StronglyMeasurable (fun ω ↦ ∫ s, g s ω ∂(timeMeasureT T)) :=
+  StronglyMeasurable.integral_prod_left' (μ := timeMeasureT T)
     (f := fun p : ℝ≥0 × Ω ↦ g p.1 p.2) (hg.mono ℱ.predictable_le_prod le_rfl).stronglyMeasurable
 
 lemma memLp_timeIntegral (T : ℝ≥0) {g : ℝ≥0 → Ω → ℝ} {C : ℝ}
     (hg : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ g p.1 p.2)) (hgb : ∀ t ω, |g t ω| ≤ C) :
-    MemLp (fun ω ↦ ∫ s, g s ω ∂(timeMeasure_T T)) 2 μ := by
+    MemLp (fun ω ↦ ∫ s, g s ω ∂(timeMeasureT T)) 2 μ := by
   refine MemLp.of_bound (stronglyMeasurable_timeIntegral T hg).aestronglyMeasurable
-    (C * (timeMeasure_T T Set.univ).toReal) (Eventually.of_forall fun ω => ?_)
+    (C * (timeMeasureT T Set.univ).toReal) (Eventually.of_forall fun ω => ?_)
   exact norm_integral_le_of_norm_le_const (Eventually.of_forall fun s => hgb s ω)
 
 omit [IsProbabilityMeasure μ] in
@@ -608,15 +608,15 @@ theorem tendsto_covariation_same (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0)
     {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ C₁ C₂ : ℝ} (hw : GoodProcess ℱ μ T w C₀)
     (hg₁ : GoodProcess ℱ μ T h₁ C₁) (hg₂ : GoodProcess ℱ μ T h₂ C₂)
-    {φ₁ φ₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
-    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
+    {φ₁ φ₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
+    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hW.measurable φ₁ (unifPart T n (j + 1)) ω
             - itoContinuousMod T hW.measurable φ₁ (unifPart T n j) ω)
         * (itoContinuousMod T hW.measurable φ₂ (unifPart T n (j + 1)) ω
             - itoContinuousMod T hW.measurable φ₂ (unifPart T n j) ω)
-        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)| ∂μ) atTop (𝓝 0) := by
+        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)| ∂μ) atTop (𝓝 0) := by
   have hg := (hw.mul hg₁).mul hg₂
   have hQraw := MathFin.FilteredIto.CommonQv.tendsto_weighted_qv_process_of_ae_continuous hW
         hW.measurable
@@ -630,7 +630,7 @@ theorem tendsto_covariation_same (hW : BrownianOn ℱ W μ)
       - itoContinuousMod T hW.measurable φ₂ (unifPart T n j) ω)
     (a₁ := fun n j ω ↦ W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω)
     (a₂ := fun n j ω ↦ W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω)
-    (L := fun ω ↦ ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)) (K := T)
+    (L := fun ω ↦ ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)) (K := T)
     hw.nonneg hg₁.nonneg hg₂.nonneg (fun n j _ ω => hw.bdd _ ω) (fun n j _ ω => hg₁.bdd _ ω)
     (fun n j _ ω => hg₂.bdd _ ω)
     (fun n j hj => memLp_defect hW hWc T (Finset.mem_range.mp hj) hg₁ φ₁)
@@ -644,11 +644,11 @@ theorem tendsto_covariation_same (hW : BrownianOn ℱ W μ)
       (fun t => hg.adapted t) hg.nonneg hg.bdd T n).sub
         (memLp_timeIntegral T hg.pred hg.bdd)).ae_eq (Eventually.of_forall fun ω => ?_)
     show weightedSquareSum W (fun t ω ↦ w t ω * h₁ t ω * h₂ t ω) T n ω
-        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)
+        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)
       = ∑ j ∈ Finset.range n, w (unifPart T n j) ω * h₁ (unifPart T n j) ω
           * h₂ (unifPart T n j) ω * ((W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω)
             * (W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω))
-        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)
+        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)
     rw [weightedSquareSum]
     congr 1
     exact Finset.sum_congr rfl fun j _ => by ring
@@ -659,7 +659,7 @@ theorem tendsto_covariation_same (hW : BrownianOn ℱ W μ)
       = (∑ j ∈ Finset.range n, w (unifPart T n j) ω * h₁ (unifPart T n j) ω
           * h₂ (unifPart T n j) ω * ((W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω)
             * (W (unifPart T n (j + 1)) ω - W (unifPart T n j) ω))
-        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)) ^ 2
+        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)) ^ 2
     congr 2
     exact Finset.sum_congr rfl fun j _ => by ring
 
@@ -669,9 +669,9 @@ theorem tendsto_covariation_cross {B Z : ℝ≥0 → Ω → ℝ} (hP : Independe
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ C₁ C₂ : ℝ} (hw : GoodProcess ℱ μ T w C₀)
     (hg₁ : GoodProcess ℱ μ T h₁ C₁) (hg₂ : GoodProcess ℱ μ T h₂ C₂)
-    {φ₁ φ₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
-    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
+    {φ₁ φ₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
+    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hP.left.measurable φ₁ (unifPart T n (j + 1)) ω
             - itoContinuousMod T hP.left.measurable φ₁ (unifPart T n j) ω)

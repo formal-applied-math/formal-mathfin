@@ -135,7 +135,7 @@ lemma tendsto_dyadicUpper {T : ℝ≥0} {σ : Ω → ℝ≥0} (hσT : ∀ ω, σ
 continuous Itô integral is integrable with mean zero. -/
 theorem itoContinuousMod_optional (hB : BrownianOn ℱ B μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {T : ℝ≥0}
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) {σ : Ω → ℝ≥0}
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) {σ : Ω → ℝ≥0}
     (hσ : IsOptional ℱ σ) (hσT : ∀ ω, σ ω ≤ T) :
     Integrable (fun ω ↦ itoContinuousMod T hB.measurable φ (σ ω) ω) μ ∧
       ∫ ω, itoContinuousMod T hB.measurable φ (σ ω) ω ∂μ = 0 := by
@@ -143,7 +143,7 @@ theorem itoContinuousMod_optional (hB : BrownianOn ℱ B μ)
     with hF
   set G : Ω → ℝ := fun ω ↦ itoContinuousMod T hB.measurable φ (σ ω) ω with hG
   have hτ : ∀ k, IsStop ℱ (dyadicUpper T k σ) := fun k => isStop_dyadicUpper hσ T k
-  have hrep : ∀ k, (itoIntegralCLM_T hB T (stopKernel T (hτ k) φ) : Ω → ℝ) =ᵐ[μ] F k := by
+  have hrep : ∀ k, (itoIntegralCLMT hB T (stopKernel T (hτ k) φ) : Ω → ℝ) =ᵐ[μ] F k := by
     intro k
     filter_upwards [itoIntegralCLM_T_stopKernel hB T hB.measurable hBc (hτ k) φ] with ω hω
     rw [hω, min_eq_right (dyadicUpper_le T k σ ω)]

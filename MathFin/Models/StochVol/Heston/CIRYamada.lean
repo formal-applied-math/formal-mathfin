@@ -57,41 +57,41 @@ open MathFin.AdaptedDrift MathFin.ItoIntegralAgainstMartingale
 /-! ## Facts about the Yamada function -/
 
 theorem yamada_psi_le_two_div_ma (p : YamadaParams) (x : ℝ) :
-    yamada_psi p x ≤ 2 / (yamada_m p * p.a) := by
+    yamadaPsi p x ≤ 2 / (yamadaM p * p.a) := by
   have hm := yamada_m_pos p
   by_cases hx : p.a ≤ x
   · have hxpos : 0 < x := lt_of_lt_of_le p.ha_pos hx
-    calc yamada_psi p x ≤ 2 / (yamada_m p * x) := yamada_psi_le_two_div_mx p hxpos
-      _ ≤ 2 / (yamada_m p * p.a) :=
+    calc yamadaPsi p x ≤ 2 / (yamadaM p * x) := yamada_psi_le_two_div_mx p hxpos
+      _ ≤ 2 / (yamadaM p * p.a) :=
         div_le_div_of_nonneg_left (by norm_num) (mul_pos hm p.ha_pos)
           (mul_le_mul_of_nonneg_left hx hm.le)
   · rw [yamada_psi_of_lt p (lt_of_not_ge hx)]
     exact div_nonneg (by norm_num) (mul_pos hm p.ha_pos).le
 
 theorem abs_yamada_psi_abs_le (p : YamadaParams) (x : ℝ) :
-    |yamada_psi p (|x|)| ≤ 2 / (yamada_m p * p.a) := by
+    |yamadaPsi p (|x|)| ≤ 2 / (yamadaM p * p.a) := by
   rw [abs_of_nonneg (yamada_psi_nonneg p _)]
   exact yamada_psi_le_two_div_ma p _
 
 theorem yamada_psi_abs_mul_abs_le (p : YamadaParams) (x : ℝ) :
-    yamada_psi p |x| * |x| ≤ 2 / yamada_m p := by
+    yamadaPsi p |x| * |x| ≤ 2 / yamadaM p := by
   have hm := yamada_m_pos p
   rcases eq_or_ne x 0 with rfl | hx
   · simp only [abs_zero, mul_zero]
     exact div_nonneg (by norm_num) hm.le
   · have hpos : 0 < |x| := abs_pos.mpr hx
-    calc yamada_psi p |x| * |x| ≤ 2 / (yamada_m p * |x|) * |x| :=
+    calc yamadaPsi p |x| * |x| ≤ 2 / (yamadaM p * |x|) * |x| :=
           mul_le_mul_of_nonneg_right (yamada_psi_abs_le_two_div_m_abs p hx) hpos.le
-      _ = 2 / yamada_m p := by
+      _ = 2 / yamadaM p := by
           rw [div_mul_eq_mul_div, mul_div_mul_right _ _ hpos.ne']
 
 theorem yamada_phiPrime_mul_self_nonneg (p : YamadaParams) (x : ℝ) :
-    0 ≤ yamada_phiPrime p x * x := by
+    0 ≤ yamadaPhiPrime p x * x := by
   rcases le_or_gt 0 x with hx | hx
   · exact mul_nonneg (yamada_phiPrime_nonneg_of_nonneg p hx) hx
   · have h1 := yamada_phiPrime_neg p (-x)
     rw [neg_neg] at h1
-    have h2 : 0 ≤ yamada_phiPrime p (-x) := yamada_phiPrime_nonneg_of_nonneg p (by linarith)
+    have h2 : 0 ≤ yamadaPhiPrime p (-x) := yamada_phiPrime_nonneg_of_nonneg p (by linarith)
     rw [h1]
     nlinarith
 
@@ -106,7 +106,7 @@ def yamadaParamsOf (b m : ℝ) (hb : 0 < b) (hm : 0 < m) : YamadaParams where
     (yamadaParamsOf b m hb hm).b = b := rfl
 
 theorem yamada_m_yamadaParamsOf {b m : ℝ} (hb : 0 < b) (hm : 0 < m) :
-    yamada_m (yamadaParamsOf b m hb hm) = m := by
+    yamadaM (yamadaParamsOf b m hb hm) = m := by
   show Real.log (b / (b / Real.exp m)) = m
   rw [div_div_cancel₀ hb.ne', Real.log_exp]
 
@@ -177,7 +177,7 @@ theorem yamada_estimate (p : YamadaParams) {x₀ κ θ A c : ℝ} (hκ : 0 ≤ �
       ≤ A * |l2ItoProcess T hBmeas x₀ G₁ H₁ z.1 z.2 - l2ItoProcess T hBmeas x₀ G₂ H₂ z.1 z.2| + c)
     {t : ℝ≥0} (htT : t ≤ T) :
     ∫ ω, |l2ItoProcess T hBmeas x₀ G₁ H₁ t ω - l2ItoProcess T hBmeas x₀ G₂ H₂ t ω| ∂μ
-      ≤ p.b + (A / yamada_m p + c / (yamada_m p * p.a)) * t := by
+      ≤ p.b + (A / yamadaM p + c / (yamadaM p * p.a)) * t := by
   set X := l2ItoProcess T hBmeas x₀ G₁ H₁ with hX
   set Y := l2ItoProcess T hBmeas x₀ G₂ H₂ with hY
   set D := l2ItoProcess T hBmeas (x₀ - x₀) (G₁ - G₂) (H₁ - H₂) with hD
@@ -185,15 +185,15 @@ theorem yamada_estimate (p : YamadaParams) {x₀ κ θ A c : ℝ} (hκ : 0 ≤ �
     l2ItoProcess_sub hB T hBmeas hBcont x₀ x₀ G₁ H₁ G₂ H₂
   have hm := yamada_m_pos p
   have ha := p.ha_pos
-  set K := A / yamada_m p + c / (yamada_m p * p.a) with hK
+  set K := A / yamadaM p + c / (yamadaM p * p.a) with hK
   have hK0 : 0 ≤ K := add_nonneg (div_nonneg hA hm.le) (div_nonneg hc (mul_pos hm ha).le)
   have hI := ito_formula_L2_integral hB T hBmeas hBcont (x₀ - x₀) (G₁ - G₂) (H₁ - H₂)
     (yamada_hasDerivAt_phi p) (yamada_hasDerivAt_phiPrime p)
     ((yamada_continuous_psi p).comp continuous_abs) (yamada_abs_phiPrime_le_one p)
     (abs_yamada_psi_abs_le p) htT
   rw [← hD] at hI
-  have hslice : ∀ᵐ ω ∂μ, ∫ s in Set.Ioc 0 t, (yamada_phiPrime p (D s ω) * (G₁ - G₂) (s, ω)
-      + 1 / 2 * (yamada_psi p |D s ω| * (H₁ - H₂) (s, ω) ^ 2)) ∂timeMeasure ≤ K * t := by
+  have hslice : ∀ᵐ ω ∂μ, ∫ s in Set.Ioc 0 t, (yamadaPhiPrime p (D s ω) * (G₁ - G₂) (s, ω)
+      + 1 / 2 * (yamadaPsi p |D s ω| * (H₁ - H₂) (s, ω) ^ 2)) ∂timeMeasure ≤ K * t := by
     filter_upwards [ae_ae_of_ae_trim T hBmeas hG₁, ae_ae_of_ae_trim T hBmeas hG₂,
       ae_ae_of_ae_trim T hBmeas hH, ae_ae_of_ae_trim T hBmeas (Lp.coeFn_sub G₁ G₂),
       ae_ae_of_ae_trim T hBmeas (Lp.coeFn_sub H₁ H₂), hDXY] with ω h1 h2 h3 h4 h5 h6
@@ -206,35 +206,35 @@ theorem yamada_estimate (p : YamadaParams) {x₀ κ θ A c : ℝ} (hκ : 0 ≤ �
     have e3' : (H₁ (s, ω) - H₂ (s, ω)) ^ 2 ≤ A * |X s ω - Y s ω| + c := e3
     rw [e4, e5, Pi.sub_apply, Pi.sub_apply, e1', e2']
     have hDs : D s ω = X s ω - Y s ω := h6 s hsT
-    have hdrift : yamada_phiPrime p (D s ω) * (κ * (θ - X s ω) - κ * (θ - Y s ω)) ≤ 0 := by
+    have hdrift : yamadaPhiPrime p (D s ω) * (κ * (θ - X s ω) - κ * (θ - Y s ω)) ≤ 0 := by
       have heq : κ * (θ - X s ω) - κ * (θ - Y s ω) = -κ * D s ω := by rw [hDs]; ring
       rw [heq]
       have := yamada_phiPrime_mul_self_nonneg p (D s ω)
       nlinarith
-    have hψ0 : 0 ≤ yamada_psi p |D s ω| := yamada_psi_nonneg p _
-    have hdiff : yamada_psi p |D s ω| * (H₁ (s, ω) - H₂ (s, ω)) ^ 2
-        ≤ yamada_psi p |D s ω| * (A * |D s ω| + c) := by
+    have hψ0 : 0 ≤ yamadaPsi p |D s ω| := yamada_psi_nonneg p _
+    have hdiff : yamadaPsi p |D s ω| * (H₁ (s, ω) - H₂ (s, ω)) ^ 2
+        ≤ yamadaPsi p |D s ω| * (A * |D s ω| + c) := by
       refine mul_le_mul_of_nonneg_left ?_ hψ0
       rw [hDs]
       exact e3'
-    have hb1 : yamada_psi p |D s ω| * |D s ω| ≤ 2 / yamada_m p := yamada_psi_abs_mul_abs_le p _
-    have hb2 : yamada_psi p |D s ω| ≤ 2 / (yamada_m p * p.a) := yamada_psi_le_two_div_ma p _
-    have hcomb : yamada_psi p |D s ω| * (A * |D s ω| + c)
-        ≤ A * (2 / yamada_m p) + c * (2 / (yamada_m p * p.a)) := by
+    have hb1 : yamadaPsi p |D s ω| * |D s ω| ≤ 2 / yamadaM p := yamada_psi_abs_mul_abs_le p _
+    have hb2 : yamadaPsi p |D s ω| ≤ 2 / (yamadaM p * p.a) := yamada_psi_le_two_div_ma p _
+    have hcomb : yamadaPsi p |D s ω| * (A * |D s ω| + c)
+        ≤ A * (2 / yamadaM p) + c * (2 / (yamadaM p * p.a)) := by
       have k1 := mul_le_mul_of_nonneg_left hb1 hA
       have k2 := mul_le_mul_of_nonneg_left hb2 hc
       nlinarith
-    have hKeq : K = 1 / 2 * (A * (2 / yamada_m p) + c * (2 / (yamada_m p * p.a))) := by
+    have hKeq : K = 1 / 2 * (A * (2 / yamadaM p) + c * (2 / (yamadaM p * p.a))) := by
       rw [hK]; ring
     rw [hKeq]
     linarith
-  have hφ0 : yamada_phi p (x₀ - x₀) = 0 := by rw [sub_self, yamada_phi_zero]
-  have hE : ∫ ω, yamada_phi p (D t ω) ∂μ ≤ K * t := by
+  have hφ0 : yamadaPhi p (x₀ - x₀) = 0 := by rw [sub_self, yamada_phi_zero]
+  have hE : ∫ ω, yamadaPhi p (D t ω) ∂μ ≤ K * t := by
     have hI' := hI
     simp only [hφ0, sub_zero] at hI'
     rw [hI']
     exact integral_le_of_ae_le_const (mul_nonneg hK0 t.coe_nonneg) hslice
-  have hφint : Integrable (fun ω => yamada_phi p (D t ω)) μ := by
+  have hφint : Integrable (fun ω => yamadaPhi p (D t ω)) μ := by
     have := integrable_comp_at hB T hBmeas hBcont (x₀ - x₀) (G₁ - G₂) (H₁ - H₂)
       (yamada_hasDerivAt_phi p) (yamada_abs_phiPrime_le_one p) htT
     rw [← hD] at this
@@ -249,12 +249,12 @@ theorem yamada_estimate (p : YamadaParams) {x₀ κ θ A c : ℝ} (hκ : 0 ≤ �
         refine integral_congr_ae ?_
         filter_upwards [hDXY] with ω h
         rw [h t htT]
-    _ ≤ ∫ ω, (yamada_phi p (D t ω) + p.b) ∂μ :=
+    _ ≤ ∫ ω, (yamadaPhi p (D t ω) + p.b) ∂μ :=
         integral_mono hDint (hφint.add (integrable_const _)) (fun ω => by
           have := yamada_sub_le_phi p (D t ω)
           dsimp only
           linarith)
-    _ = ∫ ω, yamada_phi p (D t ω) ∂μ + p.b := by
+    _ = ∫ ω, yamadaPhi p (D t ω) ∂μ + p.b := by
         rw [integral_add hφint (integrable_const _)]
         simp only [integral_const, probReal_univ, smul_eq_mul, one_mul]
     _ ≤ K * t + p.b := by linarith [hE]
@@ -372,8 +372,8 @@ theorem cir_regularized_cauchy (p : Parameters) (hκ : 0 ≤ p.kappa) {ε δ v�
       fun z => cirRegularizedDiffusion p δ (l2ItoProcess T hBmeas v₀ G₂ H₂ z.1 z.2))
     {t : ℝ≥0} (htT : t ≤ T) :
     ∫ ω, |l2ItoProcess T hBmeas v₀ G₁ H₁ t ω - l2ItoProcess T hBmeas v₀ G₂ H₂ t ω| ∂μ
-      ≤ q.b + (2 * p.xi ^ 2 / yamada_m q
-        + 4 * p.xi ^ 2 * (ε + δ) / (yamada_m q * q.a)) * t :=
+      ≤ q.b + (2 * p.xi ^ 2 / yamadaM q
+        + 4 * p.xi ^ 2 * (ε + δ) / (yamadaM q * q.a)) * t :=
   yamada_estimate hB T hBmeas hBcont q hκ (by positivity) (by positivity) G₁ H₁ G₂ H₂
     (by simpa only [cirDrift] using hG₁) (by simpa only [cirDrift] using hG₂) (by
       filter_upwards [hH₁, hH₂] with z h1 h2

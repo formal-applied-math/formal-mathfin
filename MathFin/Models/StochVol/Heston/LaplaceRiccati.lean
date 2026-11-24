@@ -39,13 +39,18 @@ Heston model, stochastic volatility, MSC 91G20, JEL G13
 noncomputable section
 namespace MathFin.Heston
 
+/-- Quadratic coefficient in the maturity-time Riccati equation. -/
 def laplaceA (p : Parameters) : Real := p.xi ^ 2 / 2
+/-- Linear coefficient in the maturity-time Riccati equation. -/
 def laplaceB (p : Parameters) (u : Complex) : Complex :=
   (p.rho : Complex) * (p.xi : Complex) * u - (p.kappa : Complex)
+/-- Constant forcing term for log-spot exponent u. -/
 def laplaceConstant (u : Complex) : Complex := (u ^ 2 - u) / 2
+/-- Maturity-time Riccati vector field evaluated at the current variance loading. -/
 def laplaceRhs (p : Parameters) (u z : Complex) : Complex :=
   (laplaceA p : Complex) * z ^ 2 + laplaceB p u * z + laplaceConstant u
 
+/-- The real part of the log-spot exponent lies between zero and one. -/
 def inClosedLaplaceStrip (u : Complex) : Prop := 0 ≤ u.re ∧ u.re ≤ 1
 
 theorem rho_square_le_one (p : Parameters) (hρ : |p.rho| ≤ 1) : p.rho ^ 2 ≤ 1 := by
@@ -75,8 +80,10 @@ theorem laplaceRhs_characteristic (p : Parameters) (u : Real) (z : Complex) :
   push_cast
   linear_combination (u : Complex) ^ 2 / 2 * Complex.I_sq
 
+/-- Negative real part of the numerator times the conjugated denominator. -/
 def gramBarrier (P Q : Complex) : Real := -(P * star Q).re
 
+/-- Derivative of the Gram barrier along the Heston linear system. -/
 def gramSlope (p : Parameters) (u P Q : Complex) : Real :=
   -((laplaceB p u * P + laplaceConstant u * Q) * star Q +
     P * star (-(laplaceA p : Complex) * P)).re

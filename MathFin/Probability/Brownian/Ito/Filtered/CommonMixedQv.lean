@@ -45,10 +45,12 @@ open scoped NNReal ENNReal Topology
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B Z : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
 
+/-- Weighted sum of squared Brownian increments on the uniform partition. -/
 def weightedSquareSum (B w : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (n : ℕ) (ω : Ω) : ℝ :=
   ∑ k ∈ Finset.range n, w (unifPart T n k) ω *
     (B (unifPart T n (k+1)) ω - B (unifPart T n k) ω)^2
 
+/-- Weighted sum of products of increments of the two drivers on the uniform partition. -/
 def weightedCrossSum (B Z w : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (n : ℕ) (ω : Ω) : ℝ :=
   ∑ k ∈ Finset.range n, w (unifPart T n k) ω *
     (B (unifPart T n (k+1)) ω - B (unifPart T n k) ω) *

@@ -64,7 +64,7 @@ theorem itoSimpleProcess_isStronglyPredictable (hm : ∀ t, Measurable (B t))
 
 theorem itoContinuousMod_isStronglyPredictable (T : ℝ≥0) (hm : ∀ t, Measurable (B t))
     (hc : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     IsStronglyPredictable ℱ (itoContinuousMod T hm φ) := by
   rw [IsStronglyPredictable]
   have hrw : Function.uncurry (itoContinuousMod T hm φ) =

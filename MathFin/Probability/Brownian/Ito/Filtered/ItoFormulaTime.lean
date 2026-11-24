@@ -52,6 +52,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 section Tools
 variable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
+omit [IsProbabilityMeasure μ] in
 /-- Processes with a.s. continuous paths on `[0,T]` that agree a.s. at each time of `[0,T]` agree
 a.s. at all times of `[0,T]` simultaneously. -/
 theorem ae_forall_eq_of_continuousOn {X Y : ℝ≥0 → Ω → ℝ}
@@ -83,6 +84,7 @@ theorem ae_ae_of_ae_trim {p : ℝ≥0 × Ω → Prop}
     Measure.measurePreserving_swap.quasiMeasurePreserving.ae h1
   exact Measure.ae_ae_of_ae_prod h2
 
+omit [IsProbabilityMeasure μ] in
 /-- Under the trimmed product measure, time is a.e. strictly positive. -/
 theorem ae_pos_trim : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), 0 < z.1 := by
   have hmeas : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]

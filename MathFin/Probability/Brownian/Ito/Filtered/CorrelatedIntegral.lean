@@ -88,15 +88,15 @@ theorem IndependentPair.itoSimpleLp_rotation (h : IndependentPair ℱ B Z μ)
 of the two independent-driver integrals, for every common predictable L2 kernel. -/
 theorem IndependentPair.itoIntegral_rotation (h : IndependentPair ℱ B Z μ)
     (a b : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (T : ℝ≥0)
-    (f : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    itoIntegralCLM_T (h.linear_brownian a b hab) T f =
-      a • itoIntegralCLM_T h.left T f + b • itoIntegralCLM_T h.right T f := by
-  have he : (fun g => itoIntegralCLM_T (h.linear_brownian a b hab) T g) =
-      (fun g => a • itoIntegralCLM_T h.left T g + b • itoIntegralCLM_T h.right T g) := by
+    (f : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    itoIntegralCLMT (h.linear_brownian a b hab) T f =
+      a • itoIntegralCLMT h.left T f + b • itoIntegralCLMT h.right T f := by
+  have he : (fun g => itoIntegralCLMT (h.linear_brownian a b hab) T g) =
+      (fun g => a • itoIntegralCLMT h.left T g + b • itoIntegralCLMT h.right T g) := by
     apply (simpleAssembly_T_denseRange (μ := μ) T ℱ).equalizer
-      (itoIntegralCLM_T (h.linear_brownian a b hab) T).continuous
-      (((itoIntegralCLM_T h.left T).continuous.const_smul a).add
-        ((itoIntegralCLM_T h.right T).continuous.const_smul b))
+      (itoIntegralCLMT (h.linear_brownian a b hab) T).continuous
+      (((itoIntegralCLMT h.left T).continuous.const_smul a).add
+        ((itoIntegralCLMT h.right T).continuous.const_smul b))
     funext V
     simp only [Function.comp_apply, Pi.add_apply, Pi.smul_apply, itoIntegralCLM_T_simpleAssembly]
     exact h.itoSimpleLp_rotation a b hab V.val
@@ -104,10 +104,10 @@ theorem IndependentPair.itoIntegral_rotation (h : IndependentPair ℱ B Z μ)
 
 theorem IndependentPair.itoIntegral_correlated (h : IndependentPair ℱ B Z μ)
     {ρ : ℝ} (hρ : |ρ| ≤ 1) (T : ℝ≥0)
-    (f : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    itoIntegralCLM_T (h.correlated_brownian hρ) T f =
-      ρ • itoIntegralCLM_T h.left T f +
-      orthogonalWeight ρ • itoIntegralCLM_T h.right T f :=
+    (f : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    itoIntegralCLMT (h.correlated_brownian hρ) T f =
+      ρ • itoIntegralCLMT h.left T f +
+      orthogonalWeight ρ • itoIntegralCLMT h.right T f :=
   h.itoIntegral_rotation ρ (orthogonalWeight ρ) (sq_add_orthogonalWeight_sq hρ) T f
 
 end MathFin.FilteredIto.CommonNoise

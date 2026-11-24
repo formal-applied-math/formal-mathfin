@@ -143,9 +143,11 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {B : ℝ≥0 → Ω → ℝ}
 
 /-- A process adapted to the Brownian filtration, continuous along every path and bounded. -/
 structure ContAdaptedBdd (hBmeas : ∀ t, Measurable (B t)) where
+  /-- Time-indexed random coefficient. -/
   toFun : ℝ≥0 → Ω → ℝ
   adapted : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (toFun t)
   cont : ∀ ω, Continuous fun t => toFun t ω
+  /-- Uniform bound on the absolute value of the coefficient. -/
   bound : ℝ
   bdd : ∀ t ω, |toFun t ω| ≤ bound
 

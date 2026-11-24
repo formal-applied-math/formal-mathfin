@@ -45,6 +45,7 @@ open scoped NNReal ENNReal
 open MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM
 open MathFin.ItoIntegralProcessContinuousModification
 
+/-- CIR volatility with the square-root coefficient regularized at scale ε. -/
 def cirRegularizedDiffusion (p : Parameters) (ε x : Real) : Real :=
   p.xi * cirApproxDiff ε x
 

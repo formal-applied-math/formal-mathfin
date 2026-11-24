@@ -70,14 +70,14 @@ theorem exists_cir_on_common_filtration (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
     (p : MathFin.Heston.Parameters) (hk : 0 ≤ p.kappa) (hθ : 0 ≤ p.theta)
     {v₀ : ℝ} (hv₀ : 0 ≤ v₀) :
     ∃ (V : ℝ≥0 → Ω → ℝ)
-      (G H : Lp ℝ 2 (CommonPredictable.trimMeasure_T (μ := μ) T ℱ)),
+      (G H : Lp ℝ 2 (CommonPredictable.trimMeasureT (μ := μ) T ℱ)),
       IsStronglyPredictable ℱ V ∧
       (∀ᵐ ω ∂μ, ContinuousOn (fun t => V t ω) (Set.Icc 0 T)) ∧
-      MemLp (Function.uncurry V) 2 (CommonPredictable.trimMeasure_T (μ := μ) T ℱ) ∧
+      MemLp (Function.uncurry V) 2 (CommonPredictable.trimMeasureT (μ := μ) T ℱ) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, 0 ≤ V t ω) ∧
-      (⇑G =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+      (⇑G =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
         fun z => MathFin.Heston.cirDrift p (V z.1 z.2)) ∧
-      (⇑H =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+      (⇑H =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
         fun z => MathFin.Heston.cirDiffusion p (V z.1 z.2)) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀ +
         (∫ s in Set.Ioc 0 t, MathFin.Heston.cirDrift p (V s ω) ∂MathFin.ItoIntegralL2.timeMeasure) +
@@ -86,10 +86,10 @@ theorem exists_cir_on_common_filtration (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
     MathFin.Heston.exists_cir_strong_solution hB.law T hB.measurable hc p hk hθ hv₀
   have hle := natural_le hB
   have hp' := predictable_mono hle hp
-  have hm' : MemLp (Function.uncurry V) 2 (CommonPredictable.trimMeasure_T (μ := μ) T ℱ) := by
+  have hm' : MemLp (Function.uncurry V) 2 (CommonPredictable.trimMeasureT (μ := μ) T ℱ) := by
     apply memLp_iff.mpr
     change eLpNorm (Function.uncurry V) 2
-      (((CommonPredictable.timeMeasure_T T).prod μ).trim ℱ.predictable_le_prod) < ⊤
+      (((CommonPredictable.timeMeasureT T).prod μ).trim ℱ.predictable_le_prod) < ⊤
     rw [eLpNorm_trim ℱ.predictable_le_prod hp',
       ← eLpNorm_trim (MathFin.ItoIntegralL2.natFiltration hB.measurable).predictable_le_prod hp]
     exact hm.eLpNorm_lt_top

@@ -43,8 +43,11 @@ namespace MathFin.Heston
 open Filter Set
 open scoped Topology
 
+/-- Cube of the negative part, used to detect variance below zero. -/
 def cirNegativePart (x : Real) : Real := (max (-x) 0)^3
+/-- First derivative of the cubed negative part. -/
 def cirNegativePartDeriv (x : Real) : Real := -3 * (max (-x) 0)^2
+/-- Second derivative of the cubed negative part. -/
 def cirNegativePartDeriv2 (x : Real) : Real := 6 * max (-x) 0
 
 theorem cirNegativePart_nonneg (x : Real) : 0 ≤ cirNegativePart x := by

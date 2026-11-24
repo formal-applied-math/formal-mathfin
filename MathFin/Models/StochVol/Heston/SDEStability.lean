@@ -164,6 +164,7 @@ section Stability
 variable (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
 
+omit [IsProbabilityMeasure μ] in
 theorem bandEnergy_smul (c : ℝ) (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     bandEnergy T hBmeas (c • Z) t = c ^ 2 * bandEnergy T hBmeas Z t := by
   unfold bandEnergy

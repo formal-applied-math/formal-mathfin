@@ -29,6 +29,7 @@ Heston model, stochastic volatility, MSC 91G20, JEL G13
 noncomputable section
 namespace MathFin.Heston
 
+/-- Heston generator acting on complex functions of log-spot and variance. -/
 def logHestonGenerator (p : Parameters) (f : Real → Real → Complex) (x v : Real) : Complex :=
   ((p.r : Complex) - (p.q : Complex) - (v : Complex) / 2) *
       deriv (fun y : Real => f y v) x +

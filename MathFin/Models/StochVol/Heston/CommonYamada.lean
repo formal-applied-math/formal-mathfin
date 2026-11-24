@@ -121,16 +121,16 @@ theorem itoTest_unit {g : ℝ → ℝ} (hg : ContDiff ℝ 2 g) {C₁ C₂ : ℝ}
 
 lemma yamada_psi_abs_unif (p : YamadaParams) :
     ∀ ε > 0, ∃ δ > 0, ∀ x y : ℝ, |x - y| < δ →
-      |yamada_psi p (|x|) - yamada_psi p (|y|)| < ε := by
+      |yamadaPsi p (|x|) - yamadaPsi p (|y|)| < ε := by
   intro ε hε
-  have hc : Continuous fun x : ℝ ↦ yamada_psi p (|x|) :=
+  have hc : Continuous fun x : ℝ ↦ yamadaPsi p (|x|) :=
     (yamada_continuous_psi p).comp continuous_abs
   have huc := (isCompact_Icc (a := -(p.b + 1)) (b := p.b + 1)).uniformContinuousOn_of_continuous
     hc.continuousOn
   rw [Metric.uniformContinuousOn_iff] at huc
   obtain ⟨δ, hδ, hδε⟩ := huc ε hε
   refine ⟨min δ 1, lt_min hδ one_pos, fun x y hxy => ?_⟩
-  have hzero : ∀ z : ℝ, p.b < |z| → yamada_psi p (|z|) = 0 := fun z hz => yamada_psi_of_gt p hz
+  have hzero : ∀ z : ℝ, p.b < |z| → yamadaPsi p (|z|) = 0 := fun z hz => yamada_psi_of_gt p hz
   have hxy1 : |x - y| < 1 := lt_of_lt_of_le hxy (min_le_right _ _)
   have hxyδ : |x - y| < δ := lt_of_lt_of_le hxy (min_le_left _ _)
   by_cases hx : |x| ≤ p.b + 1
@@ -159,7 +159,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 
 lemma itoContinuousMod_sub_ae (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0)
-    (φ ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hW.measurable (φ - ψ) t ω
       = itoContinuousMod T hW.measurable φ t ω - itoContinuousMod T hW.measurable ψ t ω := by
   refine ae_forall_eq_of_continuousOn' (itoContinuousMod_continuousOn hW T hW.measurable hWc _)
@@ -177,7 +177,7 @@ lemma itoContinuousMod_sub_ae (hW : BrownianOn ℱ W μ)
 lemma itoContinuousMod_zero_kernel (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T,
-      itoContinuousMod T hW.measurable (0 : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) t ω = 0 := by
+      itoContinuousMod T hW.measurable (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) t ω = 0 := by
   refine ae_forall_eq_of_continuousOn' (Y := fun _ _ ↦ (0 : ℝ))
     (itoContinuousMod_continuousOn hW T hW.measurable hWc _)
     (Eventually.of_forall fun _ => continuousOn_const) fun t ht => ?_
@@ -187,7 +187,7 @@ lemma itoContinuousMod_zero_kernel (hW : BrownianOn ℱ W μ)
 
 lemma integral_itoContinuousMod (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) {t T : ℝ≥0} (htT : t ≤ T)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Integrable (fun ω ↦ itoContinuousMod T hW.measurable φ t ω) μ ∧
       ∫ ω, itoContinuousMod T hW.measurable φ t ω ∂μ = 0 := by
   have h1 := itoContinuousMod_modification hW T hW.measurable hWc φ htT
@@ -201,13 +201,13 @@ lemma integral_itoContinuousMod (hW : BrownianOn ℱ W μ)
 theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} (p : YamadaParams) {κ A c x₀ : ℝ} (hκ : 0 ≤ κ) (hA : 0 ≤ A) (hc : 0 ≤ c)
-    {X₁ X₂ a₁ a₂ b₁ b₂ : ℝ≥0 → Ω → ℝ} {H₁ H₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {X₁ X₂ a₁ a₂ b₁ b₂ : ℝ≥0 → Ω → ℝ} {H₁ H₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hX₁ : ContProcess ℱ μ T X₁) (hX₂ : ContProcess ℱ μ T X₂)
     (hb₁ : ContProcess ℱ μ T b₁) (hb₂ : ContProcess ℱ μ T b₂)
     (ha₁ : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ a₁ t ω) (Set.Icc 0 T))
     (ha₂ : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ a₂ t ω) (Set.Icc 0 T))
-    (hH₁ : ⇑H₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ b₁ z.1 z.2)
-    (hH₂ : ⇑H₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ b₂ z.1 z.2)
+    (hH₁ : ⇑H₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ b₁ z.1 z.2)
+    (hH₂ : ⇑H₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ b₂ z.1 z.2)
     (hdrift : ∀ᵐ ω ∂μ, ∀ s ≤ T, a₁ s ω - a₂ s ω = -κ * (X₁ s ω - X₂ s ω))
     (hdiff : ∀ᵐ ω ∂μ, ∀ s ≤ T, (b₁ s ω - b₂ s ω) ^ 2 ≤ A * |X₁ s ω - X₂ s ω| + c)
     (heq₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = x₀ + ∫ s in Set.Ioc 0 t, a₁ s ω ∂leb
@@ -216,7 +216,7 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
       + itoContinuousMod T hP.left.measurable H₂ t ω)
     {t : ℝ≥0} (htT : t ≤ T) :
     Integrable (fun ω ↦ |X₁ t ω - X₂ t ω|) μ ∧
-      ∫ ω, |X₁ t ω - X₂ t ω| ∂μ ≤ p.b + (A / yamada_m p + c / (yamada_m p * p.a)) * t := by
+      ∫ ω, |X₁ t ω - X₂ t ω| ∂μ ≤ p.b + (A / yamadaM p + c / (yamadaM p * p.a)) * t := by
   have hDproc : ItoProc hP T (fun _ : Unit ↦ fun s ω ↦ X₁ s ω - X₂ s ω) (fun _ ↦ 0)
       (fun _ s ω ↦ a₁ s ω - a₂ s ω) (fun _ s ω ↦ b₁ s ω - b₂ s ω) (fun _ _ _ ↦ (0 : ℝ))
       (fun _ ↦ H₁ - H₂) (fun _ ↦ 0) :=
@@ -235,7 +235,7 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
         filter_upwards [Lp.coeFn_sub H₁ H₂, hH₁, hH₂] with z h1 h2 h3
         rw [h1, Pi.sub_apply, h2, h3]
       kerZ := fun _ => by
-        filter_upwards [Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasure_T (μ := μ) T ℱ)]
+        filter_upwards [Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasureT (μ := μ) T ℱ)]
           with z hz
         rw [hz, Pi.zero_apply]
       eq := by
@@ -250,20 +250,20 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
           + itoContinuousMod T hP.right.measurable 0 s ω
         rw [e1 s hs, e2 s hs, integral_sub i1 i2, e3 s hs, e4 s hs]
         ring }
-  have hd1 : deriv (yamada_phi p) = yamada_phiPrime p :=
+  have hd1 : deriv (yamadaPhi p) = yamadaPhiPrime p :=
     funext fun x => (yamada_hasDerivAt_phi p x).deriv
-  have hd2 : deriv (deriv (yamada_phi p)) = fun x ↦ yamada_psi p (|x|) := by
+  have hd2 : deriv (deriv (yamadaPhi p)) = fun x ↦ yamadaPsi p (|x|) := by
     rw [hd1]; exact funext fun x => (yamada_hasDerivAt_phiPrime p x).deriv
   obtain ⟨hf, hpd, hpd2⟩ := itoTest_unit (yamada_contDiff_phi p) (C₁ := 1)
-    (C₂ := 2 / (yamada_m p * p.a))
+    (C₂ := 2 / (yamadaM p * p.a))
     (fun x => by rw [hd1]; exact yamada_abs_phiPrime_le_one p x)
     (fun x => by rw [hd2]; exact abs_yamada_psi_abs_le p x)
     (by rw [hd2]; exact yamada_psi_abs_unif p)
   have hIto := ito_formula_at hP hBc hZc hDproc hf htT
-  have hd2' : deriv (yamada_phiPrime p) = fun x ↦ yamada_psi p (|x|) :=
+  have hd2' : deriv (yamadaPhiPrime p) = fun x ↦ yamadaPsi p (|x|) :=
     funext fun x => (yamada_hasDerivAt_phiPrime p x).deriv
   simp only [Fintype.sum_unique] at hIto
-  set K := A / yamada_m p + c / (yamada_m p * p.a) with hK
+  set K := A / yamadaM p + c / (yamadaM p * p.a) with hK
   have hm := yamada_m_pos p
   have ha := p.ha_pos
   have hK0 : 0 ≤ K := add_nonneg (div_nonneg hA hm.le) (div_nonneg hc (mul_pos hm ha).le)
@@ -272,7 +272,7 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
       (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂))
   obtain ⟨iM₂, eM₂⟩ := integral_itoContinuousMod hP.right hZc htT
     (mulKernel T (goodProcess_pd hDproc.proc hf default).pred
-      (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)))
+      (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
   have key : ∀ (D b I M N K' t' : ℝ), |D| - b ≤ 0 + I + M + N → I ≤ K' * t' →
       |D| ≤ b + K' * t' + (M + N) := by
     intro D b I M N K' t' h1 h2
@@ -283,7 +283,7 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
         + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
               default).pred
-          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)))
+          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω) := by
     filter_upwards [hIto, hdrift, hdiff] with ω hω hdr hdf
     have hlow := yamada_sub_le_phi p (X₁ t ω - X₂ t ω)
@@ -294,23 +294,23 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
       have hsT : s ≤ T := hs.2.trans htT
       simp only [hpd, hpd2, hd1, hd2']
       rw [hdr s hsT]
-      have h1 : yamada_phiPrime p (X₁ s ω - X₂ s ω) * (-κ * (X₁ s ω - X₂ s ω)) ≤ 0 := by
+      have h1 : yamadaPhiPrime p (X₁ s ω - X₂ s ω) * (-κ * (X₁ s ω - X₂ s ω)) ≤ 0 := by
         have := yamada_phiPrime_mul_self_nonneg p (X₁ s ω - X₂ s ω)
         nlinarith
-      have h2 : yamada_psi p (|X₁ s ω - X₂ s ω|)
+      have h2 : yamadaPsi p (|X₁ s ω - X₂ s ω|)
             * ((b₁ s ω - b₂ s ω) * (b₁ s ω - b₂ s ω) + 0 * 0)
-          ≤ yamada_psi p (|X₁ s ω - X₂ s ω|) * (A * |X₁ s ω - X₂ s ω| + c) := by
+          ≤ yamadaPsi p (|X₁ s ω - X₂ s ω|) * (A * |X₁ s ω - X₂ s ω| + c) := by
         have := hdf s hsT
         refine mul_le_mul_of_nonneg_left ?_ (yamada_psi_nonneg p _)
         nlinarith
-      have h3 : yamada_psi p (|X₁ s ω - X₂ s ω|) * (A * |X₁ s ω - X₂ s ω| + c) ≤ 2 * K := by
+      have h3 : yamadaPsi p (|X₁ s ω - X₂ s ω|) * (A * |X₁ s ω - X₂ s ω| + c) ≤ 2 * K := by
         have e1 := yamada_psi_abs_mul_abs_le p (X₁ s ω - X₂ s ω)
-        have e3 : yamada_psi p (|X₁ s ω - X₂ s ω|) ≤ 2 / (yamada_m p * p.a) :=
+        have e3 : yamadaPsi p (|X₁ s ω - X₂ s ω|) ≤ 2 / (yamadaM p * p.a) :=
           (le_abs_self _).trans (abs_yamada_psi_abs_le p (X₁ s ω - X₂ s ω))
-        calc yamada_psi p (|X₁ s ω - X₂ s ω|) * (A * |X₁ s ω - X₂ s ω| + c)
-            = A * (yamada_psi p (|X₁ s ω - X₂ s ω|) * |X₁ s ω - X₂ s ω|)
-              + c * yamada_psi p (|X₁ s ω - X₂ s ω|) := by ring
-          _ ≤ A * (2 / yamada_m p) + c * (2 / (yamada_m p * p.a)) :=
+        calc yamadaPsi p (|X₁ s ω - X₂ s ω|) * (A * |X₁ s ω - X₂ s ω| + c)
+            = A * (yamadaPsi p (|X₁ s ω - X₂ s ω|) * |X₁ s ω - X₂ s ω|)
+              + c * yamadaPsi p (|X₁ s ω - X₂ s ω|) := by ring
+          _ ≤ A * (2 / yamadaM p) + c * (2 / (yamadaM p * p.a)) :=
               add_le_add (mul_le_mul_of_nonneg_left e1 hA) (mul_le_mul_of_nonneg_left e3 hc)
           _ = 2 * K := by rw [hK]; ring
       linarith
@@ -319,14 +319,14 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
       + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
             default).pred
-          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)))
+          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω) μ := iM₁.add iM₂
   have iub : Integrable (fun ω ↦ p.b + K * t + (itoContinuousMod T hP.left.measurable (mulKernel
         T (goodProcess_pd hDproc.proc hf default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
       + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
             default).pred
-          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)))
+          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω)) μ := (integrable_const (p.b + K * t)).add iMM
   have hmeas : AEStronglyMeasurable (fun ω ↦ |X₁ t ω - X₂ t ω|) μ :=
     ((((hX₁.adapted t).mono (ℱ.le t) le_rfl).sub
@@ -339,7 +339,7 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
           + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
                 default).pred
-          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)))
+          (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω)) ∂μ :=
           integral_mono_of_nonneg (Eventually.of_forall fun ω => abs_nonneg _) iub hbound
       _ = p.b + K * t := by
@@ -352,13 +352,13 @@ common filtration (Yamada–Watanabe). -/
 theorem pathwise_unique_common (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} {κ A x₀ : ℝ} (hκ : 0 ≤ κ) (hA : 0 ≤ A)
-    {X₁ X₂ a₁ a₂ b₁ b₂ : ℝ≥0 → Ω → ℝ} {H₁ H₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {X₁ X₂ a₁ a₂ b₁ b₂ : ℝ≥0 → Ω → ℝ} {H₁ H₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hX₁ : ContProcess ℱ μ T X₁) (hX₂ : ContProcess ℱ μ T X₂)
     (hb₁ : ContProcess ℱ μ T b₁) (hb₂ : ContProcess ℱ μ T b₂)
     (ha₁ : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ a₁ t ω) (Set.Icc 0 T))
     (ha₂ : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ a₂ t ω) (Set.Icc 0 T))
-    (hH₁ : ⇑H₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ b₁ z.1 z.2)
-    (hH₂ : ⇑H₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ b₂ z.1 z.2)
+    (hH₁ : ⇑H₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ b₁ z.1 z.2)
+    (hH₂ : ⇑H₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ b₂ z.1 z.2)
     (hdrift : ∀ᵐ ω ∂μ, ∀ s ≤ T, a₁ s ω - a₂ s ω = -κ * (X₁ s ω - X₂ s ω))
     (hdiff : ∀ᵐ ω ∂μ, ∀ s ≤ T, (b₁ s ω - b₂ s ω) ^ 2 ≤ A * |X₁ s ω - X₂ s ω|)
     (heq₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = x₀ + ∫ s in Set.Ioc 0 t, a₁ s ω ∂leb
@@ -411,10 +411,10 @@ of `dV = κ(θ − V) dt + ξ √V dB` with the same initial value agree almost 
 theorem cir_unique_common (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} (p : Parameters) (hκ : 0 ≤ p.kappa) {v₀ : ℝ}
-    {V₁ V₂ : ℝ≥0 → Ω → ℝ} {H₁ H₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {V₁ V₂ : ℝ≥0 → Ω → ℝ} {H₁ H₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hV₁ : ContProcess ℱ μ T V₁) (hV₂ : ContProcess ℱ μ T V₂)
-    (hH₁ : ⇑H₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₁ z.1 z.2))
-    (hH₂ : ⇑H₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₂ z.1 z.2))
+    (hH₁ : ⇑H₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₁ z.1 z.2))
+    (hH₂ : ⇑H₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₂ z.1 z.2))
     (heq₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, V₁ t ω = v₀
       + ∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V₁ s ω) ∂leb
       + itoContinuousMod T hP.left.measurable H₁ t ω)
@@ -444,17 +444,17 @@ lemma contProcess_of_predictable {T : ℝ≥0} {X : ℝ≥0 → Ω → ℝ} (hX 
   ⟨fun t => (hX.stronglyAdapted t).measurable, hX.measurable, hc⟩
 
 /-- Two `L²` kernels representing integrands that agree pathwise a.s. on `[0, T]` coincide. -/
-lemma lp_eq_of_pathwise {T : ℝ≥0} {H₁ H₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+lemma lp_eq_of_pathwise {T : ℝ≥0} {H₁ H₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     {f₁ f₂ : ℝ≥0 × Ω → ℝ}
     (hf₁ : Measurable[ℱ.predictable] f₁) (hf₂ : Measurable[ℱ.predictable] f₂)
-    (hH₁ : ⇑H₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] f₁) (hH₂ : ⇑H₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] f₂)
+    (hH₁ : ⇑H₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] f₁) (hH₂ : ⇑H₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] f₂)
     (h : ∀ᵐ ω ∂μ, ∀ t ≤ T, f₁ (t, ω) = f₂ (t, ω)) : H₁ = H₂ := by
   have hset : MeasurableSet[ℱ.predictable] {z : ℝ≥0 × Ω | f₁ z = f₂ z} :=
     measurableSet_eq_fun hf₁ hf₂
-  have h12 : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ), f₁ z = f₂ z := by
+  have h12 : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ), f₁ z = f₂ z := by
     refine ae_trim_of_ae_ae (P := fun z ↦ f₁ z = f₂ z) hset ?_
     filter_upwards [(ae_restrict_mem measurableSet_Ioc :
-      ∀ᵐ s ∂(timeMeasure_T T), s ∈ Set.Ioc 0 T)] with s hs
+      ∀ᵐ s ∂(timeMeasureT T), s ∈ Set.Ioc 0 T)] with s hs
     filter_upwards [h] with ω hω using hω s hs.2
   apply Lp.ext
   filter_upwards [hH₁, hH₂, h12] with z h1 h2 h3
@@ -466,14 +466,14 @@ same pair of independent Brownian motions, agree almost surely on `[0, T]`. -/
 theorem heston_unique_common (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} (p : Parameters) (hκ : 0 ≤ p.kappa) (hρ : |p.rho| ≤ 1) {x₀ v₀ : ℝ}
-    {X₁ V₁ X₂ V₂ : ℝ≥0 → Ω → ℝ} {Hv₁ Hx₁ Hv₂ Hx₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {X₁ V₁ X₂ V₂ : ℝ≥0 → Ω → ℝ} {Hv₁ Hx₁ Hv₂ Hx₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hpV₁ : IsStronglyPredictable ℱ V₁) (hpV₂ : IsStronglyPredictable ℱ V₂)
     (hcV₁ : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ V₁ t ω) (Set.Icc 0 T))
     (hcV₂ : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ V₂ t ω) (Set.Icc 0 T))
-    (hHv₁ : ⇑Hv₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₁ z.1 z.2))
-    (hHv₂ : ⇑Hv₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₂ z.1 z.2))
-    (hHx₁ : ⇑Hx₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ Real.sqrt (V₁ z.1 z.2))
-    (hHx₂ : ⇑Hx₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ Real.sqrt (V₂ z.1 z.2))
+    (hHv₁ : ⇑Hv₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₁ z.1 z.2))
+    (hHv₂ : ⇑Hv₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₂ z.1 z.2))
+    (hHx₁ : ⇑Hx₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V₁ z.1 z.2))
+    (hHx₂ : ⇑Hx₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V₂ z.1 z.2))
     (heqV₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, V₁ t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V₁ s ω) ∂leb)
       + itoContinuousMod T hP.left.measurable Hv₁ t ω)

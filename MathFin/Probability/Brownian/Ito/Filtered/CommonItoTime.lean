@@ -102,7 +102,7 @@ variable [IsProbabilityMeasure μ]
 
 lemma restrictKernel_mulKernel {s T : ℝ≥0} (hsT : s ≤ T) {w : ℝ≥0 → Ω → ℝ}
     (hwP : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ w p.1 p.2)) {C : ℝ}
-    (hC : ∀ t ω, |w t ω| ≤ C) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (hC : ∀ t ω, |w t ω| ≤ C) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     restrictKernel hsT (mulKernel T hwP hC φ) = mulKernel s hwP hC (restrictKernel hsT φ) := by
   refine Lp.ext ?_
   filter_upwards [coeFn_restrictKernel hsT (mulKernel T hwP hC φ),
@@ -114,7 +114,7 @@ lemma restrictKernel_mulKernel {s T : ℝ≥0} (hsT : s ≤ T) {w : ℝ≥0 → 
 /-- An Itô process on `[0, T]` restricts to an Itô process on `[0, t]`. -/
 lemma ItoProc.restrict {ι : Type*} [Countable ι] {hP : IndependentPair ℱ B Z μ} {T : ℝ≥0}
     {Y : ι → ℝ≥0 → Ω → ℝ} {y : ι → ℝ} {a b c : ι → ℝ≥0 → Ω → ℝ}
-    {φB φZ : ι → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
+    {φB φZ : ι → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {t : ℝ≥0} (htT : t ≤ T) :
     ItoProc hP t Y y a b c (fun i ↦ restrictKernel htT (φB i))
@@ -138,7 +138,7 @@ horizon-`T` continuous Itô processes at time `t`. -/
 theorem ito_formula_at {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} {Y : ι → ℝ≥0 → Ω → ℝ} {y : ι → ℝ} {a b c : ι → ℝ≥0 → Ω → ℝ}
-    {φB φZ : ι → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
+    {φB φZ : ι → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
     {f : (ι → ℝ) → ℝ} {C₁ C₂ : ℝ} (hf : ItoTest f C₁ C₂) {t : ℝ≥0} (htT : t ≤ T) :
     ∀ᵐ ω ∂μ, f (fun i ↦ Y i t ω) = f y
       + ∫ s in Set.Ioc 0 t, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
@@ -150,7 +150,7 @@ theorem ito_formula_at {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independ
             i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i)) t ω := by
   have hY' := hY.restrict hBc hZc htT
   have key := ito_formula hP hBc hZc hY' hf
-  have hB : ∀ i, ∀ᵐ ω ∂μ, itoIntegralCLM_T hP.left t (mulKernel t
+  have hB : ∀ i, ∀ᵐ ω ∂μ, itoIntegralCLMT hP.left t (mulKernel t
       (goodProcess_pd hY'.proc hf i).pred (goodProcess_pd hY'.proc hf i).bdd
         (restrictKernel htT (φB i))) ω
       = itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hY.proc hf i).pred
@@ -162,7 +162,7 @@ theorem ito_formula_at {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independ
       (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φB i))
             htT] with ω hω
     exact hω.symm
-  have hZ : ∀ i, ∀ᵐ ω ∂μ, itoIntegralCLM_T hP.right t (mulKernel t
+  have hZ : ∀ i, ∀ᵐ ω ∂μ, itoIntegralCLMT hP.right t (mulKernel t
       (goodProcess_pd hY'.proc hf i).pred (goodProcess_pd hY'.proc hf i).bdd
         (restrictKernel htT (φZ i))) ω
       = itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hY.proc hf i).pred
@@ -181,7 +181,7 @@ theorem ito_formula_at {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independ
 theorem ito_formula_all {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} {Y : ι → ℝ≥0 → Ω → ℝ} {y : ι → ℝ} {a b c : ι → ℝ≥0 → Ω → ℝ}
-    {φB φZ : ι → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
+    {φB φZ : ι → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
     {f : (ι → ℝ) → ℝ} {C₁ C₂ : ℝ} (hf : ItoTest f C₁ C₂) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, f (fun i ↦ Y i t ω) = f y
       + ∫ s in Set.Ioc 0 t, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
@@ -231,7 +231,7 @@ theorem ito_formula_random_time {ι : Type*} [Fintype ι] [DecidableEq ι]
     (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} {Y : ι → ℝ≥0 → Ω → ℝ} {y : ι → ℝ} {a b c : ι → ℝ≥0 → Ω → ℝ}
-    {φB φZ : ι → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
+    {φB φZ : ι → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
     {f : (ι → ℝ) → ℝ} {C₁ C₂ : ℝ} (hf : ItoTest f C₁ C₂) {τ : Ω → ℝ≥0} (hτ : ∀ ω, τ ω ≤ T) :
     ∀ᵐ ω ∂μ, f (fun i ↦ Y i (τ ω) ω) = f y
       + ∫ s in Set.Ioc 0 (τ ω), (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
@@ -251,7 +251,7 @@ theorem ito_formula_stopped {ι : Type*} [Fintype ι] [DecidableEq ι]
     (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} {Y : ι → ℝ≥0 → Ω → ℝ} {y : ι → ℝ} {a b c : ι → ℝ≥0 → Ω → ℝ}
-    {φB φZ : ι → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
+    {φB φZ : ι → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
     {f : (ι → ℝ) → ℝ} {C₁ C₂ : ℝ} (hf : ItoTest f C₁ C₂) {τ : Ω → ℝ≥0} (hτ : IsStop ℱ τ) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, f (fun i ↦ Y i (min t (τ ω)) ω) = f y
       + ∫ s in Set.Ioc 0 (min t (τ ω)), (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω

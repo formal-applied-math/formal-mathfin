@@ -50,6 +50,7 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
 
+/-- Partial Brownian increment sum of a simple process up to the evaluation time. -/
 noncomputable def itoSimpleProcess (_hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ)
     (t : ℝ≥0) : Ω → ℝ :=
@@ -149,6 +150,7 @@ theorem memLp_itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
       from funext fun ω ↦ by rw [itoSimpleProcess_apply]; rfl]
   exact memLp_finsetSum _ fun p hp ↦ memLp_truncated_term hB hBmeas V t hp
 
+/-- Partial Brownian increment sum as a square-integrable random variable. -/
 noncomputable def itoSimpleProcessLp (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ)
     (t : ℝ≥0) : Lp ℝ 2 μ :=

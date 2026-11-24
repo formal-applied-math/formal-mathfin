@@ -64,9 +64,9 @@ structure IsHestonState (hP : IndependentPair ℱ B Z μ) (T : ℝ≥0) (p : Par
   contX : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Set.Icc 0 T)
   contV : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ V t ω) (Set.Icc 0 T)
   nonneg : ∀ᵐ ω ∂μ, ∀ t ≤ T, 0 ≤ V t ω
-  kernels : ∃ Hv Hx : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ),
-    (⇑Hv =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2)) ∧
-    (⇑Hx =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2)) ∧
+  kernels : ∃ Hv Hx : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ),
+    (⇑Hv =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2)) ∧
+    (⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2)) ∧
     (∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
       + itoContinuousMod T hP.left.measurable Hv t ω) ∧

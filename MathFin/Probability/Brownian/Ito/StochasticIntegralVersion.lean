@@ -65,12 +65,14 @@ noncomputable def predictableL2Class (μ : Measure Ω) (ℱ : Filtration ℝ≥0
 variable {T : ℝ≥0} {hBmeas : ∀ t, Measurable (B t)}
   {φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)}
 
+omit [IsProbabilityMeasure μ] in
 /-- On the natural filtration with the bracket measure the process domain is the library's
 canonical one. -/
 theorem predictableL2Domain_bracket :
     predictableL2Domain μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) =
       domain T hBmeas φ := rfl
 
+omit [IsProbabilityMeasure μ] in
 /-- Applying the generic class selector on the bracket measure returns the original L² class. -/
 theorem predictableL2Class_bracket (X : ℝ≥0 → Ω → ℝ) :
     predictableL2Class μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) X =

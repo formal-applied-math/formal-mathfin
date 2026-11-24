@@ -95,7 +95,7 @@ lemma contProcess_const_mul_sqrt {T : ℝ≥0} (c : ℝ) {V : ℝ≥0 → Ω →
 
 theorem itoContinuousMod_smul_ae (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) {T : ℝ≥0} (c : ℝ)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hW.measurable (c • φ) t ω
       = c * itoContinuousMod T hW.measurable φ t ω := by
   refine ae_forall_eq_of_continuousOn' (itoContinuousMod_continuousOn hW T hW.measurable hWc _)
@@ -112,7 +112,7 @@ integral against the correlated noise is `ρ` times the `B`-integral plus `√(1
 `Z`-integral. -/
 theorem itoContinuousMod_correlated (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
-    {ρ : ℝ} (hρ : |ρ| ≤ 1) {T : ℝ≥0} (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    {ρ : ℝ} (hρ : |ρ| ≤ 1) {T : ℝ≥0} (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T (hP.correlated_brownian hρ).measurable φ t ω
       = ρ * itoContinuousMod T hP.left.measurable φ t ω
         + orthogonalWeight ρ * itoContinuousMod T hP.right.measurable φ t ω := by
@@ -163,23 +163,23 @@ def hestonDiffZ (p : Parameters) (V : ℝ≥0 → Ω → ℝ) : Fin 3 → ℝ≥
   ![fun _ _ ↦ 0, fun s ω ↦ orthogonalWeight p.rho * Real.sqrt (V s ω), fun _ _ ↦ 0]
 
 /-- `L²` kernels of the `B`-integrals. -/
-def hestonKerB (p : Parameters) {T : ℝ≥0} (Hv Hx : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    Fin 3 → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) := ![0, p.rho • Hx, Hv]
+def hestonKerB (p : Parameters) {T : ℝ≥0} (Hv Hx : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    Fin 3 → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) := ![0, p.rho • Hx, Hv]
 
 /-- `L²` kernels of the `Z`-integrals. -/
-def hestonKerZ (p : Parameters) {T : ℝ≥0} (Hx : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    Fin 3 → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) := ![0, orthogonalWeight p.rho • Hx, 0]
+def hestonKerZ (p : Parameters) {T : ℝ≥0} (Hx : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    Fin 3 → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) := ![0, orthogonalWeight p.rho • Hx, 0]
 
 /-- **The Heston state is a three-dimensional Itô process** driven by `(B, Z)`. -/
 theorem hestonItoProc (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} (p : Parameters) (hρ : |p.rho| ≤ 1) {x₀ v₀ : ℝ}
-    {X V : ℝ≥0 → Ω → ℝ} {Hv Hx : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {X V : ℝ≥0 → Ω → ℝ} {Hv Hx : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hpX : IsStronglyPredictable ℱ X) (hpV : IsStronglyPredictable ℱ V)
     (hcX : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Set.Icc 0 T))
     (hcV : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ V t ω) (Set.Icc 0 T))
-    (hHv : ⇑Hv =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2))
-    (hHx : ⇑Hx =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
+    (hHv : ⇑Hv =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2))
+    (hHx : ⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
     (heqV : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
       + itoContinuousMod T hP.left.measurable Hv t ω)
@@ -213,20 +213,20 @@ theorem hestonItoProc (hP : IndependentPair ℱ B Z μ)
     · exact contProcess_zero T
   kerB i := by
     fin_cases i
-    · exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasure_T (μ := μ) T ℱ)
-    · show ⇑(p.rho • Hx) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    · exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasureT (μ := μ) T ℱ)
+    · show ⇑(p.rho • Hx) =ᵐ[trimMeasureT (μ := μ) T ℱ]
         fun z ↦ p.rho * Real.sqrt (V z.1 z.2)
       filter_upwards [Lp.coeFn_smul p.rho Hx, hHx] with z h1 h2
       rw [h1, Pi.smul_apply, h2, smul_eq_mul]
     · exact hHv
   kerZ i := by
     fin_cases i
-    · exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasure_T (μ := μ) T ℱ)
-    · show ⇑(orthogonalWeight p.rho • Hx) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    · exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasureT (μ := μ) T ℱ)
+    · show ⇑(orthogonalWeight p.rho • Hx) =ᵐ[trimMeasureT (μ := μ) T ℱ]
         fun z ↦ orthogonalWeight p.rho * Real.sqrt (V z.1 z.2)
       filter_upwards [Lp.coeFn_smul (orthogonalWeight p.rho) Hx, hHx] with z h1 h2
       rw [h1, Pi.smul_apply, h2, smul_eq_mul]
-    · exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasure_T (μ := μ) T ℱ)
+    · exact Lp.coeFn_zero (E := ℝ) (p := 2) (μ := trimMeasureT (μ := μ) T ℱ)
   eq := by
     filter_upwards [heqX, heqV, itoContinuousMod_zero_kernel hP.left hBc T,
       itoContinuousMod_zero_kernel hP.right hZc T,

@@ -330,6 +330,7 @@ theorem integral_abs_le_sqrt_mul_norm (u : Lp ℝ 2 ν) :
   rw [← MathFin.lp_two_norm_sq, Real.sqrt_sq (norm_nonneg _)] at h
   linarith [h]
 
+omit [IsFiniteMeasure ν] in
 /-- Dominated convergence for weighted differences. -/
 theorem tendsto_integral_abs_sub_mul {g : ℕ → α → ℝ} {g₀ h : α → ℝ} {M : ℝ}
     (hgm : ∀ n, AEStronglyMeasurable (g n) ν) (hg₀m : AEStronglyMeasurable g₀ ν)
@@ -627,6 +628,7 @@ section General
 variable (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
 
+omit [IsProbabilityMeasure μ] in
 theorem memLp_comp_mul_coeFn {X : ℝ≥0 → Ω → ℝ}
     (hX : IsStronglyPredictable (natFiltration hBmeas) X)
     {g : ℝ → ℝ} (hg : Continuous g) {C : ℝ} (hgC : ∀ x, |g x| ≤ C)

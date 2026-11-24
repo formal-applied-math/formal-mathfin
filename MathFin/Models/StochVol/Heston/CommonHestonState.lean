@@ -48,16 +48,16 @@ theorem exists_heston_state (h : IndependentPair ℱ B Z μ) (T : ℝ≥0)
     (p : MathFin.Heston.Parameters) (hk : 0 ≤ p.kappa) (hθ : 0 ≤ p.theta)
     (hξ : 0 < p.xi) (hρ : |p.rho| ≤ 1) (x₀ v₀ : ℝ) (hv₀ : 0 ≤ v₀) :
     ∃ (X V : ℝ≥0 → Ω → ℝ)
-      (Gx Hv Hx : Lp ℝ 2 (CommonPredictable.trimMeasure_T (μ := μ) T ℱ)),
+      (Gx Hv Hx : Lp ℝ 2 (CommonPredictable.trimMeasureT (μ := μ) T ℱ)),
       IsStronglyPredictable ℱ X ∧ IsStronglyPredictable ℱ V ∧
       (∀ᵐ ω ∂μ, ContinuousOn (fun t => X t ω) (Set.Icc 0 T)) ∧
       (∀ᵐ ω ∂μ, ContinuousOn (fun t => V t ω) (Set.Icc 0 T)) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, 0 ≤ V t ω) ∧
-      (⇑Gx =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+      (⇑Gx =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
         fun z => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2) ∧
-      (⇑Hv =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+      (⇑Hv =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
         fun z => p.xi * Real.sqrt (V z.1 z.2)) ∧
-      (⇑Hx =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+      (⇑Hx =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
         fun z => Real.sqrt (V z.1 z.2)) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀ +
         (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂MathFin.ItoIntegralL2.timeMeasure) +
@@ -99,16 +99,16 @@ theorem exists_heston_state (h : IndependentPair ℱ B Z μ) (T : ℝ≥0)
       (fun z : ℝ≥0 × Ω => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2) :=
     (show Continuous (fun v : ℝ => (p.r-p.q) - (1/2 : ℝ) * v) by
           fun_prop).comp_stronglyMeasurable hpV
-  have hGx : ⇑Gx =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+  have hGx : ⇑Gx =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
       fun z => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2 :=
     (coeFn_lpLift hle T β).trans (ae_lift hle T (Lp.stronglyMeasurable β) hβm hβ.coeFn_toLp)
   have hHm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration h.left.measurable).predictable]
       (fun z : ℝ≥0 × Ω => MathFin.Heston.cirDiffusion p (V z.1 z.2)) :=
     (MathFin.Heston.continuous_cirDiffusion p).comp_stronglyMeasurable hpV
-  have hHv : ⇑Hv =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+  have hHv : ⇑Hv =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
       fun z => p.xi * Real.sqrt (V z.1 z.2) :=
     (coeFn_lpLift hle T H).trans (ae_lift hle T (Lp.stronglyMeasurable H) hHm hH)
-  have hHx : ⇑Hx =ᵐ[CommonPredictable.trimMeasure_T (μ := μ) T ℱ]
+  have hHx : ⇑Hx =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
       fun z => Real.sqrt (V z.1 z.2) := by
     filter_upwards [Lp.coeFn_smul p.xi⁻¹ Hv, hHv] with z hs hv
     rw [show Hx z = (p.xi⁻¹ • (Hv : ℝ≥0 × Ω → ℝ)) z from hs,

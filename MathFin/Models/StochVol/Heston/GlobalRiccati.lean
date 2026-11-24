@@ -43,12 +43,15 @@ namespace MathFin.Heston
 open Set Filter
 open scoped Topology
 
+/-- First component of the linear flow representing the variance coefficient. -/
 def riccatiNumerator (p : Parameters) (u w : Complex) (t : Real) : Complex :=
   linearSystemP (laplaceA p) (laplaceB p u) (laplaceConstant u) w t
 
+/-- Second component of the linear flow representing the variance coefficient. -/
 def riccatiDenominator (p : Parameters) (u w : Complex) (t : Real) : Complex :=
   linearSystemQ (laplaceA p) (laplaceB p u) (laplaceConstant u) w t
 
+/-- Ratio of the two linear-flow components at maturity t. -/
 def globalLaplaceD (p : Parameters) (u w : Complex) (t : Real) : Complex :=
   riccatiNumerator p u w t / riccatiDenominator p u w t
 

@@ -91,21 +91,21 @@ every `ω`, holds `trim_T`-almost everywhere. -/
 lemma ae_trim_of_forall_ae {T : ℝ≥0} {P : ℝ≥0 × Ω → Prop}
     (hP : MeasurableSet[ℱ.predictable] {p | P p})
     (h : ∀ s ∈ Set.Ioc 0 T, ∀ᵐ ω ∂μ, P (s, ω)) :
-    ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), P p := by
-  have hprod : ∀ᵐ p ∂((timeMeasure_T T).prod μ), P p := by
-    rw [Measure.ae_prod_iff_ae_ae (ℱ.predictable_le_prod _ hP), timeMeasure_T,
+    ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), P p := by
+  have hprod : ∀ᵐ p ∂((timeMeasureT T).prod μ), P p := by
+    rw [Measure.ae_prod_iff_ae_ae (ℱ.predictable_le_prod _ hP), timeMeasureT,
       ae_restrict_iff' measurableSet_Ioc]
     exact Eventually.of_forall fun s hs => h s hs
   rw [ae_iff] at hprod ⊢
-  rw [trimMeasure_T, trim_measurableSet_eq _
+  rw [trimMeasureT, trim_measurableSet_eq _
     (show MeasurableSet[ℱ.predictable] {a | ¬ P a} from hP.compl)]
   exact hprod
 
 /-- A `trim_T`-almost-everywhere property holds, for almost every time `s ∈ (0,T]`, for
 almost every `ω`. -/
 lemma ae_ae_of_ae_trim' {T : ℝ≥0} {P : ℝ≥0 × Ω → Prop}
-    (h : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), P p) :
-    ∀ᵐ s ∂(timeMeasure_T T), ∀ᵐ ω ∂μ, P (s, ω) :=
+    (h : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), P p) :
+    ∀ᵐ s ∂(timeMeasureT T), ∀ᵐ ω ∂μ, P (s, ω) :=
   Measure.ae_ae_of_ae_prod (ae_of_ae_trim ℱ.predictable_le_prod h)
 
 /-! ### Frozen factors and frozen kernels -/
@@ -225,20 +225,20 @@ lemma tendsto_frozenFactor (T : ℝ≥0) {w : ℝ≥0 → Ω → ℝ} {s : ℝ�
 /-- The frozen kernel `∑ₖ w(tₖ)·𝟙_{(tₖ,tₖ₊₁]}·φ`. -/
 noncomputable def frozenKernel (T : ℝ≥0) (n : ℕ) (hBmeas : ∀ u, Measurable (B u))
     (w : ℝ≥0 → Ω → ℝ) (hw : ∀ t, Measurable[ℱ t] (w t)) (C : ℝ) (hC : ∀ t ω, |w t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   ∑ k ∈ Finset.range n, smulAdapted T (unifPart T n k) hBmeas (w (unifPart T n k))
     (hw _) C (fun ω ↦ hC _ ω) (band T (unifPart T n k) (unifPart T n (k + 1)) hBmeas φ)
 
 omit [IsProbabilityMeasure μ] in
 lemma coeFn_frozenKernel (T : ℝ≥0) (n : ℕ) (hBmeas : ∀ u, Measurable (B u))
     (w : ℝ≥0 → Ω → ℝ) (hw : ∀ t, Measurable[ℱ t] (w t)) (C : ℝ) (hC : ∀ t ω, |w t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(frozenKernel T n hBmeas w hw C hC φ) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(frozenKernel T n hBmeas w hw C hC φ) =ᵐ[trimMeasureT (μ := μ) T ℱ]
       fun p ↦ frozenFactor T n w p * φ p := by
   have hterm : ∀ k ∈ Finset.range n,
       ⇑(smulAdapted T (unifPart T n k) hBmeas (w (unifPart T n k)) (hw _) C (fun ω ↦ hC _ ω)
         (band T (unifPart T n k) (unifPart T n (k + 1)) hBmeas φ))
-      =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦
+      =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦
         (afterFactor (unifPart T n k) (w (unifPart T n k)) p
           - afterFactor (unifPart T n (k + 1)) (w (unifPart T n k)) p) * φ p := by
     intro k _
@@ -265,15 +265,15 @@ lemma coeFn_frozenKernel (T : ℝ≥0) (n : ℕ) (hBmeas : ∀ u, Measurable (B 
 /-- The limit kernel `w·φ`, for a predictable bounded weight. -/
 noncomputable def mulKernel (T : ℝ≥0) {w : ℝ≥0 → Ω → ℝ}
     (hwP : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ w p.1 p.2)) {C : ℝ}
-    (hC : ∀ t ω, |w t ω| ≤ C) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
-  mulBddCLM (trimMeasure_T (μ := μ) T ℱ) hwP (fun p ↦ hC p.1 p.2) φ
+    (hC : ∀ t ω, |w t ω| ≤ C) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
+  mulBddCLM (trimMeasureT (μ := μ) T ℱ) hwP (fun p ↦ hC p.1 p.2) φ
 
 omit [IsProbabilityMeasure μ] in
 lemma coeFn_mulKernel (T : ℝ≥0) {w : ℝ≥0 → Ω → ℝ}
     (hwP : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ w p.1 p.2)) {C : ℝ}
-    (hC : ∀ t ω, |w t ω| ≤ C) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(mulKernel T hwP hC φ) =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ w p.1 p.2 * φ p :=
+    (hC : ∀ t ω, |w t ω| ≤ C) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(mulKernel T hwP hC φ) =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ w p.1 p.2 * φ p :=
   coeFn_mulBddCLM _ _ _ φ
 
 /-- **Frozen kernels converge** to `w·φ` in `L²(trim_T)` when the paths of `w` are a.s.
@@ -282,13 +282,13 @@ theorem tendsto_frozenKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     {w : ℝ≥0 → Ω → ℝ} (hw : ∀ t, Measurable[ℱ t] (w t))
     (hwP : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ w p.1 p.2)) {C : ℝ}
     (hC : ∀ t ω, |w t ω| ≤ C) (hcont : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ w t ω) (Set.Icc 0 T))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Tendsto (fun n : ℕ ↦ frozenKernel T n hBmeas w hw C hC φ) atTop
       (𝓝 (mulKernel T hwP hC φ)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
   set F : ℕ → ℝ≥0 × Ω → ℝ := fun n p ↦
     ((frozenKernel T n hBmeas w hw C hC φ - mulKernel T hwP hC φ : Lp ℝ 2 _) p) ^ 2 with hF
-  have hcoe : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), ∀ n : ℕ,
+  have hcoe : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), ∀ n : ℕ,
       F n p = ((frozenFactor T n w p - w p.1 p.2) * φ p) ^ 2 := by
     rw [ae_all_iff]
     intro n
@@ -298,7 +298,7 @@ theorem tendsto_frozenKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     rw [h1, Pi.sub_apply, h2, h3]
     ring
   -- pointwise convergence of the frozen factor, trim-almost everywhere
-  have hconv : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ),
+  have hconv : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ),
       Tendsto (fun n ↦ frozenFactor T n w p - w p.1 p.2) atTop (𝓝 0) := by
     refine ae_trim_of_forall_ae ?_ ?_
     · exact measurableSet_tendsto (𝓝 0) fun n =>
@@ -307,8 +307,8 @@ theorem tendsto_frozenKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
       filter_upwards [hcont] with ω hω
       have := (tendsto_frozenFactor T hs hω).sub_const (w s ω)
       simpa using this
-  have hint : Tendsto (fun n ↦ ∫ p, F n p ∂(trimMeasure_T (μ := μ) T ℱ)) atTop (𝓝 0) := by
-    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasure_T (μ := μ) T ℱ)
+  have hint : Tendsto (fun n ↦ ∫ p, F n p ∂(trimMeasureT (μ := μ) T ℱ)) atTop (𝓝 0) := by
+    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasureT (μ := μ) T ℱ)
       (F := F) (f := fun _ => (0 : ℝ)) (fun p ↦ (2 * C) ^ 2 * (φ p) ^ 2)
       (fun n => (Lp.aestronglyMeasurable _).pow 2)
       ((Lp.memLp φ).integrable_sq.const_mul _)
@@ -330,7 +330,7 @@ theorem tendsto_frozenKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
         exact this.congr fun n => (hp n).symm)
     simpa using key
   have hsq : ∀ n : ℕ, ‖frozenKernel T n hBmeas w hw C hC φ - mulKernel T hwP hC φ‖ ^ 2
-      = ∫ p, F n p ∂(trimMeasure_T (μ := μ) T ℱ) := fun n => MathFin.lp_two_norm_sq _
+      = ∫ p, F n p ∂(trimMeasureT (μ := μ) T ℱ) := fun n => MathFin.lp_two_norm_sq _
   have h2 : Tendsto (fun n : ℕ ↦ ‖frozenKernel T n hBmeas w hw C hC φ - mulKernel T hwP hC φ‖ ^ 2)
       atTop (𝓝 0) := by
     simp_rw [hsq]; exact hint
@@ -344,8 +344,8 @@ include hB
 /-- The integral of a frozen kernel is the frozen Riemann–Stieltjes sum. -/
 theorem itoIntegralCLM_T_frozenKernel (T : ℝ≥0) (n : ℕ) (hBmeas : ∀ u, Measurable (B u))
     (w : ℝ≥0 → Ω → ℝ) (hw : ∀ t, Measurable[ℱ t] (w t)) (C : ℝ) (hC : ∀ t ω, |w t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    (itoIntegralCLM_T hB T (frozenKernel T n hBmeas w hw C hC φ) : Ω → ℝ)
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    (itoIntegralCLMT hB T (frozenKernel T n hBmeas w hw C hC φ) : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ ∑ k ∈ Finset.range n, w (unifPart T n k) ω *
         (itoProcessCLM hB T (unifPart T n (k + 1)) hBmeas φ ω
           - itoProcessCLM hB T (unifPart T n k) hBmeas φ ω) := by
@@ -375,11 +375,11 @@ theorem itoIntegralCLM_T_frozenKernel (T : ℝ≥0) (n : ℕ) (hBmeas : ∀ u, M
 theorem frozenSum_eq_itoIntegral (T : ℝ≥0) (n : ℕ) (hBmeas : ∀ u, Measurable (B u))
     (hBcont : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω)
     (w : ℝ≥0 → Ω → ℝ) (hw : ∀ t, Measurable[ℱ t] (w t)) (C : ℝ) (hC : ∀ t ω, |w t ω| ≤ C)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (fun ω ↦ ∑ k ∈ Finset.range n, w (unifPart T n k) ω *
         (itoContinuousMod T hBmeas φ (unifPart T n (k + 1)) ω
           - itoContinuousMod T hBmeas φ (unifPart T n k) ω))
-      =ᵐ[μ] (itoIntegralCLM_T hB T (frozenKernel T n hBmeas w hw C hC φ) : Ω → ℝ) := by
+      =ᵐ[μ] (itoIntegralCLMT hB T (frozenKernel T n hBmeas w hw C hC φ) : Ω → ℝ) := by
   have hmod : ∀ k ∈ Finset.range (n + 1),
       (fun ω ↦ itoContinuousMod T hBmeas φ (unifPart T n k) ω)
         =ᵐ[μ] itoProcessCLM hB T (unifPart T n k) hBmeas φ :=
@@ -400,24 +400,24 @@ theorem tendsto_riemannStieltjes (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
     {w : ℝ≥0 → Ω → ℝ} (hw : ∀ t, Measurable[ℱ t] (w t))
     (hwP : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ w p.1 p.2)) {C : ℝ}
     (hC : ∀ t ω, |w t ω| ≤ C) (hcont : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ w t ω) (Set.Icc 0 T))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n, w (unifPart T n k) ω *
         (itoContinuousMod T hBmeas φ (unifPart T n (k + 1)) ω
           - itoContinuousMod T hBmeas φ (unifPart T n k) ω)
-        - itoIntegralCLM_T hB T (mulKernel T hwP hC φ) ω) ^ 2 ∂μ) atTop (𝓝 0) := by
-  have hL : Tendsto (fun n : ℕ ↦ itoIntegralCLM_T hB T (frozenKernel T n hBmeas w hw C hC φ))
-      atTop (𝓝 (itoIntegralCLM_T hB T (mulKernel T hwP hC φ))) :=
-    ((itoIntegralCLM_T hB T).continuous.tendsto _).comp
+        - itoIntegralCLMT hB T (mulKernel T hwP hC φ) ω) ^ 2 ∂μ) atTop (𝓝 0) := by
+  have hL : Tendsto (fun n : ℕ ↦ itoIntegralCLMT hB T (frozenKernel T n hBmeas w hw C hC φ))
+      atTop (𝓝 (itoIntegralCLMT hB T (mulKernel T hwP hC φ))) :=
+    ((itoIntegralCLMT hB T).continuous.tendsto _).comp
       (tendsto_frozenKernel T hBmeas hw hwP hC hcont φ)
-  have hn : Tendsto (fun n : ℕ ↦ ‖itoIntegralCLM_T hB T (frozenKernel T n hBmeas w hw C hC φ)
-      - itoIntegralCLM_T hB T (mulKernel T hwP hC φ)‖ ^ 2) atTop (𝓝 0) := by
+  have hn : Tendsto (fun n : ℕ ↦ ‖itoIntegralCLMT hB T (frozenKernel T n hBmeas w hw C hC φ)
+      - itoIntegralCLMT hB T (mulKernel T hwP hC φ)‖ ^ 2) atTop (𝓝 0) := by
     have := (tendsto_iff_norm_sub_tendsto_zero.mp hL).pow 2
     simpa using this
   refine hn.congr fun n => ?_
   rw [MathFin.lp_two_norm_sq]
   refine integral_congr_ae ?_
-  filter_upwards [Lp.coeFn_sub (itoIntegralCLM_T hB T (frozenKernel T n hBmeas w hw C hC φ))
-      (itoIntegralCLM_T hB T (mulKernel T hwP hC φ)),
+  filter_upwards [Lp.coeFn_sub (itoIntegralCLMT hB T (frozenKernel T n hBmeas w hw C hC φ))
+      (itoIntegralCLMT hB T (mulKernel T hwP hC φ)),
     frozenSum_eq_itoIntegral hB T n hBmeas hBcont w hw C hC φ] with ω h1 h2
   rw [h1, Pi.sub_apply, ← h2]
 

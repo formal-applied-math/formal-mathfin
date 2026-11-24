@@ -51,9 +51,9 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 theorem ae_horizon_of_ae_forall (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) {q : ℝ≥0 × Ω → Prop}
     (hq : MeasurableSet[(ℱ).predictable] {z | q z})
     (h : ∀ᵐ ω ∂μ, ∀ t, q (t, ω)) :
-    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ), q z := by
+    ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ), q z := by
   apply ae_iff.2
-  unfold trimMeasure_T
+  unfold trimMeasureT
   rw [trim_measurableSet_eq _
       (show MeasurableSet[(ℱ).predictable] {z | ¬ q z} from hq.compl)]
   refine measure_mono_null (t := Set.univ ×ˢ {ω | ¬ ∀ t, q (t, ω)})
@@ -67,9 +67,9 @@ variable {T ℱ}
 
 /-- Two predictable versions of one process are equal `⟨M⟩`-almost everywhere. -/
 theorem uncurry_ae_eq_of_isPredictableVersion {X X₁ X₂ : ℝ≥0 → Ω → ℝ}
-    (h₁ : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X X₁) (h₂ : PredictableL2Version
-          μ ℱ (trimMeasure_T (μ := μ) T ℱ) X X₂) :
-    Function.uncurry X₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] Function.uncurry X₂ := by
+    (h₁ : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X X₁) (h₂ : PredictableL2Version
+          μ ℱ (trimMeasureT (μ := μ) T ℱ) X X₂) :
+    Function.uncurry X₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] Function.uncurry X₂ := by
   refine ae_horizon_of_ae_forall T ℱ
     (q := fun z ↦ Function.uncurry X₁ z = Function.uncurry X₂ z)
     (measurableSet_eq_fun h₁.1 h₂.1) ?_
@@ -77,10 +77,10 @@ theorem uncurry_ae_eq_of_isPredictableVersion {X X₁ X₂ : ℝ≥0 → Ω → 
   exact (h1 t).symm.trans (h2 t)
 
 /-- `integrandLp` does not depend on the version chosen. -/
-theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL2Version μ ℱ (trimMeasure_T (μ :=
+theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL2Version μ ℱ (trimMeasureT (μ :=
       μ) T ℱ) X X') :
-    predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) X = h.2.1.toLp _ := by
-  have hX : X ∈ predictableL2Domain μ ℱ (trimMeasure_T (μ := μ) T ℱ) := ⟨X', h⟩
+    predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) X = h.2.1.toLp _ := by
+  have hX : X ∈ predictableL2Domain μ ℱ (trimMeasureT (μ := μ) T ℱ) := ⟨X', h⟩
   rw [predictableL2Class, dite_eq_left hX]
   exact MemLp.toLp_congr _ _ (uncurry_ae_eq_of_isPredictableVersion hX.choose_spec h)
 
@@ -88,11 +88,11 @@ theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL2Version
 variable (T ℱ) in
 /-- Read the terminal continuous linear Itô operator on a process with a predictable version. -/
 noncomputable def sIntegral (hB : BrownianOn ℱ B μ) (X : ℝ≥0 → Ω → ℝ) : Ω → ℝ :=
-  itoIntegralCLM_T hB T (predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) X)
+  itoIntegralCLMT hB T (predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) X)
 
 private theorem version_band {i j : ℝ≥0} (hij : i ≤ j) {X : Ω → ℝ}
     (hm : Measurable[ℱ i] X) {C : ℝ} (hb : ∀ ω, ‖X ω‖ ≤ C) :
-    PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) (fun k ω ↦ if k ∈ Set.Ioc i j then X ω
+    PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (fun k ω ↦ if k ∈ Set.Ioc i j then X ω
           else 0)
       (fun k ω ↦ if k ∈ Set.Ioc i j then X ω else 0) := by
   let V := stepSP (B := fun _ _ ↦ 0) (fun _ ↦ measurable_const) hij (le_refl j) hm hb
@@ -111,7 +111,7 @@ private theorem sIntegral_band (hB : BrownianOn ℱ B μ) {i j : ℝ≥0} (hij :
   simp only [sIntegral, integrandLp_eq hv]
   by_cases hi : i ≤ T
   · let V := stepSP hB.measurable (le_min hij hi) (min_le_right j T) hm hb
-    have hc : hv.2.1.toLp _ = simpleAssembly_T (μ := μ) T ℱ V := by
+    have hc : hv.2.1.toLp _ = simpleAssemblyT (μ := μ) T ℱ V := by
       apply Lp.ext
       filter_upwards [hv.2.1.coeFn_toLp, (memLp_uncurry_trim_T (μ := μ) T ℱ V.val).coeFn_toLp,
         ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T ℱ] with z hz hz' ht
@@ -126,7 +126,7 @@ private theorem sIntegral_band (hB : BrownianOn ℱ B μ) {i j : ℝ≥0} (hij :
   · have hc : hv.2.1.toLp _ = 0 := by
       apply Lp.ext
       filter_upwards [hv.2.1.coeFn_toLp, ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T ℱ,
-        Lp.coeFn_zero ℝ 2 (trimMeasure_T (μ := μ) T ℱ)] with z hz ht h0
+        Lp.coeFn_zero ℝ 2 (trimMeasureT (μ := μ) T ℱ)] with z hz ht h0
       rw [hz,h0]
       simp [Function.uncurry, Set.mem_Ioc, not_lt_of_ge (ht.2.trans (le_of_not_ge hi))]
     rw [hc,map_zero]
@@ -164,7 +164,7 @@ theorem measurable_bottomBand (i : ℝ≥0) {X : Ω → ℝ}
 version. -/
 theorem isPredictableVersion_bottomBand (i : ℝ≥0) {X : Ω → ℝ}
     (hXm : Measurable[ℱ ⊥] X) {C : ℝ} (hC : ∀ ω, ‖X ω‖ ≤ C) :
-    PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) (fun k ω ↦ if k ∈ Set.Iic i then X ω
+    PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (fun k ω ↦ if k ∈ Set.Iic i then X ω
           else 0)
       (fun k ω ↦ if k ∈ Set.Iic i then X ω else 0) := by
   refine ⟨measurable_bottomBand i hXm, ?_, .rfl⟩
@@ -198,36 +198,36 @@ theorem sIntegral_bottomBand (hB : BrownianOn ℱ B μ) (i : ℝ≥0) {X : Ω �
 
 omit [IsProbabilityMeasure μ] in
 private theorem version_add {X₁ X₂ X₁' X₂' : ℝ≥0 → Ω → ℝ}
-    (h₁ : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X₁ X₁') (h₂ :
-          PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X₂ X₂') :
-    PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) (X₁ + X₂) (X₁' + X₂') :=
+    (h₁ : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X₁ X₁') (h₂ :
+          PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X₂ X₂') :
+    PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (X₁ + X₂) (X₁' + X₂') :=
   ⟨h₁.1.add h₂.1, h₁.2.1.add h₂.2.1, h₁.2.2.add h₂.2.2⟩
 
 omit [IsProbabilityMeasure μ] in
 private theorem version_const_smul {X X' : ℝ≥0 → Ω → ℝ}
-    (h : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X X') (c : ℝ) :
-    PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) (c • X) (c • X') :=
+    (h : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X X') (c : ℝ) :
+    PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (c • X) (c • X') :=
   ⟨h.1.const_smul c, h.2.1.const_smul c, h.2.2.const_smul⟩
 
 omit [IsProbabilityMeasure μ] in
 private theorem version_of_indistinguishable {X Y X' : ℝ≥0 → Ω → ℝ}
-    (h : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X X') (hXY : X ≡ᵐ[μ] Y) :
-    PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) Y X' :=
+    (h : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X X') (hXY : X ≡ᵐ[μ] Y) :
+    PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) Y X' :=
   ⟨h.1, h.2.1, hXY.symm.trans h.2.2⟩
 
 theorem integrandLp_add {X₁ X₂ X₁' X₂' : ℝ≥0 → Ω → ℝ}
-    (h₁ : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X₁ X₁') (h₂ :
-          PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X₂ X₂') :
-    predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) (X₁ + X₂) = predictableL2Class μ ℱ
-          (trimMeasure_T (μ := μ) T ℱ) X₁ + predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ)
+    (h₁ : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X₁ X₁') (h₂ :
+          PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X₂ X₂') :
+    predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) (X₁ + X₂) = predictableL2Class μ ℱ
+          (trimMeasureT (μ := μ) T ℱ) X₁ + predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ)
           X₂ := by
   rw [integrandLp_eq (version_add h₁ h₂), integrandLp_eq h₁, integrandLp_eq h₂]
   exact MemLp.toLp_add _ _
 
-theorem integrandLp_const_smul {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL2Version μ ℱ (trimMeasure_T
+theorem integrandLp_const_smul {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL2Version μ ℱ (trimMeasureT
       (μ := μ) T ℱ) X X')
-    (c : ℝ) : predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) (c • X) = c •
-          predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) X := by
+    (c : ℝ) : predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) (c • X) = c •
+          predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) X := by
   rw [integrandLp_eq (version_const_smul h c), integrandLp_eq h]
   exact MemLp.toLp_const_smul c _
 
@@ -237,15 +237,15 @@ theorem integrandLp_const_smul {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL
 at every time and outcome and dominated by one process of the domain, has its limit in the domain,
 and the integrals converge in measure. -/
 theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω → ℝ)
-    (X_dom X_lim : ℝ≥0 → Ω → ℝ) (h₁ : ∀ n, X n ∈ predictableL2Domain μ ℱ (trimMeasure_T (μ := μ)
+    (X_dom X_lim : ℝ≥0 → Ω → ℝ) (h₁ : ∀ n, X n ∈ predictableL2Domain μ ℱ (trimMeasureT (μ := μ)
           T ℱ))
-    (h₂ : X_dom ∈ predictableL2Domain μ ℱ (trimMeasure_T (μ := μ) T ℱ)) (h_dom : ∀ n i ω, |X n i
+    (h₂ : X_dom ∈ predictableL2Domain μ ℱ (trimMeasureT (μ := μ) T ℱ)) (h_dom : ∀ n i ω, |X n i
           ω| ≤ |X_dom i ω|)
     (h_lim : ∀ i ω, Tendsto (X · i ω) atTop (𝓝 (X_lim i ω))) :
-    X_lim ∈ predictableL2Domain μ ℱ (trimMeasure_T (μ := μ) T ℱ) ∧
+    X_lim ∈ predictableL2Domain μ ℱ (trimMeasureT (μ := μ) T ℱ) ∧
       TendstoInMeasure μ (fun n ↦ sIntegral T ℱ hB (X n)) atTop
         (sIntegral T ℱ hB X_lim) := by
-  have h₁' : ∀ n, ∃ V, PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) (X n) V := h₁
+  have h₁' : ∀ n, ∃ V, PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (X n) V := h₁
   choose V hV using h₁'
   obtain ⟨Vd, hVd⟩ := h₂
   set pred := (ℱ).predictable
@@ -265,15 +265,15 @@ theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω →
   have hVl_meas : Measurable[pred] (Function.uncurry Vl) :=
     (StronglyMeasurable.limUnder (l := atTop) hVm).measurable
   -- domination and convergence, `⟨M⟩`-almost everywhere
-  have hdom (n : ℕ) : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ),
+  have hdom (n : ℕ) : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ),
       ‖Function.uncurry (V n) z‖ ≤ ‖Function.uncurry Vd z‖ := by
     refine ae_horizon_of_ae_forall T ℱ
       (measurableSet_le (hV n).1.norm hVd.1.norm) ?_
     filter_upwards [hall] with ω hω t
     simpa only [Function.uncurry_apply_pair, Real.norm_eq_abs, hω.1 n t, hω.2 t] using h_dom n t ω
-  have hconv : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ),
+  have hconv : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ),
       Tendsto (fun n ↦ Function.uncurry (V n) z) atTop (𝓝 (Function.uncurry Vl z)) := by
-    have hex : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ),
+    have hex : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ),
         ∃ c, Tendsto (fun n ↦ Function.uncurry (V n) z) atTop (𝓝 c) := by
       refine ae_horizon_of_ae_forall T ℱ
         (StronglyMeasurable.measurableSet_exists_tendsto hVm) ?_
@@ -281,18 +281,18 @@ theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω →
       exact ⟨_, hω t⟩
     filter_upwards [hex] with z hz
     exact tendsto_nhds_limUnder hz
-  have hdom_lim : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ),
+  have hdom_lim : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ),
       ‖Function.uncurry Vl z‖ ≤ ‖Function.uncurry Vd z‖ := by
     filter_upwards [hconv, ae_all_iff.2 hdom] with z hz hzd
     exact le_of_tendsto' hz.norm hzd
-  have hVl : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) X_lim Vl :=
+  have hVl : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X_lim Vl :=
     ⟨hVl_meas, hVd.2.1.of_le hVl_meas.stronglyMeasurable.aestronglyMeasurable hdom_lim,
       hVl_eq.symm⟩
   refine ⟨⟨Vl, hVl⟩, ?_⟩
   -- convergence in `L²(⟨M⟩)`, then through the isometry, then in measure
-  have hLp : Tendsto (fun n ↦ predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) (X n)) atTop
-      (𝓝 (predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) X_lim)) := by
-    have hseq : (fun n ↦ predictableL2Class μ ℱ (trimMeasure_T (μ := μ) T ℱ) (X n)) = fun n ↦
+  have hLp : Tendsto (fun n ↦ predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) (X n)) atTop
+      (𝓝 (predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) X_lim)) := by
+    have hseq : (fun n ↦ predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) (X n)) = fun n ↦
           (hV n).2.1.toLp _ :=
       funext fun n ↦ integrandLp_eq (hV n)
     rw [hseq, integrandLp_eq hVl]
@@ -300,7 +300,7 @@ theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω →
       (tendsto_eLpNorm_sub_of_dominated_convergence ENNReal.ofNat_ne_top _
         (fun n ↦ (hVm n).aestronglyMeasurable) hVd.2.1.norm hdom hconv)
   exact tendstoInMeasure_of_tendsto_Lp
-    (((itoIntegralCLM_T hB T).continuous.tendsto _).comp hLp)
+    (((itoIntegralCLMT hB T).continuous.tendsto _).comp hLp)
 
 /-! ### The integral against `M` extends the Riemann–Stieltjes integral -/
 
@@ -310,7 +310,7 @@ sum against `M` stopped at `T`, and it respects linearity, indistinguishability 
 convergence. -/
 theorem isRiemannStieltjesExtension (hB : BrownianOn ℱ B μ) :
     IsRiemannStieltjesExtension μ ((fun s ↦ B (min s T))) (ℱ)
-      (sIntegral T ℱ hB) (predictableL2Domain μ ℱ (trimMeasure_T (μ := μ) T ℱ)) where
+      (sIntegral T ℱ hB) (predictableL2Domain μ ℱ (trimMeasureT (μ := μ) T ℱ)) where
   measurable _ _ := Lp.aestronglyMeasurable _
   elementary_ioc i j hij X := by
     -- a simple function over `𝓕_i` is bounded and `𝓕_i`-measurable
@@ -349,16 +349,16 @@ theorem isRiemannStieltjesExtension (hB : BrownianOn ℱ B μ) :
 of the stopped driver, including kernels depending on both drivers. -/
 theorem isStochasticIntegral_stopped (hB : BrownianOn ℱ B μ) :
     IsStochasticIntegral μ (fun t ↦ B (min t T)) ℱ (sIntegral T ℱ hB) (predictableL2Domain μ ℱ
-          (trimMeasure_T (μ := μ) T ℱ)) :=
+          (trimMeasureT (μ := μ) T ℱ)) :=
   StochasticIntegralUniqueness.isStochasticIntegral_of_predictable_versions
     (isRiemannStieltjesExtension (T := T) hB)
     (fun _ ⟨V, hV⟩ ↦ ⟨V, hV.1.stronglyMeasurable, hV.2.2⟩)
 
 /-- Evaluation on the predictable representative of an L² kernel recovers exactly
 the terminal operator used by the common-filtration SDE. -/
-theorem sIntegral_curry (hB : BrownianOn ℱ B μ) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    sIntegral T ℱ hB (Function.curry (⇑φ)) = ⇑(itoIntegralCLM_T hB T φ) := by
-  have hv : PredictableL2Version μ ℱ (trimMeasure_T (μ := μ) T ℱ) (Function.curry (⇑φ))
+theorem sIntegral_curry (hB : BrownianOn ℱ B μ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    sIntegral T ℱ hB (Function.curry (⇑φ)) = ⇑(itoIntegralCLMT hB T φ) := by
+  have hv : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (Function.curry (⇑φ))
         (Function.curry (⇑φ)) :=
     ⟨(Lp.stronglyMeasurable φ).measurable, Lp.memLp φ, .rfl⟩
   rw [sIntegral, integrandLp_eq hv]
@@ -368,7 +368,7 @@ theorem sIntegral_curry (hB : BrownianOn ℱ B μ) (φ : Lp ℝ 2 (trimMeasure_T
 /-- At its horizon the continuous realization of every common-filtration kernel
 is a version of the BrownianMotion stochastic integral. -/
 theorem sIntegral_curry_ae_eq_continuousMod (hB : BrownianOn ℱ B μ)
-    (hc : ∀ ω, Continuous (fun s ↦ B s ω)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (hc : ∀ ω, Continuous (fun s ↦ B s ω)) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     sIntegral T ℱ hB (Function.curry (⇑φ)) =ᵐ[μ]
       CommonContinuous.itoContinuousMod T hB.measurable φ T := by
   have hh := CommonContinuous.itoContinuousMod_modification hB T hB.measurable hc φ (le_refl T)

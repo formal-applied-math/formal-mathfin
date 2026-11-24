@@ -111,6 +111,7 @@ theorem IndependentPair.integral_adapted_cross (h : IndependentPair ℱ B Z μ)
   simpa only [Function.comp_def, id_eq, h.integral_increment_mul s t s t, mul_zero]
     using he
 
+/-- Linear combination of the two Brownian drivers. -/
 def linearNoise (a b : ℝ) (B Z : ℝ≥0 → Ω → ℝ) : ℝ≥0 → Ω → ℝ :=
   fun t ω => a * B t ω + b * Z t ω
 
@@ -178,6 +179,7 @@ theorem IndependentPair.linear_brownian (h : IndependentPair ℱ B Z μ)
     rw [he]
     exact hi
 
+/-- Weight of the independent driver in the correlated rotation. -/
 def orthogonalWeight (ρ : ℝ) : ℝ := Real.sqrt (1 - ρ ^ 2)
 
 theorem sq_add_orthogonalWeight_sq {ρ : ℝ} (hρ : |ρ| ≤ 1) :
@@ -188,6 +190,7 @@ theorem sq_add_orthogonalWeight_sq {ρ : ℝ} (hρ : |ρ| ≤ 1) :
   rw [orthogonalWeight, Real.sq_sqrt hh]
   ring
 
+/-- Brownian driver constructed by rotating an independent pair to correlation ρ. -/
 def correlatedNoise (ρ : ℝ) (B Z : ℝ≥0 → Ω → ℝ) : ℝ≥0 → Ω → ℝ :=
   linearNoise ρ (orthogonalWeight ρ) B Z
 

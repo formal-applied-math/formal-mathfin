@@ -21,8 +21,8 @@ Adapted to an arbitrary filtration for this Heston project, 2026-10-18.
 ## Main definitions
 
 * `TBoundedSP`
-* `simpleAssembly_T`
-* `iocSP_T`
+* `simpleAssemblyT`
+* `iocSPT`
 
 ## Main results
 
@@ -48,26 +48,28 @@ open MathFin
 open scoped NNReal ENNReal InnerProductSpace
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
 
-def timeMeasure_T (T : ℝ≥0) : Measure ℝ≥0 :=
+/-- Lebesgue time measure restricted to the positive part of the finite horizon. -/
+def timeMeasureT (T : ℝ≥0) : Measure ℝ≥0 :=
   ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)
 
-instance (T : ℝ≥0) : IsFiniteMeasure (timeMeasure_T T) := by
+instance (T : ℝ≥0) : IsFiniteMeasure (timeMeasureT T) := by
   refine ⟨?_⟩
-  rw [timeMeasure_T, Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
+  rw [timeMeasureT, Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
     ItoIntegralL2.timeMeasure_Ioc]
   exact ENNReal.ofReal_lt_top
 
-def trimMeasure_T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :=
-  ((timeMeasure_T T).prod μ).trim ℱ.predictable_le_prod
+/-- Time–probability product measure restricted to the predictable sigma algebra. -/
+def trimMeasureT (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :=
+  ((timeMeasureT T).prod μ).trim ℱ.predictable_le_prod
 
 instance (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
-    IsFiniteMeasure (trimMeasure_T (μ := μ) T ℱ) := by
-  unfold trimMeasure_T
+    IsFiniteMeasure (trimMeasureT (μ := μ) T ℱ) := by
+  unfold trimMeasureT
   infer_instance
 
 lemma memLp_uncurry_trim_T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ)
     (V : SimpleProcess ℝ ℱ) :
-    MemLp (Function.uncurry ⇑V) 2 (trimMeasure_T (μ := μ) T ℱ) := by
+    MemLp (Function.uncurry ⇑V) 2 (trimMeasureT (μ := μ) T ℱ) := by
   obtain ⟨C, hC⟩ := V.coe_bounded
   exact MemLp.of_bound V.isStronglyPredictable.aestronglyMeasurable C
     (Eventually.of_forall fun z => hC z.1 z.2)
@@ -80,6 +82,7 @@ lemma uncurry_coe_smul (ℱ : Filtration ℝ≥0 mΩ) (c : ℝ) (V : SimpleProce
     Function.uncurry ⇑(c • V) = c • Function.uncurry ⇑V := by
   rw [SimpleProcess.coe_smul]; rfl
 
+/-- Rectangles generating the predictable sigma algebra of the given filtration. -/
 def predictableRect (ℱ : Filtration ℝ≥0 mΩ) :
     Set (Set (ℝ≥0 × Ω)) :=
   ℱ.predictableRectangles
@@ -121,29 +124,31 @@ theorem generateFrom_predictableRect (ℱ : Filtration ℝ≥0 mΩ) :
         (MeasureTheory.Filtration.Ioc_prod_mem_predictableRectangles _ i (seq n) hA)
 
 lemma trimMeasure_T_eq_restrict (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
-    trimMeasure_T (μ := μ) T ℱ =
+    trimMeasureT (μ := μ) T ℱ =
       ((ItoIntegralL2.timeMeasure.prod μ).trim
         ℱ.predictable_le_prod).restrict
         (Set.Ioc 0 T ×ˢ Set.univ) := by
   let 𝓕 := ℱ
-  show ((timeMeasure_T T).prod μ).trim 𝓕.predictable_le_prod = _
-  unfold timeMeasure_T
+  show ((timeMeasureT T).prod μ).trim 𝓕.predictable_le_prod = _
+  unfold timeMeasureT
   rw [Measure.restrict_prod_eq_prod_univ,
       ← MeasureTheory.restrict_trim 𝓕.predictable_le_prod _
         (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ)]
 
 lemma ae_fst_mem_Ioc_trimMeasure_T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
-    ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ), z.1 ∈ Set.Ioc 0 T := by
+    ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ), z.1 ∈ Set.Ioc 0 T := by
   rw [trimMeasure_T_eq_restrict]
   exact (ae_restrict_mem (MeasureTheory.measurableSet_predictable_Ioc_prod
     (𝓕 := ℱ) 0 T MeasurableSet.univ)).mono
     fun _ hz ↦ hz.1
 
-noncomputable def simpleProcessL2_T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ)
+/-- Simple process as a predictable square-integrable kernel on the finite horizon. -/
+noncomputable def simpleProcessL2T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ)
     (V : SimpleProcess ℝ ℱ) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   (memLp_uncurry_trim_T T ℱ V).toLp (Function.uncurry ⇑V)
 
+/-- Submodule of simple processes whose time bands end by the given horizon. -/
 def TBoundedSP (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
     Submodule ℝ (SimpleProcess ℝ ℱ) where
   carrier := { V | ∀ p ∈ V.value.support, p.2 ≤ T }
@@ -173,19 +178,20 @@ lemma uncurry_eq_zero_of_lt {T : ℝ≥0} {ℱ : Filtration ℝ≥0 mΩ}
   intro _
   exact lt_of_le_of_lt (V.property p hp) ht
 
-noncomputable def simpleAssembly_T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
-    TBoundedSP T ℱ →ₗ[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) where
-  toFun V := simpleProcessL2_T T ℱ V.val
+/-- Linear map from horizon-bounded simple processes into predictable L². -/
+noncomputable def simpleAssemblyT (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
+    TBoundedSP T ℱ →ₗ[ℝ] Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) where
+  toFun V := simpleProcessL2T T ℱ V.val
   map_add' V W := by
-    show simpleProcessL2_T T ℱ ((V + W).val) = _
-    rw [Submodule.coe_add, simpleProcessL2_T, simpleProcessL2_T, simpleProcessL2_T,
+    show simpleProcessL2T T ℱ ((V + W).val) = _
+    rw [Submodule.coe_add, simpleProcessL2T, simpleProcessL2T, simpleProcessL2T,
         ← MemLp.toLp_add (memLp_uncurry_trim_T T ℱ V.val)
           (memLp_uncurry_trim_T T ℱ W.val)]
     congr 1
     exact uncurry_coe_add ℱ V.val W.val
   map_smul' c V := by
-    show simpleProcessL2_T T ℱ ((c • V).val) = _
-    rw [Submodule.coe_smul, simpleProcessL2_T, simpleProcessL2_T, RingHom.id_apply,
+    show simpleProcessL2T T ℱ ((c • V).val) = _
+    rw [Submodule.coe_smul, simpleProcessL2T, simpleProcessL2T, RingHom.id_apply,
         ← MemLp.toLp_const_smul c (memLp_uncurry_trim_T T ℱ V.val)]
     congr 1
     exact uncurry_coe_smul ℱ c V.val
@@ -193,15 +199,15 @@ noncomputable def simpleAssembly_T (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) 
 lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     (ℱ : Filtration ℝ≥0 mΩ)
     {g : ℝ≥0 × Ω → ℝ}
-    (hg_int : Integrable g (trimMeasure_T (μ := μ) T ℱ))
+    (hg_int : Integrable g (trimMeasureT (μ := μ) T ℱ))
     (h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) ℱ,
-      ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T ℱ) = 0)
+      ∫ z in R, g z ∂(trimMeasureT (μ := μ) T ℱ) = 0)
     (s : Set (ℝ≥0 × Ω))
     (hs : MeasurableSet[ℱ.predictable] s) :
-    ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T ℱ) = 0 := by
+    ∫ z in s, g z ∂(trimMeasureT (μ := μ) T ℱ) = 0 := by
   let 𝓕 := ℱ
 
-  have h_total : ∫ z, g z ∂(trimMeasure_T (μ := μ) T ℱ) = 0 := by
+  have h_total : ∫ z, g z ∂(trimMeasureT (μ := μ) T ℱ) = 0 := by
     by_cases hT : 0 < T
     ·
       have hR : Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) ∈ predictableRect (mΩ := mΩ) ℱ :=
@@ -210,34 +216,34 @@ lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
         MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ
 
       have hSc_null :
-          (trimMeasure_T (μ := μ) T ℱ) (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω))ᶜ = 0 := by
+          (trimMeasureT (μ := μ) T ℱ) (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω))ᶜ = 0 := by
         rw [trimMeasure_T_eq_restrict,
             Measure.restrict_apply (MeasurableSet.compl hS_pred),
             Set.compl_inter_self]
         exact measure_empty
       have h_int_Sc : ∫ z in (Set.Ioc 0 T ×ˢ Set.univ)ᶜ, g z
-          ∂(trimMeasure_T (μ := μ) T ℱ) = 0 :=
+          ∂(trimMeasureT (μ := μ) T ℱ) = 0 :=
         setIntegral_measure_zero g hSc_null
       have h_int_S := h_orth _ hR
       have h_split := integral_add_compl
-        (μ := trimMeasure_T (μ := μ) T ℱ) (f := g) hS_pred hg_int
+        (μ := trimMeasureT (μ := μ) T ℱ) (f := g) hS_pred hg_int
       linarith
     ·
       push Not at hT
       have hT0 : T = 0 := le_antisymm hT bot_le
-      have h_zero : trimMeasure_T (μ := μ) T ℱ = 0 := by
+      have h_zero : trimMeasureT (μ := μ) T ℱ = 0 := by
         subst hT0
-        unfold trimMeasure_T timeMeasure_T
+        unfold trimMeasureT timeMeasureT
         rw [Set.Ioc_self, Measure.restrict_empty, Measure.zero_prod,
             MeasureTheory.zero_trim]
 
       let gf : ℝ≥0 × Ω → ℝ := (g : ℝ≥0 × Ω → ℝ)
-      show ∫ z, gf z ∂(trimMeasure_T (μ := μ) T ℱ) = 0
+      show ∫ z, gf z ∂(trimMeasureT (μ := μ) T ℱ) = 0
       rw [h_zero]
       exact integral_zero_measure gf
 
   refine MeasurableSpace.induction_on_inter
-    (C := fun s _ ↦ ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T ℱ) = 0)
+    (C := fun s _ ↦ ∫ z in s, g z ∂(trimMeasureT (μ := μ) T ℱ) = 0)
     (h_eq := (generateFrom_predictableRect ℱ).symm)
     (h_inter := isPiSystem_predictableRect ℱ)
     (empty := setIntegral_empty)
@@ -246,14 +252,15 @@ lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
   ·
     intro S hS hPS
     have h_split := integral_add_compl
-      (μ := trimMeasure_T (μ := μ) T ℱ) (f := g) hS hg_int
+      (μ := trimMeasureT (μ := μ) T ℱ) (f := g) hS hg_int
     linarith
   ·
     intro f hf hfm hf_zero
     rw [integral_iUnion hfm hf hg_int.integrableOn]
     simp [hf_zero]
 
-noncomputable def iocSP_T {T : ℝ≥0} (ℱ : Filtration ℝ≥0 mΩ)
+/-- Horizon-bounded simple process associated with a predictable rectangle. -/
+noncomputable def iocSPT {T : ℝ≥0} (ℱ : Filtration ℝ≥0 mΩ)
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[ℱ a] F) :
     TBoundedSP T ℱ :=
@@ -274,7 +281,7 @@ noncomputable def iocSP_T {T : ℝ≥0} (ℱ : Filtration ℝ≥0 mΩ)
 lemma uncurry_iocSP_T_eq {T : ℝ≥0} (ℱ : Filtration ℝ≥0 mΩ)
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[ℱ a] F) :
-    Function.uncurry ⇑(iocSP_T ℱ hab hbT hF : TBoundedSP T ℱ).val
+    Function.uncurry ⇑(iocSPT ℱ hab hbT hF : TBoundedSP T ℱ).val
       = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) := by
   funext ⟨t, ω⟩
   change ⇑((ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ)) t ω
@@ -286,9 +293,9 @@ lemma uncurry_iocSP_T_eq {T : ℝ≥0} (ℱ : Filtration ℝ≥0 mΩ)
 private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (ℱ : Filtration ℝ≥0 mΩ)
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[ℱ a] F)
-    (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⟪simpleAssembly_T (μ := μ) T ℱ (iocSP_T ℱ hab hbT hF), g⟫_ℝ
-      = ∫ z in Set.Ioc a b ×ˢ F, g z ∂(trimMeasure_T (μ := μ) T ℱ) := by
+    (g : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⟪simpleAssemblyT (μ := μ) T ℱ (iocSPT ℱ hab hbT hF), g⟫_ℝ
+      = ∫ z in Set.Ioc a b ×ˢ F, g z ∂(trimMeasureT (μ := μ) T ℱ) := by
   let 𝓕 := ℱ
 
   letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
@@ -296,19 +303,19 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (ℱ : Filtration ℝ
 
   have h_coe := MemLp.coeFn_toLp
     (memLp_uncurry_trim_T (μ := μ) T ℱ
-      (iocSP_T ℱ hab hbT hF : TBoundedSP T ℱ).val)
+      (iocSPT ℱ hab hbT hF : TBoundedSP T ℱ).val)
   have h_uncurry_eq := uncurry_iocSP_T_eq ℱ hab hbT hF
-  have h_ae_eq : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T ℱ),
-      (⟪(simpleAssembly_T (μ := μ) T ℱ (iocSP_T ℱ hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
+  have h_ae_eq : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ),
+      (⟪(simpleAssemblyT (μ := μ) T ℱ (iocSPT ℱ hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
         (g : ℝ≥0 × Ω → ℝ) z⟫_ℝ : ℝ)
         = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z := by
     filter_upwards [h_coe] with z hz
 
     have hSA_eq :
-        (simpleAssembly_T (μ := μ) T ℱ (iocSP_T ℱ hab hbT hF) : ℝ≥0 × Ω → ℝ) z
+        (simpleAssemblyT (μ := μ) T ℱ (iocSPT ℱ hab hbT hF) : ℝ≥0 × Ω → ℝ) z
           = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
-      calc (simpleAssembly_T (μ := μ) T ℱ (iocSP_T ℱ hab hbT hF) : ℝ≥0 × Ω → ℝ) z
-          = Function.uncurry ⇑(iocSP_T ℱ hab hbT hF : TBoundedSP T ℱ).val z := hz
+      calc (simpleAssemblyT (μ := μ) T ℱ (iocSPT ℱ hab hbT hF) : ℝ≥0 × Ω → ℝ) z
+          = Function.uncurry ⇑(iocSPT ℱ hab hbT hF : TBoundedSP T ℱ).val z := hz
         _ = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by rw [h_uncurry_eq]
     rw [hSA_eq]
 
@@ -326,31 +333,31 @@ lemma setIntegral_eq_setIntegral_inter_supp {T : ℝ≥0}
     (ℱ : Filtration ℝ≥0 mΩ)
     (g : ℝ≥0 × Ω → ℝ) (R : Set (ℝ≥0 × Ω))
     (hR : MeasurableSet[ℱ.predictable] R) :
-    ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T ℱ) =
-      ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasure_T (μ := μ) T ℱ) := by
+    ∫ z in R, g z ∂(trimMeasureT (μ := μ) T ℱ) =
+      ∫ z in R ∩ (Set.Ioc 0 T ×ˢ Set.univ), g z ∂(trimMeasureT (μ := μ) T ℱ) := by
   let 𝓕 := ℱ
 
   letI : MeasurableSpace (ℝ≥0 × Ω) := 𝓕.predictable
   have hS_pred : MeasurableSet (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ
 
-  have h1 : (trimMeasure_T (μ := μ) T ℱ).restrict R
-      = (trimMeasure_T (μ := μ) T ℱ).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ) := by
+  have h1 : (trimMeasureT (μ := μ) T ℱ).restrict R
+      = (trimMeasureT (μ := μ) T ℱ).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ) := by
     rw [trimMeasure_T_eq_restrict,
         Measure.restrict_restrict hR,
         Measure.restrict_restrict (hR.inter hS_pred),
         Set.inter_assoc, Set.inter_self]
-  show ∫ z, g z ∂((trimMeasure_T (μ := μ) T ℱ).restrict R)
-      = ∫ z, g z ∂((trimMeasure_T (μ := μ) T ℱ).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ))
+  show ∫ z, g z ∂((trimMeasureT (μ := μ) T ℱ).restrict R)
+      = ∫ z, g z ∂((trimMeasureT (μ := μ) T ℱ).restrict (R ∩ Set.Ioc 0 T ×ˢ Set.univ))
   rw [h1]
 
 theorem simpleAssembly_T_denseRange (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ) :
-    DenseRange (simpleAssembly_T (μ := μ) T ℱ) := by
+    DenseRange (simpleAssemblyT (μ := μ) T ℱ) := by
   let 𝓕 := ℱ
   suffices h_orth_bot :
-      (LinearMap.range (simpleAssembly_T (μ := μ) T ℱ))ᗮ = ⊥ by
+      (LinearMap.range (simpleAssemblyT (μ := μ) T ℱ))ᗮ = ⊥ by
     rw [denseRange_iff_closure_range,
-        ← LinearMap.coe_range (simpleAssembly_T (μ := μ) T ℱ),
+        ← LinearMap.coe_range (simpleAssemblyT (μ := μ) T ℱ),
         ← Submodule.topologicalClosure_coe,
         Submodule.topologicalClosure_eq_top_iff.mpr h_orth_bot, Submodule.top_coe]
   rw [Submodule.eq_bot_iff]
@@ -358,7 +365,7 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ)
   rw [Submodule.mem_orthogonal] at h_mem
 
   have h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) ℱ,
-      ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T ℱ) = 0 := by
+      ∫ z in R, g z ∂(trimMeasureT (μ := μ) T ℱ) = 0 := by
     intro R hR
     rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, _hab, F, hF, rfl⟩
     ·
@@ -394,7 +401,7 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ)
       ·
         have hbT' : min b T ≤ T := min_le_right _ _
         have h_set := inner_simpleAssembly_T_iocSP_T (μ := μ) ℱ hab' hbT' hF g
-        have h_inner := h_mem _ ⟨iocSP_T ℱ hab' hbT' hF, rfl⟩
+        have h_inner := h_mem _ ⟨iocSPT ℱ hab' hbT' hF, rfl⟩
         rw [← h_set]
         exact h_inner
       ·

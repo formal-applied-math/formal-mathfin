@@ -21,8 +21,8 @@ Common-filtration extension for Heston, 2026-10-18.
 
 ## Main definitions
 
-* `itoAssembly_T`
-* `itoIntegralCLM_T`
+* `itoAssemblyT`
+* `itoIntegralCLMT`
 
 ## Main results
 
@@ -51,7 +51,7 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 
 private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (_hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T ℱ) :
-    eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T ℱ)
+    eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasureT (μ := μ) T ℱ)
       = eLpNorm (Function.uncurry ⇑V.val) 2
           ((CommonL2.timeMeasure.prod μ).trim
             ℱ.predictable_le_prod) := by
@@ -88,7 +88,7 @@ private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (_hBmeas : ∀ t, Mea
       · intro ⟨⟨_, hle⟩, _⟩
         exact absurd hle (not_le.mpr htT)
 
-  calc eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T ℱ)
+  calc eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasureT (μ := μ) T ℱ)
       = eLpNorm (Function.uncurry ⇑V.val) 2
           (((CommonL2.timeMeasure.prod μ).trim 𝓕.predictable_le_prod).restrict
             (Set.Ioc 0 T ×ˢ Set.univ)) := by rw [trimMeasure_T_eq_restrict]; rfl
@@ -101,41 +101,42 @@ private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (_hBmeas : ∀ t, Mea
 
 private lemma simpleProcessL2_T_norm_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T ℱ) :
-    ‖simpleProcessL2_T (μ := μ) T ℱ V.val‖
+    ‖simpleProcessL2T (μ := μ) T ℱ V.val‖
       = ‖CommonL2.simpleProcessL2 (μ := μ) hBmeas V.val‖ := by
   have h := eLpNorm_uncurry_trim_T_eq_trim (μ := μ) T hBmeas V
-  unfold simpleProcessL2_T CommonL2.simpleProcessL2
+  unfold simpleProcessL2T CommonL2.simpleProcessL2
   rw [Lp.norm_toLp, Lp.norm_toLp, h]
 
-def itoAssembly_T (hB : BrownianOn ℱ B μ) (T : ℝ≥0) :
+/-- Linear map taking a horizon-bounded simple integrand to its terminal integral. -/
+def itoAssemblyT (hB : BrownianOn ℱ B μ) (T : ℝ≥0) :
     TBoundedSP T ℱ →ₗ[ℝ] Lp ℝ 2 μ :=
   (CommonL2.itoAssembly hB hB.measurable).comp (TBoundedSP T ℱ).subtype
 
 theorem assembly_isometry_T (hB : BrownianOn ℱ B μ) (T : ℝ≥0) (V : TBoundedSP T ℱ) :
-    ‖itoAssembly_T hB T V‖ = ‖simpleAssembly_T (μ := μ) T ℱ V‖ := by
+    ‖itoAssemblyT hB T V‖ = ‖simpleAssemblyT (μ := μ) T ℱ V‖ := by
   show ‖CommonL2.itoAssembly hB hB.measurable V.val‖ =
-    ‖simpleProcessL2_T (μ := μ) T ℱ V.val‖
+    ‖simpleProcessL2T (μ := μ) T ℱ V.val‖
   rw [simpleProcessL2_T_norm_eq T hB.measurable V]
   exact CommonL2.assembly_isometry hB hB.measurable V.val
 
 /-- The actual terminal Itô integral, defined by continuous extension of the
 increment-sum map on the dense simple predictable processes. -/
-def itoIntegralCLM_T (hB : BrownianOn ℱ B μ) (T : ℝ≥0) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 μ :=
-  (itoAssembly_T hB T).extendOfNorm (simpleAssembly_T (μ := μ) T ℱ)
+def itoIntegralCLMT (hB : BrownianOn ℱ B μ) (T : ℝ≥0) :
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 μ :=
+  (itoAssemblyT hB T).extendOfNorm (simpleAssemblyT (μ := μ) T ℱ)
 
 theorem itoIntegralCLM_T_simpleAssembly (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
     (V : TBoundedSP T ℱ) :
-    itoIntegralCLM_T hB T (simpleAssembly_T (μ := μ) T ℱ V) =
+    itoIntegralCLMT hB T (simpleAssemblyT (μ := μ) T ℱ V) =
       CommonL2.itoSimpleLp hB hB.measurable V.val := by
-  rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T ℱ)
+  rw [itoIntegralCLMT, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T ℱ)
     ⟨1, fun W => by rw [one_mul]; exact (assembly_isometry_T hB T W).le⟩]
   rfl
 
 theorem itoIntegralCLM_T_norm (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
-    (f : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ‖itoIntegralCLM_T hB T f‖ = ‖f‖ := by
-  rw [itoIntegralCLM_T]
+    (f : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ‖itoIntegralCLMT hB T f‖ = ‖f‖ := by
+  rw [itoIntegralCLMT]
   exact LinearMap.norm_extendOfNorm_eq_of_isometry
     (simpleAssembly_T_denseRange T ℱ) (assembly_isometry_T hB T) f
 

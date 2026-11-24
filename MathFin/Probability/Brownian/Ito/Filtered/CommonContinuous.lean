@@ -64,7 +64,7 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (T : ℝ≥0) (V : TBoundedSP T ℱ) {ε : ℝ} (hε : 0 < ε) :
     μ.real {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖}
-      ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T ℱ V‖ := by
+      ≤ ε⁻¹ * ‖simpleAssemblyT (μ := μ) T ℱ V‖ := by
   set f := itoSimpleProcess hBmeas V.val T
   set S := {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖}
   have hf : MemLp f 2 μ := memLp_itoSimpleProcess hB hBmeas V.val T
@@ -81,26 +81,26 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
       ← eLpNorm_one_eq_lintegral_enorm hfi.aestronglyMeasurable]
     exact ENNReal.toReal_mono hf.eLpNorm_lt_top.ne (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num))
 
-  have hterm : ‖itoSimpleProcessLp hB hBmeas V.val T‖ = ‖simpleAssembly_T (μ := μ) T ℱ V‖ := by
+  have hterm : ‖itoSimpleProcessLp hB hBmeas V.val T‖ = ‖simpleAssemblyT (μ := μ) T ℱ V‖ := by
     rw [← itoProcessCLM_simpleAssembly_T hB T T hBmeas V, itoProcessCLM_norm_terminal hB T hBmeas]
 
   rw [smul_eq_mul] at hweak
-  have hchain : ε * μ.real S ≤ ‖simpleAssembly_T (μ := μ) T ℱ V‖ :=
+  have hchain : ε * μ.real S ≤ ‖simpleAssemblyT (μ := μ) T ℱ V‖ :=
     hweak.trans (hsub.trans (hL2.trans_eq hterm))
   calc μ.real S = ε⁻¹ * (ε * μ.real S) := by
         rw [← mul_assoc, inv_mul_cancel₀ hε.ne', one_mul]
-    _ ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T ℱ V‖ :=
+    _ ≤ ε⁻¹ * ‖simpleAssemblyT (μ := μ) T ℱ V‖ :=
         mul_le_mul_of_nonneg_left hchain (inv_nonneg.mpr hε.le)
 
 omit hB in
 
 theorem approxSeq (T : ℝ≥0) (_hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∃ V : ℕ → TBoundedSP T ℱ,
-      ∀ n, ‖simpleAssembly_T (μ := μ) T ℱ (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n := by
+      ∀ n, ‖simpleAssemblyT (μ := μ) T ℱ (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n := by
   have hd := simpleAssembly_T_denseRange (μ := μ) T ℱ
   have hex : ∀ n : ℕ, ∃ V : TBoundedSP T ℱ,
-      ‖simpleAssembly_T (μ := μ) T ℱ V - φ‖ ≤ (2⁻¹ : ℝ) ^ n := by
+      ‖simpleAssemblyT (μ := μ) T ℱ V - φ‖ ≤ (2⁻¹ : ℝ) ^ n := by
     intro n
     obtain ⟨V, hV⟩ := hd.exists_dist_lt φ (by positivity : (0 : ℝ) < (2⁻¹ : ℝ) ^ n)
     exact ⟨V, by rw [← dist_eq_norm, dist_comm]; exact hV.le⟩
@@ -117,8 +117,8 @@ lemma itoSimpleProcess_sub (hBmeas : ∀ t, Measurable (B t))
 
 theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) (V : ℕ → TBoundedSP T ℱ)
-    (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T ℱ (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) (V : ℕ → TBoundedSP T ℱ)
+    (hV : ∀ n, ‖simpleAssemblyT (μ := μ) T ℱ (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
     Summable (fun n ↦ μ.real {ω | (3 / 4 : ℝ) ^ n ≤
       ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖}) := by
   refine Summable.of_nonneg_of_le (fun n ↦ measureReal_nonneg) (fun n ↦ ?_)
@@ -126,13 +126,13 @@ theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
   refine (itoSimpleProcess_maximal_prob hB hBmeas hBcont T (V n - V (n + 1))
     (ε := (3 / 4 : ℝ) ^ n) (by positivity)).trans ?_
-  have hnorm : ‖simpleAssembly_T (μ := μ) T ℱ (V n - V (n + 1))‖ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
+  have hnorm : ‖simpleAssemblyT (μ := μ) T ℱ (V n - V (n + 1))‖ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
     rw [map_sub]
-    calc ‖simpleAssembly_T (μ := μ) T ℱ (V n) - simpleAssembly_T (μ := μ) T ℱ (V (n + 1))‖
-        ≤ ‖simpleAssembly_T (μ := μ) T ℱ (V n) - φ‖
-            + ‖φ - simpleAssembly_T (μ := μ) T ℱ (V (n + 1))‖ := by
-          have h := norm_add_le (simpleAssembly_T (μ := μ) T ℱ (V n) - φ)
-            (φ - simpleAssembly_T (μ := μ) T ℱ (V (n + 1)))
+    calc ‖simpleAssemblyT (μ := μ) T ℱ (V n) - simpleAssemblyT (μ := μ) T ℱ (V (n + 1))‖
+        ≤ ‖simpleAssemblyT (μ := μ) T ℱ (V n) - φ‖
+            + ‖φ - simpleAssemblyT (μ := μ) T ℱ (V (n + 1))‖ := by
+          have h := norm_add_le (simpleAssemblyT (μ := μ) T ℱ (V n) - φ)
+            (φ - simpleAssemblyT (μ := μ) T ℱ (V (n + 1)))
           simpa using h
       _ ≤ (2⁻¹ : ℝ) ^ n + (2⁻¹ : ℝ) ^ (n + 1) := by
           gcongr
@@ -140,7 +140,7 @@ theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
           · rw [norm_sub_rev]; exact hV (n + 1)
       _ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
           rw [pow_succ]; linarith [pow_nonneg (by norm_num : (0 : ℝ) ≤ 2⁻¹) n]
-  calc ((3 / 4 : ℝ) ^ n)⁻¹ * ‖simpleAssembly_T (μ := μ) T ℱ (V n - V (n + 1))‖
+  calc ((3 / 4 : ℝ) ^ n)⁻¹ * ‖simpleAssemblyT (μ := μ) T ℱ (V n - V (n + 1))‖
       ≤ ((3 / 4 : ℝ) ^ n)⁻¹ * (2 * (2⁻¹ : ℝ) ^ n) :=
         mul_le_mul_of_nonneg_left hnorm (by positivity)
     _ = 2 * (2 / 3 : ℝ) ^ n := by
@@ -149,8 +149,8 @@ theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 theorem ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) (V : ℕ → TBoundedSP T ℱ)
-    (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T ℱ (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) (V : ℕ → TBoundedSP T ℱ)
+    (hV : ∀ n, ‖simpleAssemblyT (μ := μ) T ℱ (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
     ∀ᵐ ω ∂μ, ∀ᶠ n in atTop,
       (⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖) < (3 / 4 : ℝ) ^ n := by
   set A : ℕ → Set Ω := fun n ↦ {ω | (3 / 4 : ℝ) ^ n ≤
@@ -183,13 +183,14 @@ lemma norm_le_iSup_Iic (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 omit hB in
 
+/-- Continuous modification obtained from the approximating simple integrals. -/
 noncomputable def itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) (t : ℝ≥0) (ω : Ω) : ℝ :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) (t : ℝ≥0) (ω : Ω) : ℝ :=
   limUnder atTop fun n ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω
 
 theorem itoContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ∀ t : ℝ≥0, t ≤ T →
       Tendsto (fun n ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
         (𝓝 (itoContinuousMod T hBmeas φ t ω)) := by
@@ -220,7 +221,7 @@ theorem itoContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
 
 theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) {t : ℝ≥0} (ht : t ≤ T) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) {t : ℝ≥0} (ht : t ≤ T) :
     (fun ω ↦ itoContinuousMod T hBmeas φ t ω) =ᵐ[μ] itoProcessCLM hB T t hBmeas φ := by
   set V := (approxSeq T hBmeas φ).choose with hVdef
   have hV := (approxSeq T hBmeas φ).choose_spec
@@ -232,14 +233,14 @@ theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     refine tendstoInMeasure_of_tendsto_ae hFmeas ?_
     filter_upwards [itoContinuousMod_tendsto hB T hBmeas hBcont φ] with ω hω using hω t ht
 
-  have hsa : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T ℱ (V n)) atTop (𝓝 φ) := by
+  have hsa : Tendsto (fun n ↦ simpleAssemblyT (μ := μ) T ℱ (V n)) atTop (𝓝 φ) := by
     rw [tendsto_iff_norm_sub_tendsto_zero]
     exact squeeze_zero (fun n ↦ norm_nonneg _) hV
       (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num))
   have hLp : Tendsto (fun n ↦ itoSimpleProcessLp hB hBmeas (V n).val t) atTop
       (𝓝 (itoProcessCLM hB T t hBmeas φ)) := by
     have hrw : (fun n ↦ itoSimpleProcessLp hB hBmeas (V n).val t)
-        = fun n ↦ itoProcessCLM hB T t hBmeas (simpleAssembly_T (μ := μ) T ℱ (V n)) :=
+        = fun n ↦ itoProcessCLM hB T t hBmeas (simpleAssemblyT (μ := μ) T ℱ (V n)) :=
       funext fun n ↦ (itoProcessCLM_simpleAssembly_T hB T t hBmeas (V n)).symm
     rw [hrw]
     exact ((itoProcessCLM hB T t hBmeas).continuous.tendsto φ).comp hsa
@@ -270,7 +271,7 @@ lemma consecutive_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
   set V := (approxSeq T hBmeas φ).choose with hVdef
   have hV := (approxSeq T hBmeas φ).choose_spec
@@ -313,7 +314,7 @@ theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
 
 theorem exists_continuous_modification_itoProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, t ≤ T → X t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ) ∧
       (∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Set.Icc 0 T)) :=

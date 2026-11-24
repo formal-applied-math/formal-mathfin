@@ -52,6 +52,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 theorem adaptedAt_of_measurable (_hBm : ∀ t, Measurable (B t)) {s : ℝ≥0}
     {f : Ω → ℝ} (hf : Measurable[ℱ s] f) : CommonPairing.AdaptedAt ℱ s f := hf
 
+/-- Terminal Brownian increment sum of a simple process on the supplied filtration. -/
 noncomputable def itoSimple (_hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) : Ω → ℝ :=
   fun ω ↦ V.value.sum fun p v ↦ v ω * (B p.2 ω - B p.1 ω)
@@ -78,6 +79,7 @@ theorem memLp_itoSimple (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (
     ((V.measurable_value p).mono (ℱ.le p.1) le_rfl).aestronglyMeasurable
     V.valueBound (ae_of_all _ (V.value_le_valueBound p))
 
+/-- Terminal Brownian increment sum as a square-integrable random variable. -/
 noncomputable def itoSimpleLp (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) : Lp ℝ 2 μ :=
   (memLp_itoSimple hB hBmeas V).toLp _
@@ -145,6 +147,7 @@ theorem itoSimpleLp_norm_sq (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurab
 lemma measurableEmbedding_nnrealCoe : MeasurableEmbedding ((↑) : ℝ≥0 → ℝ) :=
   NNReal.isClosedEmbedding_coe.measurableEmbedding
 
+/-- Lebesgue time measure on the nonnegative reals. -/
 noncomputable def timeMeasure : Measure ℝ≥0 := Measure.comap ((↑) : ℝ≥0 → ℝ) volume
 
 lemma timeMeasure_Ioc (a b : ℝ≥0) :
@@ -174,9 +177,11 @@ lemma timeMeasure_singleton (a : ℝ≥0) : timeMeasure {a} = 0 := by
   rw [timeMeasure, measurableEmbedding_nnrealCoe.comap_apply, Set.image_singleton,
     Real.volume_singleton]
 
+/-- A random coefficient supported on one deterministic time interval. -/
 noncomputable def elemIntegrand (a b : ℝ≥0) (Z : Ω → ℝ) : ℝ≥0 × Ω → ℝ :=
   fun z ↦ (Set.Ioc a b).indicator (fun _ ↦ (1 : ℝ)) z.1 * Z z.2
 
+/-- Elementary integrand belonging to a single band of a simple process. -/
 noncomputable def rectTerm (_hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) (p : ℝ≥0 × ℝ≥0) :
     ℝ≥0 × Ω → ℝ :=
@@ -242,6 +247,7 @@ lemma memLp_uncurry_trim (hBmeas : ∀ t, Measurable (B t))
   rw [eLpNorm_trim _ V.isStronglyPredictable]
   exact (memLp_uncurry_prod hBmeas V).eLpNorm_lt_top
 
+/-- Simple process represented in the predictable L² space. -/
 noncomputable def simpleProcessL2 (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) :
     Lp ℝ 2 ((timeMeasure.prod μ).trim ℱ.predictable_le_prod) :=
@@ -323,6 +329,7 @@ lemma itoSimple_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
   rw [Finsupp.sum_smul_index' (fun p ↦ by simp), Finsupp.mul_sum]
   exact Finsupp.sum_congr fun p _ ↦ by simp [mul_assoc]
 
+/-- Linear map sending simple processes to square-integrable increment sums. -/
 noncomputable def itoAssembly (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t)) :
     SimpleProcess ℝ ℱ →ₗ[ℝ] Lp ℝ 2 μ where
   toFun V := itoSimpleLp hB hBmeas V
@@ -347,6 +354,7 @@ lemma uncurry_coe_smul (_hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
     Function.uncurry ⇑(c • V) = c • Function.uncurry ⇑V := by
   rw [SimpleProcess.coe_smul]; rfl
 
+/-- Linear embedding of simple processes into the predictable L² space. -/
 noncomputable def simpleAssembly (hBmeas : ∀ t, Measurable (B t)) :
     SimpleProcess ℝ ℱ
       →ₗ[ℝ] Lp ℝ 2 ((timeMeasure.prod μ).trim ℱ.predictable_le_prod) where

@@ -69,13 +69,13 @@ theorem stopped_affine_ell (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} (p : Parameters) (hξ : 0 < p.xi) (hρ : |p.rho| ≤ 1) {u w : ℂ}
     (hu : inClosedLaplaceStrip u) (hw : w.re ≤ 0) {x₀ v₀ : ℝ} (hv₀ : 0 ≤ v₀)
-    {X V : ℝ≥0 → Ω → ℝ} {Hv Hx : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {X V : ℝ≥0 → Ω → ℝ} {Hv Hx : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hpX : IsStronglyPredictable ℱ X) (hpV : IsStronglyPredictable ℱ V)
     (hcX : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Set.Icc 0 T))
     (hcV : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ V t ω) (Set.Icc 0 T))
     (hVnn : ∀ᵐ ω ∂μ, ∀ t ≤ T, 0 ≤ V t ω)
-    (hHv : ⇑Hv =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2))
-    (hHx : ⇑Hx =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
+    (hHv : ⇑Hv =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2))
+    (hHx : ⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
     (heqV : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
       + itoContinuousMod T hP.left.measurable Hv t ω)
@@ -197,13 +197,13 @@ theorem stopped_affine (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} (p : Parameters) (hξ : 0 < p.xi) (hρ : |p.rho| ≤ 1) {u w : ℂ}
     (hu : inClosedLaplaceStrip u) (hw : w.re ≤ 0) {x₀ v₀ : ℝ} (hv₀ : 0 ≤ v₀)
-    {X V : ℝ≥0 → Ω → ℝ} {Hv Hx : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
+    {X V : ℝ≥0 → Ω → ℝ} {Hv Hx : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
     (hpX : IsStronglyPredictable ℱ X) (hpV : IsStronglyPredictable ℱ V)
     (hcX : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Set.Icc 0 T))
     (hcV : ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ V t ω) (Set.Icc 0 T))
     (hVnn : ∀ᵐ ω ∂μ, ∀ t ≤ T, 0 ≤ V t ω)
-    (hHv : ⇑Hv =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2))
-    (hHx : ⇑Hx =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
+    (hHv : ⇑Hv =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V z.1 z.2))
+    (hHx : ⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
     (heqV : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
       + itoContinuousMod T hP.left.measurable Hv t ω)

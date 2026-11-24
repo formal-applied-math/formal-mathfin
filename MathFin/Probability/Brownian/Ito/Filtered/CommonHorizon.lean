@@ -64,31 +64,31 @@ lemma measurableSet_band0 (s : ℝ≥0) : MeasurableSet[ℱ.predictable] (band0 
   measurableSet_predictable_Ioc_prod (𝓕 := ℱ) 0 s MeasurableSet.univ
 
 lemma trimMeasure_T_restrict_band0 {s T : ℝ≥0} (hsT : s ≤ T) :
-    (trimMeasure_T (μ := μ) T ℱ).restrict (band0 s) = trimMeasure_T (μ := μ) s ℱ := by
+    (trimMeasureT (μ := μ) T ℱ).restrict (band0 s) = trimMeasureT (μ := μ) s ℱ := by
   rw [trimMeasure_T_eq_restrict T ℱ, trimMeasure_T_eq_restrict s ℱ,
     Measure.restrict_restrict (measurableSet_band0 s)]
   congr 1
   exact Set.inter_eq_left.mpr (Set.prod_mono (Set.Ioc_subset_Ioc le_rfl hsT) subset_rfl)
 
 lemma trimMeasure_T_mono {s T : ℝ≥0} (hsT : s ≤ T) :
-    trimMeasure_T (μ := μ) s ℱ ≤ trimMeasure_T (μ := μ) T ℱ := by
+    trimMeasureT (μ := μ) s ℱ ≤ trimMeasureT (μ := μ) T ℱ := by
   rw [← trimMeasure_T_restrict_band0 hsT]
   exact Measure.restrict_le_self
 
 /-! ### Restriction of kernels -/
 
 /-- Restriction of a horizon-`T` kernel to the horizon `s ≤ T`. -/
-def restrictKernel {s T : ℝ≥0} (hsT : s ≤ T) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ) :=
+def restrictKernel {s T : ℝ≥0} (hsT : s ≤ T) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ) :=
   ((Lp.memLp φ).mono_measure (trimMeasure_T_mono hsT)).toLp ⇑φ
 
 lemma coeFn_restrictKernel {s T : ℝ≥0} (hsT : s ≤ T)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⇑(restrictKernel hsT φ) =ᵐ[trimMeasure_T (μ := μ) s ℱ] ⇑φ :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⇑(restrictKernel hsT φ) =ᵐ[trimMeasureT (μ := μ) s ℱ] ⇑φ :=
   MemLp.coeFn_toLp _
 
 lemma restrictKernel_restrictKernel {r s T : ℝ≥0} (hrs : r ≤ s) (hsT : s ≤ T)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     restrictKernel hrs (restrictKernel hsT φ) = restrictKernel (hrs.trans hsT) φ := by
   refine Lp.ext ?_
   filter_upwards [coeFn_restrictKernel hrs (restrictKernel hsT φ),
@@ -98,35 +98,35 @@ lemma restrictKernel_restrictKernel {r s T : ℝ≥0} (hrs : r ≤ s) (hsT : s �
 
 /-! ### Extension of kernels by zero -/
 
-lemma memLp_extend {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
-    MemLp ((band0 s).indicator ⇑ψ) 2 (trimMeasure_T (μ := μ) T ℱ) := by
+lemma memLp_extend {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
+    MemLp ((band0 s).indicator ⇑ψ) 2 (trimMeasureT (μ := μ) T ℱ) := by
   rw [memLp_indicator_iff_restrict (measurableSet_band0 s).nullMeasurableSet,
         trimMeasure_T_restrict_band0 hsT]
   exact Lp.memLp ψ
 
 /-- Extension by zero of a horizon-`s` kernel to the horizon `T ≥ s`. -/
-def extendKernel {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+def extendKernel {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   (memLp_extend hsT ψ).toLp ((band0 s).indicator ⇑ψ)
 
-lemma coeFn_extendKernel {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
-    ⇑(extendKernel hsT ψ) =ᵐ[trimMeasure_T (μ := μ) T ℱ] (band0 s).indicator ⇑ψ :=
+lemma coeFn_extendKernel {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
+    ⇑(extendKernel hsT ψ) =ᵐ[trimMeasureT (μ := μ) T ℱ] (band0 s).indicator ⇑ψ :=
   MemLp.coeFn_toLp _
 
 lemma indicator_ae_congr {s T : ℝ≥0} (hsT : s ≤ T) {f g : ℝ≥0 × Ω → ℝ}
-    (h : f =ᵐ[trimMeasure_T (μ := μ) s ℱ] g) :
-    (band0 s).indicator f =ᵐ[trimMeasure_T (μ := μ) T ℱ] (band0 s).indicator g := by
+    (h : f =ᵐ[trimMeasureT (μ := μ) s ℱ] g) :
+    (band0 s).indicator f =ᵐ[trimMeasureT (μ := μ) T ℱ] (band0 s).indicator g := by
   rw [← trimMeasure_T_restrict_band0 hsT] at h
   let : MeasurableSpace (ℝ≥0 × Ω) := ℱ.predictable
   exact (ae_eq_restrict_iff_indicator_ae_eq (measurableSet_band0 s)).mp h
 
-lemma norm_extendKernel {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
+lemma norm_extendKernel {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
     ‖extendKernel hsT ψ‖ = ‖ψ‖ := by
   rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_ae (coeFn_extendKernel hsT ψ),
     eLpNorm_indicator_eq_eLpNorm_restrict (measurableSet_band0 s).nullMeasurableSet,
           trimMeasure_T_restrict_band0 hsT]
 
-lemma extendKernel_add {s T : ℝ≥0} (hsT : s ≤ T) (ψ ψ' : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
+lemma extendKernel_add {s T : ℝ≥0} (hsT : s ≤ T) (ψ ψ' : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
     extendKernel hsT (ψ + ψ') = extendKernel hsT ψ + extendKernel hsT ψ' := by
   refine Lp.ext ?_
   filter_upwards [coeFn_extendKernel hsT (ψ + ψ'), indicator_ae_congr hsT (Lp.coeFn_add ψ ψ'),
@@ -138,7 +138,7 @@ lemma extendKernel_add {s T : ℝ≥0} (hsT : s ≤ T) (ψ ψ' : Lp ℝ 2 (trimM
   · simp [Set.indicator_of_notMem hp]
 
 lemma extendKernel_smul {s T : ℝ≥0} (hsT : s ≤ T) (c : ℝ)
-    (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
+    (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
     extendKernel hsT (c • ψ) = c • extendKernel hsT ψ := by
   refine Lp.ext ?_
   filter_upwards [coeFn_extendKernel hsT (c • ψ), indicator_ae_congr hsT (Lp.coeFn_smul c ψ),
@@ -150,14 +150,14 @@ lemma extendKernel_smul {s T : ℝ≥0} (hsT : s ≤ T) (c : ℝ)
 
 /-- Extension by zero as an isometric continuous linear map. -/
 def extendCLM {s T : ℝ≥0} (hsT : s ≤ T) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ) →L[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ) →L[ℝ] Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   LinearMap.mkContinuous
     { toFun := extendKernel hsT
       map_add' := extendKernel_add hsT
       map_smul' := extendKernel_smul hsT }
     1 (fun ψ => by rw [one_mul]; exact (norm_extendKernel hsT ψ).le)
 
-lemma extendCLM_apply {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
+lemma extendCLM_apply {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
     extendCLM hsT ψ = extendKernel hsT ψ := rfl
 
 /-! ### Cross-horizon identities -/
@@ -165,19 +165,19 @@ lemma extendCLM_apply {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasur
 /-- The horizon-`s` integral of a kernel equals the horizon-`T` integral of its extension
 by zero. -/
 theorem itoIntegralCLM_T_extend (hB : BrownianOn ℱ B μ) {s T : ℝ≥0} (hsT : s ≤ T)
-    (ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) s ℱ)) :
-    itoIntegralCLM_T hB s ψ = itoIntegralCLM_T hB T (extendCLM hsT ψ) := by
+    (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
+    itoIntegralCLMT hB s ψ = itoIntegralCLMT hB T (extendCLM hsT ψ) := by
   refine (simpleAssembly_T_denseRange (μ := μ) s ℱ).induction_on ψ
-    (isClosed_eq (itoIntegralCLM_T hB s).continuous
-      ((itoIntegralCLM_T hB T).continuous.comp (extendCLM hsT).continuous)) fun V => ?_
+    (isClosed_eq (itoIntegralCLMT hB s).continuous
+      ((itoIntegralCLMT hB T).continuous.comp (extendCLM hsT).continuous)) fun V => ?_
   have hVT : V.val ∈ TBoundedSP T ℱ := fun p hp => (V.property p hp).trans hsT
-  have hE : extendCLM hsT (simpleAssembly_T (μ := μ) s ℱ V)
-      = simpleAssembly_T (μ := μ) T ℱ ⟨V.val, hVT⟩ := by
+  have hE : extendCLM hsT (simpleAssemblyT (μ := μ) s ℱ V)
+      = simpleAssemblyT (μ := μ) T ℱ ⟨V.val, hVT⟩ := by
     refine Lp.ext ?_
-    have h1 := coeFn_extendKernel (μ := μ) hsT (simpleAssembly_T (μ := μ) s ℱ V)
-    have h2 : ⇑(simpleAssembly_T (μ := μ) s ℱ V) =ᵐ[trimMeasure_T (μ := μ) s ℱ]
+    have h1 := coeFn_extendKernel (μ := μ) hsT (simpleAssemblyT (μ := μ) s ℱ V)
+    have h2 : ⇑(simpleAssemblyT (μ := μ) s ℱ V) =ᵐ[trimMeasureT (μ := μ) s ℱ]
         Function.uncurry ⇑V.val := MemLp.coeFn_toLp (memLp_uncurry_trim_T (μ := μ) s ℱ V.val)
-    have h3 : ⇑(simpleAssembly_T (μ := μ) T ℱ ⟨V.val, hVT⟩) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    have h3 : ⇑(simpleAssemblyT (μ := μ) T ℱ ⟨V.val, hVT⟩) =ᵐ[trimMeasureT (μ := μ) T ℱ]
         Function.uncurry ⇑V.val := MemLp.coeFn_toLp (memLp_uncurry_trim_T (μ := μ) T ℱ V.val)
     filter_upwards [h1, indicator_ae_congr hsT h2, h3,
       ae_fst_mem_Ioc_trimMeasure_T (μ := μ) T ℱ] with p e1 e2 e3 e4
@@ -191,15 +191,15 @@ theorem itoIntegralCLM_T_extend (hB : BrownianOn ℱ B μ) {s T : ℝ≥0} (hsT 
 /-- **Cross-horizon identity.** The horizon-`s` integral of the restriction of a horizon-`T`
 kernel is the horizon-`T` Itô process at time `s`. -/
 theorem itoIntegralCLM_T_restrictKernel (hB : BrownianOn ℱ B μ) {s T : ℝ≥0} (hsT : s ≤ T)
-    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    itoIntegralCLM_T hB s (restrictKernel hsT φ) = itoProcessCLM hB T s hBmeas φ := by
+    (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    itoIntegralCLMT hB s (restrictKernel hsT φ) = itoProcessCLM hB T s hBmeas φ := by
   rw [itoIntegralCLM_T_extend hB hsT, extendCLM_apply]
-  have hafter : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), s < p.1 →
+  have hafter : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), s < p.1 →
       extendKernel hsT (restrictKernel hsT φ) p = 0 := by
     filter_upwards [coeFn_extendKernel hsT (restrictKernel hsT φ)] with p hp hsp
     rw [hp, Set.indicator_of_notMem (fun (h : p ∈ band0 s) => (not_le.mpr hsp) h.1.2)]
   rw [itoIntegralCLM_T_eq_itoProcessCLM_of_vanishes_after hB T s hsT hBmeas _ hafter]
-  have hbefore : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), p.1 ≤ s →
+  have hbefore : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), p.1 ≤ s →
       (φ - extendKernel hsT (restrictKernel hsT φ)) p = 0 := by
     filter_upwards [Lp.coeFn_sub φ (extendKernel hsT (restrictKernel hsT φ)),
       coeFn_extendKernel hsT (restrictKernel hsT φ),
@@ -214,7 +214,7 @@ theorem itoIntegralCLM_T_restrictKernel (hB : BrownianOn ℱ B μ) {s T : ℝ≥
 /-- The continuous modifications on the horizons `t ≤ T` agree on `[0, t]` almost surely. -/
 theorem itoContinuousMod_restrictKernel (hB : BrownianOn ℱ B μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {t T : ℝ≥0} (htT : t ≤ T)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, ∀ s ≤ t, itoContinuousMod t hB.measurable (restrictKernel htT φ) s ω
       = itoContinuousMod T hB.measurable φ s ω := by
   refine ae_forall_eq_of_continuousOn'

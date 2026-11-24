@@ -56,10 +56,10 @@ include hB
 
 theorem itoSimpleProcessLp_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ ℱ) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
-    ‖itoSimpleProcessLp hB hBmeas V t‖ ≤ ‖simpleProcessL2_T (μ := μ) T ℱ V‖ := by
+    ‖itoSimpleProcessLp hB hBmeas V t‖ ≤ ‖simpleProcessL2T (μ := μ) T ℱ V‖ := by
   have : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
 
-  have hnorm_eq : ‖simpleProcessL2_T (μ := μ) T ℱ V‖ = ‖itoSimpleLp hB hBmeas V‖ :=
+  have hnorm_eq : ‖simpleProcessL2T (μ := μ) T ℱ V‖ = ‖itoSimpleLp hB hBmeas V‖ :=
     (assembly_isometry_T hB T ⟨V, hVT⟩).symm
   rw [hnorm_eq]
 
@@ -77,6 +77,7 @@ theorem itoSimpleProcessLp_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
         (eLpNorm_congr_ae hcond).symm
     _ ≤ eLpNorm (itoSimple hBmeas V) 2 μ := eLpNorm_condExp_le_eLpNorm _ (by simp)
 
+/-- Linear map evaluating a horizon-bounded simple integral at the specified time. -/
 noncomputable def itoProcessLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
     TBoundedSP T ℱ →ₗ[ℝ] Lp ℝ 2 μ where
   toFun V := itoSimpleProcessLp hB hBmeas V.val t
@@ -94,20 +95,21 @@ noncomputable def itoProcessLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
     congr 1
     exact itoSimpleProcess_smul hBmeas c V.val t
 
+/-- Continuous linear evaluation of the Itô integral in the supplied filtration. -/
 noncomputable def itoProcessCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 μ :=
-  (itoProcessLM hB T t hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T ℱ)
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 μ :=
+  (itoProcessLM hB T t hBmeas).extendOfNorm (simpleAssemblyT (μ := μ) T ℱ)
 
 theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : TBoundedSP T ℱ) :
-    itoProcessCLM hB T t hBmeas (simpleAssembly_T (μ := μ) T ℱ V)
+    itoProcessCLM hB T t hBmeas (simpleAssemblyT (μ := μ) T ℱ V)
       = itoSimpleProcessLp hB hBmeas V.val t := by
   rw [itoProcessCLM, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T ℱ)
     ⟨1, fun W ↦ by rw [one_mul]; exact itoSimpleProcessLp_norm_le hB T t hBmeas W.val W.property⟩]
   rfl
 
 @[simp] theorem itoProcessCLM_zero_time (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     itoProcessCLM hB T 0 hBmeas φ = 0 := by
   refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T ℱ)
     (itoProcessCLM hB T 0 hBmeas).continuous
@@ -129,15 +131,15 @@ theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
         (le_max_left t T)
 
 theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     itoProcessCLM hB T t hBmeas φ
       = (condExpL2 ℝ ℝ (ℱ.le t)
-          (itoIntegralCLM_T hB T φ) : Lp ℝ 2 μ) := by
-  have hcont_R : Continuous fun ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) ↦
+          (itoIntegralCLMT hB T φ) : Lp ℝ 2 μ) := by
+  have hcont_R : Continuous fun ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) ↦
       (condExpL2 ℝ ℝ (ℱ.le t)
-        (itoIntegralCLM_T hB T ψ) : Lp ℝ 2 μ) :=
+        (itoIntegralCLMT hB T ψ) : Lp ℝ 2 μ) :=
     (continuous_subtype_val.comp (condExpL2 ℝ ℝ (ℱ.le t)).continuous).comp
-      (itoIntegralCLM_T hB T).continuous
+      (itoIntegralCLMT hB T).continuous
   refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T ℱ)
     (itoProcessCLM hB T t hBmeas).continuous hcont_R (funext fun V ↦ ?_)) φ
   simp only [Function.comp_apply]
@@ -150,68 +152,68 @@ theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
   rw [hω1, ← hω3, hω2]
 
 theorem itoProcessCLM_aeStronglyMeasurable (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     AEStronglyMeasurable[ℱ t]
       (itoProcessCLM hB T t hBmeas φ : Ω → ℝ) μ := by
   rw [itoProcessCLM_eq_condExpL2]
   exact mem_lpMeas_iff_aestronglyMeasurable.mp
-    (condExpL2 ℝ ℝ (ℱ.le t) (itoIntegralCLM_T hB T φ)).2
+    (condExpL2 ℝ ℝ (ℱ.le t) (itoIntegralCLMT hB T φ)).2
 
 theorem itoIntegralProcessGen_isMartingale (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) {i j : ℝ≥0} (hij : i ≤ j) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) {i j : ℝ≥0} (hij : i ≤ j) :
     μ[(itoProcessCLM hB T j hBmeas φ : Ω → ℝ) | ℱ i]
       =ᵐ[μ] (itoProcessCLM hB T i hBmeas φ : Ω → ℝ) := by
 
   have hbridge : ∀ k : ℝ≥0,
       ((condExpL2 ℝ ℝ (ℱ.le k)
-          (itoIntegralCLM_T hB T φ) : Lp ℝ 2 μ) : Ω → ℝ)
-        =ᵐ[μ] μ[(itoIntegralCLM_T hB T φ : Ω → ℝ) | ℱ k] := by
+          (itoIntegralCLMT hB T φ) : Lp ℝ 2 μ) : Ω → ℝ)
+        =ᵐ[μ] μ[(itoIntegralCLMT hB T φ : Ω → ℝ) | ℱ k] := by
     intro k
-    have h := (Lp.memLp (itoIntegralCLM_T hB T φ)).condExpL2_ae_eq_condExp
+    have h := (Lp.memLp (itoIntegralCLMT hB T φ)).condExpL2_ae_eq_condExp
       (𝕜 := ℝ) (ℱ.le k)
     rwa [Lp.toLp_coeFn] at h
   rw [itoProcessCLM_eq_condExpL2, itoProcessCLM_eq_condExpL2]
   calc μ[((condExpL2 ℝ ℝ (ℱ.le j)
-            (itoIntegralCLM_T hB T φ) : Lp ℝ 2 μ) : Ω → ℝ) | ℱ i]
-      =ᵐ[μ] μ[μ[(itoIntegralCLM_T hB T φ : Ω → ℝ) | ℱ j]
+            (itoIntegralCLMT hB T φ) : Lp ℝ 2 μ) : Ω → ℝ) | ℱ i]
+      =ᵐ[μ] μ[μ[(itoIntegralCLMT hB T φ : Ω → ℝ) | ℱ j]
               | ℱ i] := condExp_congr_ae (hbridge j)
-    _ =ᵐ[μ] μ[(itoIntegralCLM_T hB T φ : Ω → ℝ) | ℱ i] :=
+    _ =ᵐ[μ] μ[(itoIntegralCLMT hB T φ : Ω → ℝ) | ℱ i] :=
         condExp_condExp_of_le (ℱ.mono hij) (ℱ.le j)
     _ =ᵐ[μ] ((condExpL2 ℝ ℝ (ℱ.le i)
-              (itoIntegralCLM_T hB T φ) : Lp ℝ 2 μ) : Ω → ℝ) := (hbridge i).symm
+              (itoIntegralCLMT hB T φ) : Lp ℝ 2 μ) : Ω → ℝ) := (hbridge i).symm
 
 theorem itoProcessCLM_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ‖itoProcessCLM hB T t hBmeas φ‖ ≤ ‖φ‖ := by
   have hae : (itoProcessCLM hB T t hBmeas φ : Ω → ℝ)
-      =ᵐ[μ] μ[(itoIntegralCLM_T hB T φ : Ω → ℝ) | ℱ t] := by
+      =ᵐ[μ] μ[(itoIntegralCLMT hB T φ : Ω → ℝ) | ℱ t] := by
     rw [itoProcessCLM_eq_condExpL2]
-    have h := (Lp.memLp (itoIntegralCLM_T hB T φ)).condExpL2_ae_eq_condExp
+    have h := (Lp.memLp (itoIntegralCLMT hB T φ)).condExpL2_ae_eq_condExp
       (𝕜 := ℝ) (ℱ.le t)
     rwa [Lp.toLp_coeFn] at h
   rw [Lp.norm_def, ← itoIntegralCLM_T_norm hB T φ, Lp.norm_def]
-  refine ENNReal.toReal_mono (Lp.eLpNorm_ne_top (itoIntegralCLM_T hB T φ)) ?_
+  refine ENNReal.toReal_mono (Lp.eLpNorm_ne_top (itoIntegralCLMT hB T φ)) ?_
   rw [eLpNorm_congr_ae hae]
   exact eLpNorm_condExp_le_eLpNorm _ (by simp)
 
 theorem itoProcessCLM_terminal_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    itoProcessCLM hB T T hBmeas φ = itoIntegralCLM_T hB T φ :=
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    itoProcessCLM hB T T hBmeas φ = itoIntegralCLMT hB T φ :=
   congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T ℱ)
-    (itoProcessCLM hB T T hBmeas).continuous (itoIntegralCLM_T hB T).continuous
+    (itoProcessCLM hB T T hBmeas).continuous (itoIntegralCLMT hB T).continuous
     (funext fun V ↦ by
       simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T,
         itoIntegralCLM_T_simpleAssembly, itoSimpleProcessLp, itoSimpleLp,
         itoSimpleProcess_eq_itoSimple hBmeas V.val (fun p hp ↦ V.property p hp)])) φ
 
 theorem itoProcessCLM_norm_terminal (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ‖itoProcessCLM hB T T hBmeas φ‖ = ‖φ‖ := by
   rw [itoProcessCLM_terminal_eq hB T hBmeas φ, itoIntegralCLM_T_norm hB T φ]
 
 theorem integral_itoIntegralCLM_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ∫ ω, itoIntegralCLM_T hB T φ ω ∂μ = 0 := by
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ∫ ω, itoIntegralCLMT hB T φ ω ∂μ = 0 := by
   have hmart := itoIntegralProcessGen_isMartingale hB T hBmeas φ (i := 0) (j := T) zero_le
   rw [itoProcessCLM_zero_time hB T hBmeas φ] at hmart
   rw [← itoProcessCLM_terminal_eq hB T hBmeas φ,
@@ -219,7 +221,7 @@ theorem integral_itoIntegralCLM_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u
   simp
 
 theorem itoIntegralProcessGen_l2_continuous (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Continuous (fun t ↦ itoProcessCLM hB T t hBmeas φ) := by
 
   obtain ⟨g, hg_range, hg_lim⟩ := mem_closure_iff_seq_limit.mp

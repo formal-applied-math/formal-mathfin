@@ -43,6 +43,7 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
 
+/-- Measurability of a real random variable with respect to the filtration at a fixed time. -/
 def AdaptedAt (ℱ : Filtration ℝ≥0 mΩ) (s : ℝ≥0) (f : Ω → ℝ) : Prop :=
   Measurable[ℱ s] f
 

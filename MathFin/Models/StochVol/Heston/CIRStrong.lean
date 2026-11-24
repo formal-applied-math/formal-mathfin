@@ -506,6 +506,7 @@ theorem cir_strong_solution_unique (p : Parameters) (hκ : 0 ≤ p.kappa) {v₀ 
   exact cir_pathwise_unique hB T hBmeas hBcont p hκ G₁ H₁ G₂ H₂ hG₁ hG₂
     (hsq G₁ H₁ hnn₁ hH₁) (hsq G₂ H₂ hnn₂ hH₂)
 
+omit [IsProbabilityMeasure μ] in
 /-- **Non-explosion**: a process with a.s. continuous paths on `[0,T]` is a.s. bounded there. -/
 theorem ae_bounded_of_continuousOn {V : ℝ≥0 → Ω → ℝ}
     (hcont : ∀ᵐ ω ∂μ, ContinuousOn (fun t => V t ω) (Set.Icc 0 T)) :

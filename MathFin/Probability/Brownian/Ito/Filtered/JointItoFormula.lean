@@ -41,7 +41,7 @@ theorem ito_formula_stochasticIntegral {ι : Type*} [Fintype ι] [DecidableEq ι
       IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {T : ℝ≥0} {Y : ι → ℝ≥0 → Ω → ℝ} {y : ι → ℝ} {a b c : ι → ℝ≥0 → Ω → ℝ}
-    {φB φZ : ι → Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
+    {φB φZ : ι → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)
     {f : (ι → ℝ) → ℝ} {C₁ C₂ : ℝ} (hf : ItoTest f C₁ C₂) :
     ∀ᵐ ω ∂μ, f (fun i ↦ Y i T ω) = f y
       + ∫ s in Set.Ioc 0 T, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω

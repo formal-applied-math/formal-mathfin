@@ -37,6 +37,7 @@ Heston model, stochastic volatility, MSC 91G20, JEL G13
 noncomputable section
 namespace MathFin.Heston
 
+/-- Spatial exponential-affine profile with fixed complex coefficients. -/
 def laplaceSpatialProfile (C D u : Complex) (x v : Real) : Complex :=
   Complex.exp (C + u * (x : Complex) + D * (v : Complex))
 

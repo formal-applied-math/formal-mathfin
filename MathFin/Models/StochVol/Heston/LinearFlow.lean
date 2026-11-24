@@ -62,6 +62,7 @@ namespace MathFin.Heston
 
 open ContinuousLinearMap
 
+/-- Pair of complex coordinates for the linearized Riccati flow. -/
 abbrev StateSpace : Type := Complex × Complex
 
 /-- The 2x2 continuous linear generator `A(P, Q) = (b * P + c * Q, -a * P)`. -/

@@ -52,6 +52,7 @@ def qValue (b d e : Complex) : Complex := (b + d) - (b - d) * e
 /-- Decaying exponential used in the little-Heston-trap form. -/
 def decay (d t : Complex) : Complex := Complex.exp (-d * t)
 
+/-- Denominator of the Möbius representation of the Riccati coefficient. -/
 def denominator (b d t : Complex) : Complex := qValue b d (decay d t)
 
 /-- Normalized logarithm argument. It equals one at time zero when d is nonzero. -/
@@ -65,40 +66,56 @@ def closedD (b d h t : Complex) : Complex :=
 def closedC (b d a s m t : Complex) : Complex :=
   m * t + (a / s) * ((b - d) * t - 2 * Complex.log (logArgument b d t))
 
+/-- Quadratic vector field for the variance coefficient at characteristic frequency. -/
 def rhsD (b s h z : Complex) : Complex := s / 2 * z ^ 2 - b * z - h / 2
 
+/-- Ratio of the two root factors in the little-trap representation. -/
 def trapG (b d : Complex) : Complex := (b - d) / (b + d)
 
 /-- Actual model coefficients, not a record of assumed conclusions. -/
 structure Parameters where
+  /-- Mean reversion speed of the variance. -/
   kappa : Real
+  /-- Long-run variance level. -/
   theta : Real
+  /-- Volatility coefficient of the variance process. -/
   xi : Real
+  /-- Correlation between the log-spot and variance drivers. -/
   rho : Real
+  /-- Risk-free rate. -/
   r : Real
+  /-- Continuous dividend yield. -/
   q : Real
 
+/-- Mean-reversion term shifted by the correlation at the characteristic frequency. -/
 def modelB (p : Parameters) (u : Real) : Complex :=
   (p.kappa : Complex) - (p.rho : Complex) * (p.xi : Complex) * Complex.I * (u : Complex)
 
+/-- Frequency polynomial appearing in the constant Riccati forcing term. -/
 def modelH (u : Real) : Complex := (u : Complex) ^ 2 + Complex.I * (u : Complex)
 
+/-- Square of the volatility of volatility as a complex coefficient. -/
 def modelS (p : Parameters) : Complex := (p.xi : Complex) ^ 2
 
+/-- Constant variance drift, equal to the mean reversion speed times the long-run level. -/
 def modelA (p : Parameters) : Complex := (p.kappa : Complex) * (p.theta : Complex)
 
+/-- Log-spot carry multiplied by the imaginary frequency. -/
 def modelM (p : Parameters) (u : Real) : Complex :=
   Complex.I * (u : Complex) * ((p.r : Complex) - (p.q : Complex))
 
+/-- Discriminant of the characteristic-frequency Riccati polynomial. -/
 def discriminant (p : Parameters) (u : Real) : Complex :=
   modelB p u ^ 2 + modelS p * modelH u
 
+/-- Chosen square root of the characteristic-frequency discriminant. -/
 def modelRoot (p : Parameters) (u : Real) : Complex := principalRoot (discriminant p u)
 
 /-- Zero frequency is defined separately; no 0/0 convention is used there. -/
 def hestonD (p : Parameters) (u t : Real) : Complex :=
   if u = 0 then 0 else closedD (modelB p u) (modelRoot p u) (modelH u) (t : Complex)
 
+/-- Time coefficient of the complex closed form at a real characteristic frequency. -/
 def hestonC (p : Parameters) (u t : Real) : Complex :=
   if u = 0 then 0 else
     closedC (modelB p u) (modelRoot p u) (modelA p) (modelS p) (modelM p u) (t : Complex)

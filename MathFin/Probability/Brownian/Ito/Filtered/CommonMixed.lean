@@ -186,20 +186,20 @@ theorem IndependentPair.inner_itoSimpleLp (h : IndependentPair ℱ B Z μ)
 /-- The two real integrals are orthogonal for arbitrary random predictable L2
 kernels on the COMMON filtration. No independence of these integrals is claimed. -/
 theorem IndependentPair.inner_itoIntegral (h : IndependentPair ℱ B Z μ) (T : ℝ≥0)
-    (f g : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ⟪itoIntegralCLM_T h.left T f, itoIntegralCLM_T h.right T g⟫_ℝ = 0 := by
+    (f g : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ⟪itoIntegralCLMT h.left T f, itoIntegralCLMT h.right T g⟫_ℝ = 0 := by
   have hv (V : TBoundedSP T ℱ) :
-      (fun g => ⟪itoIntegralCLM_T h.left T (simpleAssembly_T (μ := μ) T ℱ V),
-        itoIntegralCLM_T h.right T g⟫_ℝ) = (fun _ => (0 : ℝ)) := by
+      (fun g => ⟪itoIntegralCLMT h.left T (simpleAssemblyT (μ := μ) T ℱ V),
+        itoIntegralCLMT h.right T g⟫_ℝ) = (fun _ => (0 : ℝ)) := by
     apply (simpleAssembly_T_denseRange (μ := μ) T ℱ).equalizer
-      (continuous_const.inner (itoIntegralCLM_T h.right T).continuous) continuous_const
+      (continuous_const.inner (itoIntegralCLMT h.right T).continuous) continuous_const
     funext W
     simp only [Function.comp_apply, itoIntegralCLM_T_simpleAssembly]
     exact h.inner_itoSimpleLp V.val W.val
-  have he : (fun f => ⟪itoIntegralCLM_T h.left T f, itoIntegralCLM_T h.right T g⟫_ℝ) =
+  have he : (fun f => ⟪itoIntegralCLMT h.left T f, itoIntegralCLMT h.right T g⟫_ℝ) =
       (fun _ => (0 : ℝ)) := by
     apply (simpleAssembly_T_denseRange (μ := μ) T ℱ).equalizer
-      ((itoIntegralCLM_T h.left T).continuous.inner continuous_const) continuous_const
+      ((itoIntegralCLMT h.left T).continuous.inner continuous_const) continuous_const
     funext V
     exact congrFun (hv V) g
   exact congrFun he f

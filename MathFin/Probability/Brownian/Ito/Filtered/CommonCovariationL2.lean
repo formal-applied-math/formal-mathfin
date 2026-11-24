@@ -128,24 +128,24 @@ lemma ContProcess.trunc {T : ℝ≥0} {h : ℝ≥0 → Ω → ℝ} (hh : ContPro
 
 /-- The truncated kernel `max (-k) (min k h)`. -/
 noncomputable def truncKernel (T : ℝ≥0) {h : ℝ≥0 → Ω → ℝ} (hh : ContProcess ℱ μ T h) (k : ℕ) :
-    Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ) :=
+    Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) :=
   (MemLp.of_bound ((continuous_clampAt (k : ℝ)).measurable.comp hh.pred).aestronglyMeasurable
     (k : ℝ) (Eventually.of_forall fun p ↦ by
       rw [Real.norm_eq_abs]; exact abs_clampAt_le (Nat.cast_nonneg k) _)).toLp
     (fun p : ℝ≥0 × Ω ↦ clampAt k (h p.1 p.2))
 
 lemma coeFn_truncKernel (T : ℝ≥0) {h : ℝ≥0 → Ω → ℝ} (hh : ContProcess ℱ μ T h) (k : ℕ) :
-    ⇑(truncKernel (μ := μ) T hh k) =ᵐ[trimMeasure_T (μ := μ) T ℱ]
+    ⇑(truncKernel (μ := μ) T hh k) =ᵐ[trimMeasureT (μ := μ) T ℱ]
       fun p ↦ clampAt k (h p.1 p.2) :=
   MemLp.coeFn_toLp _
 
 /-- Truncated kernels converge in `L²(trim_T)`. -/
 theorem tendsto_truncKernel (T : ℝ≥0) {h : ℝ≥0 → Ω → ℝ} (hh : ContProcess ℱ μ T h)
-    {φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ : ⇑φ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
+    {φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ : ⇑φ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h p.1 p.2) :
     Tendsto (fun k : ℕ ↦ truncKernel (μ := μ) T hh k) atTop (𝓝 φ) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
-  have hcoe : ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ), ∀ k : ℕ,
+  have hcoe : ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ), ∀ k : ℕ,
       ((truncKernel (μ := μ) T hh k - φ : Lp ℝ 2 _) p) ^ 2
         = (clampAt k (h p.1 p.2) - h p.1 p.2) ^ 2 := by
     rw [ae_all_iff]
@@ -154,8 +154,8 @@ theorem tendsto_truncKernel (T : ℝ≥0) {h : ℝ≥0 → Ω → ℝ} (hh : Con
       with p h1 h2 h3
     rw [h1, Pi.sub_apply, h2, h3]
   have hint : Tendsto (fun k : ℕ ↦ ∫ p, ((truncKernel (μ := μ) T hh k - φ : Lp ℝ 2 _) p) ^ 2
-      ∂(trimMeasure_T (μ := μ) T ℱ)) atTop (𝓝 0) := by
-    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasure_T (μ := μ) T ℱ)
+      ∂(trimMeasureT (μ := μ) T ℱ)) atTop (𝓝 0) := by
+    have key := tendsto_integral_of_dominated_convergence (μ := trimMeasureT (μ := μ) T ℱ)
       (F := fun k p ↦ ((truncKernel (μ := μ) T hh k - φ : Lp ℝ 2 _) p) ^ 2)
       (f := fun _ => (0 : ℝ)) (fun p ↦ (φ p) ^ 2)
       (fun k => (Lp.aestronglyMeasurable _).pow 2) (Lp.memLp φ).integrable_sq
@@ -184,8 +184,8 @@ theorem tendsto_truncKernel (T : ℝ≥0) {h : ℝ≥0 → Ω → ℝ} (hh : Con
 
 omit [IsProbabilityMeasure μ] in
 lemma norm_band_sq_eq (T a b : ℝ≥0) (hWmeas : ∀ u, Measurable (W u))
-    (z : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
-    ∀ᵐ p ∂(trimMeasure_T (μ := μ) T ℱ),
+    (z : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+    ∀ᵐ p ∂(trimMeasureT (μ := μ) T ℱ),
       (band T a b hWmeas z p) ^ 2 = bandInd a b p.1 ^ 2 * (z p) ^ 2 := by
   filter_upwards [coeFn_band T a b hWmeas z] with p hp
   rw [hp, bandInd]
@@ -194,13 +194,13 @@ lemma norm_band_sq_eq (T a b : ℝ≥0) (hWmeas : ∀ u, Measurable (W u))
 /-- `∑ⱼ E[(ΔMⱼ)²] ≤ ‖z‖²`. -/
 lemma sum_integral_incrM_sq_le (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0) (n : ℕ)
-    (z : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (z : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∑ j ∈ Finset.range n, ∫ ω, (itoContinuousMod T hW.measurable z (unifPart T n (j + 1)) ω
       - itoContinuousMod T hW.measurable z (unifPart T n j) ω) ^ 2 ∂μ ≤ ‖z‖ ^ 2 := by
   have hterm : ∀ j ∈ Finset.range n, ∫ ω, (itoContinuousMod T hW.measurable z
       (unifPart T n (j + 1)) ω - itoContinuousMod T hW.measurable z (unifPart T n j) ω) ^ 2 ∂μ
       = ∫ p, (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable z p) ^ 2
-          ∂(trimMeasure_T (μ := μ) T ℱ) := by
+          ∂(trimMeasureT (μ := μ) T ℱ) := by
     intro j hj
     rw [← MathFin.lp_two_norm_sq, ← itoIntegralCLM_T_norm hW T, MathFin.lp_two_norm_sq]
     refine integral_congr_ae ?_
@@ -226,14 +226,14 @@ lemma sum_integral_incrM_sq_le (hW : BrownianOn ℱ W μ)
     split_ifs <;> norm_num
 
 lemma memLp_incrM (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
-    (T : ℝ≥0) {n j : ℕ} (hj : j < n) (z : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (T : ℝ≥0) {n j : ℕ} (hj : j < n) (z : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     MemLp (fun ω ↦ itoContinuousMod T hW.measurable z (unifPart T n (j + 1)) ω
       - itoContinuousMod T hW.measurable z (unifPart T n j) ω) 2 μ :=
   (Lp.memLp _).ae_eq (incrM_ae_eq hW hWc T hj z).symm
 
 /-- Increments of the continuous integral are linear in the kernel, almost surely. -/
 lemma incrM_sub_ae (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
-    (T : ℝ≥0) {n j : ℕ} (hj : j < n) (x y : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (T : ℝ≥0) {n j : ℕ} (hj : j < n) (x y : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∀ᵐ ω ∂μ, (itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
         - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
       - (itoContinuousMod T hW.measurable y (unifPart T n (j + 1)) ω
@@ -246,8 +246,8 @@ lemma incrM_sub_ae (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : 
     simp only [band, map_sub]; abel
   filter_upwards [incrM_ae_eq hW hWc T hj x, incrM_ae_eq hW hWc T hj y,
     incrM_ae_eq hW hWc T hj (x - y),
-    Lp.coeFn_sub (itoIntegralCLM_T hW T (band T (unifPart T n j) (unifPart T n (j + 1))
-      hW.measurable x)) (itoIntegralCLM_T hW T (band T (unifPart T n j) (unifPart T n (j + 1))
+    Lp.coeFn_sub (itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1))
+      hW.measurable x)) (itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1))
       hW.measurable y))] with ω h1 h2 h3 h4
   rw [h1, h2, h3, hband, map_sub, h4, Pi.sub_apply]
 
@@ -256,7 +256,7 @@ lemma integral_abs_frozenBilinear_le {W' : ℝ≥0 → Ω → ℝ} (hW : Brownia
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : BrownianOn ℱ W' μ)
     (hW'c : ∀ ω, Continuous fun u : ℝ≥0 ↦ W' u ω) (T : ℝ≥0) (n : ℕ)
     {w : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hC₀ : 0 ≤ C₀) (hwb : ∀ t ω, |w t ω| ≤ C₀)
-    (x y : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (x y : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
           - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
@@ -339,7 +339,7 @@ lemma integrable_frozenBilinear {W' : ℝ≥0 → Ω → ℝ} (hW : BrownianOn �
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : BrownianOn ℱ W' μ)
     (hW'c : ∀ ω, Continuous fun u : ℝ≥0 ↦ W' u ω) (T : ℝ≥0) (n : ℕ)
     {w : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hwm : ∀ t, Measurable (w t)) (hwb : ∀ t ω, |w t ω| ≤ C₀)
-    (x y : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (x y : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Integrable (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
           - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
@@ -362,7 +362,7 @@ lemma integral_abs_frozenBilinear_sub_le {W' : ℝ≥0 → Ω → ℝ} (hW : Bro
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : BrownianOn ℱ W' μ)
     (hW'c : ∀ ω, Continuous fun u : ℝ≥0 ↦ W' u ω) (T : ℝ≥0) (n : ℕ)
     {w : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hC₀ : 0 ≤ C₀) (hwm : ∀ t, Measurable (w t))
-    (hwb : ∀ t ω, |w t ω| ≤ C₀) (x₁ y₁ x₂ y₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)) :
+    (hwb : ∀ t ω, |w t ω| ≤ C₀) (x₁ y₁ x₂ y₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hW.measurable x₁ (unifPart T n (j + 1)) ω
           - itoContinuousMod T hW.measurable x₁ (unifPart T n j) ω)
@@ -420,23 +420,23 @@ lemma integral_abs_frozenBilinear_sub_le {W' : ℝ≥0 → Ω → ℝ} (hW : Bro
 /-- `E|∫ w·trunc_k(h₁)·trunc_k(h₂) ds − ∫ w h₁ h₂ ds| → 0`, with integrability of the error. -/
 lemma tendsto_timeIntegral_trunc (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ : ℝ}
     (hw : GoodProcess ℱ μ T w C₀) (hc₁ : ContProcess ℱ μ T h₁) (hc₂ : ContProcess ℱ μ T h₂)
-    {φ₁ φ₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
-    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
+    {φ₁ φ₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
+    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     (∀ k : ℕ, Integrable (fun ω ↦ ∫ s, w s ω * clampAt k (h₁ s ω) * clampAt k (h₂ s ω)
-        ∂(timeMeasure_T T) - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)) μ) ∧
+        ∂(timeMeasureT T) - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)) μ) ∧
     Tendsto (fun k : ℕ ↦ ∫ ω, |∫ s, w s ω * clampAt k (h₁ s ω) * clampAt k (h₂ s ω)
-        ∂(timeMeasure_T T) - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)| ∂μ)
+        ∂(timeMeasureT T) - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)| ∂μ)
       atTop (𝓝 0) := by
   -- the product function `|h₁ h₂|` is integrable on the product measure
   have hprodP : Measurable[ℱ.predictable] (fun p : ℝ≥0 × Ω ↦ h₁ p.1 p.2 * h₂ p.1 p.2) :=
     hc₁.pred.mul hc₂.pred
   have hH : Integrable (fun p : ℝ≥0 × Ω ↦ h₁ p.1 p.2 * h₂ p.1 p.2)
-      ((timeMeasure_T T).prod μ) := by
-    have h1 : Integrable (fun p ↦ φ₁ p * φ₂ p) (trimMeasure_T (μ := μ) T ℱ) :=
+      ((timeMeasureT T).prod μ) := by
+    have h1 : Integrable (fun p ↦ φ₁ p * φ₂ p) (trimMeasureT (μ := μ) T ℱ) :=
       (Lp.memLp φ₁).integrable_mul (Lp.memLp φ₂)
     have h2 : Integrable (fun p : ℝ≥0 × Ω ↦ h₁ p.1 p.2 * h₂ p.1 p.2)
-        (trimMeasure_T (μ := μ) T ℱ) := by
+        (trimMeasureT (μ := μ) T ℱ) := by
       refine h1.congr ?_
       filter_upwards [hφ₁, hφ₂] with p e1 e2
       rw [e1, e2]
@@ -464,13 +464,13 @@ lemma tendsto_timeIntegral_trunc (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω →
         ≤ C₀ * (2 * (|h₁ p.1 p.2| * |h₂ p.1 p.2|)) :=
           mul_le_mul (hw.bdd _ _) e (abs_nonneg _) hw.nonneg
       _ = 2 * C₀ * (|h₁ p.1 p.2| * |h₂ p.1 p.2|) := by ring
-  have hGi : ∀ k, Integrable (G k) ((timeMeasure_T T).prod μ) := fun k =>
+  have hGi : ∀ k, Integrable (G k) ((timeMeasureT T).prod μ) := fun k =>
     (hH.abs.const_mul (2 * C₀)).mono' ((hGm k).mono ℱ.predictable_le_prod
           le_rfl).aestronglyMeasurable
       (Eventually.of_forall fun p => (hGb k p).trans (by rw [abs_mul]))
   -- dominated convergence on the product measure
-  have hGlim : Tendsto (fun k ↦ ∫ p, G k p ∂((timeMeasure_T T).prod μ)) atTop (𝓝 0) := by
-    have key := tendsto_integral_of_dominated_convergence (μ := (timeMeasure_T T).prod μ)
+  have hGlim : Tendsto (fun k ↦ ∫ p, G k p ∂((timeMeasureT T).prod μ)) atTop (𝓝 0) := by
+    have key := tendsto_integral_of_dominated_convergence (μ := (timeMeasureT T).prod μ)
       (F := G) (f := fun _ => (0 : ℝ)) (fun p ↦ 2 * C₀ * |h₁ p.1 p.2 * h₂ p.1 p.2|)
       (fun k => ((hGm k).mono ℱ.predictable_le_prod le_rfl).aestronglyMeasurable)
       (hH.abs.const_mul _) (fun k => Eventually.of_forall (hGb k))
@@ -484,11 +484,11 @@ lemma tendsto_timeIntegral_trunc (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω →
           sub_self, abs_zero, mul_zero])
     simpa using key
   -- Fubini and the pointwise bound
-  have hfub : ∀ k, ∫ p, G k p ∂((timeMeasure_T T).prod μ)
-      = ∫ ω, ∫ s, G k (s, ω) ∂(timeMeasure_T T) ∂μ := fun k => integral_prod_symm _ (hGi k)
-  have hsec_wh : ∀ᵐ ω ∂μ, Integrable (fun s ↦ w s ω * h₁ s ω * h₂ s ω) (timeMeasure_T T) := by
+  have hfub : ∀ k, ∫ p, G k p ∂((timeMeasureT T).prod μ)
+      = ∫ ω, ∫ s, G k (s, ω) ∂(timeMeasureT T) ∂μ := fun k => integral_prod_symm _ (hGi k)
+  have hsec_wh : ∀ᵐ ω ∂μ, Integrable (fun s ↦ w s ω * h₁ s ω * h₂ s ω) (timeMeasureT T) := by
     have hI : Integrable (fun p : ℝ≥0 × Ω ↦ w p.1 p.2 * h₁ p.1 p.2 * h₂ p.1 p.2)
-        ((timeMeasure_T T).prod μ) := by
+        ((timeMeasureT T).prod μ) := by
       refine (hH.bdd_mul (c := C₀) (hw.pred.mono ℱ.predictable_le_prod le_rfl).aestronglyMeasurable
         (Eventually.of_forall fun p => by rw [Real.norm_eq_abs]; exact hw.bdd _ _)).congr
         (Eventually.of_forall fun p => ?_)
@@ -496,7 +496,7 @@ lemma tendsto_timeIntegral_trunc (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω →
       ring
     exact hI.prod_left_ae
   have hsec_wc : ∀ k : ℕ, ∀ᵐ ω ∂μ, Integrable (fun s ↦ w s ω * clampAt k (h₁ s ω)
-      * clampAt k (h₂ s ω)) (timeMeasure_T T) := by
+      * clampAt k (h₂ s ω)) (timeMeasureT T) := by
     intro k
     refine Eventually.of_forall fun ω => ?_
     refine Integrable.of_bound (C := C₀ * k * k) ?_ ?_
@@ -513,8 +513,8 @@ lemma tendsto_timeIntegral_trunc (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω →
       exact mul_le_mul (mul_le_mul (hw.bdd s ω) (abs_clampAt_le hk _) (abs_nonneg _) hw.nonneg)
         (abs_clampAt_le hk _) (abs_nonneg _) (mul_nonneg hw.nonneg hk)
   have hpt : ∀ k : ℕ, ∀ᵐ ω ∂μ, |∫ s, w s ω * clampAt k (h₁ s ω) * clampAt k (h₂ s ω)
-      ∂(timeMeasure_T T) - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)|
-        ≤ ∫ s, G k (s, ω) ∂(timeMeasure_T T) := by
+      ∂(timeMeasureT T) - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)|
+        ≤ ∫ s, G k (s, ω) ∂(timeMeasureT T) := by
     intro k
     filter_upwards [hsec_wh, hsec_wc k] with ω h1 h2
     rw [← integral_sub h2 h1]
@@ -525,8 +525,8 @@ lemma tendsto_timeIntegral_trunc (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω →
     congr 1
     ring
   have hmeasL : ∀ k : ℕ, AEStronglyMeasurable (fun ω ↦ ∫ s, w s ω * clampAt k (h₁ s ω)
-      * clampAt k (h₂ s ω) ∂(timeMeasure_T T) - ∫ s, w s ω * h₁ s ω * h₂ s ω
-        ∂(timeMeasure_T T)) μ := by
+      * clampAt k (h₂ s ω) ∂(timeMeasureT T) - ∫ s, w s ω * h₁ s ω * h₂ s ω
+        ∂(timeMeasureT T)) μ := by
     intro k
     refine ((stronglyMeasurable_timeIntegral (ℱ := ℱ) T ?_).sub
       (stronglyMeasurable_timeIntegral (ℱ := ℱ) T ?_)).aestronglyMeasurable
@@ -562,15 +562,15 @@ theorem tendsto_covariation_same_L2 (hW : BrownianOn ℱ W μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0)
     {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hw : GoodProcess ℱ μ T w C₀)
     (hc₁ : ContProcess ℱ μ T h₁) (hc₂ : ContProcess ℱ μ T h₂)
-    {φ₁ φ₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
-    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
+    {φ₁ φ₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
+    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hW.measurable φ₁ (unifPart T n (j + 1)) ω
             - itoContinuousMod T hW.measurable φ₁ (unifPart T n j) ω)
         * (itoContinuousMod T hW.measurable φ₂ (unifPart T n (j + 1)) ω
             - itoContinuousMod T hW.measurable φ₂ (unifPart T n j) ω)
-        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T)| ∂μ) atTop (𝓝 0) := by
+        - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)| ∂μ) atTop (𝓝 0) := by
   have hwm : ∀ t, Measurable (w t) := fun t => (hw.adapted t).mono (ℱ.le t) le_rfl
   obtain ⟨hLLi, hLL⟩ := tendsto_timeIntegral_trunc T hw hc₁ hc₂ hφ₁ hφ₂
   refine tendsto_of_approx (ν := μ)
@@ -584,9 +584,9 @@ theorem tendsto_covariation_same_L2 (hW : BrownianOn ℱ W μ)
             - itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₁ k) (unifPart T n j) ω)
         * (itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₂ k) (unifPart T n (j + 1)) ω
             - itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₂ k) (unifPart T n j) ω))
-    (L := fun ω ↦ ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasure_T T))
+    (L := fun ω ↦ ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T))
     (L' := fun (k : ℕ) ω ↦ ∫ s, w s ω * clampAt k (h₁ s ω) * clampAt k (h₂ s ω)
-      ∂(timeMeasure_T T))
+      ∂(timeMeasureT T))
     (e := fun k ↦ C₀ * (‖φ₁ - truncKernel (μ := μ) T hc₁ k‖ * ‖φ₂‖
       + ‖truncKernel (μ := μ) T hc₁ k‖ * ‖φ₂ - truncKernel (μ := μ) T hc₂ k‖))
     (fun n => integrable_frozenBilinear hW hWc hW hWc T n hwm hw.bdd φ₁ φ₂)
@@ -606,9 +606,9 @@ theorem tendsto_covariation_cross_L2 {B Z : ℝ≥0 → Ω → ℝ} (hP : Indepe
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hw : GoodProcess ℱ μ T w C₀)
     (hc₁ : ContProcess ℱ μ T h₁) (hc₂ : ContProcess ℱ μ T h₂)
-    {φ₁ φ₂ : Lp ℝ 2 (trimMeasure_T (μ := μ) T ℱ)}
-    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
-    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasure_T (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
+    {φ₁ φ₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)}
+    (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
+    (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
         * (itoContinuousMod T hP.left.measurable φ₁ (unifPart T n (j + 1)) ω
             - itoContinuousMod T hP.left.measurable φ₁ (unifPart T n j) ω)
