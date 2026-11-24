@@ -198,6 +198,7 @@ theorem integrable_prod_coeFn (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) 
     Integrable (⇑φ) ((timeMeasureHorizon T).prod μ) :=
   (memLp_prod_coeFn T hBmeas φ).integrable one_le_two
 
+omit [IsProbabilityMeasure μ] in
 theorem integrable_prod_coeFn_sq (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Integrable (fun z => (φ z) ^ 2) ((timeMeasureHorizon T).prod μ) :=
   (memLp_prod_coeFn T hBmeas φ).integrable_sq

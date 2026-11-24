@@ -320,6 +320,7 @@ variable (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable
   {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
   (η_E : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
 
+omit [IsProbabilityMeasure μ] in
 theorem integrableOn_bandEnergy (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) (t : ℝ≥0) :
     IntegrableOn (bandEnergy T hBmeas Z) (Set.Ioc 0 t) timeMeasure := by
   refine Measure.integrableOn_of_bounded (M := ‖Z‖ ^ 2) ?_
