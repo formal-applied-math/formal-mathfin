@@ -90,7 +90,7 @@ variable {hP : IndependentPair ℱ B Z μ} {T : ℝ≥0} {p : Parameters} {hρ :
 /-- The localization times `σₙ` (rational exit times of `|X| + V`, shifted so that the level
 exceeds the initial value). -/
 def locTime (X V : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (N₀ n : ℕ) : Ω → ℝ≥0 :=
-  exitTime T (locFun X V) ((n + N₀ : ℕ) : ℝ)
+  CommonOptional.exitTime T (locFun X V) ((n + N₀ : ℕ) : ℝ)
 
 theorem IsHestonState.stopped (hS : IsHestonState hP T p hρ x₀ v₀ X V)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)

@@ -84,8 +84,9 @@ theorem stopped_affine_ell (hP : IndependentPair ℱ B Z μ)
       + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx t ω)
     (ℓ : ℂ →L[ℝ] ℝ) {n : ℕ} (hn : |x₀| + v₀ < n) :
     Integrable (fun ω ↦ ℓ (affST p u w T
-      (fun l ↦ hestonY X V l (exitTime T (locFun X V) n ω) ω))) μ ∧
-      ∫ ω, ℓ (affST p u w T (fun l ↦ hestonY X V l (exitTime T (locFun X V) n ω) ω)) ∂μ
+      (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω))) μ ∧
+      ∫ ω, ℓ (affST p u w T
+        (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω)) ∂μ
         = ℓ (affST p u w T (hestonY0 x₀ v₀)) := by
   have hY := hestonItoProc hP hBc hZc p hρ hpX hpV hcX hcV hHv hHx heqV heqX
   obtain ⟨δ, hδ, hDC, hCC, -⟩ := contDiffOn_globalLaplace p u w hξ hρ hu hw
@@ -93,7 +94,7 @@ theorem stopped_affine_ell (hP : IndependentPair ℱ B Z μ)
   have hdiff : ContDiff ℝ 2 (affTest p u w T δ hT hδ n ℓ) :=
     contDiff_affTest p u w T δ hT hδ n ℓ hDC hCC
   obtain ⟨C₁, C₂, hf⟩ := itoTest_affTest p u w T δ hT hδ n ℓ hDC hCC
-  set σ := exitTime T (locFun X V) n with hσdef
+  set σ := CommonOptional.exitTime T (locFun X V) n with hσdef
   have hσT : ∀ ω, σ ω ≤ T := fun ω => exitTime_le T _ _ ω
   have hXc := contProcess_of_predictable hpX hcX
   have hVc := contProcess_of_predictable hpV hcV
@@ -211,8 +212,8 @@ theorem stopped_affine (hP : IndependentPair ℱ B Z μ)
       + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx t ω)
     {n : ℕ} (hn : |x₀| + v₀ < n) :
     Integrable (fun ω ↦ affST p u w T
-      (fun l ↦ hestonY X V l (exitTime T (locFun X V) n ω) ω)) μ ∧
-      ∫ ω, affST p u w T (fun l ↦ hestonY X V l (exitTime T (locFun X V) n ω) ω) ∂μ
+      (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω)) μ ∧
+      ∫ ω, affST p u w T (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω) ∂μ
         = affST p u w T (hestonY0 x₀ v₀) := by
   obtain ⟨hre, ere⟩ := stopped_affine_ell hP hBc hZc p hξ hρ hu hw hv₀ hpX hpV hcX hcV hVnn
     hHv hHx heqV heqX Complex.reCLM hn
@@ -221,7 +222,7 @@ theorem stopped_affine (hP : IndependentPair ℱ B Z μ)
   simp only [Complex.reCLM_apply] at hre ere
   simp only [Complex.imCLM_apply] at him eim
   have hint : Integrable (fun ω ↦ affST p u w T
-      (fun l ↦ hestonY X V l (exitTime T (locFun X V) n ω) ω)) μ :=
+      (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω)) μ :=
     Integrable.re_im_iff.1 ⟨by simpa using hre, by simpa using him⟩
   refine ⟨hint, Complex.ext ?_ ?_⟩
   · have h := integral_re hint
