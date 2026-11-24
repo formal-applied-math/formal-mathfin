@@ -108,6 +108,7 @@ theorem bandEnergy_mono (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {t t' :
     (ae_of_all _ fun _ => sq_nonneg _)
     (Set.prod_mono (Set.Ioc_subset_Ioc_right h) le_rfl).eventuallyLE
 
+omit [IsProbabilityMeasure μ] in
 theorem monotone_bandEnergy (Z : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     Monotone (bandEnergy T hBmeas Z) :=
   fun _ _ h => bandEnergy_mono T hBmeas Z h

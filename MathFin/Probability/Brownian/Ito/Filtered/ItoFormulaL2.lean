@@ -188,6 +188,7 @@ section Slices
 variable (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
 
+omit [IsProbabilityMeasure μ] in
 /-- The product-measure version of an `E`-element is square integrable. -/
 theorem memLp_prod_coeFn (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) :
     MemLp (⇑φ) 2 ((timeMeasureHorizon T).prod μ) :=
@@ -410,6 +411,7 @@ theorem tendsto_integral_abs_comp_mul_sub {g : ℝ → ℝ} (hg : Continuous g) 
         rw [abs_mul, abs_mul]
         exact add_le_add (mul_le_mul_of_nonneg_right (hgC _) (abs_nonneg _)) le_rfl
 
+omit [IsFiniteMeasure ν] in
 /-- `L¹` convergence of `g(Y_k) v_k²`. -/
 theorem tendsto_integral_abs_comp_mul_sq_sub {g : ℝ → ℝ} (hg : Continuous g) {C : ℝ}
     (hgC : ∀ x, |g x| ≤ C) {Y : ℕ → α → ℝ} {Y₀ : α → ℝ}
@@ -469,6 +471,7 @@ theorem tendsto_integral_abs_comp_mul_sq_sub {g : ℝ → ℝ} (hg : Continuous 
         rw [abs_mul, abs_mul]
         exact add_le_add (mul_le_mul_of_nonneg_right (hgC _) (abs_nonneg _)) le_rfl
 
+omit [IsFiniteMeasure ν] in
 /-- `L²` convergence of `g(Y_k) v_k`. -/
 theorem tendsto_Lp_comp_mul {g : ℝ → ℝ} (hg : Continuous g) {C : ℝ}
     (hgC : ∀ x, |g x| ≤ C) {Y : ℕ → α → ℝ} {Y₀ : α → ℝ}

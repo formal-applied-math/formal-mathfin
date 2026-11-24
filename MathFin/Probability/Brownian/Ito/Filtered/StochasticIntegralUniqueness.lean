@@ -33,7 +33,7 @@ noncomputable section
 namespace MathFin.FilteredIto.StochasticIntegralUniqueness
 open ProbabilityTheory MeasureTheory Filter Topology
 open scoped NNReal ENNReal
-variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}
     {Y : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
     {I I' : (ℝ≥0 → Ω → ℝ) → Ω → ℝ} {S S' : Set (ℝ≥0 → Ω → ℝ)}
 
@@ -41,7 +41,6 @@ private def Agree (μ : Measure Ω) (I : (ℝ≥0 → Ω → ℝ) → Ω → ℝ
     (I' : (ℝ≥0 → Ω → ℝ) → Ω → ℝ) (S' : Set (ℝ≥0 → Ω → ℝ)) (Z : ℝ≥0 → Ω → ℝ) : Prop :=
   Z ∈ S ∧ Z ∈ S' ∧ I Z =ᵐ[μ] I' Z
 
-omit [IsProbabilityMeasure μ] in
 private theorem Agree.add (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
       IsRiemannStieltjesExtension μ Y ℱ I' S') {Z₁ Z₂ : ℝ≥0 → Ω → ℝ}
     (h₁ : Agree μ I S I' S' Z₁) (h₂ : Agree μ I S I' S' Z₂) :
@@ -51,7 +50,6 @@ private theorem Agree.add (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
   obtain ⟨hS', hI''⟩ := hI'.integral_add Z₁ Z₂ h₁.2.1 h₂.2.1
   exact ⟨hS, hS', hI.trans ((h₁.2.2.add h₂.2.2).trans hI''.symm)⟩
 
-omit [IsProbabilityMeasure μ] in
 private theorem Agree.const_smul (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
       IsRiemannStieltjesExtension μ Y ℱ I' S')
     {Z : ℝ≥0 → Ω → ℝ} (h : Agree μ I S I' S' Z) (c : ℝ) :
@@ -66,7 +64,6 @@ private theorem Agree.sub (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
     Agree μ I S I' S' (Z₁ - Z₂) := by
   simpa [sub_eq_add_neg] using h₁.add hI hI' (h₂.const_smul hI hI' (-1))
 
-omit [IsProbabilityMeasure μ] in
 /-- **`Agree` is closed under dominated limits**: both integrals pass to the limit in measure,
 and limits in measure are almost surely unique. -/
 private theorem Agree.of_tendsto (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
@@ -80,7 +77,6 @@ private theorem Agree.of_tendsto (hI : IsRiemannStieltjesExtension μ Y ℱ I S)
   exact ⟨hS, hS', tendstoInMeasure_ae_unique hconv
     (hconv'.congr_left fun n ↦ ((hZ n).2.2).symm)⟩
 
-omit [IsProbabilityMeasure μ] in
 private theorem agree_band (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
       IsRiemannStieltjesExtension μ Y ℱ I' S') {i j : ℝ≥0} (hij : i ≤ j)
     (X : @SimpleFunc Ω (ℱ i) ℝ) :
@@ -89,7 +85,6 @@ private theorem agree_band (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' 
   obtain ⟨hS', hI''⟩ := hI'.elementary_ioc i j hij X
   exact ⟨hS, hS', hI.trans hI''.symm⟩
 
-omit [IsProbabilityMeasure μ] in
 private theorem agree_bottomBand (hI : IsRiemannStieltjesExtension μ Y ℱ I S) (hI' :
       IsRiemannStieltjesExtension μ Y ℱ I' S') (i : ℝ≥0)
     (X : @SimpleFunc Ω (ℱ ⊥) ℝ) :
