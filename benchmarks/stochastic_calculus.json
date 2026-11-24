@@ -1430,6 +1430,48 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. ito_product_rule_process in MathFin/Probability/Brownian/Ito/ItoProductRule.lean is polarisation: Ito's formula for f(x) = x^2/2 (ito_half_sq_process, the case f_t = 0 of ito_formula_adapted_unbounded_C2_process) along X, Y and Z = X + Y gives XY = Z^2/2 - X^2/2 - Y^2/2. Z is again an Ito process with coefficients sigma + tau, b + c (ae_localItoProcess_add): localItoIntegral and predItoIntegral are additive up to indistinguishability on [0, T] (ae_localItoIntegral_add, ae_predItoIntegral_add), being at each time limits in probability of Riemann sums that add. SCOPE: product rule f(x, y) = xy only; one scalar Brownian driver; continuous adapted coefficients; the stochastic integral is predItoIntegral against B with horizon T. Itô's formula for general f(t, x, y) needs the Taylor argument of ItoFormulaAdaptedTD in two coordinates and is not proved. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-two-state-two-drivers",
+      "name": "Two-state Itô formula with two Brownian drivers",
+      "domain": "stochastic_calculus",
+      "description": "Apply the two-driver Itô formula to a two-coordinate state, including the mixed second derivative and the two stochastic integrals on the common filtration.",
+      "code": {
+        "lean": "import MathFin.Probability.Brownian.Ito.Filtered.JointItoFormula\n\nnamespace MathFin.FilteredIto.CommonIto\nopen MeasureTheory ProbabilityTheory\nopen MathFin.FilteredIto.CommonNoise MathFin.FilteredIto.CommonPredictable MathFin.FilteredIto.CommonRiemann MathFin.FilteredIto.CommonCovariation\nopen scoped NNReal ENNReal\nvariable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {ℱ : Filtration ℝ≥0 mΩ} {B Z : ℝ≥0 → Ω → ℝ}\nlocal notation \"leb\" => MathFin.ItoIntegralL2.timeMeasure\n\n\ntheorem benchmark_two_state_ito (hP : IndependentPair ℱ B Z μ)\n    (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)\n    {T : ℝ≥0} {Y : (Fin 2) → ℝ≥0 → Ω → ℝ} {y : (Fin 2) → ℝ} {a b c : (Fin 2) → ℝ≥0 → Ω → ℝ}\n    {φB φZ : (Fin 2) → Lp ℝ 2 (trimMeasure_T (μ :=\n  MathFin.FilteredIto.CommonIto.ito_formula_stochasticIntegral hP hBc hZc hY hf\n\nend MathFin.FilteredIto.CommonIto\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "KaratzasShreve1991",
+        "citations": [
+          {
+            "key": "KaratzasShreve1991"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Finite nonnegative horizon, continuous drivers forming a supplied independent Brownian pair, a decomposed Itô process, a jointly C2 spatial test with bounded first and second derivatives and uniformly continuous Hessian. The formula holds almost surely at the specified horizon."
+      }
+    },
+    {
+      "id": "sc-stochastic-integral-filtration-lift",
+      "name": "Continuous integral under filtration enlargement",
+      "domain": "stochastic_calculus",
+      "description": "The continuous realization of a lifted natural-filtration kernel represents the canonical integrator in BrownianMotion’s uniqueness characterization.",
+      "code": {
+        "lean": "import MathFin.Probability.Brownian.Ito.Filtered.StochasticIntegralIdentification\n\nnamespace MathFin.FilteredIto.CommonLift\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin.FilteredIto.CommonNoise MathFin.StochasticIntegralCharacterisation\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {ℱ : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n\n\ntheorem benchmark_lifted_stochastic_integral (hB : BrownianOn ℱ B μ)\n    (hpath : ∀ ω, Continuous (fun t ↦ B t ω)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (MathFin.ItoIntegralCLM.trimMeasure (μ :=\n  MathFin.FilteredIto.CommonLift.lifted_modification_isStochasticIntegral hB hpath T φ\n\nend MathFin.FilteredIto.CommonLift\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "KaratzasShreve1991",
+        "citations": [
+          {
+            "key": "KaratzasShreve1991"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "For a square-integrable predictable kernel in the driver’s natural filtration, its continuous realization after lifting to a larger compatible Brownian filtration gives the same stochastic integral against that martingale on the original domain."
+      }
     }
   ]
 }

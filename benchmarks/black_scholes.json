@@ -2909,6 +2909,48 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-heston-characteristic-function",
+      "name": "Heston terminal log-spot characteristic function",
+      "domain": "mathematical_finance",
+      "description": "Construct a nonnegative-variance Heston state on the given Brownian basis and identify the characteristic function of terminal log-spot at all real frequencies.",
+      "code": {
+        "lean": "import MathFin.Models.StochVol.Heston.LogSpotCharacteristic\n\nnamespace MathFin.Heston.CommonAffineTransform\nopen MathFin.FilteredIto\nopen MeasureTheory ProbabilityTheory Filter Topology\nopen MathFin.Heston.CommonAffineStopped\nopen MathFin.FilteredIto.CommonNoise MathFin.FilteredIto.CommonStopping MathFin.Heston.CommonHestonIto MathFin.Heston.CommonAffine\nopen scoped NNReal\n\n\ntheorem benchmark_exists_hestonState_charFun\n    {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {ℱ : Filtration ℝ≥0 mΩ} {B Z : ℝ≥0 → Ω → ℝ} (hP : IndependentPair ℱ B Z μ)\n    (hBc : ∀ ω, Continuous (fun s ↦ B s ω)) (hZc : ∀ ω, Continuous (fun s ↦ Z s ω))\n    (T : ℝ≥0) (p : Parameters) (hκ : 0 ≤ p.kappa) (hθ : 0 ≤ p.theta) (hξ : 0 < p.xi)\n    (hρ : |p.rho| ≤ 1) (x₀ v₀ : ℝ) (hv : 0 ≤ v₀) :\n    ∃ X V : ℝ≥0 → Ω → ℝ, IsHestonState hP T p hρ x₀ v₀ X V ∧\n      ∀ k : ℝ, charFun (μ.map (X T)) k = globalAffineTransform p (Complex.I * k) 0 x₀ v₀ T :=\n  MathFin.Heston.CommonAffineTransform.exists_hestonState_charFun hP hBc hZc T p hκ hθ hξ hρ x₀ v₀ hv\n\nend MathFin.Heston.CommonAffineTransform\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Heston1993",
+        "citations": [
+          {
+            "key": "Heston1993"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Finite deterministic horizon and deterministic initial state, nonnegative initial variance, nonnegative mean reversion and long-run variance, positive volatility of volatility and absolute correlation at most one. The supplied independent Brownian pair has continuous paths and joint future increments independent of the common past. The branch-independent coefficients are constructed by a linear flow and a time integral."
+      }
+    },
+    {
+      "id": "mf-heston-linear-flow-real-moment",
+      "name": "Identification of real-strip Heston coefficients",
+      "domain": "mathematical_finance",
+      "description": "Identify the complex linear-flow transform with the existing Heston real Möbius and logarithmic profile.",
+      "code": {
+        "lean": "import MathFin.Models.StochVol.Heston.RiccatiIdentification\n\nnamespace MathFin.Heston\n\ntheorem benchmark_heston_real_moment_bridge (p : Parameters) {u t : ℝ} (ht : 0 ≤ t)\n    (hξ : 0 < p.xi) (hρ : |p.rho| ≤ 1) (hu : 0 < u) (hu' : u < 1) (x v : ℝ) :\n    globalAffineTransform p u 0 x v t =\n      (MathFin.Heston.hestonTransform (p.r - p.q) p.kappa p.theta p.xi p.rho u t 0 x v : ℂ) :=\n  MathFin.Heston.globalAffineTransform_eq_hestonTransform p ht hξ hρ hu hu' x v\n\nend MathFin.Heston\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Heston1993",
+        "citations": [
+          {
+            "key": "Heston1993"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Real exponent strictly between zero and one, zero terminal variance weight, nonnegative maturity, positive volatility of volatility and absolute correlation at most one. The rate argument of the existing profile is the carry r minus q."
+      }
     }
   ]
 }

@@ -2887,6 +2887,26 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedUtility_eq_integral
 
+/-- info: 'MathFin.FilteredIto.CommonIntegral.isStochasticIntegral_stopped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.FilteredIto.CommonIntegral.isStochasticIntegral_stopped
+
+/-- info: 'MathFin.Heston.exists_cir_strong_solution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.exists_cir_strong_solution
+
+/-- info: 'MathFin.FilteredIto.CommonIto.ito_formula_stochasticIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.FilteredIto.CommonIto.ito_formula_stochasticIntegral
+
+/-- info: 'MathFin.Heston.globalAffineTransform_eq_hestonTransform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.globalAffineTransform_eq_hestonTransform
+
+/-- info: 'MathFin.Heston.CommonAffineTransform.exists_hestonState_charFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.CommonAffineTransform.exists_hestonState_charFun
+
 end MathFin.AxiomAudit
 
 /-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/

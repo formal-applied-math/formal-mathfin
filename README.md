@@ -17,8 +17,8 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 906 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 866 are proved in
+The [corpus](docs/glossary.md#corpus) records 910 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 870 are proved in
 full, 18 restate a lemma from Mathlib or BrownianMotion, and 22 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
@@ -296,6 +296,7 @@ are the usual starting point.
 
 Raphael Coelho maintains the library, with contributions from:
 
+- [Granville Gu](https://github.com/GgMacroFinance-dotcom): the Heston characteristic function and its stochastic integration foundations.
 - [Godstime Aburu](https://github.com/BboyGT): the issue-label taxonomy.
 - [Alfredo Garcia](https://github.com/oxarbitrage): Glosten–Milgrom adverse selection, a drift term
   in the Itô-process price and the CIR bond loadings.
