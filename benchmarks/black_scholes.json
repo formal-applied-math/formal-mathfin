@@ -2472,7 +2472,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, MathFin/Models/StochVol/Heston.lean. The 2D exponential-affine family, the Heston generator with the correlated cross term, the rho-shifted Riccati closed forms (Moebius denominator, admissible strip 0 < u < 1 forcing gamma > |k - rho xi u|), and the calendar-time PDE verification. The expectation form of the transform (that the profile is E[e^{u log S_T}]) is not proved: it needs the Heston process and a 2D correlated Ito formula, which the library does not have. Axioms-clean."
+        "formalization_scope": "Full formal proof, MathFin/Models/StochVol/Heston.lean. The 2D exponential-affine family, the Heston generator with the correlated cross term, the rho-shifted Riccati closed forms (Moebius denominator, admissible strip 0 < u < 1 forcing gamma > |k - rho xi u|), and the calendar-time PDE verification. This entry identifies a deterministic PDE solution on the real strip. The companion characteristic-function theorem identifies the terminal law on the imaginary axis. An expectation identity for arbitrary positive real exponents is outside both statements. Axioms-clean."
       }
     },
     {
