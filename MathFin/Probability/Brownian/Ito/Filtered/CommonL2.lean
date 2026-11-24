@@ -11,8 +11,8 @@ public import MathFin.Probability.Brownian.Ito.Filtered.CommonPairing
 # Common L2
 
 Actual simple Itô sums, L2 membership and their overlap isometry for random
-coefficients measurable on a common filtration. Generated from the pinned
-ItoIntegralL2 source; all stochastic inputs are proved in CommonPairing.
+coefficients measurable on a common filtration. The increment estimates and rectangle
+pairing use MathFin’s filtered Brownian isometry.
 
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the upstream LICENSE.

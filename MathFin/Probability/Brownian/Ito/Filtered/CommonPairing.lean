@@ -8,7 +8,7 @@ module
 public import MathFin.Probability.Brownian.Ito.Filtered.FilteredBrownian
 
 /-!
-# Common Pairing
+# Measurability at a filtration time
 
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the upstream LICENSE.
@@ -20,6 +20,7 @@ Adapted to a specified common filtration, 2026-10-18.
 
 ## Main results
 
+* `adaptedAt_eval` gives measurability of an earlier driver value at a later time.
 
 ## References
 

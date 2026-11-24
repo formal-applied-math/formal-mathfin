@@ -58,8 +58,9 @@ theorem continuous_integral_natural_lift (hB : IsFilteredPreBrownian B ℱ μ) (
   have hn := process_natural_eq hB.toIsPreBrownianReal hB.measurable_eval T t H
   have hp := CommonContinuous.itoContinuousMod_modification hB T hB.measurable_eval hc
     (lpLift (natural_le hB) T H) ht
-  rw [he, hn] at hp
-  exact hp.trans (MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_modification
+  have hval := hp.trans (Filter.Eventually.of_forall fun ω ↦
+    congrArg (fun z : Lp ℝ 2 μ ↦ z ω) (he.trans hn))
+  exact hval.trans (MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_modification
     hB.toIsPreBrownianReal T hB.measurable_eval hc H ht).symm
 
 /-- An actual nonnegative, predictable, continuous finite-horizon CIR solution
