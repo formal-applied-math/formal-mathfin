@@ -290,7 +290,7 @@ Contributions are welcome, from people and from agents working for them.
 [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to add a theorem, and
 [`docs/onboarding.md`](docs/onboarding.md) walks through a first contribution. Issues labelled
 [good first issue](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-are the usual starting point.
+are the usual starting point. To report a security concern, see [`SECURITY.md`](SECURITY.md).
 
 ## Contributors
 
@@ -304,6 +304,7 @@ Raphael Coelho maintains the library, with contributions from:
 - [Aleksey Salkutsan](https://github.com/kernelpanic888): forward rate agreements and downside
   performance metrics.
 - [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
+- [WorldianAI](https://github.com/WorldianAI): the security policy.
 - [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
   calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
   normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
