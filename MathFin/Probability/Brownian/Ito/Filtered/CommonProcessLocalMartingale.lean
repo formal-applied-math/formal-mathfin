@@ -39,7 +39,7 @@ namespace MathFin.FilteredIto
 namespace CommonProcess
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : BrownianOn ℱ B μ)
+  {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : IsFilteredPreBrownian B ℱ μ)
 
 include hB
 

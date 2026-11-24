@@ -14,14 +14,8 @@ public import MathFin.Probability.Brownian.Ito.ItoIntegralProcessContinuousModif
 A terminal L² operator can be evaluated on a process via a predictable version. Replacing
 the integrator by a fixed-time modification preserves all elementary increments.
 
-## Main definitions
-
-* `PredictableL2Version`, `predictableL2Domain` and `predictableL2Class` give the
-  process-domain interface for a measure on the predictable sigma algebra.
-
 ## Main results
 
-* `predictableL2Class_bracket` identifies the class used by the native bracket integral.
 * `isStochasticIntegral_itoContinuousMod` applies BrownianMotion's characterization
   to the stopped continuous version.
 
@@ -44,39 +38,8 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
 
-/-- A process which agrees indistinguishably with a predictable representative in L²
-for the specified measure on the predictable σ-algebra. -/
-def PredictableL2Version (μ : Measure Ω) (ℱ : Filtration ℝ≥0 mΩ)
-    (ν : @Measure (ℝ≥0 × Ω) ℱ.predictable) (X V : ℝ≥0 → Ω → ℝ) : Prop :=
-  Measurable[ℱ.predictable] (Function.uncurry V) ∧
-    MemLp (Function.uncurry V) 2 ν ∧ X ≡ᵐ[μ] V
-
-/-- Process domain of a continuous L² stochastic integral. -/
-def predictableL2Domain (μ : Measure Ω) (ℱ : Filtration ℝ≥0 mΩ)
-    (ν : @Measure (ℝ≥0 × Ω) ℱ.predictable) : Set (ℝ≥0 → Ω → ℝ) :=
-  {X | ∃ V, PredictableL2Version μ ℱ ν X V}
-
-open scoped Classical in
-/-- Select a representative for applying a continuous linear integral on predictable L². -/
-noncomputable def predictableL2Class (μ : Measure Ω) (ℱ : Filtration ℝ≥0 mΩ)
-    (ν : @Measure (ℝ≥0 × Ω) ℱ.predictable) (X : ℝ≥0 → Ω → ℝ) : Lp ℝ 2 ν :=
-  if h : X ∈ predictableL2Domain μ ℱ ν then h.choose_spec.2.1.toLp _ else 0
-
 variable {T : ℝ≥0} {hBmeas : ∀ t, Measurable (B t)}
   {φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)}
-
-omit [IsProbabilityMeasure μ] in
-/-- On the natural filtration with the bracket measure the process domain is the library's
-canonical one. -/
-theorem predictableL2Domain_bracket :
-    predictableL2Domain μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) =
-      domain T hBmeas φ := rfl
-
-omit [IsProbabilityMeasure μ] in
-/-- Applying the generic class selector on the bracket measure returns the original L² class. -/
-theorem predictableL2Class_bracket (X : ℝ≥0 → Ω → ℝ) :
-    predictableL2Class μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) X =
-      integrandLp T hBmeas φ X := rfl
 
 omit [IsProbabilityMeasure μ] in
 private theorem extension_congr_integrator {ι : Type*} [LinearOrder ι] [OrderBot ι]

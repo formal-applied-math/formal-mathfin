@@ -41,13 +41,13 @@ open scoped NNReal ENNReal Topology
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
 
-theorem common_adapted_increment_sq_sub (hB : BrownianOn ℱ B μ)
+theorem common_adapted_increment_sq_sub (hB : IsFilteredPreBrownian B ℱ μ)
     {a b c : ℝ≥0} (hac : a ≤ c) (hbc : b ≤ c) (r : ℝ) :
     CommonPairing.AdaptedAt ℱ c (fun ω => (B b ω - B a ω)^2 - r) :=
-  ((((hB.adapted b).measurable.mono (ℱ.mono hbc) le_rfl).sub
-    ((hB.adapted a).measurable.mono (ℱ.mono hac) le_rfl)).pow_const 2).sub_const r
+  ((((hB.stronglyAdapted b).measurable.mono (ℱ.mono hbc) le_rfl).sub
+    ((hB.stronglyAdapted a).measurable.mono (ℱ.mono hac) le_rfl)).pow_const 2).sub_const r
 
-variable (hB : BrownianOn ℱ B μ)
+variable (hB : IsFilteredPreBrownian B ℱ μ)
 include hB
 omit hB in
 private theorem unifPart_le {T : ℝ≥0} {n k : ℕ} (hk : k ≤ n) : unifPart T n k ≤ T := by
@@ -60,15 +60,15 @@ private theorem integral_adapted_mul_centered_sq
     (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {χ : Ω → ℝ} (hχ : CommonPairing.AdaptedAt ℱ t₀ χ) :
     ∫ ω, χ ω * ((B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) ∂μ = 0 := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
   have hχm : Measurable χ := hχ.measurable hBmeas
   have hYm : Measurable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) := by fun_prop
   have hindep : IndepFun χ (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) μ := by
-    have h := (hB.independent ht hχ).comp
+    have h := (MathFin.ItoIsometryAdapted.adapted_indepFun_increment hB ht hχ).comp
       measurable_id (by fun_prop : Measurable (fun x : ℝ ↦ x ^ 2 - ((t₁ : ℝ) - t₀)))
     simpa [Function.comp_def] using h
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
-      integral_increment_centered_mean hB.law ht, mul_zero]
+      integral_increment_centered_mean hB.toIsPreBrownianReal ht, mul_zero]
 
 private theorem weighted_fluctuation_integral_le
     (hBmeas : ∀ t, Measurable (B t))
@@ -80,14 +80,15 @@ private theorem weighted_fluctuation_integral_le
              - ((unifPart T n (k + 1) : ℝ) - unifPart T n k))) ^ 2 ∂μ
       ≤ ∑ k ∈ Finset.range n,
           C ^ 2 * (2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2) := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
   have hmono : Monotone (unifPart T n) := fun i j hij ↦ by simp only [unifPart]; gcongr
   set t : ℕ → ℝ≥0 := unifPart T n
   set Y : ℕ → Ω → ℝ := fun k ω ↦ (B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)
     with hY_def
   set a : ℕ → Ω → ℝ := fun k ω ↦ w (t k) ω * Y k ω with ha_def
   have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
-  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two hB.law (t k) (t (k
+  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two
+        hB.toIsPreBrownianReal (t k) (t (k
         + 1)) _
   have ha_aesm : ∀ k, AEStronglyMeasurable (a k) μ := fun k ↦
     (hw_meas (t k)).aestronglyMeasurable.mul (hYL2 k).aestronglyMeasurable
@@ -138,7 +139,7 @@ private theorem weighted_fluctuation_integral_le
           rw [show (fun ω ↦ Y k ω * Y k ω)
                 = (fun ω ↦ ((B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)) ^ 2)
               from funext fun ω ↦ by simp only [hY_def]; ring,
-              integral_increment_sq_centered hB.law (hmono (Nat.le_succ k))]
+              integral_increment_sq_centered hB.toIsPreBrownianReal (hmono (Nat.le_succ k))]
   calc ∫ ω, (∑ k ∈ Finset.range n, a k ω) ^ 2 ∂μ
       = ∫ ω, ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, a k ω * a l ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
@@ -188,7 +189,7 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
                   * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
               - ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
       atTop (𝓝 0) := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
   have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
   set Ssum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       w (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hSsum
@@ -238,7 +239,8 @@ theorem tendsto_weighted_qv_process_of_ae_continuous
       refine memLp_finsetSum _ fun k _ ↦ ?_
       have hZ : MemLp (fun ω ↦ (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
           - ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) 2 μ :=
-        memLp_increment_sq_centered_two hB.law (unifPart T n k) (unifPart T n (k + 1)) _
+        memLp_increment_sq_centered_two hB.toIsPreBrownianReal (unifPart T n k) (unifPart T n (k
+              + 1)) _
       have haesm : AEStronglyMeasurable (fun ω ↦ w (unifPart T n k) ω
           * ((B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
             - ((unifPart T n (k + 1) : ℝ) - unifPart T n k))) μ :=

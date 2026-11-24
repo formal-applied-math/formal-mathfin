@@ -78,10 +78,10 @@ theorem stopped_affine_ell (hP : IndependentPair ℱ B Z μ)
     (hHx : ⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
     (heqV : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
-      + itoContinuousMod T hP.left.measurable Hv t ω)
+      + itoContinuousMod T hP.left.measurable_eval Hv t ω)
     (heqX : ∀ᵐ ω ∂μ, ∀ t ≤ T, X t ω = x₀
       + (∫ s in Set.Ioc 0 t, (p.r - p.q) - (1 / 2 : ℝ) * V s ω ∂leb)
-      + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx t ω)
+      + itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval Hx t ω)
     (ℓ : ℂ →L[ℝ] ℝ) {n : ℕ} (hn : |x₀| + v₀ < n) :
     Integrable (fun ω ↦ ℓ (affST p u w T
       (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω))) μ ∧
@@ -141,10 +141,10 @@ theorem stopped_affine_ell (hP : IndependentPair ℱ B Z μ)
       rw [abs_of_nonneg h2]; linarith
   -- Itô's formula at the exit time, with vanishing drift
   have hIto := ito_formula_random_time hP hBc hZc hY hf hσT
-  set MBf : Fin 3 → Ω → ℝ := fun i ω ↦ itoContinuousMod T hP.left.measurable
+  set MBf : Fin 3 → Ω → ℝ := fun i ω ↦ itoContinuousMod T hP.left.measurable_eval
     (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd
       (hestonKerB p Hv Hx i)) (σ ω) ω with hMBf
-  set MZf : Fin 3 → Ω → ℝ := fun i ω ↦ itoContinuousMod T hP.right.measurable
+  set MZf : Fin 3 → Ω → ℝ := fun i ω ↦ itoContinuousMod T hP.right.measurable_eval
     (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd
       (hestonKerZ p Hx i)) (σ ω) ω with hMZf
   set c := affTest p u w T δ hT hδ n ℓ (hestonY0 x₀ v₀) with hc
@@ -206,10 +206,10 @@ theorem stopped_affine (hP : IndependentPair ℱ B Z μ)
     (hHx : ⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
     (heqV : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
-      + itoContinuousMod T hP.left.measurable Hv t ω)
+      + itoContinuousMod T hP.left.measurable_eval Hv t ω)
     (heqX : ∀ᵐ ω ∂μ, ∀ t ≤ T, X t ω = x₀
       + (∫ s in Set.Ioc 0 t, (p.r - p.q) - (1 / 2 : ℝ) * V s ω ∂leb)
-      + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx t ω)
+      + itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval Hx t ω)
     {n : ℕ} (hn : |x₀| + v₀ < n) :
     Integrable (fun ω ↦ affST p u w T
       (fun l ↦ hestonY X V l (CommonOptional.exitTime T (locFun X V) n ω) ω)) μ ∧

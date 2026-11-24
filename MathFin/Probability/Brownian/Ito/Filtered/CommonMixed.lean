@@ -73,7 +73,7 @@ private theorem mixed_rectangle_oriented (h : IndependentPair ℱ B Z μ)
       (((h.left_adapted t).measurable.mono (ℱ.mono htle) le_rfl).sub
         ((h.left_adapted s).measurable.mono (ℱ.mono hss') le_rfl))).mul hg
     have he := MathFin.ItoIsometryAdapted.integral_adapted_mul_increment
-          h.right.isFilteredPreBrownian hst' hχ
+          h.right hst' hχ
     calc
       (∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (Z t' ω - Z s' ω)) ∂μ) =
           ∫ ω, (f ω * (B t ω - B s ω) * g ω) * (Z t' ω - Z s' ω) ∂μ := by
@@ -86,7 +86,7 @@ private theorem mixed_rectangle_oriented (h : IndependentPair ℱ B Z μ)
       ((h.left_adapted s).measurable.mono (ℱ.mono hss') le_rfl))
     have hfirst : (∫ ω, f ω * g ω * ((B s' ω - B s ω) * (Z t' ω - Z s' ω)) ∂μ) = 0 := by
       have he := MathFin.ItoIsometryAdapted.integral_adapted_mul_increment
-            h.right.isFilteredPreBrownian hst' hχ
+            h.right hst' hχ
       calc
         _ = ∫ ω, (f ω * g ω * (B s' ω - B s ω)) * (Z t' ω - Z s' ω) ∂μ := by
           apply integral_congr_ae
@@ -102,8 +102,8 @@ private theorem mixed_rectangle_oriented (h : IndependentPair ℱ B Z μ)
         add_tsub_cancel_of_le hst'] using hi
     have hsecond : (∫ ω, f ω * g ω * ((B t ω - B s' ω) * (Z t' ω - Z s' ω)) ∂μ) = 0 := by
       rw [hindep.integral_fun_mul_eq_mul_integral (hfm.mul hgm).aestronglyMeasurable
-        (((h.left.measurable t).sub (h.left.measurable s')).mul
-          ((h.right.measurable t').sub (h.right.measurable s'))).aestronglyMeasurable]
+        (((h.left.measurable_eval t).sub (h.left.measurable_eval s')).mul
+          ((h.right.measurable_eval t').sub (h.right.measurable_eval s'))).aestronglyMeasurable]
       rw [h.integral_increment_mul s' t s' t', mul_zero]
     have hsum : (∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (Z t' ω - Z s' ω)) ∂μ) =
         (∫ ω, f ω * g ω * ((B s' ω - B s ω) * (Z t' ω - Z s' ω)) ∂μ) +
@@ -133,19 +133,19 @@ variable [IsProbabilityMeasure μ]
 
 theorem IndependentPair.integral_itoSimple_mul (h : IndependentPair ℱ B Z μ)
     (V W : SimpleProcess ℝ ℱ) :
-    (∫ ω, CommonL2.itoSimple h.left.measurable V ω *
-      CommonL2.itoSimple h.right.measurable W ω ∂μ) = 0 := by
+    (∫ ω, CommonL2.itoSimple h.left.measurable_eval V ω *
+      CommonL2.itoSimple h.right.measurable_eval W ω ∂μ) = 0 := by
   let a := fun p ω => V.value p ω * (B p.2 ω - B p.1 ω)
   let b := fun p ω => W.value p ω * (Z p.2 ω - Z p.1 ω)
   have ha : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := by
     intro p hp
-    apply MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment h.left.isFilteredPreBrownian
+    apply MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment h.left
           (V.le_of_mem_support_value p hp) (V.measurable_value p)
     exact MemLp.of_bound ((V.measurable_value p).mono (ℱ.le p.1) le_rfl).aestronglyMeasurable
       V.valueBound (Filter.Eventually.of_forall (V.value_le_valueBound p))
   have hb : ∀ p ∈ W.value.support, MemLp (b p) 2 μ := by
     intro p hp
-    apply MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment h.right.isFilteredPreBrownian
+    apply MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment h.right
           (W.le_of_mem_support_value p hp) (W.measurable_value p)
     exact MemLp.of_bound ((W.measurable_value p).mono (ℱ.le p.1) le_rfl).aestronglyMeasurable
       W.valueBound (Filter.Eventually.of_forall (W.value_le_valueBound p))
@@ -167,19 +167,20 @@ theorem IndependentPair.integral_itoSimple_mul (h : IndependentPair ℱ B Z μ)
 
 theorem IndependentPair.inner_itoSimpleLp (h : IndependentPair ℱ B Z μ)
     (V W : SimpleProcess ℝ ℱ) :
-    ⟪CommonL2.itoSimpleLp h.left h.left.measurable V,
-      CommonL2.itoSimpleLp h.right h.right.measurable W⟫_ℝ = 0 := by
+    ⟪CommonL2.itoSimpleLp h.left h.left.measurable_eval V,
+      CommonL2.itoSimpleLp h.right h.right.measurable_eval W⟫_ℝ = 0 := by
   rw [L2.inner_def]
   calc
-    _ = ∫ ω, CommonL2.itoSimple h.left.measurable V ω * CommonL2.itoSimple h.right.measurable W
+    _ = ∫ ω, CommonL2.itoSimple h.left.measurable_eval V ω * CommonL2.itoSimple
+          h.right.measurable_eval W
           ω ∂μ := by
       apply integral_congr_ae
-      filter_upwards [(CommonL2.memLp_itoSimple h.left h.left.measurable V).coeFn_toLp,
-        (CommonL2.memLp_itoSimple h.right h.right.measurable W).coeFn_toLp] with ω hb hz
-      change (CommonL2.itoSimpleLp h.right h.right.measurable W ω) *
-        (CommonL2.itoSimpleLp h.left h.left.measurable V ω) = _
-      rw [show CommonL2.itoSimpleLp h.left h.left.measurable V ω = _ from hb,
-        show CommonL2.itoSimpleLp h.right h.right.measurable W ω = _ from hz]
+      filter_upwards [(CommonL2.memLp_itoSimple h.left h.left.measurable_eval V).coeFn_toLp,
+        (CommonL2.memLp_itoSimple h.right h.right.measurable_eval W).coeFn_toLp] with ω hb hz
+      change (CommonL2.itoSimpleLp h.right h.right.measurable_eval W ω) *
+        (CommonL2.itoSimpleLp h.left h.left.measurable_eval V ω) = _
+      rw [show CommonL2.itoSimpleLp h.left h.left.measurable_eval V ω = _ from hb,
+        show CommonL2.itoSimpleLp h.right h.right.measurable_eval W ω = _ from hz]
       ring
     _ = 0 := h.integral_itoSimple_mul V W
 

@@ -93,18 +93,18 @@ lemma contProcess_const_mul_sqrt {T : ℝ≥0} (c : ℝ) {V : ℝ≥0 → Ω →
 
 /-! ### Linearity and rotation of continuous Itô integrals -/
 
-theorem itoContinuousMod_smul_ae (hW : BrownianOn ℱ W μ)
+theorem itoContinuousMod_smul_ae (hW : IsFilteredPreBrownian W ℱ μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) {T : ℝ≥0} (c : ℝ)
     (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hW.measurable (c • φ) t ω
-      = c * itoContinuousMod T hW.measurable φ t ω := by
-  refine ae_forall_eq_of_continuousOn' (itoContinuousMod_continuousOn hW T hW.measurable hWc _)
+    ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hW.measurable_eval (c • φ) t ω
+      = c * itoContinuousMod T hW.measurable_eval φ t ω := by
+  refine ae_forall_eq_of_continuousOn' (itoContinuousMod_continuousOn hW T hW.measurable_eval hWc _)
     ?_ fun t ht => ?_
-  · filter_upwards [itoContinuousMod_continuousOn hW T hW.measurable hWc φ] with ω h
+  · filter_upwards [itoContinuousMod_continuousOn hW T hW.measurable_eval hWc φ] with ω h
     exact continuousOn_const.mul h
-  · filter_upwards [itoContinuousMod_modification hW T hW.measurable hWc (c • φ) ht,
-      itoContinuousMod_modification hW T hW.measurable hWc φ ht,
-      Lp.coeFn_smul c (itoProcessCLM hW T t hW.measurable φ)] with ω e1 e2 e3
+  · filter_upwards [itoContinuousMod_modification hW T hW.measurable_eval hWc (c • φ) ht,
+      itoContinuousMod_modification hW T hW.measurable_eval hWc φ ht,
+      Lp.coeFn_smul c (itoProcessCLM hW T t hW.measurable_eval φ)] with ω e1 e2 e3
     rw [e1, map_smul, e3, Pi.smul_apply, smul_eq_mul, ← e2]
 
 /-- **Rotation of the continuous integrals.** Almost surely, for every `t ≤ T`, the continuous
@@ -113,30 +113,30 @@ integral against the correlated noise is `ρ` times the `B`-integral plus `√(1
 theorem itoContinuousMod_correlated (hP : IndependentPair ℱ B Z μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)
     {ρ : ℝ} (hρ : |ρ| ≤ 1) {T : ℝ≥0} (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T (hP.correlated_brownian hρ).measurable φ t ω
-      = ρ * itoContinuousMod T hP.left.measurable φ t ω
-        + orthogonalWeight ρ * itoContinuousMod T hP.right.measurable φ t ω := by
+    ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval φ t ω
+      = ρ * itoContinuousMod T hP.left.measurable_eval φ t ω
+        + orthogonalWeight ρ * itoContinuousMod T hP.right.measurable_eval φ t ω := by
   have hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ correlatedNoise ρ B Z u ω := fun ω =>
     ((hBc ω).const_mul ρ).add ((hZc ω).const_mul (orthogonalWeight ρ))
   refine ae_forall_eq_of_continuousOn'
     (itoContinuousMod_continuousOn (hP.correlated_brownian hρ) T
-      (hP.correlated_brownian hρ).measurable hWc φ) ?_ fun t ht => ?_
-  · filter_upwards [itoContinuousMod_continuousOn hP.left T hP.left.measurable hBc φ,
-      itoContinuousMod_continuousOn hP.right T hP.right.measurable hZc φ] with ω h1 h2
+      (hP.correlated_brownian hρ).measurable_eval hWc φ) ?_ fun t ht => ?_
+  · filter_upwards [itoContinuousMod_continuousOn hP.left T hP.left.measurable_eval hBc φ,
+      itoContinuousMod_continuousOn hP.right T hP.right.measurable_eval hZc φ] with ω h1 h2
     exact (continuousOn_const.mul h1).add (continuousOn_const.mul h2)
   · have hrot := hP.itoIntegral_correlated hρ t (restrictKernel ht φ)
     rw [itoIntegralCLM_T_restrictKernel (hP.correlated_brownian hρ) ht
-        (hP.correlated_brownian hρ).measurable,
-      itoIntegralCLM_T_restrictKernel hP.left ht hP.left.measurable,
-      itoIntegralCLM_T_restrictKernel hP.right ht hP.right.measurable] at hrot
+        (hP.correlated_brownian hρ).measurable_eval,
+      itoIntegralCLM_T_restrictKernel hP.left ht hP.left.measurable_eval,
+      itoIntegralCLM_T_restrictKernel hP.right ht hP.right.measurable_eval] at hrot
     filter_upwards [itoContinuousMod_modification (hP.correlated_brownian hρ) T
-        (hP.correlated_brownian hρ).measurable hWc φ ht,
-      itoContinuousMod_modification hP.left T hP.left.measurable hBc φ ht,
-      itoContinuousMod_modification hP.right T hP.right.measurable hZc φ ht,
-      Lp.coeFn_add (ρ • itoProcessCLM hP.left T t hP.left.measurable φ)
-        (orthogonalWeight ρ • itoProcessCLM hP.right T t hP.right.measurable φ),
-      Lp.coeFn_smul ρ (itoProcessCLM hP.left T t hP.left.measurable φ),
-      Lp.coeFn_smul (orthogonalWeight ρ) (itoProcessCLM hP.right T t hP.right.measurable φ)]
+        (hP.correlated_brownian hρ).measurable_eval hWc φ ht,
+      itoContinuousMod_modification hP.left T hP.left.measurable_eval hBc φ ht,
+      itoContinuousMod_modification hP.right T hP.right.measurable_eval hZc φ ht,
+      Lp.coeFn_add (ρ • itoProcessCLM hP.left T t hP.left.measurable_eval φ)
+        (orthogonalWeight ρ • itoProcessCLM hP.right T t hP.right.measurable_eval φ),
+      Lp.coeFn_smul ρ (itoProcessCLM hP.left T t hP.left.measurable_eval φ),
+      Lp.coeFn_smul (orthogonalWeight ρ) (itoProcessCLM hP.right T t hP.right.measurable_eval φ)]
       with ω e1 e2 e3 e4 e5 e6
     rw [e1, hrot, e4, Pi.add_apply, e5, e6, Pi.smul_apply, Pi.smul_apply, smul_eq_mul,
       smul_eq_mul, ← e2, ← e3]
@@ -182,10 +182,10 @@ theorem hestonItoProc (hP : IndependentPair ℱ B Z μ)
     (hHx : ⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2))
     (heqV : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
-      + itoContinuousMod T hP.left.measurable Hv t ω)
+      + itoContinuousMod T hP.left.measurable_eval Hv t ω)
     (heqX : ∀ᵐ ω ∂μ, ∀ t ≤ T, X t ω = x₀
       + (∫ s in Set.Ioc 0 t, (p.r - p.q) - (1 / 2 : ℝ) * V s ω ∂leb)
-      + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx t ω) :
+      + itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval Hx t ω) :
     ItoProc hP T (hestonY X V) (hestonY0 x₀ v₀) (hestonDrift p V) (hestonDiffB p V)
       (hestonDiffZ p V) (hestonKerB p Hv Hx) (hestonKerZ p Hx) where
   proc i := by
@@ -236,20 +236,20 @@ theorem hestonItoProc (hP : IndependentPair ℱ B Z μ)
       with ω hX hV h0B h0Z hW hsB hsZ i t ht
     fin_cases i
     · show (t : ℝ) = 0 + ∫ s in Set.Ioc 0 t, (1 : ℝ) ∂leb
-        + itoContinuousMod T hP.left.measurable 0 t ω
-        + itoContinuousMod T hP.right.measurable 0 t ω
+        + itoContinuousMod T hP.left.measurable_eval 0 t ω
+        + itoContinuousMod T hP.right.measurable_eval 0 t ω
       rw [h0B t ht, h0Z t ht, setIntegral_const, smul_eq_mul, mul_one, measureReal_def,
         MathFin.ItoIntegralL2.timeMeasure_Ioc, NNReal.coe_zero, sub_zero,
         ENNReal.toReal_ofReal (NNReal.coe_nonneg t)]
       ring
     · show X t ω = x₀ + ∫ s in Set.Ioc 0 t, ((p.r - p.q) - (1 / 2 : ℝ) * V s ω) ∂leb
-        + itoContinuousMod T hP.left.measurable (p.rho • Hx) t ω
-        + itoContinuousMod T hP.right.measurable (orthogonalWeight p.rho • Hx) t ω
+        + itoContinuousMod T hP.left.measurable_eval (p.rho • Hx) t ω
+        + itoContinuousMod T hP.right.measurable_eval (orthogonalWeight p.rho • Hx) t ω
       rw [hX t ht, hW t ht, hsB t ht, hsZ t ht]
       ring
     · show V t ω = v₀ + ∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb
-        + itoContinuousMod T hP.left.measurable Hv t ω
-        + itoContinuousMod T hP.right.measurable 0 t ω
+        + itoContinuousMod T hP.left.measurable_eval Hv t ω
+        + itoContinuousMod T hP.right.measurable_eval 0 t ω
       rw [hV t ht, h0Z t ht]
       ring
 

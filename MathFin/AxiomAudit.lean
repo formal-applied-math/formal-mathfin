@@ -2907,6 +2907,11 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Heston.CommonAffineTransform.exists_hestonState_charFun
 
+/-- info: 'MathFin.StochasticIntegralCharacterisation.General.isStochasticIntegral_of_predictable_versions' depends on
+axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.StochasticIntegralCharacterisation.General.isStochasticIntegral_of_predictable_versions
+
 end MathFin.AxiomAudit
 
 /-- info: 'MathFin.DeFi.price_lpPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/

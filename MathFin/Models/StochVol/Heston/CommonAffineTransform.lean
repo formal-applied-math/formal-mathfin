@@ -69,10 +69,10 @@ structure IsHestonState (hP : IndependentPair ℱ B Z μ) (T : ℝ≥0) (p : Par
     (⇑Hx =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V z.1 z.2)) ∧
     (∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂leb)
-      + itoContinuousMod T hP.left.measurable Hv t ω) ∧
+      + itoContinuousMod T hP.left.measurable_eval Hv t ω) ∧
     (∀ᵐ ω ∂μ, ∀ t ≤ T, X t ω = x₀
       + (∫ s in Set.Ioc 0 t, (p.r - p.q) - (1 / 2 : ℝ) * V s ω ∂leb)
-      + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx t ω)
+      + itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval Hx t ω)
 
 /-- Heston states exist (non-vacuity), for every horizon. -/
 theorem exists_isHestonState (hP : IndependentPair ℱ B Z μ) (T : ℝ≥0)

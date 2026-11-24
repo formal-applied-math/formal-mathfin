@@ -2935,7 +2935,7 @@
       "id": "mf-heston-linear-flow-real-moment",
       "name": "Identification of real-strip Heston coefficients",
       "domain": "mathematical_finance",
-      "description": "Identify the complex linear-flow transform with the existing Heston real Möbius and logarithmic profile.",
+      "description": "For a real exponent strictly between zero and one and zero terminal variance weight, identify the deterministic complex linear-flow transform with the existing Heston real Möbius and logarithmic profile.",
       "code": {
         "lean": "import MathFin.Models.StochVol.Heston.RiccatiIdentification\n\nnamespace MathFin.Heston\n\ntheorem benchmark_heston_real_moment_bridge (p : Parameters) {u t : ℝ} (ht : 0 ≤ t)\n    (hξ : 0 < p.xi) (hρ : |p.rho| ≤ 1) (hu : 0 < u) (hu' : u < 1) (x v : ℝ) :\n    globalAffineTransform p u 0 x v t =\n      (MathFin.Heston.hestonTransform (p.r - p.q) p.kappa p.theta p.xi p.rho u t 0 x v : ℂ) :=\n  MathFin.Heston.globalAffineTransform_eq_hestonTransform p ht hξ hρ hu hu' x v\n\nend MathFin.Heston\n"
       },

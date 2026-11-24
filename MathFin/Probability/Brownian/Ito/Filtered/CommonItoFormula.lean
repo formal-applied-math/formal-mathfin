@@ -764,11 +764,11 @@ section Probabilistic
 
 variable [IsProbabilityMeasure μ] {ℱ : Filtration ℝ≥0 mΩ} {B Z W : ℝ≥0 → Ω → ℝ}
 
-lemma itoContinuousMod_zero_ae (hW : BrownianOn ℱ W μ) (T : ℝ≥0)
+lemma itoContinuousMod_zero_ae (hW : IsFilteredPreBrownian W ℱ μ) (T : ℝ≥0)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∀ᵐ ω ∂μ, itoContinuousMod T hW.measurable φ 0 ω = 0 := by
-  have h1 := itoContinuousMod_modification hW T hW.measurable hWc φ (zero_le : (0 : ℝ≥0) ≤ T)
-  rw [CommonStopping.itoProcessCLM_zero_time hW T hW.measurable φ] at h1
+    ∀ᵐ ω ∂μ, itoContinuousMod T hW.measurable_eval φ 0 ω = 0 := by
+  have h1 := itoContinuousMod_modification hW T hW.measurable_eval hWc φ (zero_le : (0 : ℝ≥0) ≤ T)
+  rw [CommonStopping.itoProcessCLM_zero_time hW T hW.measurable_eval φ] at h1
   filter_upwards [h1, Lp.coeFn_zero (E := ℝ) (p := 2) (μ := μ)] with ω e1 e2
   rw [e1, e2, Pi.zero_apply]
 
@@ -826,8 +826,8 @@ structure ItoProc {ι : Type*} (hP : IndependentPair ℱ B Z μ) (T : ℝ≥0)
   kerB : ∀ i, ⇑(φB i) =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ b i p.1 p.2
   kerZ : ∀ i, ⇑(φZ i) =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ c i p.1 p.2
   eq : ∀ᵐ ω ∂μ, ∀ i, ∀ t ≤ T, Y i t ω = y i + ∫ s in Set.Ioc 0 t, a i s ω ∂leb
-    + itoContinuousMod T hP.left.measurable (φB i) t ω
-    + itoContinuousMod T hP.right.measurable (φZ i) t ω
+    + itoContinuousMod T hP.left.measurable_eval (φB i) t ω
+    + itoContinuousMod T hP.right.measurable_eval (φZ i) t ω
 
 /-- Time integrals of `w h₁ h₂` are integrable. -/
 lemma integrable_timeIntegral_mul (T : ℝ≥0) {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ : ℝ}
@@ -874,12 +874,13 @@ lemma integral_abs_le_four {f g₁ l₁ g₂ l₂ g₃ g₄ : Ω → ℝ} (h₁ 
     _ = _ := by rw [integral_add i123 a₄, integral_add i12 a₃, integral_add a₁ a₂]
 
 /-- Riemann–Stieltjes sums are square integrable. -/
-lemma memLp_rs (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0)
+lemma memLp_rs (hW : IsFilteredPreBrownian W ℱ μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T
+      : ℝ≥0)
     (n : ℕ) {w : ℝ≥0 → Ω → ℝ} {C : ℝ} (hw : GoodProcess ℱ μ T w C)
     (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     MemLp (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-      * (itoContinuousMod T hW.measurable φ (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hW.measurable φ (unifPart T n j) ω)) 2 μ := by
+      * (itoContinuousMod T hW.measurable_eval φ (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hW.measurable_eval φ (unifPart T n j) ω)) 2 μ := by
   refine memLp_finsetSum _ fun j hj => ?_
   have hX := memLp_incrM hW hWc T (Finset.mem_range.mp hj) φ
   refine MemLp.mono (hX.const_mul C)
@@ -894,56 +895,56 @@ theorem tendsto_rs_pair (hP : IndependentPair ℱ B Z μ)
     (T : ℝ≥0) {w : ℝ≥0 → Ω → ℝ} {C : ℝ} (hw : GoodProcess ℱ μ T w C)
     (φ ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     (∀ n, Integrable (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ t ω))
         - (itoIntegralCLMT hP.left T (mulKernel T hw.pred hw.bdd φ) ω
           + itoIntegralCLMT hP.right T (mulKernel T hw.pred hw.bdd ψ) ω)) μ) ∧
     Tendsto (fun n ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ t ω))
         - (itoIntegralCLMT hP.left T (mulKernel T hw.pred hw.bdd φ) ω
           + itoIntegralCLMT hP.right T (mulKernel T hw.pred hw.bdd ψ) ω)| ∂μ)
       atTop (𝓝 0) := by
   have mB : ∀ n, MemLp (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-      * (itoContinuousMod T hP.left.measurable φ (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hP.left.measurable φ (unifPart T n j) ω)
+      * (itoContinuousMod T hP.left.measurable_eval φ (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hP.left.measurable_eval φ (unifPart T n j) ω)
       - itoIntegralCLMT hP.left T (mulKernel T hw.pred hw.bdd φ) ω) 2 μ := fun n =>
     (memLp_rs hP.left hBc T n hw φ).sub (Lp.memLp _)
   have mZ : ∀ n, MemLp (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-      * (itoContinuousMod T hP.right.measurable ψ (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hP.right.measurable ψ (unifPart T n j) ω)
+      * (itoContinuousMod T hP.right.measurable_eval ψ (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hP.right.measurable_eval ψ (unifPart T n j) ω)
       - itoIntegralCLMT hP.right T (mulKernel T hw.pred hw.bdd ψ) ω) 2 μ := fun n =>
     (memLp_rs hP.right hZc T n hw ψ).sub (Lp.memLp _)
   have tB : Tendsto (fun n ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-      * (itoContinuousMod T hP.left.measurable φ (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hP.left.measurable φ (unifPart T n j) ω)
+      * (itoContinuousMod T hP.left.measurable_eval φ (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hP.left.measurable_eval φ (unifPart T n j) ω)
       - itoIntegralCLMT hP.left T (mulKernel T hw.pred hw.bdd φ) ω| ∂μ) atTop (𝓝 0) := by
-    have h2 := tendsto_riemannStieltjes hP.left T hP.left.measurable hBc hw.adapted hw.pred
+    have h2 := tendsto_riemannStieltjes hP.left T hP.left.measurable_eval hBc hw.adapted hw.pred
       hw.bdd hw.cont φ
     refine squeeze_zero (fun n => integral_nonneg fun ω => abs_nonneg _)
       (fun n => MathFin.integral_abs_le_sqrt_integral_sq (mB n)) ?_
     simpa using h2.sqrt
   have tZ : Tendsto (fun n ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-      * (itoContinuousMod T hP.right.measurable ψ (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hP.right.measurable ψ (unifPart T n j) ω)
+      * (itoContinuousMod T hP.right.measurable_eval ψ (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hP.right.measurable_eval ψ (unifPart T n j) ω)
       - itoIntegralCLMT hP.right T (mulKernel T hw.pred hw.bdd ψ) ω| ∂μ) atTop (𝓝 0) := by
-    have h2 := tendsto_riemannStieltjes hP.right T hP.right.measurable hZc hw.adapted hw.pred
+    have h2 := tendsto_riemannStieltjes hP.right T hP.right.measurable_eval hZc hw.adapted hw.pred
       hw.bdd hw.cont ψ
     refine squeeze_zero (fun n => integral_nonneg fun ω => abs_nonneg _)
       (fun n => MathFin.integral_abs_le_sqrt_integral_sq (mZ n)) ?_
     simpa using h2.sqrt
   have hsplit : ∀ n ω, ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ t ω))
         - (itoIntegralCLMT hP.left T (mulKernel T hw.pred hw.bdd φ) ω
           + itoIntegralCLMT hP.right T (mulKernel T hw.pred hw.bdd ψ) ω)
       = (∑ j ∈ Finset.range n, w (unifPart T n j) ω
-          * (itoContinuousMod T hP.left.measurable φ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.left.measurable_eval φ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ (unifPart T n j) ω)
           - itoIntegralCLMT hP.left T (mulKernel T hw.pred hw.bdd φ) ω)
         + (∑ j ∈ Finset.range n, w (unifPart T n j) ω
-          * (itoContinuousMod T hP.right.measurable ψ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable ψ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.right.measurable_eval ψ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval ψ (unifPart T n j) ω)
           - itoIntegralCLMT hP.right T (mulKernel T hw.pred hw.bdd ψ) ω) := by
     intro n ω
     simp only [gridIncr, mul_add, Finset.sum_add_distrib]
@@ -973,16 +974,16 @@ theorem tendsto_cov_pair (hP : IndependentPair ℱ B Z μ)
     (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ b₂ p.1 p.2)
     (hψ₂ : ⇑ψ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ c₂ p.1 p.2) :
     (∀ n, Integrable (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₁ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₁ t ω))
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₂ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₂ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₁ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₁ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₂ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₂ t ω))
         - ∫ s, w s ω * (b₁ s ω * b₂ s ω + c₁ s ω * c₂ s ω) ∂(timeMeasureT T)) μ) ∧
     Tendsto (fun n ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₁ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₁ t ω))
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₂ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₂ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₁ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₁ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₂ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₂ t ω))
         - ∫ s, w s ω * (b₁ s ω * b₂ s ω + c₁ s ω * c₂ s ω) ∂(timeMeasureT T)| ∂μ)
       atTop (𝓝 0) := by
   have hwm : ∀ t, Measurable (w t) := fun t => (hw.adapted t).mono (ℱ.le t) le_rfl
@@ -1010,40 +1011,40 @@ theorem tendsto_cov_pair (hP : IndependentPair ℱ B Z μ)
       = w s ω * b₁ s ω * b₂ s ω + w s ω * c₁ s ω * c₂ s ω
     ring
   have hQsplit : ∀ n ω, ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₁ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₁ t ω))
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₂ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₂ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₁ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₁ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₂ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₂ t ω))
       = ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-          * (itoContinuousMod T hP.left.measurable φ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ₁ (unifPart T n j) ω)
-          * (itoContinuousMod T hP.left.measurable φ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ₂ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.left.measurable_eval φ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ₂ (unifPart T n j) ω)
         + ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-          * (itoContinuousMod T hP.right.measurable ψ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable ψ₁ (unifPart T n j) ω)
-          * (itoContinuousMod T hP.right.measurable ψ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable ψ₂ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.right.measurable_eval ψ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval ψ₁ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.right.measurable_eval ψ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval ψ₂ (unifPart T n j) ω)
         + ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-          * (itoContinuousMod T hP.left.measurable φ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ₁ (unifPart T n j) ω)
-          * (itoContinuousMod T hP.right.measurable ψ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable ψ₂ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.right.measurable_eval ψ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval ψ₂ (unifPart T n j) ω)
         + ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-          * (itoContinuousMod T hP.left.measurable φ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ₂ (unifPart T n j) ω)
-          * (itoContinuousMod T hP.right.measurable ψ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable ψ₁ (unifPart T n j) ω) := by
+          * (itoContinuousMod T hP.left.measurable_eval φ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ₂ (unifPart T n j) ω)
+          * (itoContinuousMod T hP.right.measurable_eval ψ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval ψ₁ (unifPart T n j) ω) := by
     intro n ω
     rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun j _ => ?_
     simp only [gridIncr]
     ring
   have hQi : ∀ n, Integrable (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₁ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₁ t ω))
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable φ₂ t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable ψ₂ t ω))) μ := by
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₁ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₁ t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval φ₂ t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval ψ₂ t ω))) μ := by
     intro n
     refine ((((iBB n).add (iZZ n)).add (iBZ n)).add (iZB n)).congr
       (Eventually.of_forall fun ω => ?_)
@@ -1091,24 +1092,24 @@ theorem ito_formula {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independent
   obtain ⟨ns, hns, hae⟩ := exists_subseq_ae_of_integral_abs_fintype (μ := μ)
     (κ := ι ⊕ (ι × ι) ⊕ ι)
     (F := Sum.elim (fun i n ω ↦ ∑ j ∈ Finset.range n, pd f i (fun l ↦ Y l (unifPart T n j) ω)
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
         - (itoIntegralCLMT hP.left T (mulKernel T (goodProcess_pd hY.proc hf i).pred
           (goodProcess_pd hY.proc hf i).bdd (φB i)) ω
           + itoIntegralCLMT hP.right T (mulKernel T (goodProcess_pd hY.proc hf i).pred
           (goodProcess_pd hY.proc hf i).bdd (φZ i)) ω))
       (Sum.elim (fun ik n ω ↦ ∑ j ∈ Finset.range n, pd2 f ik.1 ik.2 (fun l ↦ Y l (unifPart T n j) ω)
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable (φB ik.1) t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ ik.1) t ω))
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable (φB ik.2) t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ ik.2) t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB ik.1) t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ ik.1) t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB ik.2) t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ ik.2) t ω))
         - ∫ s, pd2 f ik.1 ik.2 (fun l ↦ Y l s ω) * (b ik.1 s ω * b ik.2 s ω + c ik.1 s ω * c
               ik.2 s ω) ∂(timeMeasureT T))
       (fun i n ω ↦ ∑ j ∈ Finset.range n, 1
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
-        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
+        * (gridIncr T n j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T n j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
         - ∫ s, 1 * (b i s ω * b i s ω + c i s ω * c i s ω) ∂(timeMeasureT T))))
     (by
       rintro (i | ik | i) n
@@ -1129,14 +1130,16 @@ theorem ito_formula {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independent
           (hY.diffB i) (hY.diffZ i) (hY.diffB i) (hY.diffZ i)
         (hY.kerB i) (hY.kerZ i) (hY.kerB i) (hY.kerZ i)).2)
   have hcB : ∀ᵐ ω ∂μ, ∀ i, ContinuousOn
-      (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω) (Set.Icc 0 T) :=
-    ae_all_iff.mpr fun i => itoContinuousMod_continuousOn hP.left T hP.left.measurable hBc (φB i)
+      (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω) (Set.Icc 0 T) :=
+    ae_all_iff.mpr fun i => itoContinuousMod_continuousOn hP.left T hP.left.measurable_eval hBc
+          (φB i)
   have hcZ : ∀ᵐ ω ∂μ, ∀ i, ContinuousOn
-      (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω) (Set.Icc 0 T) :=
-    ae_all_iff.mpr fun i => itoContinuousMod_continuousOn hP.right T hP.right.measurable hZc (φZ i)
-  have h0B : ∀ᵐ ω ∂μ, ∀ i, itoContinuousMod T hP.left.measurable (φB i) 0 ω = 0 :=
+      (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω) (Set.Icc 0 T) :=
+    ae_all_iff.mpr fun i => itoContinuousMod_continuousOn hP.right T hP.right.measurable_eval
+          hZc (φZ i)
+  have h0B : ∀ᵐ ω ∂μ, ∀ i, itoContinuousMod T hP.left.measurable_eval (φB i) 0 ω = 0 :=
     ae_all_iff.mpr fun i => itoContinuousMod_zero_ae hP.left T hBc (φB i)
-  have h0Z : ∀ᵐ ω ∂μ, ∀ i, itoContinuousMod T hP.right.measurable (φZ i) 0 ω = 0 :=
+  have h0Z : ∀ᵐ ω ∂μ, ∀ i, itoContinuousMod T hP.right.measurable_eval (φZ i) 0 ω = 0 :=
     ae_all_iff.mpr fun i => itoContinuousMod_zero_ae hP.right T hZc (φZ i)
   have hYc : ∀ᵐ ω ∂μ, ∀ i, ContinuousOn (fun t ↦ Y i t ω) (Set.Icc 0 T) :=
     ae_all_iff.mpr fun i => (hY.proc i).cont
@@ -1148,8 +1151,9 @@ theorem ito_formula {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independent
     with ω hωeq hωa hωB hωZ hω0B hω0Z hωY hωb hωc hωF
   have hRS : ∀ i, Tendsto (fun m ↦ ∑ j ∈ Finset.range (ns m), pd f i (fun l ↦ Y l (unifPart T
         (ns m) j) ω)
-        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))) atTop
+        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t
+                ω))) atTop
       (𝓝 (itoIntegralCLMT hP.left T (mulKernel T (goodProcess_pd hY.proc hf i).pred
           (goodProcess_pd hY.proc hf i).bdd (φB i)) ω
         + itoIntegralCLMT hP.right T (mulKernel T (goodProcess_pd hY.proc hf i).pred
@@ -1157,32 +1161,34 @@ theorem ito_formula {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independent
     tendsto_sub_nhds_zero_iff.mp (hωF (Sum.inl i))
   have hQ : ∀ i k, Tendsto (fun m ↦ ∑ j ∈ Finset.range (ns m), pd2 f i k (fun l ↦ Y l (unifPart
         T (ns m) j) ω)
-        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
-        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB k) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ k) t ω))) atTop
+        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
+        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB k) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ k) t
+                ω))) atTop
       (𝓝 (∫ s, pd2 f i k (fun l ↦ Y l s ω) * (b i s ω * b k s ω + c i s ω * c k s ω)
             ∂(timeMeasureT T))) := fun i k =>
     tendsto_sub_nhds_zero_iff.mp (hωF (Sum.inr (Sum.inl (i, k))))
   have hQ1 : ∀ i, Tendsto (fun m ↦ ∑ j ∈ Finset.range (ns m),
-        (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
-        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))) atTop
+        (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
+        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t
+                ω))) atTop
       (𝓝 (∫ s, 1 * (b i s ω * b i s ω + c i s ω * c i s ω) ∂(timeMeasureT T))) := by
     intro i
     have h3 : Tendsto (fun m ↦ ∑ j ∈ Finset.range (ns m), 1
-        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
-        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω))
+        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
+        * (gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+          + gridIncr T (ns m) j (fun t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω))
         - ∫ s, 1 * (b i s ω * b i s ω + c i s ω * c i s ω) ∂(timeMeasureT T)) atTop (𝓝 0) :=
               hωF (Sum.inr (Sum.inr i))
     refine (tendsto_sub_nhds_zero_iff.mp h3).congr fun m => Finset.sum_congr rfl fun j _ => ?_
     ring
   have key := ito_assembly (T := T) hf (y := y) (Y := fun t l ↦ Y l t ω)
-    (MB := fun i t ↦ itoContinuousMod T hP.left.measurable (φB i) t ω)
-    (MZ := fun i t ↦ itoContinuousMod T hP.right.measurable (φZ i) t ω)
+    (MB := fun i t ↦ itoContinuousMod T hP.left.measurable_eval (φB i) t ω)
+    (MZ := fun i t ↦ itoContinuousMod T hP.right.measurable_eval (φZ i) t ω)
     (a := fun i s ↦ a i s ω) hωeq hωa hωB hωZ hωY hω0B hω0Z hns hRS hQ hQ1
   have hYv : ContinuousOn (fun t l ↦ Y l t ω) (Set.Icc 0 T) := continuousOn_pi.mpr hωY
   have hPi : ∀ i, IntegrableOn (fun s ↦ pd f i (fun l ↦ Y l s ω) * a i s ω) (Set.Ioc 0 T) leb :=

@@ -164,7 +164,7 @@ lemma extendCLM_apply {s T : ℝ≥0} (hsT : s ≤ T) (ψ : Lp ℝ 2 (trimMeasur
 
 /-- The horizon-`s` integral of a kernel equals the horizon-`T` integral of its extension
 by zero. -/
-theorem itoIntegralCLM_T_extend (hB : BrownianOn ℱ B μ) {s T : ℝ≥0} (hsT : s ≤ T)
+theorem itoIntegralCLM_T_extend (hB : IsFilteredPreBrownian B ℱ μ) {s T : ℝ≥0} (hsT : s ≤ T)
     (ψ : Lp ℝ 2 (trimMeasureT (μ := μ) s ℱ)) :
     itoIntegralCLMT hB s ψ = itoIntegralCLMT hB T (extendCLM hsT ψ) := by
   refine (simpleAssembly_T_denseRange (μ := μ) s ℱ).induction_on ψ
@@ -190,7 +190,7 @@ theorem itoIntegralCLM_T_extend (hB : BrownianOn ℱ B μ) {s T : ℝ≥0} (hsT 
 
 /-- **Cross-horizon identity.** The horizon-`s` integral of the restriction of a horizon-`T`
 kernel is the horizon-`T` Itô process at time `s`. -/
-theorem itoIntegralCLM_T_restrictKernel (hB : BrownianOn ℱ B μ) {s T : ℝ≥0} (hsT : s ≤ T)
+theorem itoIntegralCLM_T_restrictKernel (hB : IsFilteredPreBrownian B ℱ μ) {s T : ℝ≥0} (hsT : s ≤ T)
     (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     itoIntegralCLMT hB s (restrictKernel hsT φ) = itoProcessCLM hB T s hBmeas φ := by
   rw [itoIntegralCLM_T_extend hB hsT, extendCLM_apply]
@@ -212,22 +212,22 @@ theorem itoIntegralCLM_T_restrictKernel (hB : BrownianOn ℱ B μ) {s T : ℝ≥
   exact h0.symm
 
 /-- The continuous modifications on the horizons `t ≤ T` agree on `[0, t]` almost surely. -/
-theorem itoContinuousMod_restrictKernel (hB : BrownianOn ℱ B μ)
+theorem itoContinuousMod_restrictKernel (hB : IsFilteredPreBrownian B ℱ μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {t T : ℝ≥0} (htT : t ≤ T)
     (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∀ᵐ ω ∂μ, ∀ s ≤ t, itoContinuousMod t hB.measurable (restrictKernel htT φ) s ω
-      = itoContinuousMod T hB.measurable φ s ω := by
+    ∀ᵐ ω ∂μ, ∀ s ≤ t, itoContinuousMod t hB.measurable_eval (restrictKernel htT φ) s ω
+      = itoContinuousMod T hB.measurable_eval φ s ω := by
   refine ae_forall_eq_of_continuousOn'
-    (itoContinuousMod_continuousOn hB t hB.measurable hBc _)
+    (itoContinuousMod_continuousOn hB t hB.measurable_eval hBc _)
     (by
-      filter_upwards [itoContinuousMod_continuousOn hB T hB.measurable hBc φ] with ω hω
+      filter_upwards [itoContinuousMod_continuousOn hB T hB.measurable_eval hBc φ] with ω hω
       exact hω.mono (Set.Icc_subset_Icc le_rfl htT)) fun s hs => ?_
-  have e1 := itoContinuousMod_modification hB t hB.measurable hBc (restrictKernel htT φ) hs
-  have e2 := itoContinuousMod_modification hB T hB.measurable hBc φ (hs.trans htT)
-  have e3 : itoProcessCLM hB t s hB.measurable (restrictKernel htT φ)
-      = itoProcessCLM hB T s hB.measurable φ := by
-    rw [← itoIntegralCLM_T_restrictKernel hB hs hB.measurable,
-      ← itoIntegralCLM_T_restrictKernel hB (hs.trans htT) hB.measurable,
+  have e1 := itoContinuousMod_modification hB t hB.measurable_eval hBc (restrictKernel htT φ) hs
+  have e2 := itoContinuousMod_modification hB T hB.measurable_eval hBc φ (hs.trans htT)
+  have e3 : itoProcessCLM hB t s hB.measurable_eval (restrictKernel htT φ)
+      = itoProcessCLM hB T s hB.measurable_eval φ := by
+    rw [← itoIntegralCLM_T_restrictKernel hB hs hB.measurable_eval,
+      ← itoIntegralCLM_T_restrictKernel hB (hs.trans htT) hB.measurable_eval,
       restrictKernel_restrictKernel]
   rw [e3] at e1
   exact e1.trans e2.symm

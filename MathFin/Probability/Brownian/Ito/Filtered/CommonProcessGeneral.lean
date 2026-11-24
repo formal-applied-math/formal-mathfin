@@ -50,14 +50,15 @@ open CommonL2 CommonPredictable CommonIntegral CommonProcess
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : BrownianOn ℱ B μ)
+  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : IsFilteredPreBrownian
+        B ℱ μ)
 
 include hB
 
 theorem itoSimpleProcessLp_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ ℱ) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
     ‖itoSimpleProcessLp hB hBmeas V t‖ ≤ ‖simpleProcessL2T (μ := μ) T ℱ V‖ := by
-  have : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  have : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
 
   have hnorm_eq : ‖simpleProcessL2T (μ := μ) T ℱ V‖ = ‖itoSimpleLp hB hBmeas V‖ :=
     (assembly_isometry_T hB T ⟨V, hVT⟩).symm

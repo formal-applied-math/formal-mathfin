@@ -61,48 +61,52 @@ theorem exists_heston_state (h : IndependentPair ℱ B Z μ) (T : ℝ≥0)
         fun z => Real.sqrt (V z.1 z.2)) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀ +
         (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂MathFin.ItoIntegralL2.timeMeasure) +
-          CommonContinuous.itoContinuousMod T h.left.measurable Hv t ω) ∧
+          CommonContinuous.itoContinuousMod T h.left.measurable_eval Hv t ω) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, X t ω = x₀ +
         (∫ s in Set.Ioc 0 t, (p.r-p.q) - (1/2 : ℝ) * V s ω ∂MathFin.ItoIntegralL2.timeMeasure) +
-          CommonContinuous.itoContinuousMod T (h.correlated_brownian hρ).measurable Hx t ω) := by
+          CommonContinuous.itoContinuousMod T (h.correlated_brownian hρ).measurable_eval Hx t ω)
+                := by
   obtain ⟨V, _G, H, _hrep, hpV, hcV, hmV, hnn, _hG, hH, heqV⟩ :=
-    MathFin.Heston.exists_cir_strong_solution h.left_law T h.left.measurable hcB p hk hθ hv₀
+    MathFin.Heston.exists_cir_strong_solution h.left_law T h.left.measurable_eval hcB p hk hθ hv₀
   have hle := natural_le h.left
   have hpV' := predictable_mono hle hpV
   have hβ : MemLp (fun z : ℝ≥0 × Ω => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2) 2
-      (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T h.left.measurable) :=
+      (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T h.left.measurable_eval) :=
     (memLp_const (p.r-p.q)).sub (hmV.const_mul (1/2 : ℝ))
   let β := hβ.toLp (fun z : ℝ≥0 × Ω => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2)
   let Hv := lpLift hle T H
   let Hx := p.xi⁻¹ • Hv
   let Gx := lpLift hle T β
   let W := correlatedNoise p.rho B Z
-  have hW : BrownianOn ℱ W μ := h.correlated_brownian hρ
+  have hW : IsFilteredPreBrownian W ℱ μ := h.correlated_brownian hρ
   have hcW : ∀ ω, Continuous fun t : ℝ≥0 => W t ω := by
     intro ω
     exact ((hcB ω).const_mul p.rho).add ((hcZ ω).const_mul (orthogonalWeight p.rho))
-  let D := MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod T h.left.measurable β
-  let M := CommonContinuous.itoContinuousMod T hW.measurable Hx
+  let D := MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod T
+        h.left.measurable_eval β
+  let M := CommonContinuous.itoContinuousMod T hW.measurable_eval Hx
   let X := fun t ω => x₀ + D t ω + M t ω
   have hpD : IsStronglyPredictable ℱ D := predictable_mono hle
     (MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod_isStronglyPredictable T
-          h.left.measurable β)
+          h.left.measurable_eval β)
   have hpM : IsStronglyPredictable ℱ M :=
-    CommonContinuous.itoContinuousMod_isStronglyPredictable hW T hW.measurable hcW Hx
+    CommonContinuous.itoContinuousMod_isStronglyPredictable hW T hW.measurable_eval hcW Hx
   have hpX : IsStronglyPredictable ℱ X :=
     (IsStronglyPredictable.const.add hpD).add hpM
   have hcX : ∀ᵐ ω ∂μ, ContinuousOn (fun t => X t ω) (Set.Icc 0 T) := by
-    filter_upwards [MathFin.FilteredIto.driftContinuousMod_continuousOn T h.left.measurable β,
-      CommonContinuous.itoContinuousMod_continuousOn hW T hW.measurable hcW Hx] with ω hd hm
+    filter_upwards [MathFin.FilteredIto.driftContinuousMod_continuousOn T h.left.measurable_eval β,
+      CommonContinuous.itoContinuousMod_continuousOn hW T hW.measurable_eval hcW Hx] with ω hd hm
     exact (continuousOn_const.add hd).add hm
-  have hβm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration h.left.measurable).predictable]
+  have hβm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration
+        h.left.measurable_eval).predictable]
       (fun z : ℝ≥0 × Ω => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2) :=
     (show Continuous (fun v : ℝ => (p.r-p.q) - (1/2 : ℝ) * v) by
           fun_prop).comp_stronglyMeasurable hpV
   have hGx : ⇑Gx =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
       fun z => (p.r-p.q) - (1/2 : ℝ) * V z.1 z.2 :=
     (coeFn_lpLift hle T β).trans (ae_lift hle T (Lp.stronglyMeasurable β) hβm hβ.coeFn_toLp)
-  have hHm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration h.left.measurable).predictable]
+  have hHm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration
+        h.left.measurable_eval).predictable]
       (fun z : ℝ≥0 × Ω => MathFin.Heston.cirDiffusion p (V z.1 z.2)) :=
     (MathFin.Heston.continuous_cirDiffusion p).comp_stronglyMeasurable hpV
   have hHv : ⇑Hv =ᵐ[CommonPredictable.trimMeasureT (μ := μ) T ℱ]
@@ -115,16 +119,18 @@ theorem exists_heston_state (h : IndependentPair ℱ B Z μ) (T : ℝ≥0)
       Pi.smul_apply, smul_eq_mul, hv, ← mul_assoc, inv_mul_cancel₀ (ne_of_gt hξ), one_mul]
   have heqV' : ∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀ +
       (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V s ω) ∂MathFin.ItoIntegralL2.timeMeasure) +
-        CommonContinuous.itoContinuousMod T h.left.measurable Hv t ω := by
+        CommonContinuous.itoContinuousMod T h.left.measurable_eval Hv t ω := by
     filter_upwards [heqV, CommonCIR.continuous_integral_natural_lift h.left T hcB H] with ω he
           hl t ht
     rw [hl t ht]
     exact he t ht
   have heqX : ∀ᵐ ω ∂μ, ∀ t ≤ T, X t ω = x₀ +
       (∫ s in Set.Ioc 0 t, (p.r-p.q) - (1/2 : ℝ) * V s ω ∂MathFin.ItoIntegralL2.timeMeasure) +
-        CommonContinuous.itoContinuousMod T hW.measurable Hx t ω := by
-    filter_upwards [MathFin.FilteredIto.driftContinuousMod_eq_setIntegral_all T h.left.measurable β,
-      MathFin.FilteredIto.ae_ae_of_ae_trim T h.left.measurable hβ.coeFn_toLp] with ω hd hco t ht
+        CommonContinuous.itoContinuousMod T hW.measurable_eval Hx t ω := by
+    filter_upwards [MathFin.FilteredIto.driftContinuousMod_eq_setIntegral_all T
+          h.left.measurable_eval β,
+      MathFin.FilteredIto.ae_ae_of_ae_trim T h.left.measurable_eval hβ.coeFn_toLp] with ω hd hco
+            t ht
     have hi : (∫ s in Set.Ioc 0 t, β (s,ω) ∂MathFin.ItoIntegralL2.timeMeasure) =
         ∫ s in Set.Ioc 0 t, (p.r-p.q) - (1/2 : ℝ) * V s ω ∂MathFin.ItoIntegralL2.timeMeasure := by
       apply integral_congr_ae

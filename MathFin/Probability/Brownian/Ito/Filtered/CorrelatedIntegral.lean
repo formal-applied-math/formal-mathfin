@@ -46,8 +46,8 @@ omit [IsProbabilityMeasure μ] in
 theorem IndependentPair.itoSimple_rotation (h : IndependentPair ℱ B Z μ)
     (a b : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (V : SimpleProcess ℝ ℱ) :
     CommonL2.itoSimple (h.linear_brownian a b hab).measurable V =
-      a • CommonL2.itoSimple h.left.measurable V +
-      b • CommonL2.itoSimple h.right.measurable V := by
+      a • CommonL2.itoSimple h.left.measurable_eval V +
+      b • CommonL2.itoSimple h.right.measurable_eval V := by
   funext ω
   simp only [CommonL2.itoSimple, Finsupp.sum, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
   rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
@@ -59,26 +59,26 @@ theorem IndependentPair.itoSimple_rotation (h : IndependentPair ℱ B Z μ)
 theorem IndependentPair.itoSimpleLp_rotation (h : IndependentPair ℱ B Z μ)
     (a b : ℝ) (hab : a ^ 2 + b ^ 2 = 1) (V : SimpleProcess ℝ ℱ) :
     CommonL2.itoSimpleLp (h.linear_brownian a b hab) (h.linear_brownian a b hab).measurable V =
-      a • CommonL2.itoSimpleLp h.left h.left.measurable V +
-      b • CommonL2.itoSimpleLp h.right h.right.measurable V := by
+      a • CommonL2.itoSimpleLp h.left h.left.measurable_eval V +
+      b • CommonL2.itoSimpleLp h.right h.right.measurable_eval V := by
   apply Lp.ext
   filter_upwards [
     (CommonL2.memLp_itoSimple (h.linear_brownian a b hab)
       (h.linear_brownian a b hab).measurable V).coeFn_toLp,
-    (CommonL2.memLp_itoSimple h.left h.left.measurable V).coeFn_toLp,
-    (CommonL2.memLp_itoSimple h.right h.right.measurable V).coeFn_toLp,
-    Lp.coeFn_add (a • CommonL2.itoSimpleLp h.left h.left.measurable V)
-      (b • CommonL2.itoSimpleLp h.right h.right.measurable V),
-    Lp.coeFn_smul a (CommonL2.itoSimpleLp h.left h.left.measurable V),
-    Lp.coeFn_smul b (CommonL2.itoSimpleLp h.right h.right.measurable V)]
+    (CommonL2.memLp_itoSimple h.left h.left.measurable_eval V).coeFn_toLp,
+    (CommonL2.memLp_itoSimple h.right h.right.measurable_eval V).coeFn_toLp,
+    Lp.coeFn_add (a • CommonL2.itoSimpleLp h.left h.left.measurable_eval V)
+      (b • CommonL2.itoSimpleLp h.right h.right.measurable_eval V),
+    Lp.coeFn_smul a (CommonL2.itoSimpleLp h.left h.left.measurable_eval V),
+    Lp.coeFn_smul b (CommonL2.itoSimpleLp h.right h.right.measurable_eval V)]
     with ω hw hb hz hadd hsa hsb
   change CommonL2.itoSimpleLp (h.linear_brownian a b hab)
     (h.linear_brownian a b hab).measurable V ω = _
   rw [hadd, Pi.add_apply, hsa, hsb, Pi.smul_apply, Pi.smul_apply, smul_eq_mul, smul_eq_mul]
-  rw [show CommonL2.itoSimpleLp h.left h.left.measurable V ω =
-    CommonL2.itoSimple h.left.measurable V ω from hb,
-    show CommonL2.itoSimpleLp h.right h.right.measurable V ω =
-    CommonL2.itoSimple h.right.measurable V ω from hz,
+  rw [show CommonL2.itoSimpleLp h.left h.left.measurable_eval V ω =
+    CommonL2.itoSimple h.left.measurable_eval V ω from hb,
+    show CommonL2.itoSimpleLp h.right h.right.measurable_eval V ω =
+    CommonL2.itoSimple h.right.measurable_eval V ω from hz,
     show CommonL2.itoSimpleLp (h.linear_brownian a b hab)
       (h.linear_brownian a b hab).measurable V ω =
       CommonL2.itoSimple (h.linear_brownian a b hab).measurable V ω from hw]

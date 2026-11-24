@@ -57,14 +57,14 @@ def weightedCrossSum (B Z w : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (n : ℕ) (�
     (Z (unifPart T n (k+1)) ω - Z (unifPart T n k) ω)
 
 omit [IsProbabilityMeasure μ] in
-theorem BrownianOn.memLp_weightedSquareSum (hB : BrownianOn ℱ B μ)
+theorem memLp_weightedSquareSum (hB : IsFilteredPreBrownian B ℱ μ)
     {w : ℝ≥0 → Ω → ℝ} (hw : ∀ t, Measurable[ℱ t] (w t))
     {C : ℝ} (hC : 0 ≤ C) (hbdd : ∀ t ω, |w t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     MemLp (weightedSquareSum B w T n) 2 μ := by
   apply memLp_finsetSum
   intro k _
   have hd : MemLp (fun ω => (B (unifPart T n (k+1)) ω - B (unifPart T n k) ω)^2) 2 μ := by
-    simpa only [sub_zero] using memLp_increment_sq_centered_two hB.law
+    simpa only [sub_zero] using memLp_increment_sq_centered_two hB.toIsPreBrownianReal
       (unifPart T n k) (unifPart T n (k+1)) 0
   have hm := ((hw (unifPart T n k)).mono (ℱ.le _) le_rfl).aestronglyMeasurable.mul
     hd.aestronglyMeasurable
@@ -93,26 +93,26 @@ theorem IndependentPair.weighted_crossVariation_L2 (h : IndependentPair ℱ B Z 
     (hcont : ∀ᵐ ω ∂μ, ContinuousOn (fun t => w t ω) (Set.Icc 0 T)) :
     Tendsto (fun n : ℕ => ∫ ω, weightedCrossSum B Z w T n ω ^ 2 ∂μ) atTop (𝓝 0) := by
   let R := linearNoise (3/5) (4/5) B Z
-  have hR : BrownianOn ℱ R μ := h.linear_brownian (3/5) (4/5) (by norm_num)
+  have hR : IsFilteredPreBrownian R ℱ μ := h.linear_brownian (3/5) (4/5) (by norm_num)
   let I := fun ω => ∫ t in Set.Ioc 0 T, w t ω ∂MathFin.ItoIntegralL2.timeMeasure
   let eB := fun n ω => weightedSquareSum B w T n ω - I ω
   let eZ := fun n ω => weightedSquareSum Z w T n ω - I ω
   let eR := fun n ω => weightedSquareSum R w T n ω - I ω
   have hb : Tendsto (fun n : ℕ => ∫ ω, eB n ω ^ 2 ∂μ) atTop (𝓝 0) :=
-    CommonQv.tendsto_weighted_qv_process_of_ae_continuous h.left h.left.measurable hw hC hbdd T
+    CommonQv.tendsto_weighted_qv_process_of_ae_continuous h.left h.left.measurable_eval hw hC hbdd T
           hcont
   have hz : Tendsto (fun n : ℕ => ∫ ω, eZ n ω ^ 2 ∂μ) atTop (𝓝 0) :=
-    CommonQv.tendsto_weighted_qv_process_of_ae_continuous h.right h.right.measurable hw hC hbdd
+    CommonQv.tendsto_weighted_qv_process_of_ae_continuous h.right h.right.measurable_eval hw hC hbdd
           T hcont
   have hr : Tendsto (fun n : ℕ => ∫ ω, eR n ω ^ 2 ∂μ) atTop (𝓝 0) :=
-    CommonQv.tendsto_weighted_qv_process_of_ae_continuous hR hR.measurable hw hC hbdd T hcont
+    CommonQv.tendsto_weighted_qv_process_of_ae_continuous hR hR.measurable_eval hw hC hbdd T hcont
   have hi : MemLp I 2 μ :=
     MathFin.memLp_pathIntegral_process_of_ae_continuous
       (fun t => (hw t).mono (ℱ.le t) le_rfl) hC hbdd T hcont
   have hib (n : ℕ) : Integrable (fun ω => eB n ω ^ 2) μ :=
-    ((h.left.memLp_weightedSquareSum hw hC hbdd T n).sub hi).integrable_sq
+    ((memLp_weightedSquareSum h.left hw hC hbdd T n).sub hi).integrable_sq
   have hiz (n : ℕ) : Integrable (fun ω => eZ n ω ^ 2) μ :=
-    ((h.right.memLp_weightedSquareSum hw hC hbdd T n).sub hi).integrable_sq
+    ((memLp_weightedSquareSum h.right hw hC hbdd T n).sub hi).integrable_sq
   have hir (n : ℕ) : Integrable (fun ω => eR n ω ^ 2) μ :=
     ((hR.memLp_weightedSquareSum hw hC hbdd T n).sub hi).integrable_sq
   have heq (n : ℕ) (ω : Ω) : weightedCrossSum B Z w T n ω =
@@ -156,8 +156,8 @@ theorem IndependentPair.memLp_weightedCrossSum (h : IndependentPair ℱ B Z μ)
     funext (weightedCrossSum_rotation B Z w T n)
   rw [he]
   exact (((hR.memLp_weightedSquareSum hw hC hbdd T n).const_mul (25/24)).sub
-    ((h.left.memLp_weightedSquareSum hw hC hbdd T n).const_mul (3/8))).sub
-    ((h.right.memLp_weightedSquareSum hw hC hbdd T n).const_mul (2/3))
+    ((memLp_weightedSquareSum h.left hw hC hbdd T n).const_mul (3/8))).sub
+    ((memLp_weightedSquareSum h.right hw hC hbdd T n).const_mul (2/3))
 
 omit mΩ [IsProbabilityMeasure μ] in
 theorem weightedCrossSum_correlated (ρ : ℝ) (B Z w : ℝ≥0 → Ω → ℝ)
@@ -185,13 +185,13 @@ theorem IndependentPair.correlated_crossVariation_L2 (h : IndependentPair ℱ B 
   let eB := fun n ω => weightedSquareSum B w T n ω - I ω
   let Q := fun n ω => weightedCrossSum B Z w T n ω
   have hbl : Tendsto (fun n : ℕ => ∫ ω, eB n ω^2 ∂μ) atTop (𝓝 0) :=
-    CommonQv.tendsto_weighted_qv_process_of_ae_continuous h.left h.left.measurable hw hC hbdd T
+    CommonQv.tendsto_weighted_qv_process_of_ae_continuous h.left h.left.measurable_eval hw hC hbdd T
           hcont
   have hcl := h.weighted_crossVariation_L2 hw hC hbdd T hcont
   have hi : MemLp I 2 μ := MathFin.memLp_pathIntegral_process_of_ae_continuous
     (fun t => (hw t).mono (ℱ.le t) le_rfl) hC hbdd T hcont
   have hib (n : ℕ) : Integrable (fun ω => (2*ρ^2) * eB n ω^2) μ :=
-    (((h.left.memLp_weightedSquareSum hw hC hbdd T n).sub hi).integrable_sq).const_mul _
+    (((memLp_weightedSquareSum h.left hw hC hbdd T n).sub hi).integrable_sq).const_mul _
   have hiq (n : ℕ) : Integrable (fun ω => (2*orthogonalWeight ρ^2) * Q n ω^2) μ :=
     (h.memLp_weightedCrossSum hw hC hbdd T n).integrable_sq.const_mul _
   have heq (n : ℕ) (ω : Ω) : weightedCrossSum (correlatedNoise ρ B Z) B w T n ω - ρ * I ω =

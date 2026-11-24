@@ -223,7 +223,7 @@ lemma ae_sub_eq_sub {α : Type*} {m : MeasurableSpace α} {ν : Measure α}
   filter_upwards [Lp.coeFn_sub f g, Lp.coeFn_sub h k] with x h1 h2
   rw [← Pi.sub_apply, ← h1, e, h2, Pi.sub_apply]
 
-variable (hB : BrownianOn ℱ B μ)
+variable (hB : IsFilteredPreBrownian B ℱ μ)
 include hB
 
 /-- `(φ●B)_t = ∫₀ᵀ φ dB − ∫₀ᵀ 𝟙_{(t,T]} φ dB`. -/

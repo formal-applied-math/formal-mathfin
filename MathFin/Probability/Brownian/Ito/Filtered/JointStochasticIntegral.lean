@@ -8,7 +8,6 @@ module
 public import MathFin.Probability.Brownian.Ito.StochasticIntegralVersion
 public import MathFin.Probability.Brownian.Ito.Filtered.CommonContinuous
 public import MathFin.Probability.Brownian.Ito.Filtered.CommonLocality
-public import MathFin.Probability.Brownian.Ito.Filtered.StochasticIntegralUniqueness
 
 /-!
 # Joint Stochastic Integral
@@ -65,7 +64,8 @@ variable (T : ℝ≥0) (ℱ : Filtration ℝ≥0 mΩ)
 
 variable {T ℱ}
 
-/-- Two predictable versions of one process are equal `⟨M⟩`-almost everywhere. -/
+/-- Two predictable versions of one process are equal almost everywhere for the predictable time
+measure. -/
 theorem uncurry_ae_eq_of_isPredictableVersion {X X₁ X₂ : ℝ≥0 → Ω → ℝ}
     (h₁ : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) X X₁) (h₂ : PredictableL2Version
           μ ℱ (trimMeasureT (μ := μ) T ℱ) X X₂) :
@@ -87,7 +87,7 @@ theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL2Version
 
 variable (T ℱ) in
 /-- Read the terminal continuous linear Itô operator on a process with a predictable version. -/
-noncomputable def sIntegral (hB : BrownianOn ℱ B μ) (X : ℝ≥0 → Ω → ℝ) : Ω → ℝ :=
+noncomputable def sIntegral (hB : IsFilteredPreBrownian B ℱ μ) (X : ℝ≥0 → Ω → ℝ) : Ω → ℝ :=
   itoIntegralCLMT hB T (predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) X)
 
 private theorem version_band {i j : ℝ≥0} (hij : i ≤ j) {X : Ω → ℝ}
@@ -103,14 +103,15 @@ private theorem version_band {i j : ℝ≥0} (hij : i ≤ j) {X : Ω → ℝ}
   rw [he]
   exact ⟨V.val.isStronglyPredictable.measurable, memLp_uncurry_trim_T T ℱ V.val, .rfl⟩
 
-private theorem sIntegral_band (hB : BrownianOn ℱ B μ) {i j : ℝ≥0} (hij : i ≤ j) {X : Ω → ℝ}
+private theorem sIntegral_band (hB : IsFilteredPreBrownian B ℱ μ) {i j : ℝ≥0} (hij : i ≤ j) {X :
+      Ω → ℝ}
     (hm : Measurable[ℱ i] X) {C : ℝ} (hb : ∀ ω, ‖X ω‖ ≤ C) :
     sIntegral T ℱ hB (fun k ω ↦ if k ∈ Set.Ioc i j then X ω else 0)
       =ᵐ[μ] X * (B (min j T) - B (min i T)) := by
   have hv := version_band (T := T) (μ := μ) hij hm hb
   simp only [sIntegral, integrandLp_eq hv]
   by_cases hi : i ≤ T
-  · let V := stepSP hB.measurable (le_min hij hi) (min_le_right j T) hm hb
+  · let V := stepSP hB.measurable_eval (le_min hij hi) (min_le_right j T) hm hb
     have hc : hv.2.1.toLp _ = simpleAssemblyT (μ := μ) T ℱ V := by
       apply Lp.ext
       filter_upwards [hv.2.1.coeFn_toLp, (memLp_uncurry_trim_T (μ := μ) T ℱ V.val).coeFn_toLp,
@@ -119,8 +120,8 @@ private theorem sIntegral_band (hB : BrownianOn ℱ B μ) {i j : ℝ≥0} (hij :
       rw [hz, hz']
       simp [V, Function.uncurry, coe_stepSP, Set.indicator, Set.mem_Ioc, ht.2]
     rw [hc, itoIntegralCLM_T_simpleAssembly]
-    filter_upwards [(CommonL2.memLp_itoSimple hB hB.measurable V.val).coeFn_toLp] with ω hω
-    change (CommonL2.memLp_itoSimple hB hB.measurable V.val).toLp _ ω = _
+    filter_upwards [(CommonL2.memLp_itoSimple hB hB.measurable_eval V.val).coeFn_toLp] with ω hω
+    change (CommonL2.memLp_itoSimple hB hB.measurable_eval V.val).toLp _ ω = _
     rw [hω, itoSimple_stepSP, min_eq_left hi]
     rfl
   · have hc : hv.2.1.toLp _ = 0 := by
@@ -175,10 +176,10 @@ theorem isPredictableVersion_bottomBand (i : ℝ≥0) {X : Ω → ℝ}
   · exact hC _
   · simpa using (norm_nonneg (X z.2)).trans (hC z.2)
 
-/-- **The initial band identity**: the integral of `1_{[0,i]}·X` against `M` is
-`X·(M_{i∧T} − M_0)`. The time origin is `⟨M⟩`-null, so the initial band has the class of the band
+/-- **The initial band identity**: the integral of `1_{[0,i]}·X` against the stopped driver is
+`X·(B (min i T) − B 0)`. The time origin has measure zero, so this band has the class of the band
 on `(0, i]`, and the band identity applies. -/
-theorem sIntegral_bottomBand (hB : BrownianOn ℱ B μ) (i : ℝ≥0) {X : Ω → ℝ}
+theorem sIntegral_bottomBand (hB : IsFilteredPreBrownian B ℱ μ) (i : ℝ≥0) {X : Ω → ℝ}
     (hXm : Measurable[ℱ ⊥] X) {C : ℝ} (hC : ∀ ω, ‖X ω‖ ≤ C) :
     sIntegral T ℱ hB (fun k ω ↦ if k ∈ Set.Iic i then X ω else 0)
       =ᵐ[μ] X * ((fun s ↦ B (min s T)) i - (fun s ↦ B (min s T)) ⊥) := by
@@ -233,10 +234,11 @@ theorem integrandLp_const_smul {X X' : ℝ≥0 → Ω → ℝ} (h : PredictableL
 
 /-! ### Dominated convergence -/
 
-/-- **Dominated convergence for the integral against `M`.** A sequence in the domain, converging
+/-- **Dominated convergence for the integral against the stopped driver.** A sequence in the
+domain, converging
 at every time and outcome and dominated by one process of the domain, has its limit in the domain,
 and the integrals converge in measure. -/
-theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω → ℝ)
+theorem sIntegral_dct (hB : IsFilteredPreBrownian B ℱ μ) (X : ℕ → ℝ≥0 → Ω → ℝ)
     (X_dom X_lim : ℝ≥0 → Ω → ℝ) (h₁ : ∀ n, X n ∈ predictableL2Domain μ ℱ (trimMeasureT (μ := μ)
           T ℱ))
     (h₂ : X_dom ∈ predictableL2Domain μ ℱ (trimMeasureT (μ := μ) T ℱ)) (h_dom : ∀ n i ω, |X n i
@@ -264,7 +266,7 @@ theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω →
     (hV n).1.stronglyMeasurable
   have hVl_meas : Measurable[pred] (Function.uncurry Vl) :=
     (StronglyMeasurable.limUnder (l := atTop) hVm).measurable
-  -- domination and convergence, `⟨M⟩`-almost everywhere
+  -- domination and convergence almost everywhere for the predictable time measure
   have hdom (n : ℕ) : ∀ᵐ z ∂(trimMeasureT (μ := μ) T ℱ),
       ‖Function.uncurry (V n) z‖ ≤ ‖Function.uncurry Vd z‖ := by
     refine ae_horizon_of_ae_forall T ℱ
@@ -289,7 +291,7 @@ theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω →
     ⟨hVl_meas, hVd.2.1.of_le hVl_meas.stronglyMeasurable.aestronglyMeasurable hdom_lim,
       hVl_eq.symm⟩
   refine ⟨⟨Vl, hVl⟩, ?_⟩
-  -- convergence in `L²(⟨M⟩)`, then through the isometry, then in measure
+  -- convergence in predictable L², then through the isometry, then in measure
   have hLp : Tendsto (fun n ↦ predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) (X n)) atTop
       (𝓝 (predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) X_lim)) := by
     have hseq : (fun n ↦ predictableL2Class μ ℱ (trimMeasureT (μ := μ) T ℱ) (X n)) = fun n ↦
@@ -302,13 +304,14 @@ theorem sIntegral_dct (hB : BrownianOn ℱ B μ) (X : ℕ → ℝ≥0 → Ω →
   exact tendstoInMeasure_of_tendsto_Lp
     (((itoIntegralCLMT hB T).continuous.tendsto _).comp hLp)
 
-/-! ### The integral against `M` extends the Riemann–Stieltjes integral -/
+/-! ### The integral against the stopped driver extends the Riemann–Stieltjes integral -/
 
-/-- **The integral against `M` is an extension of the Riemann–Stieltjes integral**, in the sense of
+/-- **The integral against the stopped driver is an extension of the Riemann–Stieltjes
+integral**, in the sense of
 BrownianMotion's `IsRiemannStieltjesExtension`: on elementary processes it is the Riemann–Stieltjes
-sum against `M` stopped at `T`, and it respects linearity, indistinguishability and dominated
+sum against the driver stopped at `T`, and it respects linearity, indistinguishability and dominated
 convergence. -/
-theorem isRiemannStieltjesExtension (hB : BrownianOn ℱ B μ) :
+theorem isRiemannStieltjesExtension (hB : IsFilteredPreBrownian B ℱ μ) :
     IsRiemannStieltjesExtension μ ((fun s ↦ B (min s T))) (ℱ)
       (sIntegral T ℱ hB) (predictableL2Domain μ ℱ (trimMeasureT (μ := μ) T ℱ)) where
   measurable _ _ := Lp.aestronglyMeasurable _
@@ -347,16 +350,18 @@ theorem isRiemannStieltjesExtension (hB : BrownianOn ℱ B μ) :
 
 /-- The common-filtration terminal Itô map is the BrownianMotion stochastic integral
 of the stopped driver, including kernels depending on both drivers. -/
-theorem isStochasticIntegral_stopped (hB : BrownianOn ℱ B μ) :
+theorem isStochasticIntegral_stopped (hB : IsFilteredPreBrownian B ℱ μ) :
     IsStochasticIntegral μ (fun t ↦ B (min t T)) ℱ (sIntegral T ℱ hB) (predictableL2Domain μ ℱ
           (trimMeasureT (μ := μ) T ℱ)) :=
-  StochasticIntegralUniqueness.isStochasticIntegral_of_predictable_versions
+  MathFin.StochasticIntegralCharacterisation.General.isStochasticIntegral_of_predictable_versions
+    (generateFrom_predictableRect ℱ)
     (isRiemannStieltjesExtension (T := T) hB)
     (fun _ ⟨V, hV⟩ ↦ ⟨V, hV.1.stronglyMeasurable, hV.2.2⟩)
 
 /-- Evaluation on the predictable representative of an L² kernel recovers exactly
 the terminal operator used by the common-filtration SDE. -/
-theorem sIntegral_curry (hB : BrownianOn ℱ B μ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
+theorem sIntegral_curry (hB : IsFilteredPreBrownian B ℱ μ) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T
+      ℱ)) :
     sIntegral T ℱ hB (Function.curry (⇑φ)) = ⇑(itoIntegralCLMT hB T φ) := by
   have hv : PredictableL2Version μ ℱ (trimMeasureT (μ := μ) T ℱ) (Function.curry (⇑φ))
         (Function.curry (⇑φ)) :=
@@ -367,12 +372,12 @@ theorem sIntegral_curry (hB : BrownianOn ℱ B μ) (φ : Lp ℝ 2 (trimMeasureT 
 
 /-- At its horizon the continuous realization of every common-filtration kernel
 is a version of the BrownianMotion stochastic integral. -/
-theorem sIntegral_curry_ae_eq_continuousMod (hB : BrownianOn ℱ B μ)
+theorem sIntegral_curry_ae_eq_continuousMod (hB : IsFilteredPreBrownian B ℱ μ)
     (hc : ∀ ω, Continuous (fun s ↦ B s ω)) (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     sIntegral T ℱ hB (Function.curry (⇑φ)) =ᵐ[μ]
-      CommonContinuous.itoContinuousMod T hB.measurable φ T := by
-  have hh := CommonContinuous.itoContinuousMod_modification hB T hB.measurable hc φ (le_refl T)
-  rw [sIntegral_curry, ← CommonProcessGeneral.itoProcessCLM_terminal_eq hB T hB.measurable]
+      CommonContinuous.itoContinuousMod T hB.measurable_eval φ T := by
+  have hh := CommonContinuous.itoContinuousMod_modification hB T hB.measurable_eval hc φ (le_refl T)
+  rw [sIntegral_curry, ← CommonProcessGeneral.itoProcessCLM_terminal_eq hB T hB.measurable_eval]
   exact hh.symm
 
 end MathFin.FilteredIto.CommonIntegral

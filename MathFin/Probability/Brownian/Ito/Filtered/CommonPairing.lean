@@ -20,9 +20,6 @@ Adapted to a specified common filtration, 2026-10-18.
 
 ## Main results
 
-* `memLp_adapted_mul_increment`
-* `integral_adapted_sq_mul_increment_sq`
-* `adapted_indepFun_forward`
 
 ## References
 
@@ -61,33 +58,10 @@ theorem AdaptedAt.sub {s : ℝ≥0} {f g : Ω → ℝ}
     (hf : AdaptedAt ℱ s f) (hg : AdaptedAt ℱ s g) :
     AdaptedAt ℱ s (fun ω => f ω - g ω) := Measurable.sub hf hg
 
-variable (hB : BrownianOn ℱ B μ)
+variable (hB : IsFilteredPreBrownian B ℱ μ)
 include hB
 
 theorem adaptedAt_eval {s u : ℝ≥0} (hu : u ≤ s) : AdaptedAt ℱ s (B u) :=
-  (hB.adapted u).measurable.mono (ℱ.mono hu) le_rfl
-
-theorem integral_adapted_mul_increment (_hBm : ∀ t, Measurable (B t))
-    {s t : ℝ≥0} (hst : s ≤ t) {f : Ω → ℝ} (hf : AdaptedAt ℱ s f) :
-    (∫ ω, f ω * (B t ω - B s ω) ∂μ) = 0 :=
-  MathFin.ItoIsometryAdapted.integral_adapted_mul_increment hB.isFilteredPreBrownian hst hf
-
-theorem memLp_adapted_mul_increment (_hBm : ∀ t, Measurable (B t))
-    {s t : ℝ≥0} (hst : s ≤ t) {f : Ω → ℝ} (hf : AdaptedAt ℱ s f)
-    (hf2 : MemLp f 2 μ) : MemLp (fun ω => f ω * (B t ω - B s ω)) 2 μ :=
-  MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment hB.isFilteredPreBrownian hst hf hf2
-
-theorem integral_adapted_sq_mul_increment_sq (_hBm : ∀ t, Measurable (B t))
-    {s t : ℝ≥0} (hst : s ≤ t) {f : Ω → ℝ} (hf : AdaptedAt ℱ s f) :
-    (∫ ω, f ω ^ 2 * (B t ω - B s ω) ^ 2 ∂μ) =
-      (∫ ω, f ω ^ 2 ∂μ) * ((t : ℝ) - s) :=
-  MathFin.ItoIsometryAdapted.integral_adapted_mul_increment_sq hB.isFilteredPreBrownian hst
-        (Measurable.pow_const hf 2)
-
-theorem adapted_indepFun_forward (_hBm : ∀ t, Measurable (B t)) {s : ℝ≥0}
-    {f : Ω → ℝ} (hf : AdaptedAt ℱ s f)
-    {H : (ℝ≥0 → ℝ) → ℝ} (hH : Measurable H) :
-    IndepFun f (fun ω => H (fun u => B (s+u) ω - B s ω)) μ :=
-  (hB.future_independent s hf).comp measurable_id hH
+  (hB.stronglyAdapted u).measurable.mono (ℱ.mono hu) le_rfl
 
 end MathFin.FilteredIto.CommonPairing

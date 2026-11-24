@@ -55,12 +55,12 @@ theorem predictable_le (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) : ℱ₁.predictable
   · exact Or.inl ⟨A, hle 0 A hA, rfl⟩
   · exact Or.inr ⟨t, A, hle t A hA, rfl⟩
 
-theorem natural_le {B : ℝ≥0 → Ω → ℝ} (hB : BrownianOn ℱ₂ B μ) :
-    ∀ t, MathFin.ItoIntegralL2.natFiltration hB.measurable t ≤ ℱ₂ t := by
+theorem natural_le {B : ℝ≥0 → Ω → ℝ} (hB : IsFilteredPreBrownian B ℱ₂ μ) :
+    ∀ t, MathFin.ItoIntegralL2.natFiltration hB.measurable_eval t ≤ ℱ₂ t := by
   intro t
   apply iSup₂_le
   intro s hst
-  exact (measurable_iff_comap_le.mp (hB.adapted s).measurable).trans (ℱ₂.mono hst)
+  exact (measurable_iff_comap_le.mp (hB.stronglyAdapted s).measurable).trans (ℱ₂.mono hst)
 
 theorem predictable_mono (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) {X : ℝ≥0 → Ω → ℝ}
     (hX : IsStronglyPredictable ℱ₁ X) : IsStronglyPredictable ℱ₂ X :=
@@ -168,7 +168,7 @@ theorem lpLift_simpleAssembly (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) (T : ℝ≥0)
   exact hl.trans (he.trans hr.symm)
 
 theorem integral_commutes (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) {B : ℝ≥0 → Ω → ℝ}
-    (hB₁ : BrownianOn ℱ₁ B μ) (hB₂ : BrownianOn ℱ₂ B μ) (T : ℝ≥0)
+    (hB₁ : IsFilteredPreBrownian B ℱ₁ μ) (hB₂ : IsFilteredPreBrownian B ℱ₂ μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ₁)) :
     itoIntegralCLMT hB₂ T (lpLift hle T f) = itoIntegralCLMT hB₁ T f := by
   have he : (fun g => itoIntegralCLMT hB₂ T (lpLift hle T g)) =
@@ -184,20 +184,22 @@ theorem integral_commutes (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) {B : ℝ≥0 → 
   exact congrFun he f
 
 theorem process_commutes (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) {B : ℝ≥0 → Ω → ℝ}
-    (hB₁ : BrownianOn ℱ₁ B μ) (hB₂ : BrownianOn ℱ₂ B μ) (T t : ℝ≥0)
+    (hB₁ : IsFilteredPreBrownian B ℱ₁ μ) (hB₂ : IsFilteredPreBrownian B ℱ₂ μ) (T t : ℝ≥0)
     (f : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ₁)) :
-    CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable (lpLift hle T f) =
-      CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable f := by
-  have he : (fun g => CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable (lpLift hle T g)) =
-      (fun g => CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable g) := by
+    CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable_eval (lpLift hle T f) =
+      CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable_eval f := by
+  have he : (fun g => CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable_eval (lpLift hle
+        T g)) =
+      (fun g => CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable_eval g) := by
     apply (simpleAssembly_T_denseRange (μ := μ) T ℱ₁).equalizer
-      ((CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable).continuous.comp (lpLiftLI hle
+      ((CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable_eval).continuous.comp
+            (lpLiftLI hle
             T).continuous)
-      (CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable).continuous
+      (CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable_eval).continuous
     funext V
-    change CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable
+    change CommonProcessGeneral.itoProcessCLM hB₂ T t hB₂.measurable_eval
       (lpLift hle T (simpleAssemblyT T ℱ₁ V)) =
-        CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable (simpleAssemblyT T ℱ₁ V)
+        CommonProcessGeneral.itoProcessCLM hB₁ T t hB₁.measurable_eval (simpleAssemblyT T ℱ₁ V)
     rw [lpLift_simpleAssembly, CommonProcessGeneral.itoProcessCLM_simpleAssembly_T,
       CommonProcessGeneral.itoProcessCLM_simpleAssembly_T]
     rfl
@@ -207,30 +209,30 @@ theorem process_commutes (hle : ∀ t, ℱ₁ t ≤ ℱ₂ t) {B : ℝ≥0 → �
 theorem integral_natural_eq {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
     (hm : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (f : Lp ℝ 2 (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T hm)) :
-    itoIntegralCLMT (brownianOn_natural hB hm) T f =
+    itoIntegralCLMT (hB.isFilteredPreBrownian hm) T f =
       MathFin.ItoIntegralCLM.itoIntegralCLM hB T hm f := by
   have he := (MathFin.ItoIntegralCLM.simpleAssemblyHorizon_denseRange (μ := μ) T hm).equalizer
-    (itoIntegralCLMT (brownianOn_natural hB hm) T).continuous
+    (itoIntegralCLMT (hB.isFilteredPreBrownian hm) T).continuous
     (MathFin.ItoIntegralCLM.itoIntegralCLM hB T hm).continuous
   apply congrFun (he ?_) f
   funext V
   let W : TBoundedSP T (MathFin.ItoIntegralL2.natFiltration hm) := ⟨V.1, V.2⟩
-  exact (itoIntegralCLM_T_simpleAssembly (brownianOn_natural hB hm) T W).trans
+  exact (itoIntegralCLM_T_simpleAssembly (hB.isFilteredPreBrownian hm) T W).trans
     (MathFin.ItoIntegralCLM.itoIntegralCLM_simpleAssemblyHorizon hB T hm V).symm
 
 
 theorem process_natural_eq {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
     (hm : ∀ t, Measurable (B t)) (T t : ℝ≥0)
     (f : Lp ℝ 2 (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T hm)) :
-    CommonProcessGeneral.itoProcessCLM (brownianOn_natural hB hm) T t hm f =
+    CommonProcessGeneral.itoProcessCLM (hB.isFilteredPreBrownian hm) T t hm f =
       MathFin.ItoIntegralProcessGeneral.itoProcessCLM hB T t hm f := by
   have he := (MathFin.ItoIntegralCLM.simpleAssemblyHorizon_denseRange (μ := μ) T hm).equalizer
-    (CommonProcessGeneral.itoProcessCLM (brownianOn_natural hB hm) T t hm).continuous
+    (CommonProcessGeneral.itoProcessCLM (hB.isFilteredPreBrownian hm) T t hm).continuous
     (MathFin.ItoIntegralProcessGeneral.itoProcessCLM hB T t hm).continuous
   apply congrFun (he ?_) f
   funext V
   let W : TBoundedSP T (MathFin.ItoIntegralL2.natFiltration hm) := ⟨V.1, V.2⟩
-  exact (CommonProcessGeneral.itoProcessCLM_simpleAssembly_T (brownianOn_natural hB hm) T t hm
+  exact (CommonProcessGeneral.itoProcessCLM_simpleAssembly_T (hB.isFilteredPreBrownian hm) T t hm
         W).trans
     (MathFin.ItoIntegralProcessGeneral.itoProcessCLM_simpleAssemblyHorizon hB T t hm V).symm
 

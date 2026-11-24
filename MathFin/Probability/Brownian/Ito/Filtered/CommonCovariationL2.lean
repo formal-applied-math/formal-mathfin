@@ -192,14 +192,14 @@ lemma norm_band_sq_eq (T a b : ℝ≥0) (hWmeas : ∀ u, Measurable (W u))
   split_ifs <;> ring
 
 /-- `∑ⱼ E[(ΔMⱼ)²] ≤ ‖z‖²`. -/
-lemma sum_integral_incrM_sq_le (hW : BrownianOn ℱ W μ)
+lemma sum_integral_incrM_sq_le (hW : IsFilteredPreBrownian W ℱ μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0) (n : ℕ)
     (z : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∑ j ∈ Finset.range n, ∫ ω, (itoContinuousMod T hW.measurable z (unifPart T n (j + 1)) ω
-      - itoContinuousMod T hW.measurable z (unifPart T n j) ω) ^ 2 ∂μ ≤ ‖z‖ ^ 2 := by
-  have hterm : ∀ j ∈ Finset.range n, ∫ ω, (itoContinuousMod T hW.measurable z
-      (unifPart T n (j + 1)) ω - itoContinuousMod T hW.measurable z (unifPart T n j) ω) ^ 2 ∂μ
-      = ∫ p, (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable z p) ^ 2
+    ∑ j ∈ Finset.range n, ∫ ω, (itoContinuousMod T hW.measurable_eval z (unifPart T n (j + 1)) ω
+      - itoContinuousMod T hW.measurable_eval z (unifPart T n j) ω) ^ 2 ∂μ ≤ ‖z‖ ^ 2 := by
+  have hterm : ∀ j ∈ Finset.range n, ∫ ω, (itoContinuousMod T hW.measurable_eval z
+      (unifPart T n (j + 1)) ω - itoContinuousMod T hW.measurable_eval z (unifPart T n j) ω) ^ 2 ∂μ
+      = ∫ p, (band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable_eval z p) ^ 2
           ∂(trimMeasureT (μ := μ) T ℱ) := by
     intro j hj
     rw [← MathFin.lp_two_norm_sq, ← itoIntegralCLM_T_norm hW T, MathFin.lp_two_norm_sq]
@@ -211,7 +211,7 @@ lemma sum_integral_incrM_sq_le (hW : BrownianOn ℱ W μ)
   refine integral_mono_ae (integrable_finsetSum _ fun j _ => (Lp.memLp _).integrable_sq)
     (Lp.memLp z).integrable_sq ?_
   have hall := (Filter.eventually_all_finset (Finset.range n)).mpr fun j _ =>
-    norm_band_sq_eq T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable z
+    norm_band_sq_eq T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable_eval z
   filter_upwards [hall] with p hp
   rw [Finset.sum_congr rfl hp, ← Finset.sum_mul]
   rcases Nat.eq_zero_or_pos n with rfl | hn
@@ -225,57 +225,57 @@ lemma sum_integral_incrM_sq_le (hW : BrownianOn ℱ W μ)
     refine mul_le_of_le_one_left (sq_nonneg _) ?_
     split_ifs <;> norm_num
 
-lemma memLp_incrM (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
+lemma memLp_incrM (hW : IsFilteredPreBrownian W ℱ μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
     (T : ℝ≥0) {n j : ℕ} (hj : j < n) (z : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    MemLp (fun ω ↦ itoContinuousMod T hW.measurable z (unifPart T n (j + 1)) ω
-      - itoContinuousMod T hW.measurable z (unifPart T n j) ω) 2 μ :=
+    MemLp (fun ω ↦ itoContinuousMod T hW.measurable_eval z (unifPart T n (j + 1)) ω
+      - itoContinuousMod T hW.measurable_eval z (unifPart T n j) ω) 2 μ :=
   (Lp.memLp _).ae_eq (incrM_ae_eq hW hWc T hj z).symm
 
 /-- Increments of the continuous integral are linear in the kernel, almost surely. -/
-lemma incrM_sub_ae (hW : BrownianOn ℱ W μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
+lemma incrM_sub_ae (hW : IsFilteredPreBrownian W ℱ μ) (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω)
     (T : ℝ≥0) {n j : ℕ} (hj : j < n) (x y : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∀ᵐ ω ∂μ, (itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-      - (itoContinuousMod T hW.measurable y (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hW.measurable y (unifPart T n j) ω)
-      = itoContinuousMod T hW.measurable (x - y) (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hW.measurable (x - y) (unifPart T n j) ω := by
-  have hband : band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable (x - y)
-      = band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable x
-        - band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable y := by
+    ∀ᵐ ω ∂μ, (itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+      - (itoContinuousMod T hW.measurable_eval y (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hW.measurable_eval y (unifPart T n j) ω)
+      = itoContinuousMod T hW.measurable_eval (x - y) (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hW.measurable_eval (x - y) (unifPart T n j) ω := by
+  have hband : band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable_eval (x - y)
+      = band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable_eval x
+        - band T (unifPart T n j) (unifPart T n (j + 1)) hW.measurable_eval y := by
     simp only [band, map_sub]; abel
   filter_upwards [incrM_ae_eq hW hWc T hj x, incrM_ae_eq hW hWc T hj y,
     incrM_ae_eq hW hWc T hj (x - y),
     Lp.coeFn_sub (itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1))
-      hW.measurable x)) (itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1))
-      hW.measurable y))] with ω h1 h2 h3 h4
+      hW.measurable_eval x)) (itoIntegralCLMT hW T (band T (unifPart T n j) (unifPart T n (j + 1))
+      hW.measurable_eval y))] with ω h1 h2 h3 h4
   rw [h1, h2, h3, hband, map_sub, h4, Pi.sub_apply]
 
 /-- **Uniform bilinear estimate** for frozen covariation sums. -/
-lemma integral_abs_frozenBilinear_le {W' : ℝ≥0 → Ω → ℝ} (hW : BrownianOn ℱ W μ)
-    (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : BrownianOn ℱ W' μ)
+lemma integral_abs_frozenBilinear_le {W' : ℝ≥0 → Ω → ℝ} (hW : IsFilteredPreBrownian W ℱ μ)
+    (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : IsFilteredPreBrownian W' ℱ μ)
     (hW'c : ∀ ω, Continuous fun u : ℝ≥0 ↦ W' u ω) (T : ℝ≥0) (n : ℕ)
     {w : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hC₀ : 0 ≤ C₀) (hwb : ∀ t ω, |w t ω| ≤ C₀)
     (x y : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y (unifPart T n j) ω)| ∂μ
+        * (itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y (unifPart T n j) ω)| ∂μ
       ≤ C₀ * (‖x‖ * ‖y‖) := by
   have hX := fun j (hj : j ∈ Finset.range n) => memLp_incrM hW hWc T (Finset.mem_range.mp hj) x
   have hY := fun j (hj : j ∈ Finset.range n) => memLp_incrM hW' hW'c T (Finset.mem_range.mp hj) y
   have hint : Integrable (fun ω ↦ ∑ j ∈ Finset.range n,
-      |(itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y (unifPart T n j) ω)|) μ :=
+      |(itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y (unifPart T n j) ω)|) μ :=
     integrable_finsetSum _ fun j hj => ((hX j hj).integrable_mul (hY j hj)).abs
   have hint' : Integrable (fun ω ↦ C₀ * ∑ j ∈ Finset.range n,
-      |(itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y (unifPart T n j) ω)|) μ := hint.const_mul C₀
+      |(itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y (unifPart T n j) ω)|) μ := hint.const_mul C₀
   refine (integral_mono_of_nonneg (Eventually.of_forall fun ω => abs_nonneg _) hint'
     (Eventually.of_forall fun ω => ?_)).trans ?_
   · beta_reduce
@@ -284,10 +284,10 @@ lemma integral_abs_frozenBilinear_le {W' : ℝ≥0 → Ω → ℝ} (hW : Brownia
     rw [mul_assoc, abs_mul]
     exact mul_le_mul_of_nonneg_right (hwb _ _) (abs_nonneg _)
   · rw [integral_const_mul, integral_finsetSum (f := fun j ω ↦
-      |(itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y (unifPart T n j) ω)|) _
+      |(itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y (unifPart T n j) ω)|) _
       fun j hj => ((hX j hj).integrable_mul (hY j hj)).abs]
     refine mul_le_mul_of_nonneg_left ((sum_integral_abs_mul_le (Finset.range n) hX hY).trans ?_)
       hC₀
@@ -335,55 +335,55 @@ lemma tendsto_of_approx {mΩ' : MeasurableSpace Ω} {ν : Measure Ω}
 
 /-! ### Integrability of frozen bilinear sums -/
 
-lemma integrable_frozenBilinear {W' : ℝ≥0 → Ω → ℝ} (hW : BrownianOn ℱ W μ)
-    (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : BrownianOn ℱ W' μ)
+lemma integrable_frozenBilinear {W' : ℝ≥0 → Ω → ℝ} (hW : IsFilteredPreBrownian W ℱ μ)
+    (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : IsFilteredPreBrownian W' ℱ μ)
     (hW'c : ∀ ω, Continuous fun u : ℝ≥0 ↦ W' u ω) (T : ℝ≥0) (n : ℕ)
     {w : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hwm : ∀ t, Measurable (w t)) (hwb : ∀ t ω, |w t ω| ≤ C₀)
     (x y : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     Integrable (fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y (unifPart T n j) ω)) μ := by
+        * (itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y (unifPart T n j) ω)) μ := by
   refine integrable_finsetSum _ fun j hj => ?_
   have hXY := (memLp_incrM hW hWc T (Finset.mem_range.mp hj) x).integrable_mul
     (memLp_incrM hW' hW'c T (Finset.mem_range.mp hj) y)
   have := hXY.bdd_mul (c := C₀) (hwm (unifPart T n j)).aestronglyMeasurable
     (Eventually.of_forall fun ω => by rw [Real.norm_eq_abs]; exact hwb (unifPart T n j) ω)
   refine this.congr (Eventually.of_forall fun ω => ?_)
-  show w (unifPart T n j) ω * ((itoContinuousMod T hW.measurable x (unifPart T n (j + 1)) ω
-      - itoContinuousMod T hW.measurable x (unifPart T n j) ω)
-      * (itoContinuousMod T hW'.measurable y (unifPart T n (j + 1)) ω
-        - itoContinuousMod T hW'.measurable y (unifPart T n j) ω)) = _
+  show w (unifPart T n j) ω * ((itoContinuousMod T hW.measurable_eval x (unifPart T n (j + 1)) ω
+      - itoContinuousMod T hW.measurable_eval x (unifPart T n j) ω)
+      * (itoContinuousMod T hW'.measurable_eval y (unifPart T n (j + 1)) ω
+        - itoContinuousMod T hW'.measurable_eval y (unifPart T n j) ω)) = _
   ring
 
 /-- Approximation of a frozen bilinear sum by changing both kernels. -/
-lemma integral_abs_frozenBilinear_sub_le {W' : ℝ≥0 → Ω → ℝ} (hW : BrownianOn ℱ W μ)
-    (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : BrownianOn ℱ W' μ)
+lemma integral_abs_frozenBilinear_sub_le {W' : ℝ≥0 → Ω → ℝ} (hW : IsFilteredPreBrownian W ℱ μ)
+    (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (hW' : IsFilteredPreBrownian W' ℱ μ)
     (hW'c : ∀ ω, Continuous fun u : ℝ≥0 ↦ W' u ω) (T : ℝ≥0) (n : ℕ)
     {w : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hC₀ : 0 ≤ C₀) (hwm : ∀ t, Measurable (w t))
     (hwb : ∀ t ω, |w t ω| ≤ C₀) (x₁ y₁ x₂ y₂ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x₁ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x₁ (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y₁ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hW.measurable_eval x₁ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y₁ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y₁ (unifPart T n j) ω)
       - ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x₂ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x₂ (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y₂ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y₂ (unifPart T n j) ω)| ∂μ
+        * (itoContinuousMod T hW.measurable_eval x₂ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x₂ (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y₂ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y₂ (unifPart T n j) ω)| ∂μ
       ≤ C₀ * (‖x₁ - x₂‖ * ‖y₁‖ + ‖x₂‖ * ‖y₁ - y₂‖) := by
   set A : Ω → ℝ := fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable (x₁ - x₂) (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable (x₁ - x₂) (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y₁ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y₁ (unifPart T n j) ω) with hA
+        * (itoContinuousMod T hW.measurable_eval (x₁ - x₂) (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval (x₁ - x₂) (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y₁ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y₁ (unifPart T n j) ω) with hA
   set B' : Ω → ℝ := fun ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x₂ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x₂ (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable (y₁ - y₂) (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable (y₁ - y₂) (unifPart T n j) ω) with hB'
+        * (itoContinuousMod T hW.measurable_eval x₂ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x₂ (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval (y₁ - y₂) (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval (y₁ - y₂) (unifPart T n j) ω) with hB'
   have hAi : Integrable A μ := integrable_frozenBilinear hW hWc hW' hW'c T n hwm hwb _ _
   have hBi : Integrable B' μ := integrable_frozenBilinear hW hWc hW' hW'c T n hwm hwb _ _
   have hX := (Filter.eventually_all_finset (Finset.range n)).mpr fun j hj =>
@@ -391,15 +391,15 @@ lemma integral_abs_frozenBilinear_sub_le {W' : ℝ≥0 → Ω → ℝ} (hW : Bro
   have hY := (Filter.eventually_all_finset (Finset.range n)).mpr fun j hj =>
     incrM_sub_ae hW' hW'c T (Finset.mem_range.mp hj) y₁ y₂
   have hsplit : ∀ᵐ ω ∂μ, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x₁ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x₁ (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y₁ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hW.measurable_eval x₁ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y₁ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y₁ (unifPart T n j) ω)
       - ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable x₂ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW.measurable x₂ (unifPart T n j) ω)
-        * (itoContinuousMod T hW'.measurable y₂ (unifPart T n (j + 1)) ω
-          - itoContinuousMod T hW'.measurable y₂ (unifPart T n j) ω)| ≤ |A ω| + |B' ω| := by
+        * (itoContinuousMod T hW.measurable_eval x₂ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW.measurable_eval x₂ (unifPart T n j) ω)
+        * (itoContinuousMod T hW'.measurable_eval y₂ (unifPart T n (j + 1)) ω
+          - itoContinuousMod T hW'.measurable_eval y₂ (unifPart T n j) ω)| ≤ |A ω| + |B' ω| := by
     filter_upwards [hX, hY] with ω h1 h2
     refine le_of_eq_of_le ?_ (abs_add_le (A ω) (B' ω))
     congr 1
@@ -558,7 +558,7 @@ lemma tendsto_approxError {E : Type*} [NormedAddCommGroup E] {φ₁ φ₂ : E} {
 
 /-- Same driver, continuous adapted integrands (no boundedness):
 `Σ_j w(t_j) ΔM¹_j ΔM²_j → ∫₀ᵀ w h₁ h₂ ds` in `L¹(μ)`. -/
-theorem tendsto_covariation_same_L2 (hW : BrownianOn ℱ W μ)
+theorem tendsto_covariation_same_L2 (hW : IsFilteredPreBrownian W ℱ μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0)
     {w h₁ h₂ : ℝ≥0 → Ω → ℝ} {C₀ : ℝ} (hw : GoodProcess ℱ μ T w C₀)
     (hc₁ : ContProcess ℱ μ T h₁) (hc₂ : ContProcess ℱ μ T h₂)
@@ -566,24 +566,28 @@ theorem tendsto_covariation_same_L2 (hW : BrownianOn ℱ W μ)
     (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
     (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable φ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hW.measurable φ₁ (unifPart T n j) ω)
-        * (itoContinuousMod T hW.measurable φ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hW.measurable φ₂ (unifPart T n j) ω)
+        * (itoContinuousMod T hW.measurable_eval φ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hW.measurable_eval φ₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hW.measurable_eval φ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hW.measurable_eval φ₂ (unifPart T n j) ω)
         - ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T)| ∂μ) atTop (𝓝 0) := by
   have hwm : ∀ t, Measurable (w t) := fun t => (hw.adapted t).mono (ℱ.le t) le_rfl
   obtain ⟨hLLi, hLL⟩ := tendsto_timeIntegral_trunc T hw hc₁ hc₂ hφ₁ hφ₂
   refine tendsto_of_approx (ν := μ)
     (S := fun n ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable φ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hW.measurable φ₁ (unifPart T n j) ω)
-        * (itoContinuousMod T hW.measurable φ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hW.measurable φ₂ (unifPart T n j) ω))
+        * (itoContinuousMod T hW.measurable_eval φ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hW.measurable_eval φ₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hW.measurable_eval φ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hW.measurable_eval φ₂ (unifPart T n j) ω))
     (S' := fun k n ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₁ k) (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₁ k) (unifPart T n j) ω)
-        * (itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₂ k) (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hW.measurable (truncKernel (μ := μ) T hc₂ k) (unifPart T n j) ω))
+        * (itoContinuousMod T hW.measurable_eval (truncKernel (μ := μ) T hc₁ k) (unifPart T n (j
+              + 1)) ω
+            - itoContinuousMod T hW.measurable_eval (truncKernel (μ := μ) T hc₁ k) (unifPart T n
+                  j) ω)
+        * (itoContinuousMod T hW.measurable_eval (truncKernel (μ := μ) T hc₂ k) (unifPart T n (j
+              + 1)) ω
+            - itoContinuousMod T hW.measurable_eval (truncKernel (μ := μ) T hc₂ k) (unifPart T n
+                  j) ω))
     (L := fun ω ↦ ∫ s, w s ω * h₁ s ω * h₂ s ω ∂(timeMeasureT T))
     (L' := fun (k : ℕ) ω ↦ ∫ s, w s ω * clampAt k (h₁ s ω) * clampAt k (h₂ s ω)
       ∂(timeMeasureT T))
@@ -610,25 +614,26 @@ theorem tendsto_covariation_cross_L2 {B Z : ℝ≥0 → Ω → ℝ} (hP : Indepe
     (hφ₁ : ⇑φ₁ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₁ p.1 p.2)
     (hφ₂ : ⇑φ₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun p ↦ h₂ p.1 p.2) :
     Tendsto (fun n : ℕ ↦ ∫ ω, |∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hP.left.measurable φ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ₁ (unifPart T n j) ω)
-        * (itoContinuousMod T hP.right.measurable φ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable φ₂ (unifPart T n j) ω)| ∂μ) atTop (𝓝 0) := by
+        * (itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hP.right.measurable_eval φ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval φ₂ (unifPart T n j) ω)| ∂μ) atTop (𝓝
+                  0) := by
   have hwm : ∀ t, Measurable (w t) := fun t => (hw.adapted t).mono (ℱ.le t) le_rfl
   have key := tendsto_of_approx (ν := μ)
     (S := fun n ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hP.left.measurable φ₁ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable φ₁ (unifPart T n j) ω)
-        * (itoContinuousMod T hP.right.measurable φ₂ (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable φ₂ (unifPart T n j) ω))
+        * (itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.left.measurable_eval φ₁ (unifPart T n j) ω)
+        * (itoContinuousMod T hP.right.measurable_eval φ₂ (unifPart T n (j + 1)) ω
+            - itoContinuousMod T hP.right.measurable_eval φ₂ (unifPart T n j) ω))
     (S' := fun k n ω ↦ ∑ j ∈ Finset.range n, w (unifPart T n j) ω
-        * (itoContinuousMod T hP.left.measurable (truncKernel (μ := μ) T hc₁ k)
+        * (itoContinuousMod T hP.left.measurable_eval (truncKernel (μ := μ) T hc₁ k)
               (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.left.measurable (truncKernel (μ := μ) T hc₁ k)
+            - itoContinuousMod T hP.left.measurable_eval (truncKernel (μ := μ) T hc₁ k)
               (unifPart T n j) ω)
-        * (itoContinuousMod T hP.right.measurable (truncKernel (μ := μ) T hc₂ k)
+        * (itoContinuousMod T hP.right.measurable_eval (truncKernel (μ := μ) T hc₂ k)
               (unifPart T n (j + 1)) ω
-            - itoContinuousMod T hP.right.measurable (truncKernel (μ := μ) T hc₂ k)
+            - itoContinuousMod T hP.right.measurable_eval (truncKernel (μ := μ) T hc₂ k)
               (unifPart T n j) ω))
     (L := fun _ ↦ (0 : ℝ)) (L' := fun _ _ ↦ (0 : ℝ))
     (e := fun k ↦ C₀ * (‖φ₁ - truncKernel (μ := μ) T hc₁ k‖ * ‖φ₂‖

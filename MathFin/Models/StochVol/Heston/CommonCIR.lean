@@ -41,31 +41,32 @@ open scoped NNReal ENNReal
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
 
-theorem continuous_integral_natural_lift (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
+theorem continuous_integral_natural_lift (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0)
     (hc : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
-    (H : Lp ℝ 2 (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T hB.measurable)) :
+    (H : Lp ℝ 2 (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T hB.measurable_eval)) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T,
-      CommonContinuous.itoContinuousMod T hB.measurable (lpLift (natural_le hB) T H) t ω =
-        MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod T hB.measurable H t ω
+      CommonContinuous.itoContinuousMod T hB.measurable_eval (lpLift (natural_le hB) T H) t ω =
+        MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod T hB.measurable_eval H t ω
               := by
   apply MathFin.FilteredIto.ae_forall_eq_of_continuousOn T
-    (CommonContinuous.itoContinuousMod_continuousOn hB T hB.measurable hc _)
+    (CommonContinuous.itoContinuousMod_continuousOn hB T hB.measurable_eval hc _)
     (MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_continuousOn
-      hB.law T hB.measurable hc H)
+      hB.toIsPreBrownianReal T hB.measurable_eval hc H)
   intro t ht
-  have he := process_commutes (natural_le hB) (brownianOn_natural hB.law hB.measurable) hB T t H
-  have hn := process_natural_eq hB.law hB.measurable T t H
-  have hp := CommonContinuous.itoContinuousMod_modification hB T hB.measurable hc
+  have he := process_commutes (natural_le hB) (hB.toIsPreBrownianReal.isFilteredPreBrownian
+        hB.measurable_eval) hB T t H
+  have hn := process_natural_eq hB.toIsPreBrownianReal hB.measurable_eval T t H
+  have hp := CommonContinuous.itoContinuousMod_modification hB T hB.measurable_eval hc
     (lpLift (natural_le hB) T H) ht
   rw [he, hn] at hp
   exact hp.trans (MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_modification
-    hB.law T hB.measurable hc H ht).symm
+    hB.toIsPreBrownianReal T hB.measurable_eval hc H ht).symm
 
 /-- An actual nonnegative, predictable, continuous finite-horizon CIR solution
 on the common filtration, satisfying its genuine common-filtration integral
 equation. Pathwise uniqueness for arbitrary enlarged-filtration competitors is
 not asserted by this existence-and-transfer theorem. -/
-theorem exists_cir_on_common_filtration (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
+theorem exists_cir_on_common_filtration (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0)
     (hc : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
     (p : MathFin.Heston.Parameters) (hk : 0 ≤ p.kappa) (hθ : 0 ≤ p.theta)
     {v₀ : ℝ} (hv₀ : 0 ≤ v₀) :
@@ -81,9 +82,10 @@ theorem exists_cir_on_common_filtration (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
         fun z => MathFin.Heston.cirDiffusion p (V z.1 z.2)) ∧
       (∀ᵐ ω ∂μ, ∀ t ≤ T, V t ω = v₀ +
         (∫ s in Set.Ioc 0 t, MathFin.Heston.cirDrift p (V s ω) ∂MathFin.ItoIntegralL2.timeMeasure) +
-          CommonContinuous.itoContinuousMod T hB.measurable H t ω) := by
+          CommonContinuous.itoContinuousMod T hB.measurable_eval H t ω) := by
   obtain ⟨V, G, H, _hrep, hp, hcV, hm, hnn, hG, hH, heq⟩ :=
-    MathFin.Heston.exists_cir_strong_solution hB.law T hB.measurable hc p hk hθ hv₀
+    MathFin.Heston.exists_cir_strong_solution hB.toIsPreBrownianReal T hB.measurable_eval hc p
+          hk hθ hv₀
   have hle := natural_le hB
   have hp' := predictable_mono hle hp
   have hm' : MemLp (Function.uncurry V) 2 (CommonPredictable.trimMeasureT (μ := μ) T ℱ) := by
@@ -91,14 +93,17 @@ theorem exists_cir_on_common_filtration (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
     change eLpNorm (Function.uncurry V) 2
       (((CommonPredictable.timeMeasureT T).prod μ).trim ℱ.predictable_le_prod) < ⊤
     rw [eLpNorm_trim ℱ.predictable_le_prod hp',
-      ← eLpNorm_trim (MathFin.ItoIntegralL2.natFiltration hB.measurable).predictable_le_prod hp]
+      ← eLpNorm_trim (MathFin.ItoIntegralL2.natFiltration
+            hB.measurable_eval).predictable_le_prod hp]
     exact hm.eLpNorm_lt_top
-  have hGm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration hB.measurable).predictable]
+  have hGm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration
+        hB.measurable_eval).predictable]
       (fun z : ℝ≥0 × Ω => MathFin.Heston.cirDrift p (V z.1 z.2)) :=
     (show Continuous (MathFin.Heston.cirDrift p) by
       unfold MathFin.Heston.cirDrift
       fun_prop).comp_stronglyMeasurable hp
-  have hHm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration hB.measurable).predictable]
+  have hHm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration
+        hB.measurable_eval).predictable]
       (fun z : ℝ≥0 × Ω => MathFin.Heston.cirDiffusion p (V z.1 z.2)) :=
     (MathFin.Heston.continuous_cirDiffusion p).comp_stronglyMeasurable hp
   refine ⟨V, lpLift hle T G, lpLift hle T H, hp', hcV, hm', hnn,

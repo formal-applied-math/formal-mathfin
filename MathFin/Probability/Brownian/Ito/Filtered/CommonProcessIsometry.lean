@@ -41,7 +41,8 @@ open MathFin.FilteredIto.CommonNoise
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}
-  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : BrownianOn ℱ B μ)
+  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : IsFilteredPreBrownian
+        B ℱ μ)
 
 include hB
 
@@ -53,7 +54,7 @@ private lemma integral_rectTerm_mul_band (t : ℝ≥0) (hBmeas : ∀ u, Measurab
         rectTerm hBmeas V p z * rectTerm hBmeas V q z ∂(timeMeasure.prod μ)
       = (∫ ω, V.value p ω * V.value q ω ∂μ)
           * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - (max (p.1 : ℝ) q.1)) := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
   have hfun : (fun z : ℝ≥0 × Ω ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z)
       = fun z ↦ ((Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1
                     * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) z.1)
@@ -136,7 +137,7 @@ private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - max (p.1 : ℝ) q.1) := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
 
   rw [trimMeasure_T_restrict_band htT hBmeas]
   simp only [pow_two]

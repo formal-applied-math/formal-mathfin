@@ -133,19 +133,19 @@ lemma tendsto_dyadicUpper {T : ℝ≥0} {σ : Ω → ℝ≥0} (hσT : ∀ ω, σ
 
 /-- **Optional stopping for continuous Itô integrals.** At a bounded optional time the
 continuous Itô integral is integrable with mean zero. -/
-theorem itoContinuousMod_optional (hB : BrownianOn ℱ B μ)
+theorem itoContinuousMod_optional (hB : IsFilteredPreBrownian B ℱ μ)
     (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) {T : ℝ≥0}
     (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) {σ : Ω → ℝ≥0}
     (hσ : IsOptional ℱ σ) (hσT : ∀ ω, σ ω ≤ T) :
-    Integrable (fun ω ↦ itoContinuousMod T hB.measurable φ (σ ω) ω) μ ∧
-      ∫ ω, itoContinuousMod T hB.measurable φ (σ ω) ω ∂μ = 0 := by
-  set F : ℕ → Ω → ℝ := fun k ω ↦ itoContinuousMod T hB.measurable φ (dyadicUpper T k σ ω) ω
+    Integrable (fun ω ↦ itoContinuousMod T hB.measurable_eval φ (σ ω) ω) μ ∧
+      ∫ ω, itoContinuousMod T hB.measurable_eval φ (σ ω) ω ∂μ = 0 := by
+  set F : ℕ → Ω → ℝ := fun k ω ↦ itoContinuousMod T hB.measurable_eval φ (dyadicUpper T k σ ω) ω
     with hF
-  set G : Ω → ℝ := fun ω ↦ itoContinuousMod T hB.measurable φ (σ ω) ω with hG
+  set G : Ω → ℝ := fun ω ↦ itoContinuousMod T hB.measurable_eval φ (σ ω) ω with hG
   have hτ : ∀ k, IsStop ℱ (dyadicUpper T k σ) := fun k => isStop_dyadicUpper hσ T k
   have hrep : ∀ k, (itoIntegralCLMT hB T (stopKernel T (hτ k) φ) : Ω → ℝ) =ᵐ[μ] F k := by
     intro k
-    filter_upwards [itoIntegralCLM_T_stopKernel hB T hB.measurable hBc (hτ k) φ] with ω hω
+    filter_upwards [itoIntegralCLM_T_stopKernel hB T hB.measurable_eval hBc (hτ k) φ] with ω hω
     rw [hω, min_eq_right (dyadicUpper_le T k σ ω)]
   have hFmeas : ∀ k, AEStronglyMeasurable (F k) μ := fun k =>
     (Lp.aestronglyMeasurable _).congr (hrep k)
@@ -153,7 +153,7 @@ theorem itoContinuousMod_optional (hB : BrownianOn ℱ B μ)
     ((Lp.memLp _).integrable one_le_two).congr (hrep k)
   have hFzero : ∀ k, ∫ ω, F k ω ∂μ = 0 := fun k => by
     rw [← integral_congr_ae (hrep k)]
-    exact integral_itoIntegralCLM_T hB T hB.measurable _
+    exact integral_itoIntegralCLM_T hB T hB.measurable_eval _
   have hnorm : ∀ k, ‖stopKernel T (hτ k) φ‖ ≤ ‖φ‖ := fun k => by
     have h := Lp.norm_le_mul_norm_of_ae_le_mul (c := 1) (f := stopKernel T (hτ k) φ) (g := φ)
       (by
@@ -167,7 +167,7 @@ theorem itoContinuousMod_optional (hB : BrownianOn ℱ B μ)
     rw [← NNReal.coe_le_coe, coe_nnnorm, coe_nnnorm, itoIntegralCLM_T_norm]
     exact hnorm k
   have hlim : ∀ᵐ ω ∂μ, Tendsto (fun k ↦ F k ω) atTop (𝓝 (G ω)) := by
-    filter_upwards [itoContinuousMod_continuousOn hB T hB.measurable hBc φ] with ω hω
+    filter_upwards [itoContinuousMod_continuousOn hB T hB.measurable_eval hBc φ] with ω hω
     have hcw := hω (σ ω) ⟨(zero_le : (0 : ℝ≥0) ≤ σ ω), hσT ω⟩
     have ht : Tendsto (fun k ↦ dyadicUpper T k σ ω) atTop (𝓝[Set.Icc 0 T] (σ ω)) :=
       tendsto_nhdsWithin_iff.2 ⟨tendsto_dyadicUpper hσT ω, Eventually.of_forall fun k =>

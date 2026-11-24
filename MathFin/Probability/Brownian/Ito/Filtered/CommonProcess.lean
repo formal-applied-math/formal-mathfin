@@ -109,14 +109,14 @@ lemma itoSimpleProcess_eq_itoSimple (hBmeas : ∀ t, Measurable (B t))
   have h1 : min p.1 t = p.1 := min_eq_left ((V.le_of_mem_support_value p hp).trans (ht p hp))
   rw [h1, h2]
 
-variable (hB : BrownianOn ℱ B μ)
+variable (hB : IsFilteredPreBrownian B ℱ μ)
 
 include hB
 
 theorem memLp_value (_hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ)
     (p : ℝ≥0 × ℝ≥0) : MemLp (V.value p) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
   exact MemLp.of_bound
     ((V.measurable_value p).mono (ℱ.le p.1)
       le_rfl).aestronglyMeasurable
@@ -126,11 +126,11 @@ theorem memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ)
     (t : ℝ≥0) {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.value.support) :
     MemLp (fun ω ↦ V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.law.isGaussianProcess.isProbabilityMeasure
+  haveI : IsProbabilityMeasure μ := hB.toIsPreBrownianReal.isGaussianProcess.isProbabilityMeasure
   by_cases ht : p.1 ≤ t
   ·
     rw [min_eq_left ht]
-    exact CommonPairing.memLp_adapted_mul_increment hB hBmeas
+    exact MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment hB
       (le_min (V.le_of_mem_support_value p hp) ht)
       (CommonL2.adaptedAt_of_measurable hBmeas (V.measurable_value p))
       (memLp_value hB hBmeas V p)

@@ -65,14 +65,14 @@ lemma itoSimple_apply (hBmeas : ∀ t, Measurable (B t))
 
 variable [IsProbabilityMeasure μ]
 
-theorem memLp_itoSimple (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t))
+theorem memLp_itoSimple (hB : IsFilteredPreBrownian B ℱ μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) :
     MemLp (itoSimple hBmeas V) 2 μ := by
   rw [show itoSimple hBmeas V
         = fun ω ↦ ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
       from funext fun ω ↦ by rw [itoSimple_apply]; rfl]
   refine memLp_finsetSum V.value.support (fun p hp ↦ ?_)
-  refine MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment hB.isFilteredPreBrownian
+  refine MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment hB
         (V.le_of_mem_support_value p hp)
     (adaptedAt_of_measurable hBmeas (V.measurable_value p)) ?_
   exact MemLp.of_bound
@@ -80,11 +80,11 @@ theorem memLp_itoSimple (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (
     V.valueBound (ae_of_all _ (V.value_le_valueBound p))
 
 /-- Terminal Brownian increment sum as a square-integrable random variable. -/
-noncomputable def itoSimpleLp (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t))
+noncomputable def itoSimpleLp (hB : IsFilteredPreBrownian B ℱ μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) : Lp ℝ 2 μ :=
   (memLp_itoSimple hB hBmeas V).toLp _
 
-theorem itoSimple_sq_integral (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t))
+theorem itoSimple_sq_integral (hB : IsFilteredPreBrownian B ℱ μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) :
     ∫ ω, (itoSimple hBmeas V ω) ^ 2 ∂μ
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
@@ -92,7 +92,7 @@ theorem itoSimple_sq_integral (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measur
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω ↦ V.value p ω * (B p.2 ω - B p.1 ω)
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp ↦
-    MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment hB.isFilteredPreBrownian
+    MathFin.ItoIsometryAdapted.memLp_adapted_mul_increment hB
           (V.le_of_mem_support_value p hp)
       (adaptedAt_of_measurable hBmeas (V.measurable_value p))
       (MemLp.of_bound
@@ -116,7 +116,7 @@ theorem itoSimple_sq_integral (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measur
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
         refine Finset.sum_congr rfl fun p hp ↦ Finset.sum_congr rfl fun q hq ↦ ?_
-        exact MathFin.ItoIsometryAdapted.rect_increment_pairing hB.isFilteredPreBrownian
+        exact MathFin.ItoIsometryAdapted.rect_increment_pairing hB
           (adaptedAt_of_measurable hBmeas (V.measurable_value p))
           (adaptedAt_of_measurable hBmeas (V.measurable_value q))
           (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
@@ -133,7 +133,7 @@ lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α}
   show (g a) * (g a) = (g a) ^ 2
   ring
 
-theorem itoSimpleLp_norm_sq (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t))
+theorem itoSimpleLp_norm_sq (hB : IsFilteredPreBrownian B ℱ μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) :
     ‖(itoSimpleLp hB hBmeas V : Lp ℝ 2 μ)‖ ^ 2
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
@@ -330,7 +330,7 @@ lemma itoSimple_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
   exact Finsupp.sum_congr fun p _ ↦ by simp [mul_assoc]
 
 /-- Linear map sending simple processes to square-integrable increment sums. -/
-noncomputable def itoAssembly (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t)) :
+noncomputable def itoAssembly (hB : IsFilteredPreBrownian B ℱ μ) (hBmeas : ∀ t, Measurable (B t)) :
     SimpleProcess ℝ ℱ →ₗ[ℝ] Lp ℝ 2 μ where
   toFun V := itoSimpleLp hB hBmeas V
   map_add' V W := by
@@ -370,7 +370,7 @@ noncomputable def simpleAssembly (hBmeas : ∀ t, Measurable (B t)) :
     congr 1
     exact uncurry_coe_smul hBmeas c V
 
-theorem assembly_isometry (hB : BrownianOn ℱ B μ) (hBmeas : ∀ t, Measurable (B t))
+theorem assembly_isometry (hB : IsFilteredPreBrownian B ℱ μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ ℱ) :
     ‖itoAssembly (μ := μ) hB hBmeas V‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
   have hsq : ‖itoAssembly (μ := μ) hB hBmeas V‖ ^ 2 = ‖simpleAssembly (μ := μ) hBmeas V‖ ^ 2 := by

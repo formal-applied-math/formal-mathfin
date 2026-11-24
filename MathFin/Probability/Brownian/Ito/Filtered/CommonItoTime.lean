@@ -144,33 +144,33 @@ theorem ito_formula_at {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Independ
       + ∫ s in Set.Ioc 0 t, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
           + (1 / 2) * ∑ i, ∑ k, pd2 f i k (fun l ↦ Y l s ω)
               * (b i s ω * b k s ω + c i s ω * c k s ω)) ∂leb
-      + ∑ i, itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.left.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φB i)) t ω
-      + ∑ i, itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i)) t ω := by
   have hY' := hY.restrict hBc hZc htT
   have key := ito_formula hP hBc hZc hY' hf
   have hB : ∀ i, ∀ᵐ ω ∂μ, itoIntegralCLMT hP.left t (mulKernel t
       (goodProcess_pd hY'.proc hf i).pred (goodProcess_pd hY'.proc hf i).bdd
         (restrictKernel htT (φB i))) ω
-      = itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hY.proc hf i).pred
+      = itoContinuousMod T hP.left.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf i).pred
             (goodProcess_pd hY.proc hf i).bdd (φB i)) t ω := by
     intro i
     rw [← restrictKernel_mulKernel htT,
-      itoIntegralCLM_T_restrictKernel hP.left htT hP.left.measurable]
-    filter_upwards [itoContinuousMod_modification hP.left T hP.left.measurable hBc
+      itoIntegralCLM_T_restrictKernel hP.left htT hP.left.measurable_eval]
+    filter_upwards [itoContinuousMod_modification hP.left T hP.left.measurable_eval hBc
       (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φB i))
             htT] with ω hω
     exact hω.symm
   have hZ : ∀ i, ∀ᵐ ω ∂μ, itoIntegralCLMT hP.right t (mulKernel t
       (goodProcess_pd hY'.proc hf i).pred (goodProcess_pd hY'.proc hf i).bdd
         (restrictKernel htT (φZ i))) ω
-      = itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hY.proc hf i).pred
+      = itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf i).pred
             (goodProcess_pd hY.proc hf i).bdd (φZ i)) t ω := by
     intro i
     rw [← restrictKernel_mulKernel htT,
-      itoIntegralCLM_T_restrictKernel hP.right htT hP.right.measurable]
-    filter_upwards [itoContinuousMod_modification hP.right T hP.right.measurable hZc
+      itoIntegralCLM_T_restrictKernel hP.right htT hP.right.measurable_eval]
+    filter_upwards [itoContinuousMod_modification hP.right T hP.right.measurable_eval hZc
       (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i))
             htT] with ω hω
     exact hω.symm
@@ -187,17 +187,17 @@ theorem ito_formula_all {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Indepen
       + ∫ s in Set.Ioc 0 t, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
           + (1 / 2) * ∑ i, ∑ k, pd2 f i k (fun l ↦ Y l s ω)
               * (b i s ω * b k s ω + c i s ω * c k s ω)) ∂leb
-      + ∑ i, itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.left.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φB i)) t ω
-      + ∑ i, itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i)) t ω := by
   refine ae_forall_eq_of_continuousOn' (X := fun t ω ↦ f (fun i ↦ Y i t ω))
     (Y := fun t ω ↦ f y + ∫ s in Set.Ioc 0 t, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
           + (1 / 2) * ∑ i, ∑ k, pd2 f i k (fun l ↦ Y l s ω)
               * (b i s ω * b k s ω + c i s ω * c k s ω)) ∂leb
-      + ∑ i, itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.left.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φB i)) t ω
-      + ∑ i, itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i)) t ω) ?_ ?_
     fun t ht => ito_formula_at hP hBc hZc hY hf ht
   · have h := ae_all_iff.mpr fun i => (hY.proc i).cont
@@ -207,10 +207,10 @@ theorem ito_formula_all {ι : Type*} [Fintype ι] [DecidableEq ι] (hP : Indepen
     have hbc := ae_all_iff.mpr fun i => (hY.diffB i).cont
     have hcc := ae_all_iff.mpr fun i => (hY.diffZ i).cont
     have hMB := ae_all_iff.mpr fun i => itoContinuousMod_continuousOn hP.left T
-      hP.left.measurable hBc (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd
+      hP.left.measurable_eval hBc (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd
             hY.proc hf i).bdd (φB i))
     have hMZ := ae_all_iff.mpr fun i => itoContinuousMod_continuousOn hP.right T
-      hP.right.measurable hZc (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd
+      hP.right.measurable_eval hZc (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd
             hY.proc hf i).bdd (φZ i))
     filter_upwards [hY.drift, hYc, hbc, hcc, hMB, hMZ] with ω ha hY' hb hc hB' hZ'
     have hYv : ContinuousOn (fun t l ↦ Y l t ω) (Set.Icc 0 T) := continuousOn_pi.mpr hY'
@@ -237,9 +237,9 @@ theorem ito_formula_random_time {ι : Type*} [Fintype ι] [DecidableEq ι]
       + ∫ s in Set.Ioc 0 (τ ω), (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
           + (1 / 2) * ∑ i, ∑ k, pd2 f i k (fun l ↦ Y l s ω)
               * (b i s ω * b k s ω + c i s ω * c k s ω)) ∂leb
-      + ∑ i, itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.left.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φB i)) (τ ω) ω
-      + ∑ i, itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hY.proc hf
+      + ∑ i, itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hY.proc hf
             i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i)) (τ ω) ω := by
   filter_upwards [ito_formula_all hP hBc hZc hY hf] with ω hω
   exact hω (τ ω) (hτ ω)
@@ -257,13 +257,14 @@ theorem ito_formula_stopped {ι : Type*} [Fintype ι] [DecidableEq ι]
       + ∫ s in Set.Ioc 0 (min t (τ ω)), (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω
           + (1 / 2) * ∑ i, ∑ k, pd2 f i k (fun l ↦ Y l s ω)
               * (b i s ω * b k s ω + c i s ω * c k s ω)) ∂leb
-      + ∑ i, itoContinuousMod T hP.left.measurable (stopKernel T hτ (mulKernel T (goodProcess_pd
+      + ∑ i, itoContinuousMod T hP.left.measurable_eval (stopKernel T hτ (mulKernel T
+            (goodProcess_pd
             hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φB i))) t ω
-      + ∑ i, itoContinuousMod T hP.right.measurable (stopKernel T hτ (mulKernel T
+      + ∑ i, itoContinuousMod T hP.right.measurable_eval (stopKernel T hτ (mulKernel T
             (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i))) t ω := by
-  have hB := ae_all_iff.mpr fun i => itoContinuousMod_stopKernel hP.left T hP.left.measurable
+  have hB := ae_all_iff.mpr fun i => itoContinuousMod_stopKernel hP.left T hP.left.measurable_eval
     hBc hτ (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φB i))
-  have hZ := ae_all_iff.mpr fun i => itoContinuousMod_stopKernel hP.right T hP.right.measurable
+  have hZ := ae_all_iff.mpr fun i => itoContinuousMod_stopKernel hP.right T hP.right.measurable_eval
     hZc hτ (mulKernel T (goodProcess_pd hY.proc hf i).pred (goodProcess_pd hY.proc hf i).bdd (φZ i))
   filter_upwards [ito_formula_all hP hBc hZc hY hf, hB, hZ] with ω hω e1 e2 t ht
   rw [hω (min t (τ ω)) ((min_le_left _ _).trans ht),

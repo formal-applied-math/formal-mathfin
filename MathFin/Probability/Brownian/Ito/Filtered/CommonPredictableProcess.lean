@@ -40,7 +40,7 @@ open MathFin.FilteredIto.CommonProcess MathFin.FilteredIto.CommonProcessGeneral
 open scoped NNReal ENNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ}
-  (hB : BrownianOn ℱ B μ)
+  (hB : IsFilteredPreBrownian B ℱ μ)
 include hB
 
 omit [IsProbabilityMeasure μ] hB in

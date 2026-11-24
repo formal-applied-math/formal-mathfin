@@ -51,7 +51,7 @@ open MathFin.FilteredIto.CommonNoise
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : BrownianOn ℱ B μ)
+  {B : ℝ≥0 → Ω → ℝ} {ℱ : Filtration ℝ≥0 mΩ} (hB : IsFilteredPreBrownian B ℱ μ)
 
 /-- Horizon-bounded simple process supported on a single deterministic band. -/
 noncomputable def stepSP {T : ℝ≥0} (_hBmeas : ∀ t, Measurable (B t)) {a b : ℝ≥0}

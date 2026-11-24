@@ -338,7 +338,7 @@ theorem tendsto_frozenKernel (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   simp only [Function.comp_def, Real.sqrt_sq (norm_nonneg _), Real.sqrt_zero] at h3
   exact h3
 
-variable (hB : BrownianOn ℱ B μ)
+variable (hB : IsFilteredPreBrownian B ℱ μ)
 include hB
 
 /-- The integral of a frozen kernel is the frozen Riemann–Stieltjes sum. -/

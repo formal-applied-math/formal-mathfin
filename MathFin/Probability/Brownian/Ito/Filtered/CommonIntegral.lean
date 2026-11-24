@@ -108,32 +108,32 @@ private lemma simpleProcessL2_T_norm_eq (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
   rw [Lp.norm_toLp, Lp.norm_toLp, h]
 
 /-- Linear map taking a horizon-bounded simple integrand to its terminal integral. -/
-def itoAssemblyT (hB : BrownianOn ℱ B μ) (T : ℝ≥0) :
+def itoAssemblyT (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0) :
     TBoundedSP T ℱ →ₗ[ℝ] Lp ℝ 2 μ :=
-  (CommonL2.itoAssembly hB hB.measurable).comp (TBoundedSP T ℱ).subtype
+  (CommonL2.itoAssembly hB hB.measurable_eval).comp (TBoundedSP T ℱ).subtype
 
-theorem assembly_isometry_T (hB : BrownianOn ℱ B μ) (T : ℝ≥0) (V : TBoundedSP T ℱ) :
+theorem assembly_isometry_T (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0) (V : TBoundedSP T ℱ) :
     ‖itoAssemblyT hB T V‖ = ‖simpleAssemblyT (μ := μ) T ℱ V‖ := by
-  show ‖CommonL2.itoAssembly hB hB.measurable V.val‖ =
+  show ‖CommonL2.itoAssembly hB hB.measurable_eval V.val‖ =
     ‖simpleProcessL2T (μ := μ) T ℱ V.val‖
-  rw [simpleProcessL2_T_norm_eq T hB.measurable V]
-  exact CommonL2.assembly_isometry hB hB.measurable V.val
+  rw [simpleProcessL2_T_norm_eq T hB.measurable_eval V]
+  exact CommonL2.assembly_isometry hB hB.measurable_eval V.val
 
 /-- The actual terminal Itô integral, defined by continuous extension of the
 increment-sum map on the dense simple predictable processes. -/
-def itoIntegralCLMT (hB : BrownianOn ℱ B μ) (T : ℝ≥0) :
+def itoIntegralCLMT (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0) :
     Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ) →L[ℝ] Lp ℝ 2 μ :=
   (itoAssemblyT hB T).extendOfNorm (simpleAssemblyT (μ := μ) T ℱ)
 
-theorem itoIntegralCLM_T_simpleAssembly (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
+theorem itoIntegralCLM_T_simpleAssembly (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0)
     (V : TBoundedSP T ℱ) :
     itoIntegralCLMT hB T (simpleAssemblyT (μ := μ) T ℱ V) =
-      CommonL2.itoSimpleLp hB hB.measurable V.val := by
+      CommonL2.itoSimpleLp hB hB.measurable_eval V.val := by
   rw [itoIntegralCLMT, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T ℱ)
     ⟨1, fun W => by rw [one_mul]; exact (assembly_isometry_T hB T W).le⟩]
   rfl
 
-theorem itoIntegralCLM_T_norm (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
+theorem itoIntegralCLM_T_norm (hB : IsFilteredPreBrownian B ℱ μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
     ‖itoIntegralCLMT hB T f‖ = ‖f‖ := by
   rw [itoIntegralCLMT]

@@ -70,10 +70,11 @@ forces `γ > |κ − ρξu|`, hence `D(τ) > 0` for **all** real τ (no per-τ g
 `κ` and `θ` enter the flow facts with no hypotheses at all (the deterministic layer
 needs no Feller-type condition).
 
-**Not proved.** That the profile at `(0, x₀, v₀)` equals `E[e^{u log S_T}]` is not
-proved: it needs a Heston process (existence of the square-root SDE, unbounded
-coefficients) and the 2D correlated Itô formula, neither of which the library has. This
-module is the generator/PDE level only.
+This module proves the generator/PDE identities. The companion
+`MathFin.Models.StochVol.Heston.LogSpotCharacteristic` constructs the state and identifies
+the characteristic function of terminal log-spot for real frequencies.
+The deterministic real-strip comparison is in
+`MathFin.Models.StochVol.Heston.RiccatiIdentification`.
 
 ## Main definitions
 

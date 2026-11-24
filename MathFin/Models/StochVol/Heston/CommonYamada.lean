@@ -157,44 +157,46 @@ lemma yamada_psi_abs_unif (p : YamadaParams) :
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {ℱ : Filtration ℝ≥0 mΩ} {B Z W : ℝ≥0 → Ω → ℝ}
 
-lemma itoContinuousMod_sub_ae (hW : BrownianOn ℱ W μ)
+lemma itoContinuousMod_sub_ae (hW : IsFilteredPreBrownian W ℱ μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0)
     (φ ψ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hW.measurable (φ - ψ) t ω
-      = itoContinuousMod T hW.measurable φ t ω - itoContinuousMod T hW.measurable ψ t ω := by
-  refine ae_forall_eq_of_continuousOn' (itoContinuousMod_continuousOn hW T hW.measurable hWc _)
+    ∀ᵐ ω ∂μ, ∀ t ≤ T, itoContinuousMod T hW.measurable_eval (φ - ψ) t ω
+      = itoContinuousMod T hW.measurable_eval φ t ω - itoContinuousMod T hW.measurable_eval ψ t
+            ω := by
+  refine ae_forall_eq_of_continuousOn' (itoContinuousMod_continuousOn hW T hW.measurable_eval hWc _)
     ?_ fun t ht => ?_
-  · filter_upwards [itoContinuousMod_continuousOn hW T hW.measurable hWc φ,
-      itoContinuousMod_continuousOn hW T hW.measurable hWc ψ] with ω h1 h2
+  · filter_upwards [itoContinuousMod_continuousOn hW T hW.measurable_eval hWc φ,
+      itoContinuousMod_continuousOn hW T hW.measurable_eval hWc ψ] with ω h1 h2
     exact h1.sub h2
-  · filter_upwards [itoContinuousMod_modification hW T hW.measurable hWc (φ - ψ) ht,
-      itoContinuousMod_modification hW T hW.measurable hWc φ ht,
-      itoContinuousMod_modification hW T hW.measurable hWc ψ ht,
-      Lp.coeFn_sub (itoProcessCLM hW T t hW.measurable φ) (itoProcessCLM hW T t hW.measurable ψ)]
+  · filter_upwards [itoContinuousMod_modification hW T hW.measurable_eval hWc (φ - ψ) ht,
+      itoContinuousMod_modification hW T hW.measurable_eval hWc φ ht,
+      itoContinuousMod_modification hW T hW.measurable_eval hWc ψ ht,
+      Lp.coeFn_sub (itoProcessCLM hW T t hW.measurable_eval φ) (itoProcessCLM hW T t
+            hW.measurable_eval ψ)]
       with ω e1 e2 e3 e4
     rw [e1, map_sub, e4, Pi.sub_apply, ← e2, ← e3]
 
-lemma itoContinuousMod_zero_kernel (hW : BrownianOn ℱ W μ)
+lemma itoContinuousMod_zero_kernel (hW : IsFilteredPreBrownian W ℱ μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) (T : ℝ≥0) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T,
-      itoContinuousMod T hW.measurable (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) t ω = 0 := by
+      itoContinuousMod T hW.measurable_eval (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) t ω = 0 := by
   refine ae_forall_eq_of_continuousOn' (Y := fun _ _ ↦ (0 : ℝ))
-    (itoContinuousMod_continuousOn hW T hW.measurable hWc _)
+    (itoContinuousMod_continuousOn hW T hW.measurable_eval hWc _)
     (Eventually.of_forall fun _ => continuousOn_const) fun t ht => ?_
-  filter_upwards [itoContinuousMod_modification hW T hW.measurable hWc 0 ht,
+  filter_upwards [itoContinuousMod_modification hW T hW.measurable_eval hWc 0 ht,
     Lp.coeFn_zero (E := ℝ) (p := 2) (μ := μ)] with ω e1 e2
   rw [e1, map_zero, e2, Pi.zero_apply]
 
-lemma integral_itoContinuousMod (hW : BrownianOn ℱ W μ)
+lemma integral_itoContinuousMod (hW : IsFilteredPreBrownian W ℱ μ)
     (hWc : ∀ ω, Continuous fun u : ℝ≥0 ↦ W u ω) {t T : ℝ≥0} (htT : t ≤ T)
     (φ : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)) :
-    Integrable (fun ω ↦ itoContinuousMod T hW.measurable φ t ω) μ ∧
-      ∫ ω, itoContinuousMod T hW.measurable φ t ω ∂μ = 0 := by
-  have h1 := itoContinuousMod_modification hW T hW.measurable hWc φ htT
-  rw [← itoIntegralCLM_T_restrictKernel hW htT hW.measurable] at h1
+    Integrable (fun ω ↦ itoContinuousMod T hW.measurable_eval φ t ω) μ ∧
+      ∫ ω, itoContinuousMod T hW.measurable_eval φ t ω ∂μ = 0 := by
+  have h1 := itoContinuousMod_modification hW T hW.measurable_eval hWc φ htT
+  rw [← itoIntegralCLM_T_restrictKernel hW htT hW.measurable_eval] at h1
   refine ⟨((Lp.memLp _).integrable one_le_two).congr h1.symm, ?_⟩
   rw [integral_congr_ae h1]
-  exact integral_itoIntegralCLM_T hW t hW.measurable _
+  exact integral_itoIntegralCLM_T hW t hW.measurable_eval _
 
 /-! ### The Yamada estimate on the common filtration -/
 
@@ -211,9 +213,9 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
     (hdrift : ∀ᵐ ω ∂μ, ∀ s ≤ T, a₁ s ω - a₂ s ω = -κ * (X₁ s ω - X₂ s ω))
     (hdiff : ∀ᵐ ω ∂μ, ∀ s ≤ T, (b₁ s ω - b₂ s ω) ^ 2 ≤ A * |X₁ s ω - X₂ s ω| + c)
     (heq₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = x₀ + ∫ s in Set.Ioc 0 t, a₁ s ω ∂leb
-      + itoContinuousMod T hP.left.measurable H₁ t ω)
+      + itoContinuousMod T hP.left.measurable_eval H₁ t ω)
     (heq₂ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₂ t ω = x₀ + ∫ s in Set.Ioc 0 t, a₂ s ω ∂leb
-      + itoContinuousMod T hP.left.measurable H₂ t ω)
+      + itoContinuousMod T hP.left.measurable_eval H₂ t ω)
     {t : ℝ≥0} (htT : t ≤ T) :
     Integrable (fun ω ↦ |X₁ t ω - X₂ t ω|) μ ∧
       ∫ ω, |X₁ t ω - X₂ t ω| ∂μ ≤ p.b + (A / yamadaM p + c / (yamadaM p * p.a)) * t := by
@@ -246,8 +248,8 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
         have i2 : IntegrableOn (fun u ↦ a₂ u ω) (Set.Ioc 0 s) leb :=
           integrableOn_of_continuousOn (h2.mono (Set.Icc_subset_Icc le_rfl hs))
         show X₁ s ω - X₂ s ω = 0 + ∫ u in Set.Ioc 0 s, (a₁ u ω - a₂ u ω) ∂leb
-          + itoContinuousMod T hP.left.measurable (H₁ - H₂) s ω
-          + itoContinuousMod T hP.right.measurable 0 s ω
+          + itoContinuousMod T hP.left.measurable_eval (H₁ - H₂) s ω
+          + itoContinuousMod T hP.right.measurable_eval 0 s ω
         rw [e1 s hs, e2 s hs, integral_sub i1 i2, e3 s hs, e4 s hs]
         ring }
   have hd1 : deriv (yamadaPhi p) = yamadaPhiPrime p :=
@@ -278,10 +280,10 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
     intro D b I M N K' t' h1 h2
     linarith
   have hbound : ∀ᵐ ω ∂μ, |X₁ t ω - X₂ t ω| ≤ p.b + K * t
-      + (itoContinuousMod T hP.left.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
+      + (itoContinuousMod T hP.left.measurable_eval (mulKernel T (goodProcess_pd hDproc.proc hf
             default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
-        + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
+        + itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hDproc.proc hf
               default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω) := by
@@ -314,17 +316,18 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
               add_le_add (mul_le_mul_of_nonneg_left e1 hA) (mul_le_mul_of_nonneg_left e3 hc)
           _ = 2 * K := by rw [hK]; ring
       linarith
-  have iMM : Integrable (fun ω ↦ itoContinuousMod T hP.left.measurable (mulKernel T
+  have iMM : Integrable (fun ω ↦ itoContinuousMod T hP.left.measurable_eval (mulKernel T
         (goodProcess_pd hDproc.proc hf default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
-      + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
+      + itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hDproc.proc hf
             default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω) μ := iM₁.add iM₂
-  have iub : Integrable (fun ω ↦ p.b + K * t + (itoContinuousMod T hP.left.measurable (mulKernel
+  have iub : Integrable (fun ω ↦ p.b + K * t + (itoContinuousMod T hP.left.measurable_eval
+        (mulKernel
         T (goodProcess_pd hDproc.proc hf default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
-      + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
+      + itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hDproc.proc hf
             default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω)) μ := (integrable_const (p.b + K * t)).add iMM
@@ -334,10 +337,10 @@ theorem yamada_estimate_common (hP : IndependentPair ℱ B Z μ)
   refine ⟨iub.mono' hmeas ?_, ?_⟩
   · filter_upwards [hbound] with ω hω
     rwa [Real.norm_eq_abs, abs_abs]
-  · calc ∫ ω, |X₁ t ω - X₂ t ω| ∂μ ≤ ∫ ω, (p.b + K * t + (itoContinuousMod T hP.left.measurable
+  · calc ∫ ω, |X₁ t ω - X₂ t ω| ∂μ ≤ ∫ ω, (p.b + K * t + (itoContinuousMod T hP.left.measurable_eval
         (mulKernel T (goodProcess_pd hDproc.proc hf default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (H₁ - H₂)) t ω
-          + itoContinuousMod T hP.right.measurable (mulKernel T (goodProcess_pd hDproc.proc hf
+          + itoContinuousMod T hP.right.measurable_eval (mulKernel T (goodProcess_pd hDproc.proc hf
                 default).pred
           (goodProcess_pd hDproc.proc hf default).bdd (0 : Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)))
                 t ω)) ∂μ :=
@@ -362,9 +365,9 @@ theorem pathwise_unique_common (hP : IndependentPair ℱ B Z μ)
     (hdrift : ∀ᵐ ω ∂μ, ∀ s ≤ T, a₁ s ω - a₂ s ω = -κ * (X₁ s ω - X₂ s ω))
     (hdiff : ∀ᵐ ω ∂μ, ∀ s ≤ T, (b₁ s ω - b₂ s ω) ^ 2 ≤ A * |X₁ s ω - X₂ s ω|)
     (heq₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = x₀ + ∫ s in Set.Ioc 0 t, a₁ s ω ∂leb
-      + itoContinuousMod T hP.left.measurable H₁ t ω)
+      + itoContinuousMod T hP.left.measurable_eval H₁ t ω)
     (heq₂ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₂ t ω = x₀ + ∫ s in Set.Ioc 0 t, a₂ s ω ∂leb
-      + itoContinuousMod T hP.left.measurable H₂ t ω) :
+      + itoContinuousMod T hP.left.measurable_eval H₂ t ω) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = X₂ t ω := by
   have hdiff' : ∀ᵐ ω ∂μ, ∀ s ≤ T, (b₁ s ω - b₂ s ω) ^ 2 ≤ A * |X₁ s ω - X₂ s ω| + 0 := by
     filter_upwards [hdiff] with ω hω s hs
@@ -417,10 +420,10 @@ theorem cir_unique_common (hP : IndependentPair ℱ B Z μ)
     (hH₂ : ⇑H₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ p.xi * Real.sqrt (V₂ z.1 z.2))
     (heq₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, V₁ t ω = v₀
       + ∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V₁ s ω) ∂leb
-      + itoContinuousMod T hP.left.measurable H₁ t ω)
+      + itoContinuousMod T hP.left.measurable_eval H₁ t ω)
     (heq₂ : ∀ᵐ ω ∂μ, ∀ t ≤ T, V₂ t ω = v₀
       + ∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V₂ s ω) ∂leb
-      + itoContinuousMod T hP.left.measurable H₂ t ω) :
+      + itoContinuousMod T hP.left.measurable_eval H₂ t ω) :
     ∀ᵐ ω ∂μ, ∀ t ≤ T, V₁ t ω = V₂ t ω := by
   refine pathwise_unique_common hP hBc hZc (κ := p.kappa) (A := p.xi ^ 2)
     (a₁ := fun s ω ↦ p.kappa * (p.theta - V₁ s ω))
@@ -476,16 +479,16 @@ theorem heston_unique_common (hP : IndependentPair ℱ B Z μ)
     (hHx₂ : ⇑Hx₂ =ᵐ[trimMeasureT (μ := μ) T ℱ] fun z ↦ Real.sqrt (V₂ z.1 z.2))
     (heqV₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, V₁ t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V₁ s ω) ∂leb)
-      + itoContinuousMod T hP.left.measurable Hv₁ t ω)
+      + itoContinuousMod T hP.left.measurable_eval Hv₁ t ω)
     (heqV₂ : ∀ᵐ ω ∂μ, ∀ t ≤ T, V₂ t ω = v₀
       + (∫ s in Set.Ioc 0 t, p.kappa * (p.theta - V₂ s ω) ∂leb)
-      + itoContinuousMod T hP.left.measurable Hv₂ t ω)
+      + itoContinuousMod T hP.left.measurable_eval Hv₂ t ω)
     (heqX₁ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = x₀
       + (∫ s in Set.Ioc 0 t, (p.r - p.q) - (1 / 2 : ℝ) * V₁ s ω ∂leb)
-      + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx₁ t ω)
+      + itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval Hx₁ t ω)
     (heqX₂ : ∀ᵐ ω ∂μ, ∀ t ≤ T, X₂ t ω = x₀
       + (∫ s in Set.Ioc 0 t, (p.r - p.q) - (1 / 2 : ℝ) * V₂ s ω ∂leb)
-      + itoContinuousMod T (hP.correlated_brownian hρ).measurable Hx₂ t ω) :
+      + itoContinuousMod T (hP.correlated_brownian hρ).measurable_eval Hx₂ t ω) :
     (∀ᵐ ω ∂μ, ∀ t ≤ T, V₁ t ω = V₂ t ω) ∧ (∀ᵐ ω ∂μ, ∀ t ≤ T, X₁ t ω = X₂ t ω) := by
   have hV := cir_unique_common hP hBc hZc p hκ (contProcess_of_predictable hpV₁ hcV₁)
     (contProcess_of_predictable hpV₂ hcV₂) hHv₁ hHv₂ heqV₁ heqV₂

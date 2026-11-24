@@ -60,13 +60,13 @@ structure IndependentPair (ℱ : Filtration ℝ≥0 mΩ)
   joint_future_independent : ∀ (s : ℝ≥0), ∀ {f : Ω → ℝ}, Measurable[ℱ s] f →
     IndepFun f (fun ω => (fun u => B (s+u) ω - B s ω, fun u => Z (s+u) ω - Z s ω)) μ
 
-theorem IndependentPair.left (h : IndependentPair ℱ B Z μ) : BrownianOn ℱ B μ := by
-  refine ⟨h.left_law, h.left_adapted, ?_⟩
+theorem IndependentPair.left (h : IndependentPair ℱ B Z μ) : IsFilteredPreBrownian B ℱ μ := by
+  apply isFilteredPreBrownian_of_indep_shift h.left_law h.left_adapted
   intro s f hf
   exact (h.joint_future_independent s hf).comp measurable_id measurable_fst
 
-theorem IndependentPair.right (h : IndependentPair ℱ B Z μ) : BrownianOn ℱ Z μ := by
-  refine ⟨h.right_law, h.right_adapted, ?_⟩
+theorem IndependentPair.right (h : IndependentPair ℱ B Z μ) : IsFilteredPreBrownian Z ℱ μ := by
+  apply isFilteredPreBrownian_of_indep_shift h.right_law h.right_adapted
   intro s f hf
   exact (h.joint_future_independent s hf).comp measurable_id measurable_snd
 
@@ -92,9 +92,12 @@ theorem IndependentPair.integral_increment_mul (h : IndependentPair ℱ B Z μ)
     (s t u v : ℝ≥0) :
     (∫ ω, (B t ω - B s ω) * (Z v ω - Z u ω) ∂μ) = 0 := by
   rw [(h.independent_increment s t u v).integral_fun_mul_eq_mul_integral
-    ((h.left.measurable t).sub (h.left.measurable s)).aestronglyMeasurable
-    ((h.right.measurable v).sub (h.right.measurable u)).aestronglyMeasurable]
-  rw [h.left.integral_increment s t, zero_mul]
+    ((h.left.measurable_eval t).sub (h.left.measurable_eval s)).aestronglyMeasurable
+    ((h.right.measurable_eval v).sub (h.right.measurable_eval u)).aestronglyMeasurable]
+  have hz : (∫ ω, B t ω - B s ω ∂μ) = 0 := by
+    have hh := (h.left_law.hasLaw_sub t s).integral_eq
+    rwa [integral_id_gaussianReal] at hh
+  rw [hz, zero_mul]
 
 /-- The genuinely adapted mixed kernel: coefficients may depend on the past
 of BOTH drivers.  This is the diagonal input to the mixed integral isometry. -/
@@ -104,8 +107,8 @@ theorem IndependentPair.integral_adapted_cross (h : IndependentPair ℱ B Z μ)
   have hi := (h.joint_independent hst hf).comp measurable_id
     (show Measurable (fun z : ℝ × ℝ => z.1 * z.2) by fun_prop)
   have hm : Measurable (fun ω => (B t ω - B s ω) * (Z t ω - Z s ω)) :=
-    ((h.left.measurable t).sub (h.left.measurable s)).mul
-      ((h.right.measurable t).sub (h.right.measurable s))
+    ((h.left.measurable_eval t).sub (h.left.measurable_eval s)).mul
+      ((h.right.measurable_eval t).sub (h.right.measurable_eval s))
   have he := hi.integral_fun_mul_eq_mul_integral
     (hf.mono (ℱ.le s) le_rfl).aestronglyMeasurable hm.aestronglyMeasurable
   simpa only [Function.comp_def, id_eq, h.integral_increment_mul s t s t, mul_zero]
@@ -151,7 +154,7 @@ theorem IndependentPair.covariance_linear (h : IndependentPair ℱ B Z μ)
 /-- A unit rotation is Brownian relative to the SAME filtration. -/
 theorem IndependentPair.linear_brownian (h : IndependentPair ℱ B Z μ)
     (a b : ℝ) (hab : a ^ 2 + b ^ 2 = 1) :
-    BrownianOn ℱ (linearNoise a b B Z) μ := by
+    IsFilteredPreBrownian (linearNoise a b B Z) ℱ μ := by
   haveI : IsProbabilityMeasure μ := h.left_law.isGaussianProcess.isProbabilityMeasure
   have hlaw : IsPreBrownianReal (linearNoise a b B Z) μ := by
     apply (h.linear_gaussian a b).isPreBrownianReal_of_covariance
@@ -164,7 +167,7 @@ theorem IndependentPair.linear_brownian (h : IndependentPair ℱ B Z μ)
     · intro s t hst
       rw [h.covariance_linear a b a b s t, min_eq_left hst]
       rw [← pow_two, ← pow_two, hab, one_mul]
-  refine ⟨hlaw, ?_, ?_⟩
+  apply isFilteredPreBrownian_of_indep_shift hlaw
   · intro t
     exact ((h.left_adapted t).const_mul a).add ((h.right_adapted t).const_mul b)
   · intro s f hf
@@ -195,7 +198,7 @@ def correlatedNoise (ρ : ℝ) (B Z : ℝ≥0 → Ω → ℝ) : ℝ≥0 → Ω �
   linearNoise ρ (orthogonalWeight ρ) B Z
 
 theorem IndependentPair.correlated_brownian (h : IndependentPair ℱ B Z μ)
-    {ρ : ℝ} (hρ : |ρ| ≤ 1) : BrownianOn ℱ (correlatedNoise ρ B Z) μ :=
+    {ρ : ℝ} (hρ : |ρ| ≤ 1) : IsFilteredPreBrownian (correlatedNoise ρ B Z) ℱ μ :=
   h.linear_brownian ρ (orthogonalWeight ρ) (sq_add_orthogonalWeight_sq hρ)
 
 theorem IndependentPair.covariance_correlated (h : IndependentPair ℱ B Z μ)

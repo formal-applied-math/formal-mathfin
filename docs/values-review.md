@@ -124,6 +124,44 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-24 — corpus 910, modules 858 — Heston characteristic function
+
+Three independent read-only reviewers examined the stochastic integration, transform and
+corpus interfaces in the local issue 99 candidate. The following decisions concern this branch.
+
+* **Mathematical quality.** The stopped characteristic function has an integrable unit bound.
+  The next analytic step is to compare its coefficients with a specified complex logarithm
+  along the characteristic axis, including the degenerate-root cases.
+* **Library coherence.** The terminal integral of joint predictable kernels satisfies
+  BrownianMotion's stochastic-integral characterization. The review found a second scalar
+  driver record at the input. The revision uses the library's filtered scalar driver directly;
+  joint future independence remains an input of the Brownian pair.
+* **Proof economy.** The curry-to-L² identity has a consumer in the two-state formula.
+  The natural and common filtrations previously repeated the same monotone-class uniqueness
+  argument. The candidate now specializes one generic proof and retains the old public
+  statements. The next cleanup is to audit the remaining elementary-process convenience lemmas.
+* **Architecture.** The CIR construction uses the isometry for lifting kernels to a larger
+  filtration. The process-domain and class-selector generalization lets the native bracket
+  integral and the joint integral share the same representation. The L² and pathwise layers
+  should continue to be compared at the level of their actual kernel domains.
+* **First principles.** The characteristic-function theorem constructs an SDE state and
+  identifies its law at all real frequencies. The existing common-filtration uniqueness theorem
+  could also be exposed on the state predicate once a caller needs it.
+* **Idiomatic interfaces.** The all-time spatial formula places every time inside the
+  almost-sure event. A future general two-process formula should reuse the predictable product
+  kernel and identify its representative directly.
+* **Concept clarity.** The two-state benchmark now spells out the function and coefficient
+  restrictions. The real-strip comparison concerns deterministic transforms at zero terminal
+  variance weight. The unrestricted time-dependent two-process formula remains a frontier item.
+* **Elegance.** The Gram-barrier argument rules out zeros of the linear-flow denominator at
+  endpoint correlations as well. A continuous logarithm of that denominator is a natural
+  intermediate result for the classical little-trap representation.
+
+The two-state benchmark names the bounded-derivative, two-driver theorem it actually derives.
+Its full status applies to that restricted result. The one-driver frontier theorem with general
+time-dependent testing and the specific complex-axis little-trap branch are separate tasks.
+This local review does not record an upstream maintainer decision.
+
 ## 2026-11-19 — corpus 903, modules 790 — one concept, one object: the seven duplicates of the trunk table tied or removed
 
 Scope: the branch `claude/inspiring-curie-fpg212`. It clears the `concept_duplicates` count of
