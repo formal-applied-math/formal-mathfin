@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Brownian.Ito.ItoIntegralAgainstMartingale
+public import MathFin.Probability.Brownian.Ito.ItoIntegralProcessContinuousModification
 public import BrownianMotion.StochasticIntegral.StochasticIntegral
 public import Mathlib.MeasureTheory.Order.Group.Lattice
 
@@ -165,6 +166,24 @@ theorem ae_bracketMeasure_of_ae_forall (T : ℝ≥0) (hBmeas : ∀ t, Measurable
     rw [Measure.prod_prod, ae_iff.1 h, mul_zero]
   exact (withDensity_absolutelyContinuous _ _).ae_le (ae_iff.2 hnull)
 
+/-- A process which agrees indistinguishably with a predictable representative in L²
+for the specified measure on the predictable σ-algebra. -/
+def PredictableL2Version (μ : Measure Ω) (ℱ : Filtration ℝ≥0 mΩ)
+    (ν : @Measure (ℝ≥0 × Ω) ℱ.predictable) (X V : ℝ≥0 → Ω → ℝ) : Prop :=
+  Measurable[ℱ.predictable] (Function.uncurry V) ∧
+    MemLp (Function.uncurry V) 2 ν ∧ X ≡ᵐ[μ] V
+
+/-- Process domain of a continuous L² stochastic integral. -/
+def predictableL2Domain (μ : Measure Ω) (ℱ : Filtration ℝ≥0 mΩ)
+    (ν : @Measure (ℝ≥0 × Ω) ℱ.predictable) : Set (ℝ≥0 → Ω → ℝ) :=
+  {X | ∃ V, PredictableL2Version μ ℱ ν X V}
+
+open scoped Classical in
+/-- Select a representative for applying a continuous linear integral on predictable L². -/
+noncomputable def predictableL2Class (μ : Measure Ω) (ℱ : Filtration ℝ≥0 mΩ)
+    (ν : @Measure (ℝ≥0 × Ω) ℱ.predictable) (X : ℝ≥0 → Ω → ℝ) : Lp ℝ 2 ν :=
+  if h : X ∈ predictableL2Domain μ ℱ ν then h.choose_spec.2.1.toLp _ else 0
+
 /-! ### The domain: processes with a predictable square-integrable version -/
 
 variable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
@@ -175,12 +194,11 @@ function of `(t, ω)`, square-integrable against the bracket `⟨M⟩`, and indi
 characterisation is stated for, and it is genuinely different: a process indistinguishable from
 a predictable one need not be predictable, or even jointly measurable, whatever the filtration. -/
 def IsPredictableVersion (X X' : ℝ≥0 → Ω → ℝ) : Prop :=
-  Measurable[(natFiltration (mΩ := mΩ) hBmeas).predictable] (Function.uncurry X') ∧
-    MemLp (Function.uncurry X') 2 (bracketMeasure (μ := μ) T hBmeas φ) ∧ X ≡ᵐ[μ] X'
+  PredictableL2Version μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) X X'
 
 /-- **The domain** of the integral against `M`: the processes with a predictable
 square-integrable version. -/
-def domain : Set (ℝ≥0 → Ω → ℝ) := {X | ∃ X', IsPredictableVersion T hBmeas φ X X'}
+def domain : Set (ℝ≥0 → Ω → ℝ) := {X | ∃ V, IsPredictableVersion T hBmeas φ X V}
 
 variable {T hBmeas φ}
 
@@ -199,13 +217,14 @@ open scoped Classical in
 /-- The class in `L²(⟨M⟩)` of a process in the domain, read off any predictable version
 (`integrandLp_eq`); `0` off the domain. -/
 noncomputable def integrandLp (X : ℝ≥0 → Ω → ℝ) : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ) :=
-  if h : X ∈ domain T hBmeas φ then h.choose_spec.2.1.toLp _ else 0
+  predictableL2Class μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) X
 
 /-- `integrandLp` does not depend on the version chosen. -/
 theorem integrandLp_eq {X X' : ℝ≥0 → Ω → ℝ} (h : IsPredictableVersion T hBmeas φ X X') :
     integrandLp T hBmeas φ X = h.2.1.toLp _ := by
   have hX : X ∈ domain T hBmeas φ := ⟨X', h⟩
-  rw [integrandLp, dite_eq_left hX]
+  have hgen : X ∈ predictableL2Domain μ (natFiltration hBmeas) (bracketMeasure T hBmeas φ) := hX
+  rw [integrandLp, predictableL2Class, dite_eq_left hgen]
   exact MemLp.toLp_congr _ _ (uncurry_ae_eq_of_isPredictableVersion hX.choose_spec h)
 
 /-! ### The integrator and the integral -/
@@ -750,6 +769,53 @@ theorem isStochasticIntegral (hB : IsPreBrownianReal B μ) :
   toIsRiemannStieltjesExtension := isRiemannStieltjesExtension hB
   consistent _ _ h _ hX := sIntegral_ae_eq_of_isRiemannStieltjesExtension h hX.1 hX.2
 
+
+omit [IsProbabilityMeasure μ] in
+private theorem extension_congr_integrator {ι : Type*} [LinearOrder ι] [OrderBot ι]
+    {Y Z : ι → Ω → ℝ} {ℱ : Filtration ι mΩ} {I : SIntegral} {S : Domain}
+    (h : IsRiemannStieltjesExtension μ Y ℱ I S) (hYZ : ∀ t, Y t =ᵐ[μ] Z t) :
+    IsRiemannStieltjesExtension μ Z ℱ I S where
+  measurable := h.measurable
+  elementary_ioc i j hij X := by
+    obtain ⟨hm, he⟩ := h.elementary_ioc i j hij X
+    refine ⟨hm, he.trans ?_⟩
+    filter_upwards [hYZ i, hYZ j] with ω hi hj
+    change X ω * (Y j ω - Y i ω) = X ω * (Z j ω - Z i ω)
+    rw [hi, hj]
+  elementary_iic i X := by
+    obtain ⟨hm, he⟩ := h.elementary_iic i X
+    refine ⟨hm, he.trans ?_⟩
+    filter_upwards [hYZ i, hYZ ⊥] with ω hi hb
+    change X ω * (Y i ω - Y ⊥ ω) = X ω * (Z i ω - Z ⊥ ω)
+    rw [hi, hb]
+  integral_add := h.integral_add
+  integral_smul := h.integral_smul
+  integral_indistinguishable := h.integral_indistinguishable
+  integral_dct := h.integral_dct
+
+/-- Any fixed-time modification of the stopped integrator has the same stochastic
+integral on the same domain. Elementary integrals only depend on a pair of endpoints. -/
+theorem isStochasticIntegral_of_modification (hB : IsPreBrownianReal B μ)
+    {Y : ℝ≥0 → Ω → ℝ} (hY : ∀ t, Y t =ᵐ[μ] integrator T hBmeas φ hB t) :
+    IsStochasticIntegral μ Y (natFiltration hBmeas)
+      (sIntegral T hBmeas φ hB) (domain T hBmeas φ) where
+  toIsRiemannStieltjesExtension :=
+    extension_congr_integrator (isRiemannStieltjesExtension (T := T) (hBmeas := hBmeas) (φ := φ) hB)
+      (fun t ↦ (hY t).symm)
+  consistent I' S' h X hX :=
+    (isStochasticIntegral (T := T) (hBmeas := hBmeas) (φ := φ) hB).consistent I' S'
+      (extension_congr_integrator h hY) X hX
+
+/-- The stopped continuous modification of the Itô process represents the same
+integrator in BrownianMotion's characterization. -/
+theorem isStochasticIntegral_itoContinuousMod (hB : IsPreBrownianReal B μ)
+    (hcont : ∀ ω, Continuous (fun t ↦ B t ω)) :
+    IsStochasticIntegral μ
+      (fun t ↦ ItoIntegralProcessContinuousModification.itoContinuousMod T hBmeas φ (min t T))
+      (natFiltration hBmeas) (sIntegral T hBmeas φ hB) (domain T hBmeas φ) :=
+  isStochasticIntegral_of_modification hB fun t ↦
+    ItoIntegralProcessContinuousModification.itoContinuousMod_modification hB T hBmeas
+      hcont φ (min_le_right t T)
 
 end StochasticIntegralCharacterisation
 
