@@ -5,6 +5,7 @@ Authors: Granville Gu
 -/
 module
 
+public import MathFin.Models.StochVol.Heston.RiccatiUniqueness
 public import MathFin.Models.StochVol.Heston.IntegratedTransform
 public import MathFin.Models.StochVol.Heston
 

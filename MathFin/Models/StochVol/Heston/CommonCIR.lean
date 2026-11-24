@@ -95,8 +95,9 @@ theorem exists_cir_on_common_filtration (hB : BrownianOn ℱ B μ) (T : ℝ≥0)
     exact hm.eLpNorm_lt_top
   have hGm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration hB.measurable).predictable]
       (fun z : ℝ≥0 × Ω => MathFin.Heston.cirDrift p (V z.1 z.2)) :=
-    (show Continuous (MathFin.Heston.cirDrift p) by unfold MathFin.Heston.cirDrift;
-          fun_prop).comp_stronglyMeasurable hp
+    (show Continuous (MathFin.Heston.cirDrift p) by
+      unfold MathFin.Heston.cirDrift
+      fun_prop).comp_stronglyMeasurable hp
   have hHm : StronglyMeasurable[(MathFin.ItoIntegralL2.natFiltration hB.measurable).predictable]
       (fun z : ℝ≥0 × Ω => MathFin.Heston.cirDiffusion p (V z.1 z.2)) :=
     (MathFin.Heston.continuous_cirDiffusion p).comp_stronglyMeasurable hp

@@ -5,6 +5,7 @@ Authors: Raphael Coelho, Granville Gu
 -/
 module
 
+public import MathFin.Probability.Brownian.Ito.StochasticIntegralVersion
 public import MathFin.Probability.Brownian.Ito.Filtered.CommonContinuous
 public import MathFin.Probability.Brownian.Ito.Filtered.CommonLocality
 public import MathFin.Probability.Brownian.Ito.Filtered.StochasticIntegralUniqueness

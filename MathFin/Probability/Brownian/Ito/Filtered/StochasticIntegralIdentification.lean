@@ -5,6 +5,7 @@ Authors: Granville Gu
 -/
 module
 
+public import MathFin.Probability.Brownian.Ito.StochasticIntegralVersion
 public import MathFin.Probability.Brownian.Ito.Filtered.CommonLift
 public import MathFin.Probability.Brownian.Ito.Filtered.CommonContinuous
 public import MathFin.Probability.Brownian.Ito.StochasticIntegralCharacterisation
