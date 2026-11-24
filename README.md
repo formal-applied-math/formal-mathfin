@@ -223,7 +223,8 @@ which takes hours on one machine.
 [`lean-toolchain`](lean-toolchain) pins the Lean version and
 [`lake-manifest.json`](lake-manifest.json) pins Mathlib and BrownianMotion. BrownianMotion and the
 library itself are compiled from source. [`CONTRIBUTING.md`](CONTRIBUTING.md) describes a prebuilt
-Docker image and a faster edit-and-check loop for contributors.
+Docker image and a faster edit-and-check loop for contributors. [`docs/pin-bumps.md`](docs/pin-bumps.md)
+says when the pins move and what must be true before a bump merges.
 
 ## Using the library in a project
 
@@ -304,6 +305,7 @@ Raphael Coelho maintains the library, with contributions from:
 - [Aleksey Salkutsan](https://github.com/kernelpanic888): forward rate agreements and downside
   performance metrics.
 - [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
+- [WorldianAI](https://github.com/WorldianAI): the security policy.
 - [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
   calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
   normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
