@@ -157,6 +157,12 @@ corpus interfaces in the local issue 99 candidate. The following decisions conce
   endpoint correlations as well. A continuous logarithm of that denominator is a natural
   intermediate result for the classical little-trap representation.
 
+A read-only follow-up on the revised stochastic layer found one shared uniqueness argument and
+no remaining scalar driver object alongside `IsFilteredPreBrownian`. A baseline-to-candidate
+Lean comparison checked the 41 original public declarations of the natural-filtration module.
+Forty expanded types printed identically. For the remaining type, the displayed compiler-generated
+proof of a numeral instance changed; the exact original statement elaborated with the new theorem.
+
 The two-state benchmark names the bounded-derivative, two-driver theorem it actually derives.
 Its full status applies to that restricted result. The one-driver frontier theorem with general
 time-dependent testing and the specific complex-axis little-trap branch are separate tasks.
