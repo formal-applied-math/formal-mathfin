@@ -422,5 +422,107 @@ theorem kyleEquilibriumCoefficients (h : KyleModel P v u p₀ σ_v σ_u) {β lam
   refine ⟨by rw [← hpos]; field_simp [h.σ_u_pos.ne'],
     by rw [hbeta, ← hpos]; field_simp [h.σ_v_pos.ne', h.σ_u_pos.ne']⟩
 
+/-- **The linear equilibrium exists.** The pair `β = σ_u/σ_v, lam = σ_v/(2σ_u)` is an
+unrestricted best response at every signal and prices the order flow at the conditional
+expectation of the value. -/
+theorem existsKyleEquilibrium (h : KyleModel P v u p₀ σ_v σ_u) :
+    ∃ β lam : ℝ, (∀ c t : ℝ, c * (β * c) - lam * (β * c) ^ 2 ≥ c * t - lam * t ^ 2)
+      ∧ (P[v | MeasurableSpace.comap (kyleFlow β v u p₀) inferInstance]
+          =ᵐ[P] fun ω ↦ p₀ + lam * kyleFlow β v u p₀ ω) := by
+  have hlampos : 0 < σ_v / (2 * σ_u) :=
+    div_pos h.σ_v_pos (by linarith [h.σ_u_pos])
+  refine ⟨σ_u / σ_v, σ_v / (2 * σ_u), ?_, ?_⟩
+  · intro c t
+    have hmax := kyleProfit_le_max hlampos c t
+    have hid : c * ((σ_u / σ_v) * c) - (σ_v / (2 * σ_u)) * ((σ_u / σ_v) * c) ^ 2
+        = c ^ 2 / (4 * (σ_v / (2 * σ_u))) := by
+      field_simp
+      ring
+    rw [hid]
+    exact hmax
+  · have heff := kyleMarketEfficiency h (σ_u / σ_v)
+    refine heff.trans ?_
+    refine Filter.Eventually.of_forall fun ω => ?_
+    have hcoef : (σ_u / σ_v) * σ_v ^ 2 / ((σ_u / σ_v) ^ 2 * σ_v ^ 2 + σ_u ^ 2)
+        = σ_v / (2 * σ_u) := by
+      field_simp [h.σ_v_pos.ne', h.σ_u_pos.ne']
+      ring
+    rw [hcoef]
+
+/-- The model hypotheses are satisfiable: independent Gaussian coordinates on a product space,
+for every admissible parameter value. -/
+theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) :
+    KyleModel ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+        (gaussianReal 0 (σ_u ^ 2).toNNReal))
+      (Prod.fst : ℝ × ℝ → ℝ) Prod.snd p₀ σ_v σ_u := by
+  have hpos1 : (0 : ℝ) ≤ σ_v ^ 2 := sq_nonneg _
+  have hpos2 : (0 : ℝ) ≤ σ_u ^ 2 := sq_nonneg _
+  have hcoev : ((σ_v ^ 2).toNNReal : ℝ) = σ_v ^ 2 := Real.coe_toNNReal _ hpos1
+  have hcoeu : ((σ_u ^ 2).toNNReal : ℝ) = σ_u ^ 2 := Real.coe_toNNReal _ hpos2
+  refine
+    { σ_v_pos := hσv
+      σ_u_pos := hσu
+      v_meas := measurable_fst
+      u_meas := measurable_snd
+      v_gaussian := ?_
+      u_gaussian := ?_
+      indep := ?_
+      mean_v := ?_
+      var_v := ?_
+      mean_u := ?_
+      var_u := ?_ }
+  · have hmap : Measure.map Prod.fst
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+        = gaussianReal p₀ (σ_v ^ 2).toNNReal := by
+      rw [Measure.map_fst_prod, measure_univ, one_smul]
+    exact HasLaw.hasGaussianLaw (μ := gaussianReal p₀ (σ_v ^ 2).toNNReal)
+      ⟨by fun_prop, hmap⟩
+  · have hmap : Measure.map Prod.snd
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+        = gaussianReal 0 (σ_u ^ 2).toNNReal := by
+      rw [Measure.map_snd_prod, measure_univ, one_smul]
+    exact HasLaw.hasGaussianLaw (μ := gaussianReal 0 (σ_u ^ 2).toNNReal)
+      ⟨by fun_prop, hmap⟩
+  · rw [indepFun_iff_measure_inter_preimage_eq_mul]
+    intro s t hs ht
+    have h1 : Prod.fst ⁻¹' s ∩ Prod.snd ⁻¹' t = s ×ˢ t := by
+      ext p
+      simp
+    rw [h1, Measure.prod_prod s t]
+    rw [← Measure.map_apply measurable_fst hs, Measure.map_fst_prod, measure_univ, one_smul]
+    rw [← Measure.map_apply measurable_snd ht, Measure.map_snd_prod, measure_univ, one_smul]
+  · have hmap : Measure.map Prod.fst
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+        = gaussianReal p₀ (σ_v ^ 2).toNNReal := by
+      rw [Measure.map_fst_prod, measure_univ, one_smul]
+    show ∫ (x : ℝ × ℝ), id x.1 ∂(gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+        (gaussianReal 0 (σ_u ^ 2).toNNReal) = p₀
+    rw [← integral_map (φ := Prod.fst) (f := id) (by fun_prop) (by fun_prop), hmap]
+    simp
+  · have hmap : Measure.map Prod.fst
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+        = gaussianReal p₀ (σ_v ^ 2).toNNReal := by
+      rw [Measure.map_fst_prod, measure_univ, one_smul]
+    show Var[id ∘ Prod.fst; (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+        (gaussianReal 0 (σ_u ^ 2).toNNReal)] = σ_v ^ 2
+    rw [← variance_map (X := id) (Y := Prod.fst) (by fun_prop) (by fun_prop), hmap]
+    simp [hcoev, variance_id_gaussianReal]
+  · have hmap : Measure.map Prod.snd
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+        = gaussianReal 0 (σ_u ^ 2).toNNReal := by
+      rw [Measure.map_snd_prod, measure_univ, one_smul]
+    show ∫ (x : ℝ × ℝ), id x.2 ∂(gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+        (gaussianReal 0 (σ_u ^ 2).toNNReal) = 0
+    rw [← integral_map (φ := Prod.snd) (f := id) (by fun_prop) (by fun_prop), hmap]
+    simp
+  · have hmap : Measure.map Prod.snd
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+        = gaussianReal 0 (σ_u ^ 2).toNNReal := by
+      rw [Measure.map_snd_prod, measure_univ, one_smul]
+    show Var[id ∘ Prod.snd; (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+        (gaussianReal 0 (σ_u ^ 2).toNNReal)] = σ_u ^ 2
+    rw [← variance_map (X := id) (Y := Prod.snd) (by fun_prop) (by fun_prop), hmap]
+    simp [hcoeu, variance_id_gaussianReal]
+
 end MathFin
 
