@@ -8,6 +8,7 @@ module
 public import MathFin.Init
 public import MathFin.Probability.Gaussian.BivariateGaussian
 public import Mathlib.Probability.ConditionalExpectation
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Independence
 public import Mathlib.Probability.Distributions.Gaussian.Real
@@ -238,4 +239,188 @@ theorem kyleMarketEfficiency (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
     field_simp [hσy_pos.ne]
   rw [hcoef, hσy_sq]
 
+section BestResponse
+
+/-- The completed-square bound on the trader's expected profit: the quadratic
+`c·t − λ·t²` never exceeds `c²/(4λ)` for `lam > 0`. -/
+private lemma kyleProfit_le_max {lam : ℝ} (hlam : 0 < lam) (c t : ℝ) :
+    c * t - lam * t ^ 2 ≤ c ^ 2 / (4 * lam) := by
+  have h1 : 4 * lam * (c * t - lam * t ^ 2) ≤ c ^ 2 := by
+    have h2 : (c - 2 * lam * t) ^ 2 ≥ 0 := sq_nonneg _
+    nlinarith
+  rw [le_div_iff₀ (by linarith)]
+  linarith
+
+/-- The best-response condition pins the coefficients: a demand slope whose linear demand is an
+unrestricted maximizer of the expected profit at every signal has positive price impact and
+satisfies `β = 1/(2λ)`. -/
+private lemma kyleMaxCoefficients {β lam : ℝ}
+    (h : ∀ c t : ℝ, c * (β * c) - lam * (β * c) ^ 2 ≥ c * t - lam * t ^ 2) :
+    0 < lam ∧ β = 1 / (2 * lam) := by
+  have h1 : ∀ t : ℝ, β - lam * β ^ 2 ≥ t - lam * t ^ 2 := by
+    intro t
+    have := h 1 t
+    simpa using this
+  have hlam0 : lam ≠ 0 := by
+    intro h0
+    subst h0
+    have := h1 (β + 1)
+    simp at this
+    linarith
+  by_cases hlampos : 0 < lam
+  · refine ⟨hlampos, ?_⟩
+    have hkey := h1 (1 / (2 * lam))
+    have hsq : (2 * lam * β - 1) ^ 2 ≤ 0 := by
+      have h4 : 0 < 4 * lam := by linarith
+      field_simp at hkey ⊢
+      nlinarith
+    have heq : 2 * lam * β - 1 = 0 := sq_eq_zero_iff.mp (le_antisymm hsq (sq_nonneg _))
+    field_simp
+    linarith
+  · have hlamle : lam ≤ 0 := not_lt.mp hlampos
+    have hlamneg : lam < 0 := lt_of_le_of_ne hlamle hlam0
+    have hpair : ∀ t : ℝ, β - lam * β ^ 2 ≥ -lam * t ^ 2 := by
+      intro t
+      have h2 := h1 t
+      have h3 := h1 (-t)
+      linarith
+    set k := -lam with hk_def
+    have hkpos : 0 < k := by linarith
+    set s := (β - lam * β ^ 2) / k with hs_def
+    have hcontr := hpair (s + 1)
+    have hks : k * s = β - lam * β ^ 2 := by rw [hs_def]; field_simp [hk_def]
+    rw [← hks] at hcontr
+    have hstep : (s + 1) ^ 2 ≤ s := le_of_mul_le_mul_left hcontr hkpos
+    nlinarith [sq_nonneg (s + 1 / 2)]
+
+end BestResponse
+
+/-- The informed trader's expected profit given the signal: for a demand measurable with
+respect to the signal, the noise term vanishes under independence and the conditional
+expectation is the quadratic `(v − p₀)·x − lam·x²`, almost surely. -/
+theorem kyleConditionalProfit (h : KyleModel P v u p₀ σ_v σ_u) (lam : ℝ) {x : Ω → ℝ}
+    (hxs : StronglyMeasurable[MeasurableSpace.comap v inferInstance] x)
+    (hint1 : Integrable (fun ω ↦ (v ω - p₀) * x ω) P)
+    (hint2 : Integrable (fun ω ↦ x ω ^ 2) P)
+    (hint3 : Integrable (fun ω ↦ x ω * u ω) P) :
+    P[(fun ω ↦ (v ω - p₀) * x ω - lam * x ω ^ 2 - lam * x ω * u ω)
+        | MeasurableSpace.comap v inferInstance]
+      =ᵐ[P] fun ω ↦ (v ω - p₀) * x ω - lam * x ω ^ 2 := by
+  have hvle : MeasurableSpace.comap v inferInstance ≤ mΩ := h.v_meas.comap_le
+  have hvs : StronglyMeasurable[MeasurableSpace.comap v inferInstance] v :=
+    (Measurable.of_comap_le le_rfl).stronglyMeasurable
+  have hus : StronglyMeasurable[MeasurableSpace.comap u inferInstance] u :=
+    (Measurable.of_comap_le le_rfl).stronglyMeasurable
+  have hvm : StronglyMeasurable[MeasurableSpace.comap v inferInstance]
+      (fun ω ↦ v ω - p₀) := hvs.sub stronglyMeasurable_const
+  have hxs' : Measurable[MeasurableSpace.comap v inferInstance] x := hxs.measurable
+  have hterm1 : StronglyMeasurable[MeasurableSpace.comap v inferInstance]
+      (fun ω ↦ (v ω - p₀) * x ω) := hvm.mul hxs
+  have hterm2 : StronglyMeasurable[MeasurableSpace.comap v inferInstance]
+      (fun ω ↦ lam * x ω ^ 2) := (hxs.pow 2).const_mul lam
+  have hintc1 : Integrable (fun ω ↦ lam * x ω ^ 2) P := hint2.const_mul lam
+  have hintc3 : Integrable (fun ω ↦ lam * x ω * u ω) P := by
+    simpa [mul_assoc] using hint3.const_mul lam
+  have hind : Indep (MeasurableSpace.comap u inferInstance)
+      (MeasurableSpace.comap v inferInstance) P :=
+    ((IndepFun_iff_Indep v u P).mp h.indep).symm
+  have hucond : P[u | MeasurableSpace.comap v inferInstance]
+      =ᵐ[P] fun _ ↦ (∫ ω, u ω ∂P) :=
+    condExp_indep_eq h.u_meas.comap_le hvle hus hind
+  have hu_pull : P[(fun ω ↦ lam * x ω * u ω) | MeasurableSpace.comap v inferInstance]
+      =ᵐ[P] fun _ ↦ (0 : ℝ) := by
+    refine (condExp_mul_of_aestronglyMeasurable_left
+      (f := fun ω ↦ lam * x ω) (g := u)
+      (stronglyMeasurable_const.mul hxs).aestronglyMeasurable
+      hintc3 h.u_gaussian.integrable).trans ?_
+    filter_upwards [hucond] with ω hw
+    simp only [Pi.mul_apply]
+    rw [hw]
+    simp [h.mean_u]
+  show P[(((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
+      - (fun ω ↦ lam * x ω * u ω)) | MeasurableSpace.comap v inferInstance]
+    =ᵐ[P] ((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
+  have hp12 : P[((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
+      | MeasurableSpace.comap v inferInstance]
+      = ((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2)) :=
+    condExp_of_stronglyMeasurable hvle (hterm1.sub hterm2) (hint1.sub hintc1)
+  have step1 := condExp_sub (f := ((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2)))
+    (g := fun ω ↦ lam * x ω * u ω) (hint1.sub hintc1) hintc3
+    (MeasurableSpace.comap v inferInstance)
+  refine step1.trans ?_
+  have step2 : P[((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
+      | MeasurableSpace.comap v inferInstance] - P[(fun ω ↦ lam * x ω * u ω)
+      | MeasurableSpace.comap v inferInstance]
+      =ᵐ[P] ((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
+        - P[(fun ω ↦ lam * x ω * u ω) | MeasurableSpace.comap v inferInstance] := by
+    filter_upwards [] with ω
+    simp only [Pi.sub_apply, hp12]
+  refine step2.trans ?_
+  filter_upwards [hu_pull] with ω hw
+  simp only [Pi.sub_apply, hw, sub_zero]
+
+/-- **The Kyle equilibrium coefficients.** A pair `(β, lam)` whose linear demand is an
+unrestricted best response at every signal and whose pricing rule is efficient satisfies
+`lam = σ_v/(2σ_u)` and `β = σ_u/σ_v`. -/
+theorem kyleEquilibriumCoefficients (h : KyleModel P v u p₀ σ_v σ_u) {β lam : ℝ}
+    (hb : ∀ c t : ℝ, c * (β * c) - lam * (β * c) ^ 2 ≥ c * t - lam * t ^ 2)
+    (he : P[v | MeasurableSpace.comap (kyleFlow β v u p₀) inferInstance]
+          =ᵐ[P] fun ω ↦ p₀ + lam * kyleFlow β v u p₀ ω) :
+    lam = σ_v / (2 * σ_u) ∧ β = σ_u / σ_v := by
+  obtain ⟨hlampos, hbeta⟩ := kyleMaxCoefficients hb
+  have heff := kyleMarketEfficiency h β
+  have hay : ∀ᵐ (ω : Ω) ∂P,
+      β * σ_v ^ 2 / (β ^ 2 * σ_v ^ 2 + σ_u ^ 2) * kyleFlow β v u p₀ ω
+        = lam * kyleFlow β v u p₀ ω := by
+    filter_upwards [heff, he] with ω h1 h2
+    linarith
+  have hcoef : β * σ_v ^ 2 / (β ^ 2 * σ_v ^ 2 + σ_u ^ 2) = lam := by
+    by_contra hne
+    exfalso
+    have hy0 : ∀ᵐ (ω : Ω) ∂P, kyleFlow β v u p₀ ω = 0 := by
+      filter_upwards [hay] with ω hw
+      have hz : (β * σ_v ^ 2 / (β ^ 2 * σ_v ^ 2 + σ_u ^ 2) - lam) * kyleFlow β v u p₀ ω = 0 :=
+        by linear_combination hw
+      rcases mul_eq_zero.mp hz with h0 | h1
+      · exact absurd (by linarith) hne
+      · exact h1
+    have hy0eq : (kyleFlow β v u p₀) =ᵐ[P] fun _ ↦ (0 : ℝ) := hy0
+    have hvar0 : Var[kyleFlow β v u p₀; P] = 0 := by
+      rw [variance_congr hy0eq]
+      exact variance_zero P
+    rw [varFlow h β] at hvar0
+    have h2u : 0 < σ_u ^ 2 := pow_pos h.σ_u_pos 2
+    have hsqp : 0 ≤ β ^ 2 * σ_v ^ 2 := by nlinarith [sq_nonneg β, sq_nonneg σ_v]
+    linarith
+  have hfix : lam * (β ^ 2 * σ_v ^ 2 + σ_u ^ 2) = β * σ_v ^ 2 :=
+    (eq_div_iff (by
+      have h2u : 0 < σ_u ^ 2 := pow_pos h.σ_u_pos 2
+      have hsq : 0 ≤ β ^ 2 * σ_v ^ 2 := by nlinarith [sq_nonneg β, sq_nonneg σ_v]
+      linarith)).mp hcoef.symm
+  have e1 : 2 * lam * β = 1 := by rw [hbeta]; field_simp
+  have e2 : 2 * lam * β * σ_v ^ 2 = σ_v ^ 2 := by rw [e1]; ring_nf
+  have e3 : 2 * lam * (lam * (β ^ 2 * σ_v ^ 2 + σ_u ^ 2)) = 2 * lam * (β * σ_v ^ 2) := by rw [hfix]
+  have e4 : 2 * lam ^ 2 * β ^ 2 * σ_v ^ 2 + 2 * lam ^ 2 * σ_u ^ 2 = σ_v ^ 2 := by
+    linear_combination e3 + e2
+  rw [hbeta] at e4
+  field_simp at e4
+  rw [show (2:ℝ) ^ 2 = 4 from by norm_num] at e4
+  have h4 : 4 * lam ^ 2 * σ_u ^ 2 = σ_v ^ 2 := by linarith
+  have hsq0 : (2 * lam * σ_u) ^ 2 = σ_v ^ 2 := by
+    rw [pow_two]
+    calc (2 * lam * σ_u) * (2 * lam * σ_u) = 4 * lam ^ 2 * σ_u ^ 2 := by ring
+      _ = σ_v ^ 2 := h4
+  rw [pow_two, pow_two] at hsq0
+  have hpos : 2 * lam * σ_u = σ_v := by
+    rcases mul_self_eq_mul_self_iff.mp hsq0 with hp | hn
+    · exact hp
+    · exact absurd hn (by
+        have h1 := h.σ_v_pos
+        have h2 := h.σ_u_pos
+        have h3 := hlampos
+        nlinarith)
+  refine ⟨by rw [← hpos]; field_simp [h.σ_u_pos.ne'],
+    by rw [hbeta, ← hpos]; field_simp [h.σ_v_pos.ne', h.σ_u_pos.ne']⟩
+
 end MathFin
+
