@@ -51,6 +51,10 @@ immediate, and avoids any explicit calculus.
 * `portfolioVarTwo_eq_quad`: for `D ≠ 0`, `Var(w) = D (w − w*)² + V_min`.
 * `portfolioVarTwo_at_minVarWeight`: for `D ≠ 0`, `Var(w*) = V_min`.
 * `portfolioVarTwo_ge_min`: `Var(w) ≥ V_min` for every `w`, given `D > 0`.
+* `portfolioVarTwo_gt_min`: `Var(w) > V_min` for `w ≠ w*`, given `D > 0`.
+* `minVarWeightTwo_pos_iff`, `minVarWeightTwo_lt_one_iff`: `w* ∈ (0, 1)` exactly when
+  `ρ < min(σ₂/σ₁, σ₁/σ₂)`.
+* `minPortfolioVarTwo_lt_sq`: in that range `V_min` is below both `σ₁²` and `σ₂²`.
 * `minPortfolioVarTwo_perfect_anticorr`: at `ρ = -1` the closed form `V_min`
   is zero (by `portfolioVarTwo_ge_min` it is the minimum variance whenever `D > 0`: a perfect
   hedge).
@@ -130,6 +134,47 @@ lemma portfolioVarTwo_ge_min {σ₁ σ₂ ρ : ℝ}
   have h_term : 0 ≤ minVarDenom σ₁ σ₂ ρ * (w - minVarWeightTwo σ₁ σ₂ ρ) ^ 2 :=
     mul_nonneg hD.le h_sq
   linarith
+
+/-- **The minimum is attained only at `w*`**: for `D > 0`, every weight `w ≠ w*` has
+`Var(w) > V_min`, since `Var(w) = D (w − w*)² + V_min` with `D > 0`. -/
+lemma portfolioVarTwo_gt_min {σ₁ σ₂ ρ : ℝ} (hD : 0 < minVarDenom σ₁ σ₂ ρ) {w : ℝ}
+    (hw : w ≠ minVarWeightTwo σ₁ σ₂ ρ) :
+    minPortfolioVarTwo σ₁ σ₂ ρ < portfolioVarTwo σ₁ σ₂ ρ w := by
+  rw [portfolioVarTwo_eq_quad hD.ne' w]
+  have h_sq : 0 < (w - minVarWeightTwo σ₁ σ₂ ρ) ^ 2 :=
+    lt_of_le_of_ne (sq_nonneg _) (Ne.symm (pow_ne_zero 2 (sub_ne_zero.2 hw)))
+  linarith [mul_pos hD h_sq]
+
+/-- **The minimum-variance weight is long in asset 1 exactly when `ρ < σ₂/σ₁`.** -/
+lemma minVarWeightTwo_pos_iff {σ₁ σ₂ ρ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)
+    (hD : 0 < minVarDenom σ₁ σ₂ ρ) : 0 < minVarWeightTwo σ₁ σ₂ ρ ↔ ρ < σ₂ / σ₁ := by
+  rw [minVarWeightTwo, div_pos_iff_of_pos_right hD, lt_div_iff₀ hσ₁,
+    show σ₂ ^ 2 - ρ * σ₁ * σ₂ = σ₂ * (σ₂ - ρ * σ₁) by ring, mul_pos_iff_of_pos_left hσ₂, sub_pos]
+
+/-- **The minimum-variance weight is long in asset 2 exactly when `ρ < σ₁/σ₂`.** -/
+lemma minVarWeightTwo_lt_one_iff {σ₁ σ₂ ρ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)
+    (hD : 0 < minVarDenom σ₁ σ₂ ρ) : minVarWeightTwo σ₁ σ₂ ρ < 1 ↔ ρ < σ₁ / σ₂ := by
+  rw [minVarWeightTwo, div_lt_one hD, lt_div_iff₀ hσ₂]
+  unfold minVarDenom
+  constructor
+  · intro h
+    by_contra hc
+    push_neg at hc
+    nlinarith [mul_le_mul_of_nonneg_left hc hσ₁.le]
+  · intro h
+    nlinarith [mul_lt_mul_of_pos_left h hσ₁]
+
+/-- **Diversification strictly lowers the variance of both assets**: when `ρ` is below both
+`σ₂/σ₁` and `σ₁/σ₂`, the minimum-variance weight `w*` lies in `(0, 1)`, and `V_min` is below the
+variance of each asset alone (the endpoints `w = 1` and `w = 0`). -/
+theorem minPortfolioVarTwo_lt_sq {σ₁ σ₂ ρ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)
+    (hD : 0 < minVarDenom σ₁ σ₂ ρ) (h₁ : ρ < σ₂ / σ₁) (h₂ : ρ < σ₁ / σ₂) :
+    minPortfolioVarTwo σ₁ σ₂ ρ < σ₁ ^ 2 ∧ minPortfolioVarTwo σ₁ σ₂ ρ < σ₂ ^ 2 := by
+  have h0 := (minVarWeightTwo_pos_iff hσ₁ hσ₂ hD).2 h₁
+  have h1 := (minVarWeightTwo_lt_one_iff hσ₁ hσ₂ hD).2 h₂
+  have e₁ : portfolioVarTwo σ₁ σ₂ ρ 1 = σ₁ ^ 2 := by unfold portfolioVarTwo; ring
+  have e₀ : portfolioVarTwo σ₁ σ₂ ρ 0 = σ₂ ^ 2 := by unfold portfolioVarTwo; ring
+  exact ⟨e₁ ▸ portfolioVarTwo_gt_min hD h1.ne', e₀ ▸ portfolioVarTwo_gt_min hD h0.ne⟩
 
 /-- **Perfect-hedge corollary**: at `ρ = -1` the closed form `V_min` is zero, for any
 `σ₁, σ₂`. It is the minimum portfolio variance when `D = (σ₁ + σ₂)² > 0`
