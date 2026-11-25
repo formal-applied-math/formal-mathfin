@@ -420,4 +420,32 @@ theorem exists_itoIntegral_const
   filter_upwards [h] with ω hω
   simpa [mul_sub] using hω
 
+/-- **A heat solution is an Itô integral.** If `f_t + ½f_xx = 0` (under the `C^{1,2}`-with-bounds
+package of `ito_formula_td_L2_bddDeriv`), then `f(T, B_T) − f(0, B_0)` is the Itô integral of
+`f_x(s, B_s)`: the `ds` term of the time-dependent Itô formula cancels. -/
+theorem heat_solution_itoIntegral_rep
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
+    (T : ℝ≥0) {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
+    (hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
+    (hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
+    (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
+    (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
+    (hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
+    (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
+    {Ct C1 C2 Ctt Ctx Cxxx : ℝ}
+    (hbd_t : ∀ t x, |f_t t x| ≤ Ct) (hbd_x : ∀ t x, |f_x t x| ≤ C1)
+    (hbd_xx : ∀ t x, |f_xx t x| ≤ C2)
+    (hbd_tt : ∀ t x, |f_tt t x| ≤ Ctt) (hbd_tx : ∀ t x, |f_tx t x| ≤ Ctx)
+    (hbd_xxx : ∀ t x, |f_xxx t x| ≤ Cxxx)
+    (hheat : ∀ t x, f_t t x + 1 / 2 * f_xx t x = 0) :
+    ∃ gfx : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
+      (⇑gfx =ᵐ[trimMeasure (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2)) ∧
+      (fun ω ↦ f T (B T ω) - f 0 (B 0 ω)) =ᵐ[μ] fun ω ↦ (itoIntegralCLM hB T hBmeas gfx) ω := by
+  obtain ⟨gfx, hgfx, h⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont T hf_t hf_tt hf_tx hf_x
+    hf_xx hf_xxx hf_x_cont hf_xx_cont hbd_t hbd_x hbd_xx hbd_tt hbd_tx hbd_xxx
+  refine ⟨gfx, hgfx, h.mono fun ω hω ↦ ?_⟩
+  simpa [hheat] using hω
+
 end MathFin
