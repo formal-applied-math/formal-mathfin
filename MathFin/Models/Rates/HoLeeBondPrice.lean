@@ -7,6 +7,7 @@ module
 
 public import MathFin.Probability.Brownian.Wiener.WienerIntegralGaussian
 public import MathFin.Probability.Brownian.Wiener.WienerIntegralExpMoment
+public import MathFin.Models.Rates.VasicekZeroMeanReversionLimit
 
 /-!
 # The Ho–Lee zero-coupon bond price
@@ -38,6 +39,12 @@ variance of the diffusion part is `∫₀ᵀ (T − u)² du = T³/3`. The affine
 * `integratedMean_eq`: for continuous `θ`, `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds = r₀·T + ∫₀ᵀ θ(s)(T − s) ds`.
 * `bondPrice_eq`: `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²T³/6)`.
 * `bondPrice_affine`: the affine form `P(0, T) = A(T)·exp(−T·r₀)`, with `B(T) = T`.
+* `bondA_const`, `bondPrice_zero_drift`: the constant-drift coefficient
+  `A(T) = exp(−θ·T²/2 + σ²T³/6)`, and at zero drift the price is the driftless price
+  `brownianBondPrice_eq` of `Models/Rates/VasicekZeroMeanReversionLimit.lean`.
+* `tendsto_vasicekBondPrice_hoLee`: the Vasicek closed form at long-run level `θ/κ` tends to the
+  constant-drift Ho–Lee price as `κ → 0⁺` — Ho–Lee is the vanishing-mean-reversion limit at the
+  level rescaling that lets the drift survive.
 
 ## References
 
@@ -56,7 +63,7 @@ Wiener integral, Gaussian Laplace transform, MSC 91G30, MSC 60H05, JEL E43
 
 namespace MathFin.HoLee
 
-open MeasureTheory ProbabilityTheory Real Set
+open MeasureTheory ProbabilityTheory Real Set Filter Topology
 open scoped NNReal
 open WienerIntegralL2
 
@@ -174,5 +181,64 @@ theorem bondPrice_affine (hB : IsPreBrownianReal B μ) {θ : ℝ → ℝ} (hθ :
   rw [bondPrice_eq hB θ σ r₀ T, bondA, integratedMean_eq hθ r₀ (T : ℝ), ← Real.exp_add]
   congr 1
   ring
+
+/-! ### The constant drift, the zero-drift price, and the vanishing-mean-reversion bridge -/
+
+/-- The drift loading of a constant Ho–Lee drift: `∫₀ᵀ θ·(T − s) ds = θ·T²/2`, by the
+reflection substitution `s ↦ T − s` and the elementary `∫ x = (b² − a²)/2`. -/
+lemma integral_const_driftLoading (θ T : ℝ) :
+    ∫ s in (0 : ℝ)..T, θ * (T - s) = θ * T ^ 2 / 2 := by
+  open intervalIntegral in
+  rw [integral_comp_sub_left (f := fun y : ℝ ↦ θ * y), intervalIntegral.integral_const_mul,
+    integral_id]
+  simp
+  ring
+
+/-- **Constant drift, in closed form**: the affine coefficient of the constant-drift Ho–Lee
+model is `A(T) = exp(−θ·T²/2 + σ²T³/6)` — the level term `θ·T²/2` plus half the variance
+`σ²T³/3`. -/
+lemma bondA_const (θ σ T : ℝ) :
+    bondA (fun _ ↦ θ) σ T = Real.exp (-(θ * T ^ 2 / 2) + σ ^ 2 * T ^ 3 / 6) := by
+  rw [bondA, integral_const_driftLoading]
+
+/-- **Zero drift is the driftless model.** At `θ ≡ 0` the mean reduces to `r₀·T` and the
+Ho–Lee price is the driftless Gaussian price `brownianBondPrice_eq` of
+`Models/Rates/VasicekZeroMeanReversionLimit.lean`, `exp(−r₀·T + σ²T³/6)`: the kernel `T − u`
+and its variance are shared, and the drift never enters either. -/
+theorem bondPrice_zero_drift (hB : IsPreBrownianReal B μ) (σ r₀ : ℝ) (T : ℝ≥0) :
+    ∫ ω, Real.exp (-(bondRate hB (fun _ ↦ 0) σ r₀ T ω)) ∂μ
+      = ∫ ω, Real.exp (-(brownianIntegratedRate hB r₀ σ T ω)) ∂μ := by
+  rw [bondPrice_eq hB (fun _ ↦ 0) σ r₀ T, brownianBondPrice_eq]
+  congr 1
+  have hm : integratedMean (fun _ : ℝ ↦ (0 : ℝ)) r₀ (T : ℝ) = r₀ * (T : ℝ) := by
+    simp [integratedMean]
+    ring
+  rw [hm]
+  ring
+
+/-- **Ho–Lee is the vanishing-mean-reversion limit at rescaled level.** The Vasicek closed
+form `exp(−M(T) + σ²V(T)/2)` (`vasicekBondPrice_eq`, for each `κ > 0` the `μ`-expectation of
+`exp(−∫r)`) at long-run level `θ/κ` — the level that makes the drift `κ·(θ/κ − r) → θ` survive
+vanishing mean reversion — tends as `κ → 0⁺` to the constant-drift Ho–Lee price
+`bondA (fun _ ↦ θ) σ T·exp(−T·r₀)`: the mean splits as `M = r₀·B(T) + θ·(T − B(T))/κ`, whose
+second loading converges to `T²/2`. At level `0` instead, the limit is the driftless price
+(`tendsto_vasicekBondPrice_brownianBondPrice`): the level, not the limit, carries the drift.
+A limit of the closed forms; no convergence of the random variables is claimed. -/
+theorem tendsto_vasicekBondPrice_hoLee (r₀ θ σ T : ℝ) :
+    Tendsto (fun κ ↦ Real.exp (-(vasicekIntegratedMean r₀ (θ / κ) κ T)
+        + σ ^ 2 * vasicekBondV κ T / 2))
+      (𝓝[>] 0) (𝓝 (bondA (fun _ ↦ θ) σ T * Real.exp (-(T * r₀)))) := by
+  rw [bondA_const, ← Real.exp_add]
+  have hB := (tendsto_vasicekBondB_zero_meanReversion T).mono_left (nhdsGT_le_nhdsNE 0)
+  have hmean := ((tendsto_const_nhds (x := r₀)).mul hB).add
+    ((tendsto_const_nhds (x := θ)).mul
+      (tendsto_vasicekBondB_secondOrder_zero_meanReversion T))
+  have h := (hmean.neg.add
+    (((tendsto_const_nhds (x := σ ^ 2)).mul
+      (tendsto_vasicekBondV_zero_meanReversion T)).div_const 2)).rexp
+  convert h using 3
+  · simp only [vasicekIntegratedMean]
+    ring
+  · ring
 
 end MathFin.HoLee

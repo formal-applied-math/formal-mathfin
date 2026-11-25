@@ -46,6 +46,19 @@ One `full` entry in `benchmarks/interest_rates.json`. Corpus 906 → 907 on the 
   `t > 0`, calibration of `θ` to an initial curve and a change of measure are not treated.
   Axioms-clean, `full`.
 
+  Follow-up additions in the same module: the constant-drift coefficient
+  `A(T) = exp(−θ·T²/2 + σ²T³/6)` (`bondA_const`, with the drift loading
+  `∫₀ᵀ θ·(T−s) ds = θ·T²/2`, by the reflection substitution
+  (`integral_const_driftLoading`)); the
+  zero-drift identification `bondPrice_zero_drift` (at `θ ≡ 0` the Ho–Lee price is the driftless
+  price `brownianBondPrice_eq` of `VasicekZeroMeanReversionLimit.lean`); and the bridge
+  `tendsto_vasicekBondPrice_hoLee`: the Vasicek closed form at long-run level `θ/κ` — the level
+  rescaling that lets the drift `κ(θ/κ − r) → θ` survive vanishing mean reversion — tends to the
+  constant-drift Ho–Lee price as `κ → 0⁺`. A limit of the closed forms, not of random variables;
+  at level `0` the limit is the driftless price instead (`tendsto_vasicekBondPrice_brownianBondPrice`),
+  so the level, not the limit, carries the drift. The two added theorems carry curated
+  `#print axioms` guards in `MathFin/AxiomAudit.lean`.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

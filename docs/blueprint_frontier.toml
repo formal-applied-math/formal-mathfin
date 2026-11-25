@@ -240,7 +240,7 @@ label = "thm:affine-term-structure"
 title = "Affine term structure"
 statement = "A short-rate model whose bond prices have the form P(t,T) = exp(A(T−t) − B(T−t)r_t) is an affine term structure, a single abstraction of which the Vasicek, Ho–Lee and Hull–White models are instances."
 uses = ["thm:vasicek-bond-pde"]
-core = ["mf-affine-bond-pde-from-riccati"]
+core = ["mf-affine-bond-pde-from-riccati", "mf-holee-bond-price"]
 area = "valuation/term"
 family = "term"
 
