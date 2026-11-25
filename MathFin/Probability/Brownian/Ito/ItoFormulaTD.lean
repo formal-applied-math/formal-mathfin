@@ -446,6 +446,7 @@ theorem heat_solution_itoIntegral_rep
   obtain ⟨gfx, hgfx, h⟩ := ito_formula_td_L2_bddDeriv hB hBmeas hBcont T hf_t hf_tt hf_tx hf_x
     hf_xx hf_xxx hf_x_cont hf_xx_cont hbd_t hbd_x hbd_xx hbd_tt hbd_tx hbd_xxx
   refine ⟨gfx, hgfx, h.mono fun ω hω ↦ ?_⟩
-  simpa [hheat] using hω
+  simp only [hheat, integral_zero, add_zero] at hω
+  exact hω
 
 end MathFin
