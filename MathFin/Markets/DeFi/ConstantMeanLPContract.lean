@@ -131,12 +131,12 @@ theorem eval_constantMeanPayoff_eq_reserves (x y : ℝ) (w : ℝ≥0) (hx : 0 < 
   rw [show (1 - (w : ℝ)) * y ^ (1 - (w : ℝ)) * y ^ (w : ℝ)
       = (1 - (w : ℝ)) * (y ^ (1 - (w : ℝ)) * y ^ (w : ℝ)) from by ring, hye, hwe]
 
-/-- **The price of the constant-mean position is the discounted expectation of its mark.** In
-any market, paying the position of invariant `V` and weight `w` at `T` is worth, under any
-measure `Q`, the discounted expectation of the position's value at the observed price (its
-closed form is `eval_constantMeanPayoff`). The identity is algebraic in `V, w` and the price
-path; it says what a position costs where the mark is a value — `0 < V`, `0 < w < 1`,
-nonnegative prices — the hypotheses the theorems above carry. -/
+/-- **The price of the constant-mean position is the discounted expectation of its mark.**
+Paying the position of invariant `V` and weight `w` at `T` is worth, under the measure `Q`, the
+discounted expectation of the position's value at the observed price (its closed form is
+`eval_constantMeanPayoff`). The statement is unconditional, an unfolding of the market's price
+of a payment; the hypotheses `0 < V`, `0 < w < 1` and nonnegative prices matter only for
+reading the mark as a position value. -/
 theorem price_constantMeanPayoff {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω)
     (Q : Measure Ω) (T : ℝ≥0) (V : ℝ) (w : ℝ≥0) :
     M.price Q (.pay T (constantMeanPayoff V w T)) =

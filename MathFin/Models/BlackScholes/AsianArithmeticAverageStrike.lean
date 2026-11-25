@@ -14,8 +14,7 @@ public import MathFin.Probability.Martingales.CondExpCallJensen
 # Discrete arithmetic average-strike Asian option: a conditioning lower bound
 
 The payoff `(S_T − A)⁺` with `A = (1/N) ∑ᵢ S_{tᵢ}` has no exact closed form under geometric
-Brownian motion. The two-moment lognormal (Margrabe-type) approximation of `(S_T, A)` is biased
-low, so this file proves the pieces of a different device, a lower bound obtained by conditioning
+Brownian motion. This file proves the pieces of a lower bound obtained by conditioning
 in the manner of Rogers and Shi (1995): for a Gaussian variable `Z`, Jensen's inequality gives
 
   `E[(S_T − A)⁺] ≥ E[(E[S_T − A | Z])⁺]`.

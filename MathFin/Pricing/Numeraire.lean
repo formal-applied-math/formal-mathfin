@@ -138,7 +138,9 @@ theorem numeraireMeasure_absolutelyContinuous :
 /-- **`Q` is absolutely continuous with respect to the numéraire measure** when the numéraire
 terminals are measurable and positive (`B0 > 0`, `N0 > 0` included): the density
 `(N_T·B₀)/(N₀·B_T)` is then strictly positive at every state, so the a.e.-positivity
-hypothesis of the library's `absolutelyContinuous_withDensity_ofReal` holds everywhere. -/
+hypothesis of the library's `absolutelyContinuous_withDensity_ofReal` holds everywhere. This is
+the integrability-free half of `numeraireMeasure_isEquivProbMeasure`, which also takes the
+integrability and martingale hypotheses that make `Q^N` a probability measure. -/
 theorem numeraireMeasure_absolutelyContinuous' (hNTmeas : Measurable NT)
     (hBTmeas : Measurable BT) (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω)
     (hB0 : 0 < B0) (hN0 : 0 < N0) :

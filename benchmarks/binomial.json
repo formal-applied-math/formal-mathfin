@@ -885,7 +885,7 @@
       },
       "metadata": {
         "chapter": 9,
-        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, 11th ed., Pearson (2021), ch. 11 'Early exercise: puts' (slide-deck text run on disk; the closed forms are derived in the tree, not transcribed); J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financ. Econ. 7 (1979) 229-263; S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), 4.4",
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, 11th ed., Pearson (2021), ch. 11 'Early exercise: puts' (the closed forms are derived in the tree, not transcribed); J. C. Cox, S. A. Ross and M. Rubinstein, Option pricing: a simplified approach, J. Financ. Econ. 7 (1979) 229-263; S. E. Shreve, Stochastic Calculus for Finance I, Springer (2004), 4.4",
         "citations": [
           {
             "key": "Hull",

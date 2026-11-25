@@ -34,10 +34,8 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 * `upAndIn` — the discretely monitored up-and-in knock-in on a payoff `f`, from the running
   maximum `Payoff.obsMax` and `indicatorLt`.
 * `chooser` — the chooser option as the static portfolio of a call and a put at the chooser date.
-* `forwardStartCall` — the call whose strike is set at a reset date as a multiple of the observed
-  price, the first payoff in the language whose strike is an observation of the same underlying
-  at an earlier date (Margrabe's exchange option observes a strike leg of the other underlying
-  at maturity).
+* `forwardStartCall` — the call whose strike is set at a reset date `t₁` as the multiple `α` of the
+  then-observed price, paying `max (S_T − α S_{t₁}) 0` at `T`.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
 ## Main results

@@ -1268,11 +1268,10 @@ attribute [blueprint "def:fx-forward"
   (title := "The cost-of-carry forward")
   (statement := /-- $\mathsf{fxForward}(S, r_d, r_f, T) = Se^{(r_d-r_f)T}$: the forward, for
   delivery at $T$, of one unit of an asset at spot $S$ carrying a continuously compounded rate
-  $r_d$ against a carry yield $r_f$. One object, three readings: covered interest parity's FX
-  forward (foreign rate in the yield slot), the dividend-yield forward at effective rate
-  $r - q$, and the commodity cost-of-carry forward with convenience yield $\delta$. Derived
-  from no-arbitrage (`covered_interest_parity`) and equal to the risk-neutral expected
-  terminal (`uncovered_interest_parity`). -/)]
+  $r_d$ against a carry yield $r_f$. In its FX reading (the foreign rate in the yield slot) it
+  is derived from no-arbitrage (`covered_interest_parity`) and equal to the risk-neutral
+  expected terminal (`uncovered_interest_parity`); the commodity cost-of-carry forward with a
+  continuous convenience yield $\delta$ is the same formula. -/)]
   MathFin.fxForward
 
 attribute [blueprint "thm:futures-basis-convergence"
@@ -1283,7 +1282,8 @@ attribute [blueprint "thm:futures-basis-convergence"
   $r < \delta$ (backwardation, `fxForward_backwardation_iff`), the maturity curve is strictly
   increasing exactly when $r > \delta$ (`fxForward_strictMono_iff`), and the spot-minus-forward
   basis $S - F(T)$ vanishes at $T = 0$ and tends to $0$ as $T \to 0^+$
-  (`fxForward_basis_tendsto_zero`). -/)]
+  (`fxForward_basis_tendsto_zero`). The curve is the deterministic-rate forward; futures agree
+  with it only under deterministic rates (`thm:futures-forward-convexity` is the gap). -/)]
   MathFin.fxForward_contango_iff
 
 attribute [blueprint "thm:key-rate-duration"
@@ -1502,11 +1502,12 @@ attribute [blueprint "thm:balancer-invariant"
   on $X$, marked at the price $P$ of $X$ in $Y$, is worth $V P^w/(w^w (1-w)^{1-w})$ in $Y$
   (`constantMeanPayoff`, `eval_constantMeanPayoff`); at the pool's own spot price the mark is
   the reserves $xP + y$, the constant value distribution $B_Y/W_Y$
-  (`eval_constantMeanPayoff_eq_reserves`); in any market paying it at $T$ is worth the
-  discounted expectation of the mark (`price_constantMeanPayoff`); and at $w = 1/2$ the
-  position is the constant-product payoff of invariant $V^2$
+  (`eval_constantMeanPayoff_eq_reserves`, the tagged statement, which ties the pool's
+  invariant and spot price to the priced position); paying it at $T$ is worth the discounted
+  expectation of the mark (`price_constantMeanPayoff`); and at $w = 1/2$ the position is the
+  constant-product payoff of invariant $V^2$
   (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
-  MathFin.DeFi.price_constantMeanPayoff
+  MathFin.DeFi.eval_constantMeanPayoff_eq_reserves
 
 attribute [blueprint "def:v3-position-value"
   (title := "Value of a concentrated-liquidity position")

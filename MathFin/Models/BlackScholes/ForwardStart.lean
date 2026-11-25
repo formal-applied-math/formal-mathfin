@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -17,10 +17,7 @@ public import MathFin.Probability.Analysis.IndepFreezing
 
 A forward-start call sets its strike at a future reset date `t₁` as a fixed multiple `α` of the
 asset price then observed, and pays `max (S_T − α S_{t₁}) 0` at the maturity `T`
-(`forwardStartCall`, the first payoff in the language whose strike is an observation of the same
-underlying at an earlier date; Margrabe's exchange option observes a strike leg too, but of the
-other underlying at maturity).
-Under the risk-neutral
+(`forwardStartCall`). Under the risk-neutral
 dynamics the ratio `S_T / S_{t₁}` is a function of the Brownian increment `B_T − B_{t₁}`, which is
 independent of everything known at `t₁`, so the price factorizes (`condExp_mul_of_indep`): the
 discounted price at `t₁` freezes at its mean, and the payoff of the ratio keeps the law of a
@@ -92,22 +89,9 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     intro ω
     unfold pathAssets
     exact mul_nonneg hS₀.le (Real.exp_pos _).le
-  -- the standardized increment's law: the library's increment law, scaled by
-  -- Mathlib's Gaussian division lemma
   have hZlaw : HasLaw (fun ω ↦ (B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
-      (gaussianReal 0 1) Q := by
-    have hdiv := gaussianReal_div_const (hasLaw_increment hB.toIsPreBrownianReal ht₁T)
-      (Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
-    have h1 : ((T - t₁ : ℝ≥0) /
-        NNReal.mk ((Real.sqrt ((T : ℝ) - (t₁ : ℝ))) ^ 2) (sq_nonneg _)) = 1 := by
-      have hnn : (0 : ℝ) ≤ (T : ℝ) - (t₁ : ℝ) := sub_nonneg.2 (by exact_mod_cast ht₁T)
-      apply NNReal.eq
-      rw [NNReal.coe_div, NNReal.coe_mk, NNReal.coe_sub (by exact_mod_cast ht₁T)]
-      rw [Real.sq_sqrt hnn]
-      field_simp
-      exact NNReal.coe_one.symm
-    refine ⟨hdiv.aemeasurable, ?_⟩
-    rw [hdiv.map_eq, zero_div, h1]
+      (gaussianReal 0 1) Q :=
+    scaled_increment_law hB.toIsPreBrownianReal (by exact_mod_cast hτ)
   have hZ₁ : BSCallHyp Q S_0 1 r σ (t₁ : ℝ) (fun ω ↦ B t₁ ω / Real.sqrt (t₁ : ℝ)) := by
     simpa using BSCallHyp.of_isPreBrownian Q B hB.toIsPreBrownianReal hS₀ one_pos hσ ht₁
   have hZT : BSCallHyp Q S_0 1 r σ (T : ℝ) (fun ω ↦ B T ω / Real.sqrt (T : ℝ)) := by

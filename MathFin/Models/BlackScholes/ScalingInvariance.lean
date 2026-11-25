@@ -18,7 +18,7 @@ Two invariances of `bsd1`, `bsd2` and `bsV` that follow from the formulas alone.
   `d₁`, `d₂` and the closed form `bsV`. For zero rates and `c = τ` the scaling gives the
   dependence on `σ² τ` alone; `bsV_eq_totalVarianceCall`
   (`Models/ModelFree/CalendarArbitrage.lean`) is the corresponding statement through the
-  definition of `totalVarianceCall`, for `σ, τ > 0`.
+  definition of `totalVarianceCall`, for `σ, τ > 0`, proved there from `bsV_timeScale`.
 
 These are identities of the closed forms (the time-volatility rescaling for `c > 0`, the spatial
 homogeneity of `bsV` for every real `c` and of `d₁`, `d₂` for `c ≠ 0`). They hold at every

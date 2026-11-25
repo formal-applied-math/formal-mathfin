@@ -26,10 +26,17 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The 2026-11-25 merge
+
+Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
+917 entries: 871 full (from 866), 18 library wrappers, 28 reduced cores (from 22); 889 are
+delivery-ready (`full` + `library_wrapper`). The dated sections below record what each pull
+request added.
+
 ### The Ho–Lee bond price (2026-11-24)
 
-One `full` entry in `benchmarks/interest_rates.json`. Corpus 906 → 907 on the merged tree
-(866 full before, 867 after; 884 → 885 delivery-ready).
+One `full` entry in `benchmarks/interest_rates.json`. It adds one
+entry to the corpus.
 
 - **`mf-holee-bond-price`** (MathFin/Models/Rates/HoLeeBondPrice.lean): the zero-coupon bond price
   `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` of the Ho–Lee short rate `dr = θ(t) dt + σ dB` (continuous `θ`,
@@ -37,8 +44,8 @@ One `full` entry in `benchmarks/interest_rates.json`. Corpus 906 → 907 on the 
   `A(T)·exp(−T·r₀)` with the linear loading `B(T) = T` and
   `A(T) = exp(−∫₀ᵀ θ(s)(T−s) ds + σ²T³/6)` (`bondPrice_affine`). It is the instance
   `m = M(T)`, `c = σ`, `f = (T−u)` of `integral_exp_neg_add_mul_wienerIntegralLp`
-  (`bondPrice_eq`), with the kernel variance `∫₀ᵀ (T−u)² du = T³/3`
-  (`integral_integratedKernel_sq`) and the mean identity `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds =
+  (`bondPrice_eq`), with the kernel `T−u` and its variance `∫₀ᵀ (T−u)² du = T³/3` shared with the
+  driftless Gaussian model (`brownianIntegratedKernelLp_integral_sq`) and the mean identity `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds =
   r₀T + ∫₀ᵀ θ(s)(T−s) ds` by integration by parts (`integratedMean_eq`). Cited: Ho & Lee (1986),
   Brigo & Mercurio 2nd ed. §3.3.1. Disclosed out of scope: the integrated short rate is carried
   in its Wiener representation, as in the Vasicek and Hull–White files, so the Ho–Lee SDE and
@@ -61,7 +68,8 @@ One `full` entry in `benchmarks/interest_rates.json`. Corpus 906 → 907 on the 
 ### The numéraire density is the Radon–Nikodym derivative (2026-11-23)
 
 Three additive lemmas on `MathFin/Pricing/Numeraire.lean`. No corpus entry: the issue asks for
-the lemmas, and `mf-change-of-numeraire` already covers the node. Corpus 906 → 906.
+the lemmas, and `mf-change-of-numeraire` already covers the node. It adds no
+corpus entry.
 
 - **`numeraireMeasure_rnDeriv`** — for σ-finite `Q` and measurable numéraire terminals,
   `(numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q] numeraireDensity BT NT B0 N0`: the
@@ -80,15 +88,15 @@ instance, the Hull–White `S`-forward measure of `Models/Rates/TimingAdjustment
 numéraire between two numéraire measures; the lemmas are named for that reuse.
 ### Contango, backwardation and basis convergence (2026-11-23)
 
-One `full` entry in `benchmarks/commodities.json`. Corpus 906 → 907 on the merged tree
-(866 full before, 867 after; 884 → 885 delivery-ready).
+One `full` entry in `benchmarks/commodities.json`. It adds one
+entry to the corpus.
 
 - **`mf-contango-basis-convergence`** (MathFin/Models/Forwards/ContangoBackwardation.lean): the
   qualitative market structure of the cost-of-carry forward
   `fxForward S r δ T = S·e^{(r−δ)T}` — the covered-parity forward of `FxForwardParity.lean`
-  read with the commodity convenience yield `δ` in the foreign-rate slot (the same reading
-  `BlackScholes/Dividends.lean` gives its dividend yield `q`; the curve is derived there from
-  `forward_price_from_no_arbitrage` and `expected_terminal_eq_forward`, not re-posited here).
+  read with the commodity convenience yield `δ` in the foreign-rate slot (the curve is derived,
+  in its FX reading, from `forward_price_from_no_arbitrage` and `expected_terminal_eq_forward`,
+  not re-posited here; the commodity reading is the same formula, not a separate derivation).
   For spot `S > 0` and maturity `T > 0`: contango `S < F(T) ↔ δ < r`
   (`fxForward_contango_iff`), backwardation `F(T) < S ↔ r < δ`
   (`fxForward_backwardation_iff`), the forward meets the spot iff `r = δ`
@@ -108,8 +116,8 @@ One `full` entry in `benchmarks/commodities.json`. Corpus 906 → 907 on the mer
   of the respective chapter files), Kaldor (1939), Working (1949).
 ### American put early-exercise premium, strict (2026-11-24)
 
-One `full` entry in `benchmarks/binomial.json`. Corpus 906 → 907 on the branch (866 full
-before, 867 after; 18 library wrappers and 22 reduced cores unchanged).
+One `full` entry in `benchmarks/binomial.json`. It adds one
+entry to the corpus.
 
 - **`mf-american-put-premium`** (MathFin/Models/Binomial/AmericanPutPremium.lean): the American
   put is strictly worth more than the European put of the same strike and expiry in the binomial
@@ -136,7 +144,7 @@ before, 867 after; 18 library wrappers and 22 reduced cores unchanged).
 ### Forward-start call: Rubinstein's factorization (2026-11-24)
 
 One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier node
-`thm:forward-start-call`. Corpus 906 → 907 on this branch.
+`thm:forward-start-call`. It adds one entry to the corpus.
 
 - **`mf-forward-start-call`** (MathFin/Models/BlackScholes/ForwardStart.lean): the forward-start
   call — strike set at a reset date `t₁` as the multiple `α` of the observed price, payoff
@@ -148,17 +156,17 @@ One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier no
   (`condExp_mul_of_indep`); the frozen leg has the martingale mean `e^{−rt₁}𝔼[S_{t₁}] = S₀`
   (`discounted_terminal_eq_S0`) and the ratio leg is `bsV` on a unit spot
   (`integral_bsCall_payoff_eq_bsV`). The reified `forwardStartCall` contract is added to
-  `Contracts/Instruments/Options.lean` — the first payoff in the language whose strike is an
-  observation of the same underlying at an earlier date. What is not proved: the dividend-yield generalization (the market's asset pays no
+  `Contracts/Instruments/Options.lean`: the call whose strike is set at the reset date `t₁` as
+  the multiple `α` of the then-observed price. What is not proved: the dividend-yield generalization (the market's asset pays no
   dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
   whole-formula dividend scaling `S₀ e^{−qT}` and the ratio leg's rate `r − q`), and cliquets (a
-  series of forward starts) are out of scope. The Risk column is 4(2), February 1991, pp. 44–47
-  (per Hull's bibliography); the delivered closed form at
+  series of forward starts) are out of scope. Rubinstein's Risk column is cited as 4(2), February 1991,
+  pp. 44–47 as Hull's bibliography gives it, not checked against the original; the delivered closed form at
   `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
   computes.
 ### Balancer constant-mean invariant and spot price (2026-11-23)
 
-One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (866 → 867 full).
+One `full` entry in `benchmarks/defi.json`. It adds one entry to the corpus.
 
 - **`mf-balancer-invariant`** (MathFin/Markets/DeFi/ConstantMeanAMM.lean): the constant-mean
   (weighted-product) invariant `V = ∏ k, B k ^ w k` of a Balancer pool with reserves
@@ -197,19 +205,16 @@ One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (86
   constant-product payoff of invariant `V²`
   (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
   the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
-  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
+  tagged on `eval_constantMeanPayoff_eq_reserves` and the frontier entry is deleted; the node joins the
   trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
   (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
-  The value function was checked numerically against four independent routes (independent
-  invariant-curve solving, spot marking, swap-consistency via the module's own out-amount,
-  and the w = 1/2 reduction) before formalization. Axioms-clean, `full`.
+  Axioms-clean, `full`.
 ### Jarrow–Yildirim: the ZC inflation caplet and the YoY forward (2026-11-20)
 
 Two `reduced_core` entries in `benchmarks/interest_rates.json` (module
 `Models/Rates/JarrowYildirim.lean`), each composing existing results under model hypotheses (the
-module's variance lemmas are module-only, not corpus entries). Corpus 906 → 908 on the merged tree
-(reduced_core 22 → 24, interest_rates 3 → 5 reduced; delivery-ready 884, unchanged — both new
-entries are reduced cores).
+module's variance lemmas are module-only, not corpus entries). They add two
+reduced cores to the corpus.
 
 - **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
   inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the

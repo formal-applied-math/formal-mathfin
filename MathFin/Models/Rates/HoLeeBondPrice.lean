@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 WorldianAI. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: WorldianAI
+Authors: WorldianAI, Yang Ye, Raphael Coelho
 -/
 module
 
@@ -23,19 +23,21 @@ so `∫₀ᵀ r_s ds = M(T) + σ·∫₀ᵀ g(u) dB_u`, with deterministic mean 
 As in the Vasicek and Hull–White files, the integrated rate is carried in this Wiener
 representation (the time-order swap is the modelling bridge). The bond price is then a Gaussian
 Laplace transform, the instance `f = g` of `integral_exp_neg_add_mul_wienerIntegralLp`, and the
-variance of the diffusion part is `∫₀ᵀ (T − u)² du = T³/3`. The affine loading is `B(T) = T`, the
+variance of the diffusion part is `∫₀ᵀ (T − u)² du = T³/3`
+(`brownianIntegratedKernelLp_integral_sq`). The affine loading is `B(T) = T`, the
 `κ → 0` limit of Vasicek's `(1 − e^{−κT})/κ`.
 
 ## Main definitions
 
-* `integratedKernel`, `integratedKernelLp`: the kernel `g(u) = T − u` and its `L²((0, T])` element.
+* The kernel `g(u) = T − u` and its `L²((0, T])` element `brownianIntegratedKernelLp` are shared
+  with the driftless Gaussian model (`Models/Rates/VasicekZeroMeanReversionLimit.lean`): the
+  diffusion part does not see the drift.
 * `integratedMean`: the deterministic mean `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds` of the integrated rate.
 * `bondRate`: the integrated Ho–Lee short rate in its Wiener representation.
 * `bondA`: the affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)(T − s) ds + σ²T³/6)`.
 
 ## Main results
 
-* `integral_integratedKernel_sq`: `∫₀ᵀ (T − u)² du = T³/3`.
 * `integratedMean_eq`: for continuous `θ`, `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds = r₀·T + ∫₀ᵀ θ(s)(T − s) ds`.
 * `bondPrice_eq`: `𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²T³/6)`.
 * `bondPrice_affine`: the affine form `P(0, T) = A(T)·exp(−T·r₀)`, with `B(T) = T`.
@@ -70,47 +72,6 @@ open WienerIntegralL2
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
-
-/-! ### The integrated kernel -/
-
-/-- The **integrated Ho–Lee kernel** `g(u) = T − u = ∫_u^T 1 ds`, the deterministic integrand
-whose Wiener integral is the diffusion part of the integrated short rate. -/
-noncomputable def integratedKernel (T : ℝ) : ℝ → ℝ :=
-  fun u ↦ T - u
-
-/-- The integrated kernel is in `L²((0, T])`: on the support it lies in `[0, T]`. -/
-lemma integratedKernel_memLp (T : ℝ≥0) :
-    MemLp (integratedKernel T) 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) := by
-  refine (memLp_top_of_bound (by unfold integratedKernel; fun_prop) (T : ℝ) ?_).mono_exponent
-    le_top
-  refine (ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ ?_)
-  intro s hs
-  rw [integratedKernel, Real.norm_eq_abs, abs_of_nonneg (by linarith [hs.2])]
-  linarith [hs.1]
-
-/-- The integrated kernel as an element of `L²((0, T])`. -/
-noncomputable def integratedKernelLp (T : ℝ≥0) :
-    Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
-  (integratedKernel_memLp T).toLp _
-
-/-- The variance integral: `∫₀ᵀ (T − u)² du = T³/3`. -/
-lemma integral_integratedKernel_sq (T : ℝ≥0) :
-    ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (integratedKernel (T : ℝ) u) ^ 2 ∂volume
-      = (T : ℝ) ^ 3 / 3 := by
-  rw [← intervalIntegral.integral_of_le T.coe_nonneg]
-  simp only [integratedKernel]
-  rw [intervalIntegral.integral_comp_sub_left (fun x : ℝ ↦ x ^ 2) (T : ℝ)]
-  simp [integral_pow]
-  norm_num
-
-/-- `∫₀ᵀ g² = T³/3` for the `L²` representative of the kernel (a.e. equal to the honest kernel). -/
-lemma integratedKernelLp_integral_sq (T : ℝ≥0) :
-    (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (integratedKernelLp T u) ^ 2 ∂volume)
-      = (T : ℝ) ^ 3 / 3 := by
-  rw [← integral_integratedKernel_sq T]
-  refine integral_congr_ae ?_
-  filter_upwards [(integratedKernel_memLp T).coeFn_toLp] with u hu
-  rw [integratedKernelLp, hu]
 
 /-! ### The deterministic mean -/
 
@@ -156,7 +117,7 @@ lemma integratedMean_eq {θ : ℝ → ℝ} (hθ : Continuous θ) (r₀ t : ℝ) 
 `∫₀ᵀ r_s ds = M(T) + σ·∫₀ᵀ (T − u) dB_u`. -/
 noncomputable def bondRate (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (σ r₀ : ℝ) (T : ℝ≥0)
     (ω : Ω) : ℝ :=
-  integratedMean θ r₀ (T : ℝ) + σ * (wienerIntegralLp B hB T (integratedKernelLp T) ω)
+  integratedMean θ r₀ (T : ℝ) + σ * (wienerIntegralLp B hB T (brownianIntegratedKernelLp T) ω)
 
 /-- **The Ho–Lee bond price** as the exponential-Gaussian moment:
 `P(0, T) = 𝔼[exp(−∫₀ᵀ r_s ds)] = exp(−M(T) + σ²·T³/6)`. It is the instance `m = M(T)`, `c = σ`,
@@ -165,7 +126,7 @@ theorem bondPrice_eq (hB : IsPreBrownianReal B μ) (θ : ℝ → ℝ) (σ r₀ :
     ∫ ω, Real.exp (-(bondRate hB θ σ r₀ T ω)) ∂μ
       = Real.exp (-(integratedMean θ r₀ (T : ℝ)) + σ ^ 2 * ((T : ℝ) ^ 3 / 3) / 2) :=
   (integral_exp_neg_add_mul_wienerIntegralLp hB T (integratedMean θ r₀ (T : ℝ)) σ
-    (integratedKernelLp T)).trans <| by rw [integratedKernelLp_integral_sq T]
+    (brownianIntegratedKernelLp T)).trans <| by rw [brownianIntegratedKernelLp_integral_sq T]
 
 /-- The Ho–Lee affine coefficient `A(T) = exp(−∫₀ᵀ θ(s)·(T − s) ds + σ²·T³/6)`: the
 `θ`-forcing integral and half the variance `σ²T³/3`. -/

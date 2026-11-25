@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -31,8 +31,8 @@ log-variance (a free input of the caplet statement), `F₀` the `Q^T`-mean of th
 distribution function and `d_{1,2} = (log(F/K) ± V/2)/√V`. These symbols (`t`, `T`, `S`, `I_t`,
 `I₀`, `I_S`, `I_T`, `σ_·`, `a_·`, `ρ_{··}`, `B_x(t,T)`, `Qn`, `B_T`, `𝔼^{Qn}`, `Q^T`, `𝔼^T`,
 `Pⁿ(t,T)`, `Pʳ(t,T)`, `F(t,T)`, `F`, `V`, `V(0,T)`, `F₀`, `Z`, `K`, `Φ`, `d_{1,2}`) keep these
-meanings in every docstring below, except in the general lemmas `quad2_nonneg`, `quad3_nonneg` and
-`blackCaplet_sqrt_variance`, whose letters are free arguments; hypothesis names (`hident`, `hZ`,
+meanings in every docstring below, except in the general lemmas `quad2_nonneg` and `quad3_nonneg`,
+whose letters are free arguments; hypothesis names (`hident`, `hZ`,
 `hmart`, `hR`) and local symbols (`μ`, `m`, `m_S`, `R_S`, `yⁱ`, `Dⁱ`, ...) are introduced where
 first used. This module records what follows without the SDE calculus.
 
@@ -278,33 +278,6 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
     simp [div_eq_inv_mul]
   rw [key']
-
-/-- **Black caplet at total variance.** (Here `F, K, σ, T, α` are free arguments of `blackCaplet`.)
-At maturity `1`, the Black caplet at total variance `σ²T` is the Black caplet at volatility `σ` and
-maturity `T` (`σ > 0`, `T > 0`): `√(σ²T) = σ√T`, and `bsd1`, `bsd2` depend on `(σ, T)` only through
-`σ√T` and `σ²T`. A general Black-76 fact (`σ` and `T` enter only through `σ√T`); it is stated here
-to keep this module self-contained, its natural home is next to `blackCaplet` in
-`Models/Forwards/Black76.lean`, and the same step appears inline in `bsV_eq_totalVarianceCall`. This
-is an identity of the total function `blackCaplet`: it has a financial meaning only for `F, K > 0`
-(`log(F/K)` is junk otherwise). `σ > 0` excludes `σ ≤ 0` (for `σ < 0`, `√(σ²T) = |σ|√T ≠ σ√T`; at
-`σ = 0` both sides are junk `x/0`), and `T > 0` excludes the corner `T = 0`, where both sides are
-junk `x/0` rather than the intrinsic value. -/
-theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 < σ) (hT : 0 < T) :
-    blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
-  have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
-    rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ.le]
-  have hsq : (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T := by
-    rw [mul_pow, Real.sq_sqrt hT.le]
-  have hd1 : bsd1 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd1 F K 0 σ T := by
-    rw [hs]
-    unfold bsd1
-    rw [Real.sqrt_one, mul_one, hsq]
-    ring_nf
-  have hd2 : bsd2 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd2 F K 0 σ T := by
-    unfold bsd2
-    rw [hd1, hs, Real.sqrt_one, mul_one]
-  unfold blackCaplet
-  rw [hd1, hd2]
 
 /-- **Deterministic rates reduce the caplet to `Pⁿ(0,T)` times the Black caplet at the index
 volatility.** With `σ_r = σ_n = 0`, `σ_I > 0` and `T > 0`, `jyVariance … = σ_I²T`

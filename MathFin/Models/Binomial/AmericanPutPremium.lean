@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -14,10 +14,11 @@ public import MathFin.Models.Binomial.AmericanMarket
 /-!
 # The American put early-exercise premium in the binomial tree
 
-With a positive interest rate the American put is worth strictly more than the European put of
-the same strike and expiry whenever the tree contains a node, reached with positive
-probability, at which immediate exercise is worth strictly more than holding on: the put
-counterpart of `MertonAmericanCallTree`'s American call = European call.
+The American put is strictly worth more than the European put of the same strike and expiry
+whenever the tree contains a node, reached with positive probability, at which immediate
+exercise is worth strictly more than the discounted continuation; with `r > 0` every
+deep-in-the-money tree has one at the root. This is the put counterpart of
+`MertonAmericanCallTree`'s American call = European call.
 
 Three steps. Deep in the money (the spot so low that the whole remaining subtree, including
 every up-move, ends in the money: `S * u ^ n ≤ K`), both prices are closed forms: the American
@@ -78,9 +79,6 @@ composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
 * [S. E. Shreve, *Stochastic Calculus for Finance I: The Binomial Asset Pricing Model*][ShreveSCFI],
   4.4
 
-The Hull chapter is available here as the slide deck's text run, which carries section titles
-but no formulas; the closed forms above are derived in the tree, not transcribed.
-
 ## Tags
 
 American put, early exercise, early-exercise premium, binomial tree, optimal exercise,
@@ -94,6 +92,39 @@ namespace MathFin
 open Real
 
 /-! ### Deep in the money: both prices in closed form -/
+
+/-- Both children of a node whose whole subtree ends in the money stay in the money for the
+remaining `n` steps: `S * u ^ (n + 1) ≤ K` gives `(S * u) * u ^ n ≤ K` and
+`(S * d) * u ^ n ≤ K`. -/
+private lemma mul_pow_children_le {u d r K S : ℝ} (h : BinomialNoArb u d r) (hS : 0 < S)
+    (n : ℕ) (hSK : S * u ^ (n + 1) ≤ K) :
+    (S * u) * u ^ n ≤ K ∧ (S * d) * u ^ n ≤ K := by
+  refine ⟨?_, ?_⟩
+  · rw [mul_assoc, mul_comm u (u ^ n), ← pow_succ]; exact hSK
+  · have h1 : (S * d) * u ^ n = d * (S * u ^ n) := by ring
+    have h2 : u * (S * u ^ n) = S * u ^ (n + 1) := by
+      rw [show u * (S * u ^ n) = S * (u ^ n * u) from by ring, ← pow_succ]
+    have h3 : d * (S * u ^ n) ≤ u * (S * u ^ n) :=
+      mul_le_mul_of_nonneg_right h.d_lt_u.le
+        (mul_nonneg hS.le (pow_nonneg h.u_pos.le n))
+    calc (S * d) * u ^ n = d * (S * u ^ n) := h1
+      _ ≤ u * (S * u ^ n) := h3
+      _ = S * u ^ (n + 1) := h2
+      _ ≤ K := hSK
+
+/-- The one-period price of the two intrinsic children `K - S * u`, `K - S * d` is the discounted
+strike minus the spot: `K * e^{-r} − S`, since the risk-neutral expectation of the next spot is
+`S * e^r` (`crrUpProb_mul_up_add`). -/
+private lemma binomialOptionPriceOnePeriod_intrinsic {u d r : ℝ} (h : BinomialNoArb u d r)
+    (K S : ℝ) :
+    binomialOptionPriceOnePeriod u d r (K - S * u) (K - S * d) = K * Real.exp (-r) - S := by
+  unfold binomialOptionPriceOnePeriod
+  rw [show crrUpProb u d r * (K - S * u) + (1 - crrUpProb u d r) * (K - S * d)
+      = K - S * (crrUpProb u d r * u + (1 - crrUpProb u d r) * d) from by ring,
+    crrUpProb_mul_up_add u d r h]
+  rw [show Real.exp (-r) * (K - S * Real.exp r)
+      = K * Real.exp (-r) - S * (Real.exp (-r) * Real.exp r) from by ring,
+    ← Real.exp_add, neg_add_cancel, Real.exp_zero, mul_one]
 
 /-- **The European put deep in the money is the discounted strike minus the spot.** When the
 spot is so low that the whole remaining subtree ends in the money (`0 < S` and `S * u ^ n ≤ K`,
@@ -114,19 +145,7 @@ theorem binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money
   | succ n ih =>
     intro S hS hSK
     rw [binomialPrice_succ_eq_onePeriod]
-    have hup : (S * u) * u ^ n ≤ K := by
-      rw [mul_assoc, mul_comm u (u ^ n), ← pow_succ]; exact hSK
-    have hdp : (S * d) * u ^ n ≤ K := by
-      have h1 : (S * d) * u ^ n = d * (S * u ^ n) := by ring
-      have h2 : u * (S * u ^ n) = S * u ^ (n + 1) := by
-        rw [show u * (S * u ^ n) = S * (u ^ n * u) from by ring, ← pow_succ]
-      have h3 : d * (S * u ^ n) ≤ u * (S * u ^ n) :=
-        mul_le_mul_of_nonneg_right h.d_lt_u.le
-          (mul_nonneg hS.le (pow_nonneg h.u_pos.le n))
-      calc (S * d) * u ^ n = d * (S * u ^ n) := h1
-        _ ≤ u * (S * u ^ n) := h3
-        _ = S * u ^ (n + 1) := h2
-        _ ≤ K := hSK
+    obtain ⟨hup, hdp⟩ := mul_pow_children_le h hS n hSK
     rw [ih (S * u) (mul_pos hS h.u_pos) hup, ih (S * d) (mul_pos hS h.d_pos) hdp]
     have hmart := crrUpProb_mul_up_add u d r h
     unfold binomialOptionPriceOnePeriod
@@ -162,22 +181,9 @@ theorem americanPutPrice_eq_intrinsic_of_deep_in_the_money
     rw [americanPrice_zero, max_eq_left (by linarith)]
   | succ n ih =>
     intro S hS hSK
-    have hup : (S * u) * u ^ n ≤ K := by
-      rw [mul_assoc, mul_comm u (u ^ n), ← pow_succ]; exact hSK
-    have hdp : (S * d) * u ^ n ≤ K := by
-      have h1 : (S * d) * u ^ n = d * (S * u ^ n) := by ring
-      have h2 : u * (S * u ^ n) = S * u ^ (n + 1) := by
-        rw [show u * (S * u ^ n) = S * (u ^ n * u) from by ring, ← pow_succ]
-      have h3 : d * (S * u ^ n) ≤ u * (S * u ^ n) :=
-        mul_le_mul_of_nonneg_right h.d_lt_u.le
-          (mul_nonneg hS.le (pow_nonneg h.u_pos.le n))
-      calc (S * d) * u ^ n = d * (S * u ^ n) := h1
-        _ ≤ u * (S * u ^ n) := h3
-        _ = S * u ^ (n + 1) := h2
-        _ ≤ K := hSK
+    obtain ⟨hup, hdp⟩ := mul_pow_children_le h hS n hSK
     rw [americanPrice_succ, ih (S * u) (mul_pos hS h.u_pos) hup,
       ih (S * d) (mul_pos hS h.d_pos) hdp]
-    have hmart := crrUpProb_mul_up_add u d r h
     have hKpos : 0 < K := lt_of_lt_of_le (mul_pos hS (pow_pos h.u_pos _)) hSK
     have hexp : Real.exp (-r) ≤ 1 := by
       rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
@@ -188,15 +194,7 @@ theorem americanPutPrice_eq_intrinsic_of_deep_in_the_money
         exact Real.exp_le_exp.mpr (by linarith)
       exact one_le_pow₀ (le_trans h1 h.lt_u.le)
     have hSle : S ≤ K := le_trans (le_mul_of_one_le_right hS.le hu1) hSK
-    have hcont : binomialOptionPriceOnePeriod u d r (K - S * u) (K - S * d)
-        = K * Real.exp (-r) - S := by
-      unfold binomialOptionPriceOnePeriod
-      rw [show crrUpProb u d r * (K - S * u) + (1 - crrUpProb u d r) * (K - S * d)
-          = K - S * (crrUpProb u d r * u + (1 - crrUpProb u d r) * d) from by ring,
-        hmart]
-      rw [show Real.exp (-r) * (K - S * Real.exp r)
-          = K * Real.exp (-r) - S * (Real.exp (-r) * Real.exp r) from by ring,
-        ← Real.exp_add, neg_add_cancel, Real.exp_zero, mul_one]
+    have hcont := binomialOptionPriceOnePeriod_intrinsic h K S
     rw [hcont, show max (K - S) 0 = K - S from max_eq_left (by linarith),
       max_eq_left (by nlinarith)]
 
@@ -437,33 +435,13 @@ theorem immediate_exercise_gt_continuation_of_deep_in_the_money
     exact Real.exp_lt_exp.mpr (by linarith)
   have huN : S * u ^ ((N - 1) + 1) ≤ K := by
     rw [show (N - 1) + 1 = N from by omega]; exact hSK
-  have hup : (S * u) * u ^ (N - 1) ≤ K := by
-    rw [mul_assoc, mul_comm u (u ^ (N - 1)), ← pow_succ]; exact huN
-  have hdp : (S * d) * u ^ (N - 1) ≤ K := by
-    have h1 : (S * d) * u ^ (N - 1) = d * (S * u ^ (N - 1)) := by ring
-    have h2 : u * (S * u ^ (N - 1)) = S * u ^ ((N - 1) + 1) := by
-      rw [show u * (S * u ^ (N - 1)) = S * (u ^ (N - 1) * u) from by ring, ← pow_succ]
-    have h3 : d * (S * u ^ (N - 1)) ≤ u * (S * u ^ (N - 1)) :=
-      mul_le_mul_of_nonneg_right h.d_lt_u.le
-        (mul_nonneg hS.le (pow_nonneg h.u_pos.le (N - 1)))
-    calc (S * d) * u ^ (N - 1) = d * (S * u ^ (N - 1)) := h1
-      _ ≤ u * (S * u ^ (N - 1)) := h3
-      _ = S * u ^ ((N - 1) + 1) := h2
-      _ ≤ K := huN
+  obtain ⟨hup, hdp⟩ := mul_pow_children_le h hS (N - 1) huN
   rw [show N - 0 - 0 - 1 = N - 1 from by omega,
     americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) (N - 1) (S * u)
       (mul_pos hS h.u_pos) hup,
     americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) (N - 1) (S * d)
       (mul_pos hS h.d_pos) hdp]
-  have hcont : binomialOptionPriceOnePeriod u d r (K - S * u) (K - S * d)
-      = K * Real.exp (-r) - S := by
-    unfold binomialOptionPriceOnePeriod
-    rw [show crrUpProb u d r * (K - S * u) + (1 - crrUpProb u d r) * (K - S * d)
-        = K - S * (crrUpProb u d r * u + (1 - crrUpProb u d r) * d) from by ring,
-      crrUpProb_mul_up_add u d r h]
-    rw [show Real.exp (-r) * (K - S * Real.exp r)
-        = K * Real.exp (-r) - S * (Real.exp (-r) * Real.exp r) from by ring,
-      ← Real.exp_add, neg_add_cancel, Real.exp_zero, mul_one]
+  have hcont := binomialOptionPriceOnePeriod_intrinsic h K S
   have hu1 : (1 : ℝ) ≤ u := by
     have h1 : (1 : ℝ) ≤ Real.exp r := by
       rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]

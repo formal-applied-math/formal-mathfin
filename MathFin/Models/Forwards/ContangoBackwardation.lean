@@ -12,11 +12,14 @@ public import MathFin.Models.Forwards.FxForwardParity
 
 The cost-of-carry forward of a commodity spot `S` with financing rate `r` and convenience
 yield `δ` is `F(T) = S·e^{(r−δ)T}` — the library's `fxForward S r δ`, where the yield sits in
-the slot of the foreign rate of covered interest parity (the same formula the dividend-yield
-machinery of `BlackScholes/Dividends.lean` carries at the effective rate `r − q`). The forward
-itself is derived, not posited: `covered_interest_parity` gets it from
-`forward_price_from_no_arbitrage` and `uncovered_interest_parity` from
-`expected_terminal_eq_forward`. This module adds the qualitative market structure that formula
+the slot of the foreign rate of covered interest parity. The forward is derived, not posited,
+in that FX reading: `covered_interest_parity` gets it from `forward_price_from_no_arbitrage` and
+`uncovered_interest_parity` from `expected_terminal_eq_forward`. The commodity reading is the
+same formula, not a separate derivation: `δ` is a continuous multiplicative yield, whereas
+`TheoryOfStorage.lean`'s convenience yield `Y` is an additive amount paid at delivery, and no
+bridge between the two is proved. The forward is the deterministic-rate curve; futures and
+forwards agree only under deterministic rates (`thm:futures-forward-convexity` is the gap).
+This module adds the qualitative market structure that formula
 induces, for `S > 0`:
 
 * **Contango** (forward above spot, a normal market): `F(T) > S ⟺ δ < r`, at any positive
