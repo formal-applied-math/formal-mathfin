@@ -202,15 +202,6 @@ uses = ["thm:aave-liquidation-kmv"]
 area = "risk/credit"
 family = "mechanisms"
 
-[[node]]
-label = "thm:balancer-invariant"
-title = "Balancer constant-mean AMM"
-statement = "In Balancer's constant-mean automated market maker, trades preserve the weighted product ∏ Bᵢ^{wᵢ} of the reserves Bᵢ with weights wᵢ summing to one, and the spot price of one asset in terms of another is the ratio of their reserve-to-weight ratios."
-uses = ["thm:impermanent-loss"]
-area = "valuation/model-free"
-family = "mechanisms"
-core = ["mf-balancer-invariant"]
-
 
 [[node]]
 label = "thm:compound-exchange-rate-bridge"

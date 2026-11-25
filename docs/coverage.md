@@ -50,6 +50,26 @@ One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (86
   that makes `V` a portfolio value, the constant-value-share theorem, In-Given-Out,
   In-Given-Price and liquidity provision are not formalized. Axioms-clean, `full`.
 
+  **Delivered 2026-11-25 (bridge; the node closes)**: `MathFin/Markets/DeFi/ConstantMeanLPContract.lean`
+  reprices the two-token position through the payoff language, the way `LPContract.lean`
+  reprices the constant-product and concentrated-liquidity positions. Proved: the position of
+  invariant `V` and weight `w` on X, marked at the price `P` of X in Y, is worth
+  `V P^w/(w^w(1-w)^(1-w))` in Y (`constantMeanPayoff`, `eval_constantMeanPayoff`); the
+  marking identity — at the pool's own spot price the mark is the reserves `xP + y`, the
+  whitepaper's constant value distribution `B_Y/W_Y`
+  (`eval_constantMeanPayoff_eq_reserves`, stated via the library's `spotPrice` and
+  `constantMeanInvariant`); paying it at `T` is worth the discounted expectation of the mark
+  in any market (`price_constantMeanPayoff`); and at `w = 1/2` the position *is* the
+  constant-product payoff of invariant `V²`
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
+  the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
+  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
+  trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
+  (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
+  The value function was checked numerically against four independent routes (independent
+  invariant-curve solving, spot marking, swap-consistency via the module's own out-amount,
+  and the w = 1/2 reduction) before formalization. Axioms-clean, `full`.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

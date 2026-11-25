@@ -1065,18 +1065,22 @@
   "label": "thm:interest-rate-parity",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Models/Forwards/FxForwardParity.lean"},
- {"uses": [],
-  "title": "Separation theorem for closed convex cones",
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "Balancer constant-mean AMM",
   "text":
-  "In $\\mathbb{R}^\\iota$ with $\\iota$ finite, if $C$ is a closed convex cone\n  and $x_0 \\notin C$, there is $p$ with $\\langle p, v\\rangle \\le 0$ for all $v \\in C$ and\n  $\\langle p, x_0\\rangle > 0$. The engine of the finite-state representation of coherent risk\n  measures. Finite dimension only.",
-  "name": "MathFin.exists_separating_of_not_mem_cone",
-  "module": "MathFin.Pricing.Duality.ConvexDuality",
-  "line": 135,
+  "In a constant-mean pool with reserves $B_k > 0$ and weights $w_k > 0$, a\n  swap of $\\Delta$ of token $i$ in for the out-amount of token $j$ out preserves the weighted\n  product $\\prod_k B_k^{w_k}$ of the reserves (`swap_preserves_constantMean`), and the spot\n  price of token $i$ in terms of token $j$ is the ratio of reserve-to-weight ratios\n  $(B_j/w_j)/(B_i/w_i)$, derived as the marginal rate of the out-amount at zero trade\n  (`hasDerivAt_swapOut_zero`). At two tokens with equal weights the invariant squared is the\n  constant product $x \\cdot y$, the spot price is the reserve ratio $y/x$ and the out-amount\n  is $y\\Delta/(x+\\Delta)$ (`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,\n  `swapOut_two_eq_swapOutput`). Priced: the two-token position of invariant $V$ and weight $w$\n  on $X$, marked at the price $P$ of $X$ in $Y$, is worth $V P^w/(w^w (1-w)^{1-w})$ in $Y$\n  (`constantMeanPayoff`, `eval_constantMeanPayoff`); at the pool's own spot price the mark is\n  the reserves $xP + y$, the constant value distribution $B_Y/W_Y$\n  (`eval_constantMeanPayoff_eq_reserves`); in any market paying it at $T$ is worth the\n  discounted expectation of the mark (`price_constantMeanPayoff`); and at $w = 1/2$ the\n  position is the constant-product payoff of invariant $V^2$\n  (`constantMeanPayoff_one_half_eq_constantProductPayoff`).",
+  "name": "MathFin.DeFi.price_constantMeanPayoff",
+  "module": "MathFin.Markets.DeFi.ConstantMeanLPContract",
+  "line": 134,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:cone-separation",
+  "label": "thm:balancer-invariant",
   "file":
-  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Pricing/Duality/ConvexDuality.lean"},
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Markets/DeFi/ConstantMeanLPContract.lean"},
  {"uses": [],
   "title": "Expected utility",
   "text":
@@ -1089,6 +1093,18 @@
   "label": "def:expected-utility",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+ {"uses": [],
+  "title": "Separation theorem for closed convex cones",
+  "text":
+  "In $\\mathbb{R}^\\iota$ with $\\iota$ finite, if $C$ is a closed convex cone\n  and $x_0 \\notin C$, there is $p$ with $\\langle p, v\\rangle \\le 0$ for all $v \\in C$ and\n  $\\langle p, x_0\\rangle > 0$. The engine of the finite-state representation of coherent risk\n  measures. Finite dimension only.",
+  "name": "MathFin.exists_separating_of_not_mem_cone",
+  "module": "MathFin.Pricing.Duality.ConvexDuality",
+  "line": 135,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:cone-separation",
+  "file":
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Pricing/Duality/ConvexDuality.lean"},
  {"uses": [],
   "title": "The superhedging price dominates every martingale price",
   "text":
@@ -1181,6 +1197,24 @@
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
  {"uses":
   ["def:market",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "Bachelier call price formula",
+  "text":
+  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
+  "name": "MathFin.Bachelier.price_europeanCall",
+  "module": "MathFin.Models.Bachelier.BachelierMarket",
+  "line": 144,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bachelier-call",
+  "file":
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Models/Bachelier/BachelierMarket.lean"},
+ {"uses":
+  ["def:market",
    "def:standard-normal-cdf",
    "def:contract",
    "def:pricing-functional",
@@ -1198,24 +1232,6 @@
   "label": "thm:jump-diffusion-price",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Models/Jumps/Market.lean"},
- {"uses":
-  ["def:market",
-   "def:brownian-motion",
-   "def:standard-normal-cdf",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "Bachelier call price formula",
-  "text":
-  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
-  "name": "MathFin.Bachelier.price_europeanCall",
-  "module": "MathFin.Models.Bachelier.BachelierMarket",
-  "line": 144,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bachelier-call",
-  "file":
-  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Models/Bachelier/BachelierMarket.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1897,6 +1913,18 @@
   "label": "thm:breeden-litzenberger",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Models/LocalVol/Dupire.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Bracket of the Itô integral",
+  "text":
+  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
+  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
+  "module": "MathFin.Probability.Martingales.BracketCompensator",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bracket-compensator",
+  "file":
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -1932,18 +1960,6 @@
   "label": "thm:key-rate-market-price",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Models/Rates/DeterministicMarket.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Bracket of the Itô integral",
-  "text":
-  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
-  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
-  "module": "MathFin.Probability.Martingales.BracketCompensator",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bracket-compensator",
-  "file":
-  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses":
   ["def:brownian-motion",
    "def:standard-normal-cdf",
@@ -2026,42 +2042,6 @@
   "label": "thm:quantile-elicitability",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Risk/Elicitability.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Lévy's characterization of Brownian motion",
-  "text":
-  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
-  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
-  "module": "MathFin.Probability.Brownian.LevyCharacterization",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:levy-characterization",
-  "file":
-  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Probability/Brownian/LevyCharacterization.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Martingale representation theorem",
-  "text":
-  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
-  "name": "MathFin.martingale_representation",
-  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:martingale-representation",
-  "file":
-  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
- {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
-  "title": "Tangent portfolio",
-  "text":
-  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
-  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
-  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:tangent-portfolio-efficient",
-  "file":
-  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -2081,6 +2061,42 @@
   "label": "thm:market-completeness",
   "file":
   "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Pricing/MarketCompleteness.lean"},
+ {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
+  "title": "Tangent portfolio",
+  "text":
+  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
+  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
+  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:tangent-portfolio-efficient",
+  "file":
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Martingale representation theorem",
+  "text":
+  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
+  "name": "MathFin.martingale_representation",
+  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:martingale-representation",
+  "file":
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Lévy's characterization of Brownian motion",
+  "text":
+  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
+  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
+  "module": "MathFin.Probability.Brownian.LevyCharacterization",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:levy-characterization",
+  "file":
+  "/var/home/yangye/devv/study/mathfin-wave5-balancer-amm/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes Greeks",
   "text":

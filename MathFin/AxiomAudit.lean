@@ -3222,3 +3222,21 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.DeFi.swapOut_lt_reserve' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.swapOut_lt_reserve
+
+/-! ### Constant-mean LP position, priced (2026-11-25) -/
+
+/-- info: 'MathFin.DeFi.eval_constantMeanPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.eval_constantMeanPayoff
+
+/-- info: 'MathFin.DeFi.eval_constantMeanPayoff_eq_reserves' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.eval_constantMeanPayoff_eq_reserves
+
+/-- info: 'MathFin.DeFi.price_constantMeanPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_constantMeanPayoff
+
+/-- info: 'MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff
