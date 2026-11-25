@@ -1708,7 +1708,8 @@ attribute [blueprint "thm:apt-pricing"
   no-arbitrage condition (`exactFactorNoArbitrage_of_pricingMeasure`), and the condition
   yields the decomposition by finite-dimensional duality. At unit prices the decomposition is
   `exists_premia_of_exactFactorNoArbitrage`, with $\lambda_0$ the payoff of a zero-loading
-  asset (`lam0_eq_of_zeroLoadingAsset`); with the market portfolio as the single factor, the
+  asset $i_0$ on the set (`lam0_eq_of_zeroLoadingAsset`); with the market portfolio as the
+  single factor, the
   loading the CAPM beta, the tangency first-order condition, and a zero-loading asset and a
   nonzero-loading asset on the set, every premia decomposition takes the security market
   line's form: the factor premium is the market's expected excess return and the intercept is
