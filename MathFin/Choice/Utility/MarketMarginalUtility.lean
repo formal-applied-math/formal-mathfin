@@ -24,6 +24,11 @@ portfolio at which the expected log-wealth is stationary on the budget set
 measure. The hypothesis is the first-order condition. A local maximum of the expected log-wealth
 on the budget set gives it (`foc_of_isLocalMaxOn_log`), so the theorems apply at an optimum.
 
+## Main definitions
+
+* `Market.IsFiniteComplete`: the standing hypotheses on a finite market's start and span: full
+  support of `P`, deterministic initial numéraire and prices, and completeness.
+
 ## Main results
 
 * `Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary`: in a complete market on a finite
