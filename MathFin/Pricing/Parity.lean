@@ -33,6 +33,8 @@ The Black–Scholes forward (`BlackScholes.value_forward`) is an instance of the
 * `value_forward_of_integral`, `value_forward_of_martingale` — the forward is worth `S₀ − K D(T)`.
 * `value_europeanCall_sub_put_of_integral`, `value_europeanCall_sub_put_of_martingale` —
   call minus put is `S₀ − K D(T)`.
+* `integral_call_sub_put` — the same payoff identity integrated against any law: the one proof
+  that the model files' parities (`jumpDiffusionCallPrice_eq`) instantiate.
 
 ## Source
 
@@ -142,6 +144,23 @@ theorem value_europeanCall_sub_put_of_integral [IsProbabilityMeasure Q]
   rw [value_europeanCall_eq_put_add_forward Q (fun t _ ↦ D t) X (integrable_europeanPut_pathPV hX)
     (integrable_forward_pathPV hX), value_forward_of_integral hX hS₀]
   ring
+
+/-- **The payoff identity of put–call parity, integrated.** For any probability measure and any
+integrable underlying `f`, the discounted call payoff minus the discounted put payoff integrates to
+`c (∫ f − K)`: pointwise `(f − K)⁺ − (K − f)⁺ = f − K`
+(`max_zero_sub_max_neg_zero_eq_self`). It is the model-free parity at the level of laws, which
+`value_europeanCall_sub_put_of_integral` states for contract values. -/
+theorem integral_call_sub_put {μ : Measure Ω} [IsProbabilityMeasure μ] {f : Ω → ℝ}
+    (hf : Integrable f μ) (c K : ℝ) :
+    ∫ ω, c * max (f ω - K) 0 ∂μ - ∫ ω, c * max (K - f ω) 0 ∂μ = c * (∫ ω, f ω ∂μ - K) := by
+  rw [← integral_sub (((hf.sub (integrable_const K)).pos_part).const_mul c)
+    (((((integrable_const K).sub hf)).pos_part).const_mul c)]
+  have h (ω : Ω) : c * max (f ω - K) 0 - c * max (K - f ω) 0 = c * (f ω - K) := by
+    have hx := max_zero_sub_max_neg_zero_eq_self (f ω - K)
+    rw [neg_sub] at hx
+    linear_combination c * hx
+  rw [integral_congr_ae (ae_of_all _ h), integral_const_mul, integral_sub hf (integrable_const _),
+    integral_const, probReal_univ, one_smul]
 
 variable {𝓕 : Filtration ℝ≥0 mΩ}
 
