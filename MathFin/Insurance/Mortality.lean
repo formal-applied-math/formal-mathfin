@@ -51,6 +51,8 @@ same calculus.
 * `survivalFromForce_pos`: positivity.
 * `gompertz_cumulative_force`: for `c ≠ 0`, `∫₀^t B·e^{c·u} du = (B/c)·(e^{c·t} − 1)`.
 * `thieleFactor_eq_exp_neg_integral`: the factor is `exp(−∫ₜˢ (δ + μ))`.
+* `hasDerivAt_integral_div_exp_neg_integral`: the integrating-factor reserve lemma, the derivative
+  `lam t * V t - G t / S t` of `V u = (∫ᵤᵀ G + c) / exp (-∫₀ᵘ lam)`.
 * `hasDerivAt_thieleReserve`: Thiele's equation `V' = (δ + μ) V + π − μ b` for the
   prospective reserve integral `thieleReserve`, at interior times.
 
