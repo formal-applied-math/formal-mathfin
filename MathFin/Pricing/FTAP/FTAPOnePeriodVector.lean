@@ -133,8 +133,8 @@ theorem isEMM_one_iff {𝓕 : Filtration ℕ mΩ} {S : ℕ → Ω → F} (hS : S
     have h0' := hQ.integrable (t := 0) (Nat.zero_le 1)
     refine ⟨hQ.toIsEquivProbMeasure, h1.sub h0', ?_⟩
     have hm : ∫ ω, S 0 ω ∂Q = ∫ ω, S 1 ω ∂Q := by
-      rw [integral_congr_ae (hQ.condExp_eq (Nat.zero_le 1) le_rfl), integral_condExp (𝓕.le 0)]
-    show ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
+      rw [← integral_congr_ae (hQ.condExp_eq (Nat.zero_le 1) le_rfl), integral_condExp (𝓕.le 0)]
+    change ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
     rw [integral_sub h1 h0', hm, sub_self]
   · intro hQ
     have := hQ.isProb
@@ -178,7 +178,7 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsCentri
        le' := fun n ↦ by
          split_ifs
          · exact bot_le
-         · exact le_rfl }, rfl, fun n hn ↦ if_neg hn⟩
+         · exact le_rfl }, rfl, fun n hn ↦ ite_eq_right hn⟩
   let S : ℕ → Ω → F := fun n ω ↦ if n = 0 then 0 else Y ω
   have hS0 : S 0 = 0 := funext fun ω ↦ ite_eq_left rfl
   have hS1 : S 1 = Y := funext fun ω ↦ ite_eq_right one_ne_zero
@@ -187,8 +187,9 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsCentri
   have hE : MathFin.IsEMM 𝓕 P S 1 Q :=
     (isEMM_one_iff P (fun n ↦ by
       by_cases hn : n = 0
-      · subst hn; rw [h0] at *; exact stronglyMeasurable_const.mono bot_le |>.mono le_rfl
-      · simp only [S, if_neg hn, h1 n hn]; exact hY.stronglyMeasurable) h0).mpr
+      · subst hn; rw [hS0]; exact stronglyMeasurable_zero
+      · have hSn : S n = Y := funext fun ω ↦ ite_eq_right hn
+        rw [hSn]; exact hY.stronglyMeasurable.mono (h1 n hn).ge) h0).mpr
       (by rw [hS0, hS1, sub_zero]; exact hQ)
   have hnull := hE.noArbitrage (fun _ _ ↦ θ) (fun _ _ ↦ stronglyMeasurable_const)
     ⟨‖θ‖, fun _ _ _ ↦ le_rfl⟩ (by rw [hgain]; exact hpos)
