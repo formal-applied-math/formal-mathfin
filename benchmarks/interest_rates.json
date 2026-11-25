@@ -597,6 +597,31 @@
       }
     },
     {
+      "id": "mf-holee-bond-price",
+      "name": "Ho-Lee Zero-Coupon Bond Price (Affine Term Structure, B(T) = T)",
+      "description": "The Ho–Lee zero-coupon bond price P(0,T) = E[exp(-∫₀ᵀ r_s ds)] for the short rate dr = θ(t) dt + σ dB with continuous deterministic θ, the expectation taken under the probability measure that carries the Brownian driver (read as the pricing measure; no change of measure is built in this entry). The integrated short rate is carried in its Wiener-integral representation ∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ (T-u) dB_u, with M(T) = ∫₀ᵀ (r₀ + ∫₀ˢ θ) ds; that it solves the Ho–Lee SDE, and the swap of time integrals behind the integrated rate, are cited, not proved. In that representation the bond price is a Gaussian Laplace transform and equals the affine term structure P(0,T) = A(T)·exp(-T·r₀) with the linear loading B(T) = T and A(T) = exp(-∫₀ᵀ θ(s)(T-s) ds + σ²T³/6). Proved: the variance ∫₀ᵀ (T-u)² du = T³/3 of the diffusion part, and the identity M(T) = r₀T + ∫₀ᵀ θ(s)(T-s) ds by integration by parts.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.Rates.HoLeeBondPrice\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Ho–Lee zero-coupon bond price — the affine term structure.**\nThe expectation `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` under the measure carrying `B` (read as the pricing measure) of one unit\npaid at `T` under the Ho–Lee short-rate model `dr = θ(t) dt + σ dB` (continuous `θ`) separates the initial rate into the\nexponential-affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = T`,\n`A(T) = exp(−∫₀ᵀ θ(s)(T−s) ds + σ²T³/6)`.\nRe-exports `MathFin.HoLee.bondPrice_affine`. -/\ntheorem holee_bond_price_affine\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    {θ : ℝ → ℝ} (hθ : Continuous θ) (σ r₀ : ℝ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(HoLee.bondRate hB θ σ r₀ T ω)) ∂μ\n      = HoLee.bondA θ σ (T : ℝ) * Real.exp (-((T : ℝ) * r₀)) :=\n  HoLee.bondPrice_affine hB hθ σ r₀ T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Ho and Lee, Term structure movements and pricing interest rate contingent claims, J. Finance 41 (1986); Brigo and Mercurio, Interest Rate Models, 2nd ed., section 3.3.1",
+        "citations": [
+          {
+            "key": "HoLee1986"
+          },
+          {
+            "key": "BrigoMercurio2006",
+            "locator": "section 3.3.1"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. Re-export from MathFin.Models.Rates.HoLeeBondPrice (HoLee.bondPrice_affine). The Ho–Lee zero-coupon bond price as the Gaussian Laplace transform of the integrated short rate, the instance m = M(T), c = σ, f = (T-u) of integral_exp_neg_add_mul_wienerIntegralLp, with the kernel variance ∫₀ᵀ (T-u)² du = T³/3 proved here. The integrated rate ∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ (T-u) dB_u is carried in its Wiener representation (the Ho–Lee SDE and the deterministic time-order swap are the modelling bridge, cited not proven -- the same parity as mf-vasicek-bond-price and mf-hull-white-reprices-curve). θ is a continuous deterministic function; the measure is read as the pricing measure. Not covered: the bond price at t > 0, calibration of θ to an initial curve, and a change of measure from a real-world measure."
+      }
+    },
+    {
       "id": "mf-vasicek-zero-meanreversion-limit",
       "name": "Vasicek Bond Price at Vanishing Mean Reversion (kappa -> 0+)",
       "domain": "mathematical_finance",
