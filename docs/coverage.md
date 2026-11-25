@@ -39,7 +39,7 @@ Gaussian projection of v on the order flow, via
 BivariateGaussianHyp.conditional_expectation_formula; the informed half (kyleConditionalProfit)
 reduces the conditional expected profit to the quadratic (v - p0)*x - lam*x^2 under
 independence; the best response at every signal forces lam > 0 and beta = 1/(2*lam)
-(kyleMaxCoefficients, private); the fixed point gives the coefficients
+(kyleMaxCoefficients); the fixed point gives the coefficients
 (kyleEquilibriumCoefficients) and the pair itself satisfies both conditions
 (existsKyleEquilibrium). The order flow of the witnessed model is Gaussian with variance
 beta^2*sigma_v^2 + sigma_u^2 (kyleFlow_hasLaw_prod, via hasLaw_linear_gaussianPair), and the

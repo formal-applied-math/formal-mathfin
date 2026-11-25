@@ -28,7 +28,8 @@ the linear demand `x = β·c`. For `σ_v, σ_u > 0` the linear equilibrium exist
 are `β = σ_u/σ_v` and `λ = σ_v/(2σ_u)`: the price-impact constant of the model.
 
 Unlike the Glosten–Milgrom modules of this area, the model has a strategic informed trader
-choosing a quantity and batch clearing against their sequential direction trades. The two share
+choosing a quantity, and the informed and noise orders clear together as one batch — against
+their sequential direction trades. The two share
 the market-maker reading of a price as a conditional expectation of the value: here
 `E[v | x + u] = p` is derived from the bivariate Gaussian projection of
 `Probability/Gaussian/BivariateGaussian.lean`. The prior mean `p₀` enters the model only as the
@@ -62,7 +63,6 @@ equilibrium among all demands is a separate open problem and is not claimed here
   Glosten–Milgrom market statement.
 * `kyleMaxCoefficients`: the best-response condition alone pins the coefficients: a demand slope
   whose linear demand is an unrestricted maximizer at every signal has `λ > 0` and `β = 1/(2λ)`.
-* `hasGaussianLaw_fun_add_const`: a translate of a Gaussian random vector is Gaussian.
 * `measurable_kyleFlow`: the order flow is measurable.
 * `kyleModel_prod`: the model hypotheses are satisfiable, witnessed by independent Gaussian
   coordinates.
@@ -115,18 +115,6 @@ omit [IsProbabilityMeasure P] in
 theorem measurable_kyleFlow (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
     Measurable (kyleFlow β v u p₀) :=
   ((h.v_meas.sub measurable_const).const_mul β).add h.u_meas
-
-/-- **A translate of a Gaussian random vector is Gaussian**: for `Z` with a Gaussian law
-under `P`, the translate `Z + c` has the Gaussian law shifted by `c`. -/
-theorem hasGaussianLaw_fun_add_const {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [MeasurableSpace E] [BorelSpace E] (P : Measure Ω) {Z : Ω → E} (c : E)
-    (hZ : HasGaussianLaw Z P) :
-    HasGaussianLaw (fun ω ↦ Z ω + c) P := by
-  have hmap : Measure.map (fun ω ↦ Z ω + c) P = Measure.map (fun x ↦ x + c) (Measure.map Z P) := by
-    rw [show (fun ω ↦ Z ω + c) = (fun x ↦ x + c) ∘ Z from rfl]
-    exact (AEMeasurable.map_map_of_aemeasurable (by fun_prop) hZ.aemeasurable).symm
-  have hinst : IsGaussian (Measure.map Z P) := hZ.isGaussian_map
-  exact ⟨by fun_prop, by rw [hmap]; exact inferInstanceAs (IsGaussian _)⟩
 
 /-- The linear map `(x₁, x₂) ↦ (x₁, β·x₁ + x₂)` underlying the pair of value and order flow. -/
 private def kyleFlowPair (β : ℝ) : ℝ × ℝ →L[ℝ] ℝ × ℝ :=
@@ -229,7 +217,7 @@ theorem kyleMarketEfficiency (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
     rfl
   have hjoint : HasGaussianLaw (fun ω ↦ (v ω, kyleFlow β v u p₀ ω)) P := by
     refine HasGaussianLaw.congr
-      (hasGaussianLaw_fun_add_const P (c := (0, -β * p₀))
+      (hasGaussianLaw_fun_add_const (c := (0, -β * p₀))
         (Z := fun ω ↦ kyleFlowPair β (v ω, u ω)) hlin) ?_
     refine Filter.Eventually.of_forall fun ω => ?_
     have h1 : (kyleFlowPair β (v ω, u ω) + (0, -β * p₀)).1 = (v ω, kyleFlow β v u p₀ ω).1 := by

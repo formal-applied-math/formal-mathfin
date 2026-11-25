@@ -116,6 +116,17 @@ theorem hasLaw_bivariateNormalLaw_of_gaussianPair {U V : Ω → ℝ} {ρ : ℝ}
       hpair]
     exact hcov
 
+/-- **A translate of a Gaussian random vector is Gaussian**: for `Z` with a Gaussian law
+under `P`, the translate `ω ↦ Z ω + c` also has a Gaussian law under `P`. -/
+theorem hasGaussianLaw_fun_add_const {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [MeasurableSpace E] [BorelSpace E] {Z : Ω → E} (c : E) (hZ : HasGaussianLaw Z P) :
+    HasGaussianLaw (fun ω ↦ Z ω + c) P := by
+  have hmap : Measure.map (fun ω ↦ Z ω + c) P = Measure.map (fun x ↦ x + c) (Measure.map Z P) := by
+    rw [show (fun ω ↦ Z ω + c) = (fun x ↦ x + c) ∘ Z from rfl]
+    exact (AEMeasurable.map_map_of_aemeasurable (by fun_prop) hZ.aemeasurable).symm
+  have hinst : IsGaussian (Measure.map Z P) := hZ.isGaussian_map
+  exact ⟨by fun_prop, by rw [hmap]; exact inferInstanceAs (IsGaussian _)⟩
+
 /-- **A linear combination of a correlated standard Gaussian pair is Gaussian**: for `(U, V)`
 jointly Gaussian with `U, V ~ N(0, 1)` and `cov(U, V) = ρ`, `aU + bV ~ N(0, a² + 2abρ + b²)`:
 the law `map_linear_bivariateNormalLaw` of a linear functional of `bivariateNormalLaw ρ`,
