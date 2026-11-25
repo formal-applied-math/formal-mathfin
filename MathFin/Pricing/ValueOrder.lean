@@ -37,8 +37,8 @@ of `pathPV` against `Q`.
   the upper contract's integrable. The integrability hypothesis is `integral_mono_of_nonneg`'s:
   without it the non-integrable side integrates to `0`, and `0` can exceed the upper
   value (take the upper contract's present value constant `-1`).
-* `Contract.value_le_value` — the two-integrable form: when both contracts are integrable,
-  dominance alone orders the values (`integral_mono_ae`).
+* `Contract.value_le_value` — the two-integrable companion: when both contracts are
+  integrable, dominance alone orders the values (`integral_mono_ae`).
 * `Contract.value_convexOn` — a family of contracts whose present value is convex in a
   real parameter, on a convex set of parameters and with each member integrable, has a
   `ConvexOn` value function. The convexity hypothesis is stated almost everywhere, what
@@ -90,8 +90,9 @@ theorem Contract.value_le_value_of_pathPV_le_ae (Q : Measure Ω) (D : ℝ≥0 �
   simp only [value]
   exact integral_mono_of_nonneg hnn hb hle
 
-/-- **The two-integrable form of `value_le_value_of_pathPV_le_ae`**: when both contracts are
-integrable, dominance alone orders the values — `integral_mono_ae` applied to `Contract.value`. -/
+/-- **The two-integrable companion of `value_le_value_of_pathPV_le_ae`**: when both contracts
+are integrable, dominance alone orders the values, by `integral_mono_ae` applied to
+`Contract.value`. -/
 theorem Contract.value_le_value (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)
     (ha : Integrable (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)
