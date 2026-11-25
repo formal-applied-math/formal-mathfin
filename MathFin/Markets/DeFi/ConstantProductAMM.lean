@@ -35,6 +35,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 module
 
 public import MathFin.Init
+public import MathFin.Markets.DeFi.ConstantMeanAMM
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.Algebra.EuclideanDomain.Basic
 public import Mathlib.Algebra.EuclideanDomain.Field
@@ -57,6 +58,13 @@ reserves `(x, y)` of two tokens. The **constant-product invariant**
 of token Y, after which the new reserves `(x + Δx, y − Δy)` again satisfy
 `(x + Δx)·(y − Δy) = x · y`. This algorithmically-determined exchange
 rate is what makes CPMMs "automated" — no order book, no oracle.
+
+The pool is the two-token, equal-weight instance of the constant-mean pool of
+`ConstantMeanAMM.lean`: this file imports it, states the instance lemmas
+(`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
+`swapOut_two_eq_swapOutput`) and derives the invariant preservation
+and the marginal price from the constant-mean theorems (`swap_preserves_constantMean`,
+`hasDerivAt_swapOut_zero`) instead of proving them again.
 
 This file formalises:
 
@@ -99,13 +107,16 @@ made here).
 
 ## Main results
 
-* `swap_preserves_invariant`: constant-product invariance under swap.
+* `constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
+  `swapOut_two_eq_swapOutput`: the equal-weight two-token constant-mean pool is this pool.
+* `swap_preserves_invariant`: constant-product invariance under swap, from
+  `swap_preserves_constantMean`.
 * `swap_output_pos`: `Δy > 0` when input is positive.
 * `swap_output_lt_y`: `Δy < y` (cannot drain pool).
 * `swap_round_trip`: a round trip through the pool returns exactly the input.
 * `marginal_exchange_rate`: the average rate `Δy / Δx = y / (x + Δx)`.
 * `hasDerivAt_swapOutput`, `hasDerivAt_swapOutput_zero`: the marginal rate,
-  and the internal price as the marginal rate at zero size.
+  and the internal price as the marginal rate at zero size (from `hasDerivAt_swapOut_zero`).
 * `exists_profitable_swap_iff`, `exists_profitable_reverse_swap_iff`,
   `arbitragePresent_iff`: price divergence is equivalent to the existence of a
   profitable swap at oracle prices.
@@ -140,30 +151,46 @@ This is the algebraic core of the Uniswap v2 model (Adams-Zinsmeister
 noncomputable def swapOutput (x y Δx : ℝ) : ℝ :=
   y * Δx / (x + Δx)
 
-/-- **Constant-product invariant preservation**: after a swap of input
-`Δx` (with `x, Δx > 0`), the new reserves `(x + Δx, y − Δy)` satisfy
+/-- **Internal price = reserve ratio** at zero input: the spot price of
+token X (denominated in Y) implied by the AMM's curve at the current
+reserve point is `y / x`. -/
+noncomputable def internalPrice (x y : ℝ) : ℝ := y / x
 
-  `(x + Δx) · (y − Δy) = x · y`,
+/-- **The equal-weight two-token invariant is the constant-product invariant**: at `n = 2` with
+`w = ![1/2, 1/2]`, the squared constant-mean invariant is the product of the two reserves,
+so the surface `V = √(x·y)` is the Uniswap curve `x·y = k` written in squared form. -/
+theorem constantMeanInvariant_two_sq_eq (x y : ℝ) (hx : 0 < x) (hy : 0 < y) :
+    (constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1/2, 1/2]) ^ 2 = x * y := by
+  have hx2 : (x ^ ((1 : ℝ) / 2)) ^ 2 = x := by
+    rw [← Real.rpow_natCast (x ^ ((1 : ℝ) / 2)) 2, ← Real.rpow_mul hx.le]
+    norm_num
+  have hy2 : (y ^ ((1 : ℝ) / 2)) ^ 2 = y := by
+    rw [← Real.rpow_natCast (y ^ ((1 : ℝ) / 2)) 2, ← Real.rpow_mul hy.le]
+    norm_num
+  unfold constantMeanInvariant
+  rw [Fin.prod_univ_two]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [mul_pow, hx2, hy2]
 
-where `Δy := swapOutput x y Δx`. This is the pricing rule of the CPMM: the swap
-is the trade that keeps the product fixed. That a round trip prints no money is
-`swap_round_trip`. -/
-theorem swap_preserves_invariant
-    (x y Δx : ℝ) (hx : 0 < x) (hΔx : 0 < Δx) :
-    (x + Δx) * (y - swapOutput x y Δx) = x * y := by
-  unfold swapOutput
-  have h_sum_pos : 0 < x + Δx := by linarith
+/-- **The equal-weight two-token spot price is the constant-product internal price**: the
+marginal rate of the two-token equal-weight pool is `internalPrice x y = y / x`. -/
+theorem spotPrice_two_eq_internalPrice (x y : ℝ) :
+    spotPrice (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 = internalPrice x y := by
+  unfold spotPrice internalPrice
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  field_simp
+
+/-- **The equal-weight two-token out-amount is the constant-product swap output**: the
+whitepaper's Out-Given-In at `w i = w j = 1/2` is `swapOutput x y Δ = y * Δ / (x + Δ)`, at
+every input with positive post-trade input reserve `0 < x + Δ`. -/
+theorem swapOut_two_eq_swapOutput (x y Δ : ℝ) (hsum : 0 < x + Δ) :
+    swapOut (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 Δ = swapOutput x y Δ := by
+  have hhalf : ((1 : ℝ) / 2) / ((1 : ℝ) / 2) = 1 :=
+    div_self (by norm_num : ((1 : ℝ) / 2) ≠ 0)
+  unfold swapOut swapOutput
+  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hhalf]
   field_simp
   ring
-
-/-- **Swap output is strictly positive** when input is positive (and
-reserves are positive). -/
-theorem swap_output_pos
-    (x y Δx : ℝ) (hx : 0 < x) (hy : 0 < y) (hΔx : 0 < Δx) :
-    0 < swapOutput x y Δx := by
-  unfold swapOutput
-  have h_sum_pos : 0 < x + Δx := by linarith
-  exact div_pos (mul_pos hy hΔx) h_sum_pos
 
 /-- **Swap output bounded by reserve**: `Δy < y` — the AMM cannot be
 drained by any single (finite) trade. The deficit is exactly the positive
@@ -177,6 +204,47 @@ theorem swap_output_lt_y
   -- y · Δx < y · x + y · Δx, the gap being the positive y · x
   nlinarith [mul_pos hy hx]
 
+/-- **Constant-product invariant preservation**: after a swap of input
+`Δx` (with `x, y, Δx > 0`), the new reserves `(x + Δx, y − Δy)` satisfy
+
+  `(x + Δx) · (y − Δy) = x · y`,
+
+where `Δy := swapOutput x y Δx`. This is the pricing rule of the CPMM: the swap
+is the trade that keeps the product fixed. It is the constant-mean pool's
+`swap_preserves_constantMean` at two tokens of weight `1/2`, the squared invariants being the
+products (`constantMeanInvariant_two_sq_eq`). That a round trip prints no money is
+`swap_round_trip`. -/
+theorem swap_preserves_invariant
+    (x y Δx : ℝ) (hx : 0 < x) (hy : 0 < y) (hΔx : 0 < Δx) :
+    (x + Δx) * (y - swapOutput x y Δx) = x * y := by
+  have hy' : 0 < y - swapOutput x y Δx := sub_pos.2 (swap_output_lt_y x y Δx hx hΔx hy)
+  have hpres := swap_preserves_constantMean (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1
+    (Δ := Δx) hx hy (by norm_num) (by decide) hΔx
+  have hres : swapReserves (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1 Δx
+      = ![x + Δx, y - swapOutput x y Δx] := by
+    rw [← swapOut_two_eq_swapOutput x y Δx (by linarith)]
+    funext k
+    fin_cases k <;> simp [swapReserves, Function.update_apply]
+  have hpres' : constantMeanInvariant (![x + Δx, y - swapOutput x y Δx] : Fin 2 → ℝ)
+      ![1 / 2, 1 / 2] = constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] := by
+    rw [hres] at hpres
+    exact hpres
+  calc (x + Δx) * (y - swapOutput x y Δx)
+      = (constantMeanInvariant (![x + Δx, y - swapOutput x y Δx] : Fin 2 → ℝ)
+          ![1 / 2, 1 / 2]) ^ 2 :=
+        (constantMeanInvariant_two_sq_eq _ _ (by linarith) hy').symm
+    _ = (constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2]) ^ 2 := by rw [hpres']
+    _ = x * y := constantMeanInvariant_two_sq_eq x y hx hy
+
+/-- **Swap output is strictly positive** when input is positive (and
+reserves are positive). -/
+theorem swap_output_pos
+    (x y Δx : ℝ) (hx : 0 < x) (hy : 0 < y) (hΔx : 0 < Δx) :
+    0 < swapOutput x y Δx := by
+  unfold swapOutput
+  have h_sum_pos : 0 < x + Δx := by linarith
+  exact div_pos (mul_pos hy hΔx) h_sum_pos
+
 /-- **Average execution rate**: for any input `Δx > 0`, the rate `Δy / Δx`
 received is `y / (x + Δx)`. The marginal rate at zero size, the internal price
 `y / x`, is `hasDerivAt_swapOutput_zero`. -/
@@ -187,11 +255,6 @@ lemma marginal_exchange_rate
   have h_sum_pos : 0 < x + Δx := by linarith
   have hΔx_ne : Δx ≠ 0 := hΔx.ne'
   field_simp
-
-/-- **Internal price = reserve ratio** at zero input: the spot price of
-token X (denominated in Y) implied by the AMM's curve at the current
-reserve point is `y / x`. -/
-noncomputable def internalPrice (x y : ℝ) : ℝ := y / x
 
 /-- **Arbitrage trigger condition**: the AMM's internal price `y/x` differs
 from an external oracle's price `p_oracle`. That this is exactly the existence
@@ -219,12 +282,18 @@ theorem hasDerivAt_swapOutput (y : ℝ) {x Δx : ℝ} (h : x + Δx ≠ 0) :
   exact ((hasDerivAt_id' Δx).const_mul y).div ((hasDerivAt_id' Δx).const_add x) h
 
 /-- **The internal price is the marginal price.** At zero size the swap pays
-`y / x` per unit of input: `d(swapOutput x y)/dΔx (0) = internalPrice x y`. -/
+`y / x` per unit of input: `d(swapOutput x y)/dΔx (0) = internalPrice x y`. It is the
+constant-mean spot price as the marginal rate (`hasDerivAt_swapOut_zero`) at two tokens of
+weight `1/2`, the out-amounts agreeing near `0` (`swapOut_two_eq_swapOutput`). -/
 theorem hasDerivAt_swapOutput_zero (y : ℝ) {x : ℝ} (hx : 0 < x) :
     HasDerivAt (swapOutput x y) (internalPrice x y) 0 := by
-  have h := hasDerivAt_swapOutput y (x := x) (Δx := 0) (by simpa using hx.ne')
-  rw [add_zero, sq, mul_comm x y, mul_div_mul_right y x hx.ne'] at h
-  exact h
+  have h := hasDerivAt_swapOut_zero (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1 hx
+  rw [spotPrice_two_eq_internalPrice] at h
+  refine h.congr_of_eventuallyEq ?_
+  have hev : ∀ᶠ Δ in nhds (0 : ℝ), 0 < x + Δ :=
+    continuousAt_const.eventually_lt (continuous_const.add continuous_id).continuousAt
+      (by simpa using hx)
+  exact hev.mono fun Δ hΔ ↦ (swapOut_two_eq_swapOutput x y Δ hΔ).symm
 
 /-- **Selling X to the pool pays exactly when the pool overprices X.** Buy
 `Δx` of X at the oracle price `P` and sell it to the pool: for some size

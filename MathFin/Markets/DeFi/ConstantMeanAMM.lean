@@ -5,7 +5,10 @@ Authors: Yang Ye
 -/
 module
 
-public import MathFin.Markets.DeFi.ConstantProductAMM
+public import MathFin.Init
+public import Mathlib.Analysis.Calculus.Deriv.Add
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.Calculus.Deriv.Mul
 public import Mathlib.Algebra.BigOperators.Fin
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -31,15 +34,15 @@ ratio of reserve-to-weight ratios
   `p i j = (B j / w j) / (B i / w i)`.
 
 The spot price is *derived*, not posited: `hasDerivAt_swapOut_zero` differentiates the
-out-amount at `Δ = 0`. At two tokens with equal weights the module reduces to the library's
-constant-product pool: the invariant squared is `x * y`, the spot price is `internalPrice`, and
-the out-amount is `swapOutput` (`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
-`swapOut_two_eq_swapOutput`).
+out-amount at `Δ = 0`. The library's constant-product pool is the two-token, equal-weight
+instance: `ConstantProductAMM.lean` imports this module and derives the pool's invariant
+preservation and marginal price from the lemmas here.
 
 The whitepaper's weights are normalized (`∑ k, w k = 1`), which makes `V` the invariant of
 a constant-value-share (weighted) portfolio; the trades-preserve, out-amount and spot-price
 statements here hold for arbitrary positive weights and are proved at that generality. Fees
-are not modelled (the fee factor is one), as in `ConstantProductAMM.lean`.
+are not modelled (the fee factor is one), as in `ConstantProductAMM.lean`, the equal-weight
+two-token instance.
 
 ## Main definitions
 
@@ -57,9 +60,6 @@ are not modelled (the fee factor is one), as in `ConstantProductAMM.lean`.
 * `hasDerivAt_swapOut_zero`: the spot price is the marginal rate `dA j/dΔ (0)`.
 * `swapOut_pos`, `swapOut_lt_reserve`: a positive input returns a positive amount, less than
   the output reserve.
-* `constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
-  `swapOut_two_eq_swapOutput`: the equal-weight two-token instance is the constant-product
-  pool of `ConstantProductAMM.lean`.
 * `constantMeanInvariant_pair`, `spotPrice_pair`: the invariant and the spot price of a
   two-token pool with arbitrary weights.
 * `prod_update_pow`: splitting a product of powers over an updated reserve vector (a
@@ -245,42 +245,6 @@ token Y per unit of token X. -/
 theorem spotPrice_pair (x y w₁ w₂ : ℝ) :
     spotPrice ![x, y] ![w₁, w₂] 0 1 = (y / w₂) / (x / w₁) := by
   simp only [spotPrice, Matrix.cons_val_zero, Matrix.cons_val_one]
-
-/-- **The equal-weight two-token invariant is the constant-product invariant**: at `n = 2` with
-`w = ![1/2, 1/2]`, the squared constant-mean invariant is the product of the two reserves,
-so the surface `V = √(x·y)` is the Uniswap curve `x·y = k` written in squared form. -/
-theorem constantMeanInvariant_two_sq_eq (x y : ℝ) (hx : 0 < x) (hy : 0 < y) :
-    (constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1/2, 1/2]) ^ 2 = x * y := by
-  have hx2 : (x ^ ((1 : ℝ) / 2)) ^ 2 = x := by
-    rw [← Real.rpow_natCast (x ^ ((1 : ℝ) / 2)) 2, ← Real.rpow_mul hx.le]
-    norm_num
-  have hy2 : (y ^ ((1 : ℝ) / 2)) ^ 2 = y := by
-    rw [← Real.rpow_natCast (y ^ ((1 : ℝ) / 2)) 2, ← Real.rpow_mul hy.le]
-    norm_num
-  unfold constantMeanInvariant
-  rw [Fin.prod_univ_two]
-  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
-  rw [mul_pow, hx2, hy2]
-
-/-- **The equal-weight two-token spot price is the constant-product internal price**: the
-marginal rate of the two-token equal-weight pool is `internalPrice x y = y / x`. -/
-theorem spotPrice_two_eq_internalPrice (x y : ℝ) :
-    spotPrice (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 = internalPrice x y := by
-  unfold spotPrice internalPrice
-  simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
-  field_simp
-
-/-- **The equal-weight two-token out-amount is the constant-product swap output**: the
-whitepaper's Out-Given-In at `w i = w j = 1/2` is `swapOutput x y Δ = y * Δ / (x + Δ)`. -/
-theorem swapOut_two_eq_swapOutput (x y Δ : ℝ) (hx : 0 < x) (hΔ : 0 < Δ) :
-    swapOut (![x, y] : Fin 2 → ℝ) ![1/2, 1/2] 0 1 Δ = swapOutput x y Δ := by
-  have hhalf : ((1 : ℝ) / 2) / ((1 : ℝ) / 2) = 1 :=
-    div_self (by norm_num : ((1 : ℝ) / 2) ≠ 0)
-  have hsum : 0 < x + Δ := by linarith
-  unfold swapOut swapOutput
-  norm_num [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hhalf]
-  field_simp
-  ring
 
 end DeFi
 
