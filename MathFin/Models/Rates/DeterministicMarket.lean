@@ -67,6 +67,9 @@ proved here.
   coupon bond at a yield is the flat case.
 * `MathFin.Rates.bondPriceKeyRate_eq_price_deterministicMarket`: for distinct tenors the key-rate
   price is the price of the schedule in the deterministic bond market of one discount curve.
+* `MathFin.Rates.TenorGrid.price_eq_price_deterministicMarket`: the same for the price on a tenor
+  grid, whose key-rate durations sum to the effective duration
+  (`TenorGrid.sum_keyRateDuration_eq_effectiveDuration`).
 * `MathFin.Rates.price_immunization_first_order`: first-order immunization stated for the market
   prices of the asset and liability schedules, in a family of markets with numéraires `e^{rt}`.
 * `MathFin.Rates.sum_deriv_keyRate_eq_deriv_price`: the key-rate partials of a coupon bond sum to
@@ -267,6 +270,18 @@ theorem bondPriceKeyRate_eq_price_deterministicMarket (P Q : Measure Ω) [IsProb
   refine Finset.sum_congr rfl fun i hi ↦ ?_
   rw [hN0, hNt i (Finset.mem_range.1 hi)]
   ring
+
+/-- **The grid price is a market price on one discount curve.** For a tenor grid `G`, node rates
+`k` and distinct cash-flow tenors with `1 + r > 0` at the interpolated rates, the price
+`G.price` of the cash flows is their price in the deterministic bond market of one numéraire `N`
+(`bondPriceKeyRate_eq_price_deterministicMarket`), under any probability measure. -/
+theorem TenorGrid.price_eq_price_deterministicMarket {κ : Type*} [Fintype κ] (G : TenorGrid κ)
+    (P Q : Measure Ω) [IsProbabilityMeasure Q] (τ : ι → ℝ≥0) (n : ℕ) (t : ℕ → ℕ) (c : ℕ → ℝ)
+    (k : κ → ℝ) (hk : ∀ i < n, 0 < 1 + G.rate k (t i)) (hinj : Set.InjOn t (Finset.range n)) :
+    ∃ (N : ℝ≥0 → ℝ) (hN : ∀ s, 0 < N s), N 0 = 1 ∧
+      G.price (Finset.range n) t c k =
+        (deterministicMarket P N hN τ).price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n) :=
+  bondPriceKeyRate_eq_price_deterministicMarket P Q τ n t c (fun i ↦ G.rate k (t i)) hk hinj
 
 /-- **A coupon bond is a sum of its zero-coupon bond prices**: at the annually compounded yield
 `y`, the price `bondPriceDisc` of the cash flows `c i` at the integer dates `t i` is

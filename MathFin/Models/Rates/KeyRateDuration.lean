@@ -21,8 +21,9 @@ Key-rate analysis refines the flat yield to a curve: cashflow `i` is discounted 
 
 The key-rate sensitivity to node `j` is the partial derivative `∂P/∂kⱼ`, the derivative of `P`
 along the curve that moves `kⱼ` alone (`Function.update k j`). The key-rate duration is
-`KRDⱼ = -(1/P)·∂P/∂kⱼ`; this module states its results for the partials and does not define
-the durations.
+`KRDⱼ = -(1/P)·∂P/∂kⱼ`. For the per-cash-flow nodes the results are stated for the partials; the
+durations are defined on a tenor grid (`TenorGrid`), where the nodes are a few tenors, the rate at
+every other tenor is interpolated from them, and the bump of a node is its hat function.
 
 The identity that makes key rates a decomposition of duration: the partials sum to the
 derivative under a parallel shift `k ↦ k + ε·1`. On a flat curve `k ≡ y` the parallel shift is
@@ -33,6 +34,14 @@ computes.
 
 * `bondPriceKeyRate`: the bond price with cashflow `i` discounted at its own rate `k i`, with
   annual compounding.
+
+* `TenorGrid`: the hat functions of the nodes, summing to `1`; `TenorGrid.rate` the interpolated
+  rate and `TenorGrid.price` the price at it.
+* `TenorGrid.piecewiseLinear`: linear interpolation between adjacent nodes, flat beyond the ends,
+  with the hats built from clamped ramps (`TenorGrid.ramp`); `piecewiseLinear_rate_node` says the
+  curve passes through the node rates.
+* `TenorGrid.keyRateDuration`, `TenorGrid.effectiveDuration`: `-(1/P) ∂P/∂kⱼ` along the bump of node
+  `j`, and `-(1/P) dP/dε` along the parallel shift of the nodes.
 
 ## Main results
 
@@ -45,6 +54,10 @@ computes.
 * `sum_keyRate_partials_eq_deriv_bondPriceDisc`, `sum_deriv_keyRate_eq_deriv_bondPriceDisc`:
   on a flat curve `k ≡ y` (`1 + y ≠ 0`), `Σⱼ ∂P/∂kⱼ = dP/dy` (`deriv (bondPriceDisc s t c) y`),
   for given partial-derivative witnesses and for the `deriv`s themselves.
+* `TenorGrid.hasDerivAt_price_update`, `TenorGrid.hasDerivAt_price_parallel`: the node partials
+  of the grid price and its parallel-shift derivative, in closed form.
+* `TenorGrid.sum_keyRateDuration_eq_effectiveDuration`: the key-rate durations of the nodes sum to
+  the effective duration of the parallel shift.
 
 ## References
 
@@ -259,6 +272,86 @@ theorem sum_keyRateDuration_eq_effectiveDuration (s : Finset ι) (t : ι → ℕ
     refine Finset.sum_congr rfl fun i _ ↦ ?_
     rw [← Finset.mul_sum, G.sum_hat, mul_one]
   simp only [keyRateDuration, effectiveDuration, ← Finset.sum_div, Finset.sum_neg_distrib, hsum]
+
+/-! #### Piecewise-linear interpolation
+
+Between adjacent nodes the rate is interpolated linearly, and beyond the first and last nodes it is
+held flat. The hat functions are built from **ramps**: `ramp τ m` climbs linearly from `0` at the
+node `τ m` to `1` at the node `τ (m + 1)` and is clamped outside. The node `j` has weight
+`1` below its left neighbour's ramp and `0` above its right neighbour's, `hat j = cum j − cum (j+1)`
+with `cum j` the ramp from node `j − 1` to node `j` (`1` before the first node, `0` after the
+last), so the hats telescope to `1`. -/
+
+/-- The **ramp** from node `m` to node `m + 1`: `0` up to `τ m`, linear to `1` at `τ (m + 1)`, and
+`1` after. -/
+noncomputable def ramp (τ : ℕ → ℝ) (m : ℕ) (u : ℝ) : ℝ :=
+  max 0 (min 1 ((u - τ m) / (τ (m + 1) - τ m)))
+
+/-- The ramp up to node `j` among the nodes `0, …, n`: the constant `1` for `j = 0`, the ramp from
+node `j − 1` for `1 ≤ j ≤ n`, and the constant `0` beyond the last node. -/
+noncomputable def cumRamp (τ : ℕ → ℝ) (n j : ℕ) (u : ℝ) : ℝ :=
+  if j = 0 then 1 else if j ≤ n then ramp τ (j - 1) u else 0
+
+/-- At the nodes of a strictly increasing grid the ramp from `m` is `1` past `m` and `0` up to it. -/
+theorem ramp_node {τ : ℕ → ℝ} (hτ : StrictMono τ) (m i : ℕ) :
+    ramp τ m (τ i) = if m < i then 1 else 0 := by
+  have hd : 0 < τ (m + 1) - τ m := sub_pos.2 (hτ (Nat.lt_succ_self m))
+  unfold ramp
+  split_ifs with h
+  · have h1 : 1 ≤ (τ i - τ m) / (τ (m + 1) - τ m) := by
+      rw [le_div_iff₀ hd]
+      linarith [hτ.monotone (show m + 1 ≤ i from h)]
+    rw [min_eq_left h1, max_eq_right zero_le_one]
+  · have h1 : (τ i - τ m) / (τ (m + 1) - τ m) ≤ 0 :=
+      div_nonpos_of_nonpos_of_nonneg (by linarith [hτ.monotone (not_lt.1 h)]) hd.le
+    rw [min_eq_right (h1.trans zero_le_one), max_eq_left h1]
+
+/-- At the node `τ i`, `i ≤ n`, the ramp up to node `j` is `1` for `j ≤ i` and `0` after. -/
+theorem cumRamp_node {τ : ℕ → ℝ} (hτ : StrictMono τ) {n i : ℕ} (hi : i ≤ n) (j : ℕ) :
+    cumRamp τ n j (τ i) = if j ≤ i then 1 else 0 := by
+  unfold cumRamp
+  rcases Nat.eq_zero_or_pos j with rfl | hj
+  · simp
+  · rw [if_neg hj.ne']
+    by_cases hjn : j ≤ n
+    · rw [if_pos hjn, ramp_node hτ]
+      by_cases hji : j ≤ i
+      · rw [if_pos (show j - 1 < i by omega), if_pos hji]
+      · rw [if_neg (show ¬ j - 1 < i by omega), if_neg hji]
+    · rw [if_neg hjn, if_neg (show ¬ j ≤ i by omega)]
+
+/-- **The piecewise-linear tenor grid** on the nodes `τ 0, …, τ n`: the hat of node `j` is
+`cum j − cum (j + 1)` (`cumRamp`), so the hats telescope to `1`. -/
+noncomputable def piecewiseLinear (τ : ℕ → ℝ) (n : ℕ) : TenorGrid (Fin (n + 1)) where
+  hat j u := cumRamp τ n j u - cumRamp τ n ((j : ℕ) + 1) u
+  sum_hat u := by
+    rw [Fin.sum_univ_eq_sum_range (fun j ↦ cumRamp τ n j u - cumRamp τ n (j + 1) u) (n + 1),
+      Finset.sum_range_sub' (fun j ↦ cumRamp τ n j u) (n + 1)]
+    simp [cumRamp]
+
+/-- **The hat of node `j` is `1` at its own tenor and `0` at the other nodes.** -/
+theorem piecewiseLinear_hat_node {τ : ℕ → ℝ} (hτ : StrictMono τ) (n : ℕ) (i j : Fin (n + 1)) :
+    (piecewiseLinear τ n).hat j (τ i) = if i = j then 1 else 0 := by
+  have hi : (i : ℕ) ≤ n := Nat.lt_succ_iff.1 i.2
+  show cumRamp τ n j (τ i) - cumRamp τ n ((j : ℕ) + 1) (τ i) = _
+  rw [cumRamp_node hτ hi, cumRamp_node hτ hi]
+  by_cases h : i = j
+  · subst h
+    simp
+  · rw [if_neg h]
+    rcases lt_or_gt_of_ne (fun e : (j : ℕ) = i ↦ h (Fin.ext e.symm)) with h1 | h1
+    · have a : (j : ℕ) ≤ i := h1.le
+      have b : (j : ℕ) + 1 ≤ i := h1
+      simp [a, b]
+    · have a : ¬ (j : ℕ) ≤ i := not_le.2 h1
+      have b : ¬ (j : ℕ) + 1 ≤ i := by omega
+      simp [a, b]
+
+/-- **The interpolated curve passes through the node rates**: at the tenor `τ i` of node `i` the
+rate is `k i`. -/
+theorem piecewiseLinear_rate_node {τ : ℕ → ℝ} (hτ : StrictMono τ) (n : ℕ) (k : Fin (n + 1) → ℝ)
+    (i : Fin (n + 1)) : (piecewiseLinear τ n).rate k (τ i) = k i := by
+  simp [rate, piecewiseLinear_hat_node hτ]
 
 end TenorGrid
 
