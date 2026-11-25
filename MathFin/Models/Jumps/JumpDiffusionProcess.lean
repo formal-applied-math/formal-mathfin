@@ -170,9 +170,9 @@ theorem integral_exp_const_mul_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ�
     (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable
     (measurable_const_mul θ).exp.aestronglyMeasurable]
   unfold jumpDiffusionLogReturn
-  rw [(jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_mul_logReturn
-      (integrable_exp_mul_canonical_jump hν) b σ (NNReal.coe_nonneg τ),
-    integral_exp_mul_canonical_jump (Λ * τ) ν θ, jumpDiffusionExponent, NNReal.coe_mul]
+  refine ((jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_mul_logReturn
+      (integrable_exp_mul_canonical_jump hν) b σ (NNReal.coe_nonneg τ)).trans ?_
+  rw [integral_exp_mul_canonical_jump (Λ * τ) ν θ, jumpDiffusionExponent, NNReal.coe_mul]
   congr 1
   ring
 

@@ -144,7 +144,7 @@ lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
     by_contra hκ
     refine hN 0 (measure_mono_null (fun ω hω ↦ ?_) hY')
     have hNω : N ω = 0 := hω
-    simp [hNω, hκ]
+    simp [compoundSum_apply, hNω, hκ]
   -- with one jump, it is `J₀`
   have hind : Q (N ⁻¹' {1} ∩ J 0 ⁻¹' {0}ᶜ) = Q (N ⁻¹' {1}) * Q (J 0 ⁻¹' {0}ᶜ) :=
     (h.N_indep_J.comp measurable_id (measurable_pi_apply 0)).measure_inter_preimage_eq_mul _ _
@@ -152,7 +152,7 @@ lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
   have hnull : Q (N ⁻¹' {1} ∩ J 0 ⁻¹' {0}ᶜ) = 0 := by
     refine measure_mono_null (fun ω hω ↦ ?_) hY'
     have hNω : N ω = 1 := hω.1
-    simpa [hNω, hκ] using hω.2
+    simpa [compoundSum_apply, hNω, hκ] using hω.2
   rw [hind, mul_eq_zero] at hnull
   refine hJ0 (ae_iff.2 (measure_mono_null (fun ω hω ↦ ?_) (hnull.resolve_left (hN 1))))
   simpa using hω
