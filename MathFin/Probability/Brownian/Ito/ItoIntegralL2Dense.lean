@@ -170,15 +170,8 @@ private lemma itoOrthRect (hBmeas : ∀ t, Measurable (B t))
   intro R hR
   rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, F, _hab, hF, rfl⟩
   · -- `{0} ×ˢ F₀` is `trim_full`-null.
-    have hpred : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
-        ({(0 : ℝ≥0)} ×ˢ F₀) :=
-      MeasureTheory.measurableSet_predictable_singleton_bot_prod
-        (𝓕 := natFiltration (mΩ := mΩ) hBmeas) hF₀
-    have h_null : ((timeMeasure.prod μ).trim
-        (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)
-        ({(0 : ℝ≥0)} ×ˢ F₀) = 0 := by
-      rw [trim_measurableSet_eq _ hpred, Measure.prod_prod, timeMeasure_singleton,
-          zero_mul]
+    have h_null := ItoIntegralCLM.trim_singleton_zero_prod_eq_zero (μ := μ)
+      (ν := timeMeasure) (timeMeasure_singleton 0) hBmeas hF₀
     exact setIntegral_measure_zero _ h_null
   · -- `Ioc a b ×ˢ F` is the inner product, which orthogonality kills.
     rw [← inner_simpleAssembly_iocSP (μ := μ) hBmeas a b hF g]
@@ -292,14 +285,8 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
         · exact h
       obtain ⟨m, hm⟩ := exists_nat_ge (t : ℝ≥0)
       exact absurd (le_trans hm (le_add_of_nonneg_right zero_le_one)) (not_le.mpr (hz m htpos))
-    have hnull : ((timeMeasure.prod μ).trim
-        (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)
-        ({(0 : ℝ≥0)} ×ˢ (Set.univ : Set Ω)) = 0 := by
-      have hpred : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable]
-          ({(0 : ℝ≥0)} ×ˢ (Set.univ : Set Ω)) :=
-        MeasureTheory.measurableSet_predictable_singleton_bot_prod
-          (𝓕 := natFiltration (mΩ := mΩ) hBmeas) MeasurableSet.univ
-      rw [trim_measurableSet_eq _ hpred, Measure.prod_prod, timeMeasure_singleton, zero_mul]
+    have hnull := ItoIntegralCLM.trim_singleton_zero_prod_eq_zero (μ := μ) (ν := timeMeasure)
+      (timeMeasure_singleton 0) hBmeas MeasurableSet.univ
     exact measure_mono_null hsub hnull
   filter_upwards [key, hcov] with z hz hz_cov
   obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hz_cov

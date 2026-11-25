@@ -149,6 +149,23 @@ noncomputable def trimMeasure (T : ℝ≥0)
   ((timeMeasureHorizon T).prod μ).trim
     (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
 
+omit [IsProbabilityMeasure μ] in
+/-- **The time origin is trim-null.** For any s-finite time measure `ν` that charges no point at
+the origin, the predictable trim of `ν ⊗ μ` gives no mass to a bottom rectangle `{0} × F` with `F`
+in `𝓕 ⊥`: the trim agrees with the product on predictable sets, and the product of the rectangle is
+`ν {0} · μ F = 0`. The one computation behind every "off the time origin" almost-everywhere
+statement of the Itô tower. -/
+lemma trim_singleton_zero_prod_eq_zero {ν : Measure ℝ≥0} [SFinite ν] [SFinite μ]
+    (hν : ν {(0 : ℝ≥0)} = 0) (hBmeas : ∀ t, Measurable (B t)) {F : Set Ω}
+    (hF : MeasurableSet[ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas ⊥] F) :
+    ((ν.prod μ).trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)
+      ({(0 : ℝ≥0)} ×ˢ F) = 0 := by
+  have hpred : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable]
+      ({(0 : ℝ≥0)} ×ˢ F) :=
+    MeasureTheory.measurableSet_predictable_singleton_bot_prod
+      (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) hF
+  rw [trim_measurableSet_eq _ hpred, Measure.prod_prod, hν, zero_mul]
+
 /-! ### Basic predictable rectangles: the π-system
 
 We work with **basic** rectangles `Ioc a b ×ˢ F` (single rectangles,
