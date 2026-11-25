@@ -176,9 +176,11 @@ theorem sample_price :
     sample.shares = Real.exp 0.2 / (Real.exp 0.2 + 1) ∧
       sample.bond = -(100 * Real.exp (-0.05)) / (Real.exp 0.2 + 1) ∧
       sample.price = 100 * (Real.exp 0.2 - Real.exp (-0.05)) / (Real.exp 0.2 + 1) := by
-  have ha : 1 < Real.exp 0.2 := Real.one_lt_exp.2 (by norm_num)
-  have hb : Real.exp (-0.2) < 1 := Real.exp_lt_one (by norm_num)
+  have ha : 1 < Real.exp 0.2 := by
+    linarith [Real.add_one_lt_exp (x := (0.2 : ℝ)) (by norm_num)]
   have hab : Real.exp 0.2 * Real.exp (-0.2) = 1 := by rw [← Real.exp_add]; norm_num
+  have hb : Real.exp (-0.2) < 1 := by
+    nlinarith [mul_pos (sub_pos.2 ha) (Real.exp_pos (-0.2))]
   have hne : Real.exp 0.2 + 1 ≠ 0 := by positivity
   have hsub : Real.exp 0.2 - Real.exp (-0.2) ≠ 0 := by linarith
   have hUp : sample.callUp = 100 * (Real.exp 0.2 - 1) := by
