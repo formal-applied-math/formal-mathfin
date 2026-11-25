@@ -33,6 +33,10 @@ This composes two genuine theorems rather than positing the algebraic shell
   (`Probability/Jumps/PoissonPgf.integral_pow_poissonMeasure`), evaluated at `x = M_X(t)`.
 
 
+## Main definitions
+
+* `compoundSum N X`: the compound sum `ω ↦ ∑_{i<N ω} X i ω`, the aggregate loss of a compound model.
+
 ## Main results
 
 * `compoundPoisson_mgf` — `∫ n, mgf (∑_{i<n} Xᵢ) t ∂Poisson(λ) = exp(λ·(mgf X₀ t − 1))`.
