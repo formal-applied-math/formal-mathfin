@@ -6,16 +6,18 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import MathFin.Probability.Laws.ConvexOrder
 public import Mathlib.Basic.Real.Basic
 public import Mathlib.Tactic.Linarith.Frontend
 public import Mathlib.Tactic.Ring.RingNF
-public import Mathlib.Tactic.LinearCombination
 public import Mathlib.Analysis.Convex.Function
 
 /-!
 # Call payoffs in the strike
 
-The call payoff `K ↦ max(S − K, 0)`, as a function of the strike, is convex and antitone. These are
+The call payoff `K ↦ max(S − K, 0)`, as a function of the strike, is convex
+(`convexOn_call_payoff`, proved with convex order in `Probability/Laws/ConvexOrder.lean`) and
+antitone. These are
 facts about the payoff, before any model: the static no-arbitrage relations of option prices
 (convexity in the strike, butterflies, the implied density) are these facts carried to prices by
 the pricing functional (`Pricing/ConvexPricingFunctional.lean`, and under an arbitrary law
@@ -28,7 +30,6 @@ short call at `K₂` (`Contracts/Instruments/Options.lean` builds it that way).
 
 ## Main results
 
-* `convexOn_call_payoff`: `K ↦ max(S − K, 0)` is convex.
 * `antitone_call_payoff`: `K ↦ max(S − K, 0)` is antitone.
 * `cappedCall_eq_bull_spread`: the capped call is the bull-call spread.
 
@@ -47,28 +48,6 @@ replication, MSC 91G20, JEL G13
 
 namespace MathFin
 
-/-- The affine function `K ↦ a − K` is convex on `Set.univ`. Affine
-functions are simultaneously convex and concave; the inequality holds
-with equality. -/
-lemma convexOn_sub_const_id (a : ℝ) :
-    ConvexOn ℝ Set.univ (fun K : ℝ ↦ a - K) := by
-  refine ⟨convex_univ, fun K₁ _ K₂ _ s t _ _ hst ↦ ?_⟩
-  change a - (s • K₁ + t • K₂) ≤ s • (a - K₁) + t • (a - K₂)
-  simp only [smul_eq_mul]
-  -- Equality (affine functions are tight): `s·a + t·a = a` via `s + t = 1`.
-  have h_sa_ta : s * a + t * a = a := by linear_combination a * hst
-  linarith
-
-/-- **Call payoff is convex in the strike**: `K ↦ max(S − K, 0)` is convex.
-
-This is the structural spine of static option-price no-arbitrage relations.
-Butterfly non-negativity and Breeden-Litzenberger PDF positivity are
-discrete and infinitesimal consequences (respectively) of this single fact,
-after passing through risk-neutral expectation. -/
-lemma convexOn_call_payoff (S : ℝ) :
-    ConvexOn ℝ Set.univ (fun K : ℝ ↦ max (S - K) 0) :=
-  (convexOn_sub_const_id S).sup (convexOn_const (0 : ℝ) convex_univ)
-
 /-- **Call payoff is antitone in the strike**: higher strikes pay less.
 
 Equivalent to monotonicity of `max(·, 0)` composed with `K ↦ S − K` (which
@@ -76,7 +55,6 @@ is itself antitone). The single-line consequence of monotonicity of `max`. -/
 lemma antitone_call_payoff (S : ℝ) :
     Antitone (fun K : ℝ ↦ max (S - K) 0) :=
   fun _ _ h ↦ max_le_max (by linarith) le_rfl
-
 
 /-- **Capped call as a bull call spread**: for `K₁ ≤ K₂`,
 `min(max(S − K₁, 0), K₂ − K₁) = max(S − K₁, 0) − max(S − K₂, 0)`. -/

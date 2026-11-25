@@ -788,14 +788,6 @@ uses = ["def:emm"]
 area = "valuation/model-free"
 
 [[node]]
-label = "def:convex-order"
-title = "Convex order"
-statement = "μ ≤_cx ν when ∫ φ dμ ≤ ∫ φ dν for every convex φ; for laws on ℝ with equal means, the ordering of call prices at every strike. Peacocks, martingale couplings and minimal-variance aggregation are stated in it."
-uses = ["thm:market-carr-madan"]
-ground = "Mathlib: ConvexOn, integral"
-area = "valuation/model-free"
-
-[[node]]
 label = "def:markov-martingale"
 title = "Markov martingales"
 statement = "A martingale that is a Markov process with respect to a given filtration, raw or satisfying the usual conditions, and the mimicking problem: a Markov martingale with prescribed one-dimensional marginals."
@@ -897,4 +889,5 @@ label = "thm:convex-order-minimal-sum"
 title = "Convex-order minimal sums"
 statement = "Open (MF-OP-018, Wang 2015): which conditions on marginals F₁,…,Fₙ are necessary and sufficient for the sums with these marginals to have a smallest element in convex order."
 uses = ["def:convex-order", "thm:frechet-hoeffding"]
+core = ["mf-convex-order-no-minimal-sum"]
 area = "risk/aggregation"
