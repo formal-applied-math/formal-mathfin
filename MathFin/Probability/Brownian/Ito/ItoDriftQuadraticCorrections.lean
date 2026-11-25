@@ -185,8 +185,6 @@ variable (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
 
 include hD
 
-set_option maxHeartbeats 1600000 in
--- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The drift–martingale cross corrections of the quadratic block die**: the statement is
 the limit `0`. The proof bounds the summed absolute expectations of the frozen weight against
 `Δ(AdaptedDrift.driftPath β)ₖ·ΔMₖ` by `2·C₂·|D_β|·|D_δ|·T·√T/√(n+1)` (`O(√mesh)`) —

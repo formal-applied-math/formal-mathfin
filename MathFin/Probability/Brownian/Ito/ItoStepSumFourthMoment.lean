@@ -109,8 +109,6 @@ private theorem integral_natMeasurable_mul_increment_pow3
       (g := fun x : ℝ ↦ x ^ 3) (by fun_prop) hχm.aestronglyMeasurable hΔm.aemeasurable,
     integral_increment_pow3 hB ht, mul_zero]
 
-set_option maxHeartbeats 1600000 in
--- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The step-sum fourth-moment recursion**: for a bounded integrand sampled along a
 monotone time grid (`φ j` measurable in `𝓕_{s j}`, `|φ| ≤ D`), the fourth moment of the
 Itô sum is at most `3·(D²·total gap)²`. -/
