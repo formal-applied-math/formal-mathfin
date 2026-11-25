@@ -7,6 +7,7 @@ module
 
 public import MathFin.Probability.Jumps.CompoundPoissonMGF
 public import MathFin.Risk.ExpectedShortfall
+public import MathFin.Risk.StopLossGap
 
 /-!
 # Expected shortfall of a compound-Poisson aggregate loss
@@ -37,6 +38,10 @@ by the Rockafellar–Uryasev theorem, once `L` is known to be integrable:
 * `expectedShortfall_compoundPoisson_eq` — `ES_α(L) = VaR_α(L) + (1 − α)⁻¹ 𝔼[(L − VaR_α(L))⁺]`.
 * `integral_max_sub_compoundPoisson` — the Poisson-mixture expansion of `𝔼[(L − c)⁺]`.
 * `integral_max_sub_compoundPoisson_eq_tsum` — the same as a series over the claim count.
+* `ae_lattice_compoundPoisson` — lattice claims have a lattice aggregate.
+* `integral_max_sub_succ_mul_compoundPoisson` — the stop-loss recursion for lattice claims.
+* `isLeast_rockafellarUryasev_compoundPoisson_lattice` — `ES_α(L)` is the least objective value over
+  the lattice retentions.
 
 ## References
 
@@ -79,6 +84,21 @@ theorem _root_.ProbabilityTheory.integral_abs_sum_le_of_identDistrib {ι : Type*
     _ = ∑ i ∈ s, ∫ ω, |Y ω| ∂μ :=
         Finset.sum_congr rfl fun i hi ↦ ((hident i hi).comp continuous_abs.measurable).integral_eq
     _ = s.card * ∫ ω, |Y ω| ∂μ := by simp
+
+omit [IsProbabilityMeasure μ] in
+/-- **A compound-Poisson aggregate of lattice claims is a lattice variable**: if every claim `Xᵢ`
+lies in `hℤ` almost surely, so does `∑_{i<N} Xᵢ`. -/
+theorem ae_lattice_compoundPoisson {h : ℝ} (hlat : ∀ i, ∀ᵐ ω ∂μ, ∃ k : ℤ, X i ω = k * h) :
+    ∀ᵐ ω ∂μ, ∃ n : ℤ, ∑ i ∈ Finset.range (N ω), X i ω = n * h := by
+  filter_upwards [ae_all_iff.2 hlat] with ω hω
+  have (m : ℕ) : ∃ n : ℤ, ∑ i ∈ Finset.range m, X i ω = n * h := by
+    induction m with
+    | zero => exact ⟨0, by simp⟩
+    | succ m ih =>
+      obtain ⟨n, hn⟩ := ih
+      obtain ⟨k, hk⟩ := hω m
+      exact ⟨n + k, by rw [Finset.sum_range_succ, hn, hk]; push_cast; ring⟩
+  exact this (N ω)
 
 section Wald
 
@@ -176,6 +196,30 @@ theorem expectedShortfall_compoundPoisson_eq {α : ℝ} (hα : α ∈ Ioo 0 1) :
         + (1 - α)⁻¹ * ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω
             - valueAtRisk (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α) 0 ∂μ :=
   (rockafellarUryasev_valueAtRisk (integrable_compoundPoisson hident hX hN hNX) hα).symm
+
+/-- **The stop-loss recursion of a compound-Poisson aggregate of lattice claims.** If the claims
+lie in `hℤ` almost surely, `0 ≤ h`, then for every integer retention level `j`,
+`𝔼[(L − (j + 1)h)⁺] = 𝔼[(L − jh)⁺] − h · P(L > jh)`
+(`integral_max_sub_succ_mul_of_lattice`, for the integrable aggregate `L`). -/
+theorem integral_max_sub_succ_mul_compoundPoisson {h : ℝ} (hh : 0 ≤ h)
+    (hlat : ∀ i, ∀ᵐ ω ∂μ, ∃ k : ℤ, X i ω = k * h) (j : ℤ) :
+    ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - (j + 1) * h) 0 ∂μ =
+      ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - j * h) 0 ∂μ
+        - h * μ.real {ω | j * h < ∑ i ∈ Finset.range (N ω), X i ω} :=
+  integral_max_sub_succ_mul_of_lattice (integrable_compoundPoisson hident hX hN hNX).aemeasurable
+    (integrable_compoundPoisson hident hX hN hNX) hh (ae_lattice_compoundPoisson hlat) j
+
+/-- **Expected shortfall of a compound-Poisson aggregate of lattice claims is the least
+Rockafellar–Uryasev value on the lattice**: if the claims lie in `hℤ` almost surely with `h > 0`
+and `α ∈ (0, 1)`, then `ES_α(L)` is the least of `c + (1 − α)⁻¹ 𝔼[(L − c)⁺]` over `c = jh`, the
+values the stop-loss recursion computes (`isLeast_rockafellarUryasev_lattice`). -/
+theorem isLeast_rockafellarUryasev_compoundPoisson_lattice {h : ℝ} (hh : 0 < h)
+    (hlat : ∀ i, ∀ᵐ ω ∂μ, ∃ k : ℤ, X i ω = k * h) {α : ℝ} (hα : α ∈ Ioo 0 1) :
+    IsLeast (range fun j : ℤ ↦
+        rockafellarUryasev (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α (j * h))
+      (expectedShortfall (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α) :=
+  isLeast_rockafellarUryasev_lattice (integrable_compoundPoisson hident hX hN hNX).aemeasurable
+    (integrable_compoundPoisson hident hX hN hNX) hh (ae_lattice_compoundPoisson hlat) hα
 
 end Wald
 
