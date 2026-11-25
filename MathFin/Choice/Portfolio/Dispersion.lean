@@ -32,14 +32,15 @@ identity and what it lets one solve for.
   is a lower bound for it at nonnegative weights summing to one, by Jensen's inequality
 (`jensenProxy_le_bossuProxy`).
 * A **correlation swap** pays the pairwise correlations averaged over the pairwise weight
-  products `wᵢwⱼ`. Under equicorrelation that average, read off the dispersion identity as the
+  products `wᵢwⱼ` (an average where the normalisation is positive, as it is at nonnegative
+  index weights). Under equicorrelation that ratio, read off the dispersion identity as the
   off-diagonal share of the portfolio variance, is the common correlation
   (`realisedCorrelation_equicorrelation`).
 * The **dispersion P&L** of holding the components' variance at weight `wᵢ²` against the index
   variance is `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`): at nonnegative weights and
-  volatilities it is nonpositive, and strictly negative when the common correlation is positive
-  and two or more components contribute. At the flat weights `wᵢ = 1/d` the index variance is
-  the diversification form `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²`
+  volatilities with a common correlation `ρ ≥ 0` it is nonpositive, and strictly negative when
+  `ρ > 0` and two or more components contribute. At the flat weights `wᵢ = 1/d` the index
+  variance is the diversification form `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²`
   (`indexVar_equicorrelation_flat_weights`), the heterogeneous-volatility generalisation of
   `portfolioVarN_equicorrelation_equal_weights`.
 
@@ -64,7 +65,8 @@ identity and what it lets one solve for.
 ## References
 
 * [A. Jacquier and S. Slaoui, *Variance Dispersion and Correlation Swaps*][JacquierSlaoui],
-  §3.1, §3.2, §5.1 to §5.4
+  §3.1, §3.2 (the static identities; the dynamic P&L and weighting schemes of §5.1–§5.4 and
+  Appendix D are out of scope)
 
 ## Tags
 
@@ -210,7 +212,9 @@ theorem bossuProxy_between (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ 
 /-- **The variance-denominated proxy is a lower bound**: at nonnegative weights summing to one,
 the observed variance divided by the weighted variance sum `∑ wᵢσᵢ²` understates the Bossu
 proxy, which divides by the squared weighted-volatility sum instead. The source prints this
-variant for the realised correlation and notes the bound is Jensen's. -/
+variant for the realised correlation and notes the bound is Jensen's. When every `wᵢσᵢ`
+vanishes both denominators are zero and both sides are the junk `0`; no correlation is at
+issue there. -/
 theorem jensenProxy_le_bossuProxy (w σ : n → ℝ) (ρ : ℝ) (hflat : ∑ i, w i = 1)
     (hw : ∀ i, 0 ≤ w i) (hσ : ∀ i, 0 ≤ σ i)
     (hV : 0 ≤ portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j)) :
@@ -240,9 +244,9 @@ theorem jensenProxy_le_bossuProxy (w σ : n → ℝ) (ρ : ℝ) (hflat : ∑ i, 
     exact hJ
 
 /-- **The dispersion P&L**: holding the components' variance at weights `wᵢ²` against the index
-variance realises `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` — at nonnegative weights and volatilities it is
-nonpositive, and strictly negative when the common correlation is positive and two or more
-components contribute. -/
+variance realises `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` — at nonnegative weights and volatilities with a
+common correlation `ρ ≥ 0` it is nonpositive, and strictly negative when `ρ > 0` and two or
+more components contribute. -/
 theorem dispersionPnL_eq (w σ : n → ℝ) (ρ : ℝ) :
     ∑ i, w i ^ 2 * σ i ^ 2
         - portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j)
@@ -276,10 +280,11 @@ theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
     rw [inv_pow, inv_eq_one_div]
   rw [hinv, div_mul_eq_mul_div, one_mul]
 
-/-- **The correlation swap's floating leg under equicorrelation**: the pairwise correlations
-averaged over the pairwise weight products `wᵢwⱼ`, read off the dispersion identity as the
-off-diagonal share of the equicorrelated portfolio variance, realise the common correlation. A
-swap struck at the common correlation therefore pays nothing. -/
+/-- **The correlation swap's floating leg under equicorrelation**: the ratio of the
+off-diagonal share of the equicorrelated portfolio variance to the off-diagonal weight mass
+`∑ wᵢwⱼ` — the pairwise correlations averaged over the weight products where that
+normalisation is positive, as it is at nonnegative index weights — realises the common
+correlation. A swap struck at the common correlation therefore pays nothing. -/
 theorem realisedCorrelation_equicorrelation (w : n → ℝ) (ρ : ℝ)
     (hW : (∑ i, w i) ^ 2 ≠ ∑ i, w i ^ 2) :
     (portfolioVarN univ w (equicorrelationMatrix n ρ) - ∑ i, w i ^ 2)

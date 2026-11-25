@@ -43,7 +43,7 @@ One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 906 → 
   gap `(1 − ρ)·∑ wᵢ²σᵢ²/(∑ wᵢσᵢ)²` over the common correlation (`bossuProxy_eq_add_gap`), the
   proxy sitting between the correlation and one at nonnegative weights and volatilities
   (`bossuProxy_between`), and the Jensen lower bound for the variance-denominated variant
-  `V/∑ wᵢσᵢ²` at flat nonnegative weights (`jensenProxy_le_bossuProxy`). The dispersion P&L
+  `V/∑ wᵢσᵢ²` at nonnegative weights summing to one (`jensenProxy_le_bossuProxy`). The dispersion P&L
   identity `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`), the flat-weight index variance
   `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²` (`indexVar_equicorrelation_flat_weights`), and the
   correlation swap's floating leg realising the common correlation
