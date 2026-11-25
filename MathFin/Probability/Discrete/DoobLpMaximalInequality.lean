@@ -1061,7 +1061,9 @@ noncomputable def enormSup (f : ℕ → Ω → ℝ) (ω : Ω) : ℝ≥0∞ := �
 lemma measurable_enormSup (hf : ∀ k, Measurable (f k)) : Measurable (enormSup f) :=
   Measurable.iSup fun k ↦ (hf k).enorm
 
-/-- A nonnegative real power commutes with the supremum of a monotone sequence in `ℝ≥0∞`. -/
+/-- A nonnegative real power commutes with the supremum of a monotone sequence in `ℝ≥0∞`.
+Kept until `ENNReal.rpow_iSup` lands upstream (absent at the pinned Mathlib); that lemma will
+then replace this one. -/
 lemma iSup_rpow_of_monotone {g : ℕ → ℝ≥0∞} (hg : Monotone g) (hp : 0 ≤ p) :
     (⨆ n, g n) ^ p = ⨆ n, (g n) ^ p :=
   tendsto_nhds_unique
