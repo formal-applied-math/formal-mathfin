@@ -1450,7 +1450,7 @@ attribute [blueprint "thm:balancer-invariant"
   (`eval_constantMeanPayoff_eq_reserves`); in any market paying it at $T$ is worth the
   discounted expectation of the mark (`price_constantMeanPayoff`); and at $w = 1/2$ the
   position is the constant-product payoff of invariant $V^2$
-  (`constantMeanPayoff_one_half_eq_constantProductPayoff`). -/)]
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
   MathFin.DeFi.price_constantMeanPayoff
 
 attribute [blueprint "def:v3-position-value"
