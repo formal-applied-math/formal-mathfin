@@ -155,7 +155,8 @@ lemma condExp_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
   have h : ∫ ω, (X t ω - X s ω) ∂P = 0 := by
     rw [show (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) from rfl, hL.integral_eq,
       integral_id_gaussianReal]
-  exact condExp_comp_increment_eq_const hst (measurable_increment (𝓕 := 𝓕) (P := P) s t) measurable_id h
+  exact condExp_comp_increment_eq_const hst (measurable_increment (𝓕 := 𝓕) (P := P) s t)
+    measurable_id h
 
 /-- **Kernel 2**: the squared increment conditions on the elapsed time,
 `P[(X_t − X_s)² | 𝓕_s] =ᵐ t − s`. -/
