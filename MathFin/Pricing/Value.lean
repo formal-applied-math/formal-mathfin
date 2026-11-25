@@ -47,8 +47,8 @@ is load-bearing.
   `value_both` genuinely needs both summands integrable — `integral_add` is false without
   them. That asymmetry, not a uniform "linearity", is the honest content of this pair.
 * `Contract.value_payFlows_add`, `Contract.value_payFlows_sub`,
-  `Contract.value_payFlows_add_sub` — a schedule whose payoffs are a signed sum of the payoffs of other schedules (in the model, outcome by outcome) is worth the
-  same signed sum of their values.
+  `Contract.value_payFlows_add_sub` — a schedule whose payoffs are a signed sum of the payoffs of
+  other schedules (in the model, outcome by outcome) is worth the same signed sum of their values.
 * `Contract.value_deliverAsset` — a contract that simply delivers the asset `S` at time `T`
   is worth `∫ ω, S 0 ω ∂Q` today, given `S` is a `Q`-martingale and `Q` a probability
   measure. Mechanically this *is* conditional-expectation machinery (`condExp_ae_eq` +
