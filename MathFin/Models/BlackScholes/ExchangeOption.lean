@@ -56,7 +56,7 @@ discounted expected exchange payoff.
 * `margrabe_effective_variance`: substituting `σ₁²T, σ₂²T, ρσ₁σ₂T` gives the
   effective variance `(σ₁² + σ₂² − 2ρσ₁σ₂)·T`.
 * `exchange_payoff_eq_ratio`: `max(a − b, 0) = b · max(a/b − 1, 0)` for `b > 0`.
-* `margrabe_eq_bsVGarman`: Margrabe price is a `GarmanNormalForm` instance.
+* `margrabePrice_eq_bsVGarman`: Margrabe price is a `GarmanNormalForm` instance.
 * `margrabePrice_eq_bsV`: it is the Black–Scholes call formula at strike `S²₀` and rate `0`.
 * `margrabe_parity`: `Margrabe(S¹,S²) − Margrabe(S²,S¹) = S¹ − S²`.
 * `margrabe_price_via_call`: the exchange option is a `bs_call_formula` call
@@ -145,7 +145,7 @@ second asset plays the role of the discounted strike and `DF = 1` because the
 S²-numeraire measure carries no discounting. So a *multivariate* option is the
 same closed form `V = A·Φ(d₁) − K·DF·Φ(d₂)` as every BS-family price — one
 more consumer of the `GarmanNormalForm` principle. -/
-theorem margrabe_eq_bsVGarman (S1 S2 σ T : ℝ) :
+theorem margrabePrice_eq_bsVGarman (S1 S2 σ T : ℝ) :
     margrabePrice S1 S2 σ T = bsVGarman S1 S2 1 σ T := by
   have hd1 : margrabeD1 S1 S2 σ T = gbsd1 S1 S2 1 σ T := by
     unfold margrabeD1 gbsd1; rw [mul_one]

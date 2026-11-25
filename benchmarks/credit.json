@@ -519,7 +519,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export of MathFin.survive_eq_exp_neg_integral (MathFin/Insurance/SurvivalUnification.lean). SCOPE: the survival function of τ is the credit curve hazardSurvival h (survivalFunction_eq_hazardSurvival) and ₜpₓ is the survival ratio (SurvivalModel.survive_eq_survivalFunction_ratio); the interval integral splits. The law of τ is hypothesized; survive_coxDefaultTime shows the hypotheses hold for the constructed Cox default time when h is positive with ∫₀ᵗ h → ∞. Deterministic hazard only."
+        "formalization_scope": "Full formal proof. Re-export of MathFin.survive_eq_exp_neg_integral (MathFin/Insurance/SurvivalUnification.lean). SCOPE: the survival function of τ is the credit curve hazardSurvival h (survivalFunction_eq_hazardSurvival) and ₜpₓ is the survival ratio (SurvivalModel.survive_eq_survivalFunction_div); the interval integral splits. The law of τ is hypothesized; survive_coxDefaultTime shows the hypotheses hold for the constructed Cox default time when h is positive with ∫₀ᵗ h → ∞. Deterministic hazard only."
       }
     },
     {

@@ -148,7 +148,7 @@ theorem survive_eq_survivalProbability {h₀ : ℝ} (hh : 0 ≤ h₀) (hτ : Mea
     (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (Real.exp (-(h₀ * a))))
     {t T : ℝ} (ht : 0 ≤ t) (htT : t ≤ T) :
     SurvivalModel.survive P τ (T - t) t = survivalProbability h₀ t T := by
-  rw [SurvivalModel.survive_eq_survivalFunction_ratio hτ t (sub_nonneg.2 htT), add_sub_cancel,
+  rw [SurvivalModel.survive_eq_survivalFunction_div hτ t (sub_nonneg.2 htT), add_sub_cancel,
     survivalFunction_div_eq_survivalProbability hh hτ hcdf ht (ht.trans htT)]
 
 /-- **The actuarial `ₜpₓ` of a lifetime with hazard `h`**: under the hypotheses of
@@ -158,7 +158,7 @@ theorem survive_eq_exp_neg_integral (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)
     (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a)) {x t : ℝ}
     (hx : 0 ≤ x) (ht : 0 ≤ t) :
     SurvivalModel.survive P τ t x = Real.exp (-∫ s in x..x + t, h s) := by
-  rw [SurvivalModel.survive_eq_survivalFunction_ratio hτ x ht,
+  rw [SurvivalModel.survive_eq_survivalFunction_div hτ x ht,
     survivalFunction_eq_hazardSurvival hnn hτ hcdf (add_nonneg hx ht),
     survivalFunction_eq_hazardSurvival hnn hτ hcdf hx]
   simp only [hazardSurvival, survivalFromIntensity, cumulativeIntensity]
