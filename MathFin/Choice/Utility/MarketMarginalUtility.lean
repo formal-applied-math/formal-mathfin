@@ -21,8 +21,8 @@ this is the numéraire-portfolio identity, `sdf = w₀ / W`: the stochastic disc
 density of the pricing measure times the deflator `N 0 / N T`) is `w₀` over the wealth of a
 portfolio at which the expected log-wealth is stationary on the budget set
 (`sdf_eq_div_of_logOptimal`), so deflating by that wealth prices the assets under the physical
-measure. The hypothesis is the first-order condition only; that the portfolio maximises the
-expected log-wealth is not used or proved.
+measure. The hypothesis is the first-order condition. A local maximum of the expected log-wealth on the
+budget set gives it (`foc_of_isLocalMaxOn_log`), so the theorems apply at an optimum.
 
 ## Main results
 
@@ -31,6 +31,8 @@ expected log-wealth is not used or proved.
   `μ > 0`, and `μ * w₀ = E_P[u'(W) W]`.
 * `Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn`: the same at a local maximum of
   the expected utility `∫ u(W) ∂P` on the budget set.
+* `Market.foc_of_isLocalMaxOn_log`: a local maximum of the expected log-wealth on the budget set
+  is stationary, the hypothesis of the next theorem.
 * `Market.IsPricingMeasure.sdf_eq_div_of_logOptimal`: for `u = log`, `sdf ω = w₀ / W ω`.
 * `Market.IsPricingMeasure.integral_div_logOptimal_mul`: the prices deflated by the stationary log
   wealth are `P`-martingales in one period, `E_P[S_k(T) / W] = S_k(0) / w₀`.
@@ -81,6 +83,29 @@ variable [IsProbabilityMeasure M.P] (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ} {
   (hS : M.IsFiniteComplete T n₀ pr)
 
 include hQ hS
+
+omit hQ hS in
+/-- **A local maximum of the expected log-wealth on the budget set is stationary.** If `θ` of cost
+`w₀` with positive terminal wealth `W` is a local maximum of `θ' ↦ ∫ log W(θ') ∂P` on the budget
+set `{θ' | cost θ' = w₀}`, then `∑ ω, P{ω} · W⁻¹ · (payoff of d) = 0` for every budget-neutral `d`:
+the first-order condition `sdf_eq_div_of_logOptimal` takes as hypothesis. -/
+theorem foc_of_isLocalMaxOn_log {w₀ : ℝ} {θ : Fin K → ℝ}
+    (hmax : IsLocalMaxOn
+      (fun θ' ↦ ∫ ω, Real.log (portfolioPayoff (fun j ↦ M.asset j T) θ' ω) ∂M.P)
+      {θ' | portfolioCost pr θ' = w₀} θ)
+    (hθ : portfolioCost pr θ = w₀)
+    (hW : ∀ ω, 0 < portfolioPayoff (fun j ↦ M.asset j T) θ ω) :
+    ∀ d, portfolioCost pr d = 0 →
+      ∑ ω, M.P.real {ω} * (portfolioPayoff (fun j ↦ M.asset j T) θ ω)⁻¹ *
+        portfolioPayoff (fun j ↦ M.asset j T) d ω = 0 := by
+  have hobj : (fun θ' ↦ ∫ ω, Real.log (portfolioPayoff (fun j ↦ M.asset j T) θ' ω) ∂M.P) =
+      portfolioUtility (fun ω ↦ M.P.real {ω}) Real.log (fun j ↦ M.asset j T) := by
+    funext θ'
+    exact (expectedUtility_univ_real_eq_integral M.P _).symm
+  rw [hobj] at hmax
+  intro d hd
+  simpa only [Real.deriv_log] using sum_marginalUtility_mul_payoff_eq_zero_of_isLocalMaxOn hmax hθ
+    (fun ω ↦ Real.differentiableAt_log (hW ω).ne') hd
 
 /-- **Marginal utility is the stochastic discount factor.** In a market on a finite sample space
 with a pricing measure `Q` up to `T`, a probability measure `P` charging every state and
@@ -191,4 +216,5 @@ theorem IsPricingMeasure.integral_div_logOptimal_mul
     rw [hQ.sdf_eq_div_of_logOptimal hS hθ hw₀ hW hfoc ω]
     field_simp [hw₀.ne', (hW ω).ne']
   simp_rw [e]
-  rw [integral_const_mul, hQ.integral_sdf_mul_asset hS.numeraire_zero k (hS.asset_zero k), inv_mul_eq_div]
+  rw [integral_const_mul, hQ.integral_sdf_mul_asset hS.numeraire_zero k (hS.asset_zero k),
+    inv_mul_eq_div]
