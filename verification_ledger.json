@@ -3832,6 +3832,13 @@
       "input_hash": "e1c0d0112f5e277e34ddff8f50444ce7818469e57b47fbae428117440e7ee85c",
       "verified_at_commit": "8796bf4"
     },
+    "mf-kyle-equilibrium": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-25",
+      "elapsed_s": 4.3,
+      "input_hash": "2ef30f6f510d051e75010895f0cbe9cb993a6ba537c24f61c7911cc775a399d0",
+      "verified_at_commit": "8e3f192"
+    },
     "mf-last-survivor-annuity-value": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-20",
