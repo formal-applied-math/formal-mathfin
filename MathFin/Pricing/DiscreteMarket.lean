@@ -145,9 +145,9 @@ theorem value_europeanCall_sub_put (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 
 /-- **A discrete-time market read along a time change `φ`**: a price `S` and a numéraire `B` indexed
 by the steps, the information of the steps made by `t` (`𝓕.comp hφ`), the price after them as the
 asset, and the numéraire after them as the numéraire. It is the one construction of a `Market` from
-a discrete one: `toMarket` is the step count `⌊t⌋₊` with the price frozen at the horizon and the unit
-numéraire, and the binomial market (`Binomial.market`) is the step count `⌊t / h⌋₊` with the spot
-and the money market `e^{ρ n}`. -/
+a discrete one: `toMarket` is the step count `⌊t⌋₊` with the price frozen at the horizon and the
+unit numéraire, and the binomial market (`Binomial.market`) is the step count `⌊t / h⌋₊` with the
+spot and the money market `e^{ρ n}`. -/
 noncomputable def ofTimeChange (P : Measure Ω) (𝓕 : Filtration ℕ mΩ) {φ : ℝ≥0 → ℕ}
     (hφ : Monotone φ) (S : ℕ → Ω → ℝ) (B : ℕ → ℝ) (hB : ∀ n, 0 < B n)
     (hS : StronglyAdapted 𝓕 S) : Market Unit Ω where
