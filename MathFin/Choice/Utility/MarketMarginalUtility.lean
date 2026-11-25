@@ -21,8 +21,8 @@ this is the numéraire-portfolio identity, `sdf = w₀ / W`: the stochastic disc
 density of the pricing measure times the deflator `N 0 / N T`) is `w₀` over the wealth of a
 portfolio at which the expected log-wealth is stationary on the budget set
 (`sdf_eq_div_of_logOptimal`), so deflating by that wealth prices the assets under the physical
-measure. The hypothesis is the first-order condition. A local maximum of the expected log-wealth on the
-budget set gives it (`foc_of_isLocalMaxOn_log`), so the theorems apply at an optimum.
+measure. The hypothesis is the first-order condition. A local maximum of the expected log-wealth
+on the budget set gives it (`foc_of_isLocalMaxOn_log`), so the theorems apply at an optimum.
 
 ## Main results
 
