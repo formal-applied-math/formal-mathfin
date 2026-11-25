@@ -60,6 +60,10 @@ factor is one), as in `ConstantProductAMM.lean`.
 * `constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
   `swapOut_two_eq_swapOutput`: the equal-weight two-token instance is the constant-product
   pool of `ConstantProductAMM.lean`.
+* `constantMeanInvariant_pair`, `spotPrice_pair`: the invariant and the spot price of a
+  two-token pool with arbitrary weights.
+* `prod_update_pow`: splitting a product of powers over an updated reserve vector (a
+  `Finset.prod_update` companion for power summands).
 
 ## References
 
@@ -86,8 +90,8 @@ This is a value only for positive reserves and weights, the hypotheses the theor
 carry at the minimum their proofs need (the derivative theorem needs only the input
 reserve's positivity); on a nonpositive reserve `Real.rpow` is junk. The whitepaper
 normalizes the weights
-(`∑ k, w k = 1`), which makes `V` the value of the weighted portfolio; the statements proved
-here need only positivity. -/
+(`∑ k, w k = 1`), which makes `V` the invariant of a constant-value-share (weighted)
+portfolio; the statements proved here need only positivity. -/
 noncomputable def constantMeanInvariant (B : ι → ℝ) (w : ι → ℝ) : ℝ :=
   ∏ k, B k ^ w k
 
@@ -96,7 +100,9 @@ noncomputable def constantMeanInvariant (B : ι → ℝ) (w : ι → ℝ) : ℝ 
   `B j * (1 - (B i / (B i + Δ)) ^ (w i / w j))`
 
 of token `j`, the whitepaper's Out-Given-In formula, fee-free. The output reserve implied is
-`B j - swapOut B w i j Δ = B j * (B i / (B i + Δ)) ^ (w i / w j)`. -/
+`B j - swapOut B w i j Δ = B j * (B i / (B i + Δ)) ^ (w i / w j)`. The value means a trade
+only where `B i + Δ > 0`: at `B i + Δ = 0` it is the whole reserve `B j`, and on a negative
+denominator `Real.rpow` is junk (the theorems carry `0 < B i` and `0 < Δ`). -/
 noncomputable def swapOut (B : ι → ℝ) (w : ι → ℝ) (i j : ι) (Δ : ℝ) : ℝ :=
   B j * (1 - (B i / (B i + Δ)) ^ (w i / w j))
 
@@ -120,28 +126,28 @@ omit [Fintype ι] [DecidableEq ι] in
 /-- **A positive input returns a positive amount**: for positive reserves and weights, the
 out-amount of a positive input is positive. -/
 theorem swapOut_pos (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
-    (hB : ∀ k, 0 < B k) (hw : ∀ k, 0 < w k) (hΔ : 0 < Δ) :
+    (hBi : 0 < B i) (hBj : 0 < B j) (hwi : 0 < w i) (hwj : 0 < w j) (hΔ : 0 < Δ) :
     0 < swapOut B w i j Δ := by
-  have hsum : 0 < B i + Δ := by linarith [hB i]
-  have hr : 0 < B i / (B i + Δ) := div_pos (hB i) hsum
+  have hsum : 0 < B i + Δ := by linarith [hBi]
+  have hr : 0 < B i / (B i + Δ) := div_pos hBi hsum
   have hlt : (B i / (B i + Δ)) ^ (w i / w j) < 1 :=
-    Real.rpow_lt_one hr.le (by rw [div_lt_iff₀ hsum]; linarith) (div_pos (hw i) (hw j))
+    Real.rpow_lt_one hr.le (by rw [div_lt_iff₀ hsum]; linarith) (div_pos hwi hwj)
   unfold swapOut
-  exact mul_pos (hB j) (by linarith)
+  exact mul_pos hBj (by linarith)
 
 omit [Fintype ι] [DecidableEq ι] in
 /-- **A swap cannot drain the pool**: the out-amount is below the output reserve, so the
 post-trade reserve `B j - swapOut B w i j Δ` stays positive. -/
 theorem swapOut_lt_reserve (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
-    (hB : ∀ k, 0 < B k) (hΔ : 0 < Δ) :
+    (hBi : 0 < B i) (hBj : 0 < B j) (hΔ : 0 < Δ) :
     swapOut B w i j Δ < B j := by
-  have hsum : 0 < B i + Δ := by linarith [hB i]
-  have hr : 0 < B i / (B i + Δ) := div_pos (hB i) hsum
+  have hsum : 0 < B i + Δ := by linarith [hBi]
+  have hr : 0 < B i / (B i + Δ) := div_pos hBi hsum
   have hpos : 0 < (B i / (B i + Δ)) ^ (w i / w j) := Real.rpow_pos_of_pos hr _
   unfold swapOut
   have h1 : 1 - (B i / (B i + Δ)) ^ (w i / w j) < 1 := by linarith
   calc B j * (1 - (B i / (B i + Δ)) ^ (w i / w j)) < B j * 1 :=
-        mul_lt_mul_of_pos_left h1 (hB j)
+        mul_lt_mul_of_pos_left h1 hBj
     _ = B j := mul_one _
 
 omit [Fintype ι] [DecidableEq ι] in
@@ -149,16 +155,16 @@ omit [Fintype ι] [DecidableEq ι] in
 output token's power at the shrunk reserve is the pair's product of powers before the trade,
 the constant-mean content of the whitepaper's Out-Given-In derivation. -/
 private theorem out_pair_pow_eq (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
-    (hB : ∀ k, 0 < B k) (hw : ∀ k, 0 < w k) (hΔ : 0 < Δ) :
+    (hBi : 0 < B i) (hBj : 0 < B j) (hwj : 0 < w j) (hΔ : 0 < Δ) :
     (B i + Δ) ^ w i * (B j - swapOut B w i j Δ) ^ w j = B i ^ w i * B j ^ w j := by
-  have hsum : 0 < B i + Δ := by linarith [hB i]
-  have hr : 0 < B i / (B i + Δ) := div_pos (hB i) hsum
+  have hsum : 0 < B i + Δ := by linarith [hBi]
+  have hr : 0 < B i / (B i + Δ) := div_pos hBi hsum
   have hrw : B j - swapOut B w i j Δ = B j * (B i / (B i + Δ)) ^ (w i / w j) := by
     unfold swapOut; ring
-  have hwi : w i / w j * w j = w i := div_mul_cancel₀ (w i) (hw j).ne'
+  have hwi : w i / w j * w j = w i := div_mul_cancel₀ (w i) hwj.ne'
   have hbi : (B i + Δ) ^ w i * (B i / (B i + Δ)) ^ w i = B i ^ w i := by
     rw [← Real.mul_rpow hsum.le hr.le, mul_comm, div_mul_cancel₀ _ hsum.ne']
-  rw [hrw, Real.mul_rpow (hB j).le (Real.rpow_pos_of_pos hr _).le, ← Real.rpow_mul hr.le, hwi,
+  rw [hrw, Real.mul_rpow hBj.le (Real.rpow_pos_of_pos hr _).le, ← Real.rpow_mul hr.le, hwi,
     show (B i + Δ) ^ w i * (B j ^ w j * (B i / (B i + Δ)) ^ w i)
       = B j ^ w j * ((B i + Δ) ^ w i * (B i / (B i + Δ)) ^ w i) from by ring, hbi]
   ring
@@ -183,7 +189,7 @@ theorem prod_update_pow (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s 
 weighted product of the old. This is the pricing rule of the constant-mean pool: the swap is
 the trade that keeps the weighted product fixed. -/
 theorem swap_preserves_constantMean (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
-    (hB : ∀ k, 0 < B k) (hw : ∀ k, 0 < w k) (hij : i ≠ j) (hΔ : 0 < Δ) :
+    (hBi : 0 < B i) (hBj : 0 < B j) (hwj : 0 < w j) (hij : i ≠ j) (hΔ : 0 < Δ) :
     ∏ k, swapReserves B w i j Δ k ^ w k = constantMeanInvariant B w := by
   have hE : (Finset.univ.erase j).erase i = (Finset.univ.erase i).erase j :=
     Finset.ext fun k ↦ by simp [Finset.mem_erase, and_comm]
@@ -200,7 +206,7 @@ theorem swap_preserves_constantMean (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
     rw [← Finset.mul_prod_erase Finset.univ _ (Finset.mem_univ i),
       ← Finset.mul_prod_erase (Finset.univ.erase i) _
         (Finset.mem_erase.2 ⟨hij.symm, Finset.mem_univ _⟩)]
-  have hpair := out_pair_pow_eq B w i j hB hw hΔ
+  have hpair := out_pair_pow_eq B w i j hBi hBj hwj hΔ
   rw [hL, hR, ← mul_assoc, ← mul_assoc, ← hpair]
   rw [mul_comm ((B j - swapOut B w i j Δ) ^ w j) ((B i + Δ) ^ w i)]
 
@@ -209,7 +215,8 @@ omit [Fintype ι] [DecidableEq ι] in
 `(B j / w j) / (B i / w i)` units of token `j` per unit of token `i`: the derivative of the
 out-amount in the input at `Δ = 0` is `spotPrice B w i j`. This derives the reserve-to-weight
 ratio formula from the constant-mean surface; the whitepaper prints the same ratio with in
-and out exchanged. -/
+and out exchanged. Meaningful where the spot price is — positive reserves and weights; the
+`0 < B i` hypothesis keeps the statement out of the junk region. -/
 theorem hasDerivAt_swapOut_zero (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
     (hBi : 0 < B i) :
     HasDerivAt (swapOut B w i j) (spotPrice B w i j) 0 := by

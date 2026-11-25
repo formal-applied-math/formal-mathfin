@@ -61,7 +61,7 @@ single-token holdings `V` and `V P`, outside the hypotheses).
 * [F. Martinelli, N. Mushegian, *Balancer: a non-custodial portfolio manager, liquidity
   provider, and price sensor*][MartinelliMushegian2019], "Theory": Value Function; Spot
   Price; Constant Value Distribution Proof (`V^t = B_t / W_t`, of which the marking identity
-  is the external-price generalization).
+  is the two-token instance at the pool's own spot price).
 
 ## Tags
 
@@ -96,7 +96,7 @@ theorem eval_constantMeanPayoff (V : ℝ) (w : ℝ≥0) (T : ℝ≥0) (s : Scena
 
 /-- **The marking identity**: a pool of reserves `x, y > 0` with weight `w` on X, marked at
 its own spot price `P` of X in Y, is worth exactly its reserves `x P + y` in Y. This is the
-constant-mean generalization of `eval_constantProductPayoff`, and at the spot price it is
+constant-mean counterpart of `eval_constantProductPayoff`, and at the spot price it is
 the whitepaper's constant value distribution: the value in Y is `y / (1-w) = B_Y / W_Y`. -/
 theorem eval_constantMeanPayoff_eq_reserves (x y : ℝ) (w : ℝ≥0) (hx : 0 < x) (hy : 0 < y)
     (hw : 0 < w) (hw1 : (w : ℝ) < 1) (T : ℝ≥0) (s : Scenario Unit)
