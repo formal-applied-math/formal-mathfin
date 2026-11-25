@@ -158,15 +158,15 @@ def kellyPrice : Fin 2 → ℝ := ![1, 0]
 
 lemma kellyPayoff_win (θ : Fin 2 → ℝ) :
     portfolioPayoff (kellyPayoff b) θ 0 = θ 0 + θ 1 * b := by
-  simp [portfolioPayoff, kellyPayoff, Fin.sum_univ_two]
+  simp [portfolioPayoff, Matrix.vecMul, dotProduct, kellyPayoff, Fin.sum_univ_two]
 
 lemma kellyPayoff_lose (θ : Fin 2 → ℝ) :
     portfolioPayoff (kellyPayoff b) θ 1 = θ 0 - θ 1 := by
-  simp [portfolioPayoff, kellyPayoff, Fin.sum_univ_two]
+  simp [portfolioPayoff, Matrix.vecMul, dotProduct, kellyPayoff, Fin.sum_univ_two]
   ring
 
 lemma kellyCost (θ : Fin 2 → ℝ) : portfolioCost kellyPrice θ = θ 0 := by
-  simp [portfolioCost, kellyPrice, Fin.sum_univ_two]
+  simp [portfolioCost, dotProduct, kellyPrice, Fin.sum_univ_two]
 
 /-- The Kelly winning wealth `1 + f*·b` is positive. -/
 lemma kellyWealth_win_pos (hp : 0 < p) (hb : 0 < b) : 0 < 1 + kellyFraction p b * b := by

@@ -7,6 +7,7 @@ module
 
 public import MathFin.Choice.Utility.VonNeumannMorgenstern
 public import MathFin.Pricing.FTAP.FTAPMultiState
+public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.Calculus.Deriv.Comp
 public import Mathlib.Analysis.Calculus.Deriv.Mul
@@ -82,13 +83,14 @@ open MeasureTheory Filter Topology
 
 variable {N M : ℕ}
 
-/-- The payoff of the portfolio `θ` in state `ω`, in the market with payoff matrix `A`. -/
+/-- The payoff of the portfolio `θ` in state `ω`, in the market with payoff matrix `A`: the
+row vector `θ` times `A`. -/
 def portfolioPayoff (A : Fin M → Fin N → ℝ) (θ : Fin M → ℝ) (ω : Fin N) : ℝ :=
-  ∑ k, θ k * A k ω
+  Matrix.vecMul θ A ω
 
-/-- The cost of the portfolio `θ` at the prices `pr`. -/
+/-- The cost of the portfolio `θ` at the prices `pr`: their dot product. -/
 def portfolioCost (pr θ : Fin M → ℝ) : ℝ :=
-  ∑ k, θ k * pr k
+  θ ⬝ᵥ pr
 
 /-- The expected utility `∑ ω, p ω * u (W ω)` of the terminal wealth `W = portfolioPayoff A θ`. -/
 def portfolioUtility (p : Fin N → ℝ) (u : ℝ → ℝ) (A : Fin M → Fin N → ℝ) (θ : Fin M → ℝ) : ℝ :=
@@ -96,22 +98,18 @@ def portfolioUtility (p : Fin N → ℝ) (u : ℝ → ℝ) (A : Fin M → Fin N 
 
 lemma portfolioPayoff_add_smul (A : Fin M → Fin N → ℝ) (θ d : Fin M → ℝ) (t : ℝ) (ω : Fin N) :
     portfolioPayoff A (θ + t • d) ω = portfolioPayoff A θ ω + t * portfolioPayoff A d ω := by
-  unfold portfolioPayoff
-  rw [Finset.mul_sum, ← Finset.sum_add_distrib]
-  exact Finset.sum_congr rfl fun k _ ↦ by simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  simp [portfolioPayoff, Matrix.add_vecMul, Matrix.smul_vecMul]
 
 lemma portfolioCost_add_smul (pr θ d : Fin M → ℝ) (t : ℝ) :
     portfolioCost pr (θ + t • d) = portfolioCost pr θ + t * portfolioCost pr d := by
-  unfold portfolioCost
-  rw [Finset.mul_sum, ← Finset.sum_add_distrib]
-  exact Finset.sum_congr rfl fun k _ ↦ by simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]; ring
+  simp [portfolioCost, add_dotProduct, smul_dotProduct]
 
 /-- A weighted sum of payoffs is the portfolio-weighted sum of the weighted asset payoffs. -/
 lemma sum_mul_portfolioPayoff (l : Fin N → ℝ) (A : Fin M → Fin N → ℝ) (d : Fin M → ℝ) :
-    ∑ ω, l ω * portfolioPayoff A d ω = ∑ k, d k * ∑ ω, l ω * A k ω := by
-  simp only [portfolioPayoff, Finset.mul_sum]
-  exact Finset.sum_comm.trans
-    (Finset.sum_congr rfl fun k _ ↦ Finset.sum_congr rfl fun ω _ ↦ by ring)
+    ∑ ω, l ω * portfolioPayoff A d ω = ∑ k, d k * ∑ ω, l ω * A k ω :=
+  (dotProduct_comm l _).trans <|
+    (Matrix.dotProduct_mulVec d A l).symm.trans <|
+      Finset.sum_congr rfl fun k _ ↦ by simp [Matrix.mulVec, dotProduct, mul_comm]
 
 /-- **The derivative of expected utility along a line of portfolios**: at `θ`, in the direction
 `d`, it is the marginal-utility-weighted payoff `∑ ω, p ω * u'(W ω) * (payoff of d)`. -/

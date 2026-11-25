@@ -63,8 +63,8 @@ continuous-time notion restricts to it:
   notion has a witness on `Ω = Fin N` with the asset returns as an `ℝᴹ`-valued `Y`
   (`hasEMMMultiState_iff_exists_isEMM`);
 * the discrete-time `MathFin.IsEMM` at horizon `1` with trivial `𝓕 0`
-  (`Pricing/FTAP/FTAPDiscrete.lean`) is the scalar one for `Y = S 1 − S 0`
-  (`isEMM_one_iff_onePeriod`);
+  (`Pricing/FTAP/FTAPDiscrete.lean`) is the scalar one for `Y = S 1 − S 0` on a finite space
+  (`isEMM_one_iff_onePeriod`), and this one for `Y = S 1 − S 0` on any space (`isEMM_one_iff`);
 * a continuous-time `IsEMM` gives this notion for every increment
   `S t − S s` (`IsEMM.increment`, in `Pricing/FTAP/FTAPDiscrete.lean`).
 
@@ -117,17 +117,56 @@ structure IsEMM (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
+omit [MeasurableSpace F] [BorelSpace F] [IsProbabilityMeasure P] in
+/-- **At horizon `1` the discrete-time EMM is the vector one-period EMM.** On a general sample
+space, with `𝓕 0 = ⊥` and an `F`-valued price `S` adapted, `Q` is an equivalent martingale measure
+for the one-step market iff it is one for the one-period excess return `S 1 − S 0`: the price
+`S 0` is a constant, so the one-step martingale condition `S 0 = E_Q[S 1 | ⊥]` is
+`E_Q[S 1 − S 0] = 0`. The finite-`Ω` scalar form is `isEMM_one_iff_onePeriod`. -/
+theorem isEMM_one_iff {𝓕 : Filtration ℕ mΩ} {S : ℕ → Ω → F} (hS : StronglyAdapted 𝓕 S)
+    (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
+    MathFin.IsEMM 𝓕 P S 1 Q ↔ IsEMM P (S 1 - S 0) Q := by
+  constructor
+  · intro hQ
+    have := hQ.isProb
+    have h1 := hQ.integrable (t := 1) le_rfl
+    have h0' := hQ.integrable (t := 0) (Nat.zero_le 1)
+    refine ⟨hQ.toIsEquivProbMeasure, h1.sub h0', ?_⟩
+    have hm : ∫ ω, S 0 ω ∂Q = ∫ ω, S 1 ω ∂Q := by
+      rw [integral_congr_ae (hQ.condExp_eq (Nat.zero_le 1) le_rfl), integral_condExp (𝓕.le 0)]
+    show ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0
+    rw [integral_sub h1 h0', hm, sub_self]
+  · intro hQ
+    have := hQ.isProb
+    have hS0 : StronglyMeasurable[𝓕 0] (S 0) := hS 0
+    rw [h0] at hS0
+    obtain ⟨c, hc⟩ := stronglyMeasurable_bot_iff.mp hS0
+    have hI0 : Integrable (S 0) Q := by rw [hc]; exact integrable_const c
+    have hI1 : Integrable (S 1) Q :=
+      (hQ.int.add hI0).congr (.of_forall fun ω ↦ by simp)
+    refine .of_condExp_succ hQ.toIsEquivProbMeasure (fun t _ ↦ hS t)
+      (fun t ht ↦ by
+        rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
+        exacts [hI0, hI1])
+      fun t ht ↦ ?_
+    obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
+    rw [h0, condExp_bot, hc]
+    have hfair : ∫ ω, (S 1 ω - S 0 ω) ∂Q = 0 := hQ.fair
+    rw [integral_sub hI1 hI0, hc, integral_const, probReal_univ, one_smul] at hfair
+    exact Filter.Eventually.of_forall fun _ ↦ (sub_eq_zero.mp hfair).symm
+
 omit [IsProbabilityMeasure P] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage. The one-period
 market is the horizon-`1` market with `𝓕 0 = ⊥`, the `F`-valued price `S 0 = 0`, `S 1 = Y` and the
-constant holding `θ`: `E_Q[Y] = 0` makes `S` a `Q`-martingale up to the horizon, the gain is
-`⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.IsEMM.noArbitrage` does the rest. -/
+constant holding `θ`: `E_Q[Y] = 0` makes `S` a `Q`-martingale up to the horizon
+(`isEMM_one_iff`), the gain is `⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.IsEMM.noArbitrage` does the
+rest. -/
 theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P Y Q) :
     NoArbitrage P Y := by
   have := hQ.isProb
   intro θ hpos
   -- the two-step filtration `⊥ ≤ mΩ`
-  obtain ⟨𝓕, h0, h1⟩ : ∃ 𝓕 : Filtration ℕ mΩ, 𝓕 0 = ⊥ ∧ 𝓕 1 = mΩ :=
+  obtain ⟨𝓕, h0, h1⟩ : ∃ 𝓕 : Filtration ℕ mΩ, 𝓕 0 = ⊥ ∧ ∀ n, n ≠ 0 → 𝓕 n = mΩ :=
     ⟨{ seq := fun n ↦ if n = 0 then ⊥ else mΩ
        mono' := fun a b hab ↦ by
          dsimp only
@@ -139,25 +178,18 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P 
        le' := fun n ↦ by
          split_ifs
          · exact bot_le
-         · exact le_rfl }, rfl, rfl⟩
+         · exact le_rfl }, rfl, fun n hn ↦ if_neg hn⟩
   let S : ℕ → Ω → F := fun n ω ↦ if n = 0 then 0 else Y ω
   have hS0 : S 0 = 0 := funext fun ω ↦ ite_eq_left rfl
   have hS1 : S 1 = Y := funext fun ω ↦ ite_eq_right one_ne_zero
   have hgain : martingaleTransform (fun _ _ ↦ θ) S 1 = fun ω ↦ inner ℝ θ (Y ω) := by
     funext ω; simp [martingaleTransform, hS0, hS1]
-  have hE : MathFin.IsEMM 𝓕 P S 1 Q := .of_condExp_succ hQ.toIsEquivProbMeasure
-    (fun t ht ↦ by
-      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
-      · rw [hS0]; exact stronglyMeasurable_zero
-      · rw [hS1, h1]; exact hY.stronglyMeasurable)
-    (fun t ht ↦ by
-      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
-      · rw [hS0]; exact integrable_zero _ _ _
-      · rw [hS1]; exact hQ.int)
-    (fun t ht ↦ by
-      obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
-      rw [h0, condExp_bot, hS1, hQ.fair, hS0]
-      exact Filter.Eventually.of_forall fun ω ↦ by simp)
+  have hE : MathFin.IsEMM 𝓕 P S 1 Q :=
+    (isEMM_one_iff P (fun n ↦ by
+      by_cases hn : n = 0
+      · subst hn; rw [h0] at *; exact stronglyMeasurable_const.mono bot_le |>.mono le_rfl
+      · simp only [S, if_neg hn, h1 n hn]; exact hY.stronglyMeasurable) h0).mpr
+      (by rw [hS0, hS1, sub_zero]; exact hQ)
   have hnull := hE.noArbitrage (fun _ _ ↦ θ) (fun _ _ ↦ stronglyMeasurable_const)
     ⟨‖θ‖, fun _ _ _ ↦ le_rfl⟩ (by rw [hgain]; exact hpos)
   rwa [hgain] at hnull
