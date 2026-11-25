@@ -901,10 +901,10 @@
     },
     "mf-bgk-discrete-barrier-shift": {
       "benchmark_file": "exotic_options.json",
-      "date": "2026-11-21",
-      "elapsed_s": 2.8,
-      "input_hash": "a923ebf9f066f766af8dd07e4dbf77a849cf85294b7345a96719b413cbd02481",
-      "verified_at_commit": "e067d85"
+      "date": "2026-11-25",
+      "elapsed_s": 4.3,
+      "input_hash": "5ad95123d2bc360b30ae2a2eadf66d990c888294ac17d28992690255de5fb4fe",
+      "verified_at_commit": "2262053"
     },
     "mf-binary-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
