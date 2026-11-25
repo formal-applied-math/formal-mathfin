@@ -654,6 +654,27 @@
       "input_hash": "a5531d3cb7817d8c8aa162f32b5ba01ec01d95372cfa47fe9d3e085df66d7156",
       "verified_at_commit": "c047ee3"
     },
+    "mf-asian-avgstrike-conditioning-lower-bound": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-23",
+      "elapsed_s": 2.9,
+      "input_hash": "95afe8d67ab8d46c57ca0bee6d4c27ec84e5bd15f25d4bb6614203ee9df47cbe",
+      "verified_at_commit": "a0c5a77"
+    },
+    "mf-asian-avgstrike-expsum-gaussian-positive-part": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-23",
+      "elapsed_s": 2.2,
+      "input_hash": "3ecbcf10a9ec196f42cf3bf4746fb9a8c1ad2fd37a83714de1dcdfa38ac7fd2c",
+      "verified_at_commit": "a0c5a77"
+    },
+    "mf-asian-avgstrike-one-fixing-market-price": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-23",
+      "elapsed_s": 3.0,
+      "input_hash": "3b3b379e0e3af6f76b59a34b631f56a46551f37972fd6569be421af8ee8f0d30",
+      "verified_at_commit": "a0c5a77"
+    },
     "mf-asian-geom-driver-gaussian": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-16",
@@ -2704,6 +2725,20 @@
       "elapsed_s": 2.8,
       "input_hash": "8dcc06c214efab4f5989875b6d2899931b40c86f71feb0beeb753015cb41d230",
       "verified_at_commit": "9a596c5"
+    },
+    "mf-jarrow-yildirim-yoy-forward-convexity": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-11-23",
+      "elapsed_s": 2.9,
+      "input_hash": "4cbf0f75c333a6b8409626dd7ab16161258d86ed5c5ae598a105aac3c5cfc596",
+      "verified_at_commit": "a0c5a77"
+    },
+    "mf-jarrow-yildirim-zc-inflation-caplet": {
+      "benchmark_file": "interest_rates.json",
+      "date": "2026-11-23",
+      "elapsed_s": 2.7,
+      "input_hash": "7eada7b5e7af7e3b02a7f97b8c4ea443b22ef2f29d93744b0abb12fdaed6cf82",
+      "verified_at_commit": "a0c5a77"
     },
     "mf-joint-stdev-triangle": {
       "benchmark_file": "risk_measures.json",

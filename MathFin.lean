@@ -434,6 +434,7 @@ public import MathFin.Models.LocalVol.ForwardSmile
 public import MathFin.Models.LocalVol.MarketCallSurface
 public import MathFin.Models.BlackScholes.PutStrikeConvexity
 public import MathFin.Models.BlackScholes.AsianInequality
+public import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
 public import MathFin.Models.BlackScholes.AsianGeometric
 -- Geometric-average Asian: n-date driver law + closed-form price via effective-BS reduction
@@ -693,6 +694,7 @@ public import MathFin.Models.Rates.ForwardMeasure
 -- Inflation is FX: the zero-coupon inflation swap and the YoY convexity
 public import MathFin.Models.Rates.Inflation
 public import MathFin.Models.Rates.OvernightCompounding
+public import MathFin.Models.Rates.JarrowYildirim
 -- ABCD instantaneous volatility: closed-form integrated variance over a window
 public import MathFin.Models.Rates.ABCDVolatility
 -- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price

@@ -203,6 +203,29 @@ One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (86
   The value function was checked numerically against four independent routes (independent
   invariant-curve solving, spot marking, swap-consistency via the module's own out-amount,
   and the w = 1/2 reduction) before formalization. Axioms-clean, `full`.
+### Jarrow–Yildirim: the ZC inflation caplet and the YoY forward (2026-11-20)
+
+Two `reduced_core` entries in `benchmarks/interest_rates.json` (module
+`Models/Rates/JarrowYildirim.lean`), each composing existing results under model hypotheses (the
+module's variance lemmas are module-only, not corpus entries). Corpus 906 → 908 on the merged tree
+(reduced_core 22 → 24, interest_rates 3 → 5 reduced; delivery-ready 884, unchanged — both new
+entries are reduced cores).
+
+- **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
+  inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the
+  lognormal law of the index under the nominal `T`-forward measure. Not derived: the index-linked
+  bond pricing hident (the time-0 case of the forward-index martingale, Bagaria eq. 17.6), the
+  lognormality of the index under the nominal T-forward measure (hypothesis hZ), its SDE-level
+  derivation, and the real-rate drift shift. V is a free positive input; this statement does not
+  identify it with jyVariance.
+- **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the time-0 price of the
+  year-on-year payment, from the forward identity `jyYoyForward_eq_convexity` (the
+  conditional-expectation (martingale) hypothesis for the forward index plus the tower step
+  `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`) and the numéraire change.
+  Not derived: the martingale property of the forward index under Q^T (the conditional-expectation
+  hypothesis), the Hull-White reconstitution form hR of the bond ratio, the means, variances and
+  covariance of the rate deviations and the Hull-White loadings B^n, B^r (free inputs), their
+  SDE-level derivation, and the real-rate drift shift.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 
@@ -846,6 +869,14 @@ split by area. What each bridge proves, by area:
   form `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`). Not derived:
   `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of convergence in
   `m`, and the accuracy of the shift as an approximation to the discretely monitored price.
+  (`mf-continuous-lookback-floating-strike`, `reduced_core`). For the discrete arithmetic
+  average-strike Asian call, the Gaussian positive part of a single-crossing exponential sum,
+  the Jensen conditioning lower bound for an integrable payoff given the conditional-mean
+  property, and the one-fixing case as the forward-start call at the Black–Scholes price
+  (`mf-asian-avgstrike-expsum-gaussian-positive-part`,
+  `mf-asian-avgstrike-conditioning-lower-bound`, `mf-asian-avgstrike-one-fixing-market-price`,
+  all `reduced_core`: the conditional-mean identification under Brownian motion and the
+  closeness of the bound to the price are not proved).
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
   Black–Scholes(–Merton) put (`mf-american-put-ge-bsm-european-put`; the early-exercise premium's
   positivity is not proved); its value is unchanged by null-set horizon changes
