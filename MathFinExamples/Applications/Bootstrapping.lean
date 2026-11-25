@@ -18,10 +18,12 @@ quoted par bonds. A strip of annual par bonds is quoted, one per maturity. This 
    factors already solved (`df`);
 3. proves the curve reprices every bond in the strip exactly (`df_reprices`, from
    `bootstrap_consistency`), and that it is the only curve that does (`eq_df`, from
-   `bootstrap_solve`);
+   `bootstrap_solve`; both are `parBootstrap_reprices` and `parBootstrap_unique` of
+   `Models/Rates/YieldCurve.lean`, applied to the strip's coupons);
 4. computes the curve for an illustrative strip and checks that its first three discount factors
    are below `1` and strictly decreasing, so that the one-year forward rates between them, which
-   this file does not define, would be positive.
+   this file does not define, would be positive, and that every later factor is the previous one
+   over `1.03` (`parBootstrap_succ_of_coupon_eq`), which determines the whole curve.
 
 `sample_checked` is the single statement the build certifies.
 
@@ -62,43 +64,23 @@ structure ParStrip where
 
 namespace ParStrip
 
-/-- The sum of the discount factors to years `1, …, n`, built with the curve: each step adds the
-factor the next bond solves for. -/
-noncomputable def annuity (s : ParStrip) : ℕ → ℝ
-  | 0 => 0
-  | n + 1 => s.annuity n + (1 - s.coupon n * s.annuity n) / (1 + s.coupon n)
-
 /-- **The bootstrapped discount factor** to year `n + 1`: the bond maturing then is priced at par
-by its coupons, discounted on the factors already solved, and its final payment `1 + c`. -/
-noncomputable def df (s : ParStrip) (n : ℕ) : ℝ :=
-  (1 - s.coupon n * s.annuity n) / (1 + s.coupon n)
-
-/-- The recursion for `annuity` sums the bootstrapped discount factors. -/
-theorem annuity_eq_sum (s : ParStrip) (n : ℕ) : s.annuity n = ∑ k ∈ Finset.range n, s.df k := by
-  induction n with
-  | zero => rfl
-  | succ n ih => rw [annuity, Finset.sum_range_succ, ← ih, df]
+by its coupons, discounted on the factors already solved, and its final payment `1 + c`
+(`parBootstrap`). -/
+noncomputable def df (s : ParStrip) : ℕ → ℝ := parBootstrap s.coupon
 
 /-- The price of the bond with index `n` on a curve `B`, as a pricing equation: par equals the
 coupons discounted to years `1, …, n` plus the final payment discounted to year `n + 1`. -/
 def PricesAtPar (s : ParStrip) (B : ℕ → ℝ) (n : ℕ) : Prop :=
-  couponBondPricingEq (Finset.range n) (fun _ ↦ s.coupon n) B 1 (s.coupon n) 1 (B n)
+  parBondPricingEq s.coupon B n
 
-/-- **The curve reprices every bond in the strip exactly** (`bootstrap_consistency`). -/
-theorem df_reprices (s : ParStrip) (n : ℕ) : s.PricesAtPar s.df n := by
-  have h := bootstrap_consistency (Finset.range n) (fun _ ↦ s.coupon n) s.df 1 (s.coupon n) 1
-    (by linarith [s.coupon_pos n])
-  rwa [← Finset.mul_sum, ← annuity_eq_sum, add_comm (s.coupon n) 1, ← df] at h
+/-- **The curve reprices every bond in the strip exactly** (`parBootstrap_reprices`). -/
+theorem df_reprices (s : ParStrip) (n : ℕ) : s.PricesAtPar s.df n :=
+  parBootstrap_reprices s.coupon (fun n ↦ by linarith [s.coupon_pos n]) n
 
-/-- **The curve is the only one that reprices the strip.** A curve on which every bond is priced
-at par is the bootstrapped one: by induction on the maturity, each pricing equation determines
-the next factor from the earlier ones (`bootstrap_solve`). -/
-theorem eq_df (s : ParStrip) {B : ℕ → ℝ} (hB : ∀ n, s.PricesAtPar B n) (n : ℕ) : B n = s.df n := by
-  induction n using Nat.strong_induction_on with
-  | _ n ih =>
-    rw [bootstrap_solve _ _ _ _ _ _ _ (by linarith [s.coupon_pos n]) (hB n), ← Finset.mul_sum,
-      Finset.sum_congr rfl fun k hk ↦ ih k (Finset.mem_range.1 hk), ← annuity_eq_sum,
-      add_comm (s.coupon n) 1, df]
+/-- **The curve is the only one that reprices the strip** (`parBootstrap_unique`). -/
+theorem eq_df (s : ParStrip) {B : ℕ → ℝ} (hB : ∀ n, s.PricesAtPar B n) (n : ℕ) : B n = s.df n :=
+  parBootstrap_unique s.coupon (fun n ↦ by linarith [s.coupon_pos n]) hB n
 
 end ParStrip
 
@@ -115,7 +97,18 @@ noncomputable def sample : ParStrip where
 /-- The sample curve to three years: `50/51`, `0.951…` and `0.914…`. -/
 theorem sample_df :
     sample.df 0 = 50 / 51 ∧ sample.df 1 = 1990 / 2091 ∧ sample.df 2 = 65660 / 71791 := by
-  norm_num [ParStrip.df, ParStrip.annuity, sample]
+  norm_num [ParStrip.df, parBootstrap, parAnnuity, sample]
+
+/-- **The rest of the curve**: from the fourth year on the coupon is the same `3%`, so each factor
+is the previous one over `1.03`. With `sample_df` this fixes the whole curve. -/
+theorem sample_df_tail (n : ℕ) (hn : 2 ≤ n) : sample.df (n + 1) = sample.df n / 1.03 := by
+  have hc (m : ℕ) (hm : 2 ≤ m) : sample.coupon m = 0.03 := by
+    simp [sample, show m ≠ 0 by omega, show m ≠ 1 by omega]
+  have := parBootstrap_succ_of_coupon_eq sample.coupon (n := n)
+    (by rw [hc n hn]; norm_num) (by rw [hc n hn, hc (n + 1) (by omega)])
+  rw [hc n hn] at this
+  rw [show (1 : ℝ) + 0.03 = 1.03 by norm_num] at this
+  exact this
 
 /-! ### The check -/
 
@@ -123,15 +116,16 @@ theorem sample_df :
 - the bootstrapped curve reprices every bond in the strip at par;
 - it is the only curve that does;
 - its first three discount factors are `50/51`, `1990/2091` and `65660/71791`;
-- they are positive, below `1` and strictly decreasing. -/
+- they are positive, below `1` and strictly decreasing;
+- every later factor is the previous one over `1.03`. -/
 theorem sample_checked :
     (∀ n, sample.PricesAtPar sample.df n) ∧
       (∀ B : ℕ → ℝ, (∀ n, sample.PricesAtPar B n) → B = sample.df) ∧
       (sample.df 0 = 50 / 51 ∧ sample.df 1 = 1990 / 2091 ∧ sample.df 2 = 65660 / 71791) ∧
       0 < sample.df 2 ∧ sample.df 2 < sample.df 1 ∧ sample.df 1 < sample.df 0 ∧
-      sample.df 0 < 1 := by
+      sample.df 0 < 1 ∧ ∀ n, 2 ≤ n → sample.df (n + 1) = sample.df n / 1.03 := by
   obtain ⟨h₀, h₁, h₂⟩ := sample_df
-  refine ⟨sample.df_reprices, fun B hB ↦ funext (sample.eq_df hB), sample_df, ?_⟩
+  refine ⟨sample.df_reprices, fun B hB ↦ funext (sample.eq_df hB), sample_df, ?_, sample_df_tail⟩
   rw [h₀, h₁, h₂]
   norm_num
 
