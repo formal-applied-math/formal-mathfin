@@ -22,7 +22,7 @@ These are what let a spread, a floor or a dominance relation proved on `pathPV` 
 `ConvexPricingFunctional.lean`), which price by summing non-negative state prices.
 
 The proofs add no machinery: each statement is the corresponding order property of the
-Bochner integral (`integral_nonneg`, `integral_mono_of_nonneg`, `integral_mono_ae`,
+Bochner integral (`integral_nonneg_of_ae`, `integral_mono_of_nonneg`, `integral_mono_ae`,
 `integral_convexOn_of_integrand_ae`) applied to `Contract.value`, which *is* the integral
 of `pathPV` against `Q`.
 
