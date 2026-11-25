@@ -2845,6 +2845,13 @@
       "input_hash": "863483aabad9efa4ed5a64fc3b4f1038bc74547568b6e88f915580c99409fd28",
       "verified_at_commit": "54c0176d"
     },
+    "mf-forward-start-call": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-25",
+      "elapsed_s": 4.6,
+      "input_hash": "6e1328eff9cfe72e9a20e19b4736df0365da3ea3f7e7e6e1a2e0c08cf9e3e4c8",
+      "verified_at_commit": "4ef0fdb"
+    },
     "mf-frac-diff-binomial-series": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-19",
