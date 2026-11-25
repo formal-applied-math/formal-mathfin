@@ -573,11 +573,9 @@ lemma tendsto_integral_digital {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T)
   have h := ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto
     (crr_tendsto_gaussian_inDistribution hσ hT hp) hnull
   have h' := (NNReal.continuous_coe.tendsto _).comp h
-  simp only [hind, integral_indicator measurableSet_Ioi, setIntegral_const, smul_eq_mul, mul_one,
-    ← measureReal_def]
-  simpa only [Function.comp_def, ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure,
-    measureReal_def, ENNReal.coe_toReal, crrRowProbMeasure, bsLimitProbMeasure,
-    ProbabilityMeasure.coe_mk] using h'
+  simp only [hind, integral_indicator measurableSet_Ioi, setIntegral_const, smul_eq_mul, mul_one]
+  simpa only [Function.comp_def, crrRowProbMeasure, bsLimitProbMeasure,
+    ← ProbabilityMeasure.measureReal_eq_coe_coeFn, ProbabilityMeasure.coe_mk] using h'
 
 /-- **The discounted binomial price converges once the integral does.** For a measurable payoff
 bounded on `(0, ∞)`, if the payoff's integrals at `S₀eˣ` against the `n`-step CRR laws converge to
