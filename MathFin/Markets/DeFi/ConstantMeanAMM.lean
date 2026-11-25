@@ -83,7 +83,7 @@ namespace MathFin
 
 namespace DeFi
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {ι : Type*}
 
 /-- **Constant-mean invariant**: the weighted product `∏ k, B k ^ w k` of the pool's reserves.
 This is a value only for positive reserves and weights, the hypotheses the theorems here
@@ -92,7 +92,7 @@ reserve's positivity); on a nonpositive reserve `Real.rpow` is junk. The whitepa
 normalizes the weights
 (`∑ k, w k = 1`), which makes `V` the invariant of a constant-value-share (weighted)
 portfolio; the statements proved here need only positivity. -/
-noncomputable def constantMeanInvariant (B : ι → ℝ) (w : ι → ℝ) : ℝ :=
+noncomputable def constantMeanInvariant [Fintype ι] (B : ι → ℝ) (w : ι → ℝ) : ℝ :=
   ∏ k, B k ^ w k
 
 /-- **Out-amount of a constant-mean swap**: sending `Δ` of token `i` into the pool returns
@@ -119,10 +119,9 @@ noncomputable def spotPrice (B : ι → ℝ) (w : ι → ℝ) (i j : ι) : ℝ :
 `swapOut B w i j Δ` of token `j` out: token `i`'s reserve grows by `Δ`, token `j`'s shrinks by
 the out-amount, the others are untouched. At `i = j` the second write wins and the value is
 not a post-trade reserve; every consuming theorem carries `i ≠ j`. -/
-noncomputable def swapReserves (B : ι → ℝ) (w : ι → ℝ) (i j : ι) (Δ : ℝ) : ι → ℝ :=
+noncomputable def swapReserves [DecidableEq ι] (B : ι → ℝ) (w : ι → ℝ) (i j : ι) (Δ : ℝ) : ι → ℝ :=
   Function.update (Function.update B i (B i + Δ)) j (B j - swapOut B w i j Δ)
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- **A positive input returns a positive amount**: for positive reserves and weights, the
 out-amount of a positive input is positive. -/
 theorem swapOut_pos (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
@@ -135,7 +134,6 @@ theorem swapOut_pos (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
   unfold swapOut
   exact mul_pos hBj (by linarith)
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- **A swap cannot drain the pool**: the out-amount is below the output reserve, so the
 post-trade reserve `B j - swapOut B w i j Δ` stays positive. -/
 theorem swapOut_lt_reserve (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
@@ -150,7 +148,6 @@ theorem swapOut_lt_reserve (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : �
         mul_lt_mul_of_pos_left h1 hBj
     _ = B j := mul_one _
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- The two factors the trade touches: the input token's power at the grown reserve times the
 output token's power at the shrunk reserve is the pair's product of powers before the trade,
 the constant-mean content of the whitepaper's Out-Given-In derivation. -/
@@ -169,10 +166,9 @@ private theorem out_pair_pow_eq (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ
       = B j ^ w j * ((B i + Δ) ^ w i * (B i / (B i + Δ)) ^ w i) from by ring, hbi]
   ring
 
-omit [Fintype ι] in
 /-- Splitting a product of powers over an updated reserve vector: the updated token
 contributes its new power, the rest are unchanged. -/
-theorem prod_update_pow (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s : Finset ι)
+theorem prod_update_pow [DecidableEq ι] (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s : Finset ι)
     (h : a ∈ s) :
     ∏ k ∈ s, Function.update f a c k ^ w k = c ^ w a * ∏ k ∈ s.erase a, f k ^ w k := by
   have hfun : (fun k ↦ Function.update f a c k ^ w k)
@@ -188,7 +184,8 @@ theorem prod_update_pow (w : ι → ℝ) (f : ι → ℝ) (a : ι) (c : ℝ) (s 
 `swapOut B w i j Δ` of token `j` out, the weighted product of the new reserves equals the
 weighted product of the old. This is the pricing rule of the constant-mean pool: the swap is
 the trade that keeps the weighted product fixed. -/
-theorem swap_preserves_constantMean (B : ι → ℝ) (w : ι → ℝ) (i j : ι) {Δ : ℝ}
+theorem swap_preserves_constantMean [Fintype ι] [DecidableEq ι] (B : ι → ℝ) (w : ι → ℝ)
+    (i j : ι) {Δ : ℝ}
     (hBi : 0 < B i) (hBj : 0 < B j) (hwj : 0 < w j) (hij : i ≠ j) (hΔ : 0 < Δ) :
     ∏ k, swapReserves B w i j Δ k ^ w k = constantMeanInvariant B w := by
   have hE : (Finset.univ.erase j).erase i = (Finset.univ.erase i).erase j :=
@@ -210,7 +207,6 @@ theorem swap_preserves_constantMean (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
   rw [hL, hR, ← mul_assoc, ← mul_assoc, ← hpair]
   rw [mul_comm ((B j - swapOut B w i j Δ) ^ w j) ((B i + Δ) ^ w i)]
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- **The spot price is the marginal rate.** At zero trade size the out-amount pays
 `(B j / w j) / (B i / w i)` units of token `j` per unit of token `i`: the derivative of the
 out-amount in the input at `Δ = 0` is `spotPrice B w i j`. This derives the reserve-to-weight
@@ -238,21 +234,18 @@ theorem hasDerivAt_swapOut_zero (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
   field_simp
   ring
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- The invariant of a two-token pool with weights `w₁` on X and `w₂` on Y. -/
 theorem constantMeanInvariant_pair (x y w₁ w₂ : ℝ) :
     constantMeanInvariant ![x, y] ![w₁, w₂] = x ^ w₁ * y ^ w₂ := by
   simp only [constantMeanInvariant, Fin.prod_univ_two, Matrix.cons_val_zero,
     Matrix.cons_val_one]
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- The spot price of a two-token pool with weights `w₁` on X and `w₂` on Y: the units of
 token Y per unit of token X. -/
 theorem spotPrice_pair (x y w₁ w₂ : ℝ) :
     spotPrice ![x, y] ![w₁, w₂] 0 1 = (y / w₂) / (x / w₁) := by
   simp only [spotPrice, Matrix.cons_val_zero, Matrix.cons_val_one]
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- **The equal-weight two-token invariant is the constant-product invariant**: at `n = 2` with
 `w = ![1/2, 1/2]`, the squared constant-mean invariant is the product of the two reserves,
 so the surface `V = √(x·y)` is the Uniswap curve `x·y = k` written in squared form. -/
@@ -269,7 +262,6 @@ theorem constantMeanInvariant_two_sq_eq (x y : ℝ) (hx : 0 < x) (hy : 0 < y) :
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [mul_pow, hx2, hy2]
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- **The equal-weight two-token spot price is the constant-product internal price**: the
 marginal rate of the two-token equal-weight pool is `internalPrice x y = y / x`. -/
 theorem spotPrice_two_eq_internalPrice (x y : ℝ) :
@@ -278,7 +270,6 @@ theorem spotPrice_two_eq_internalPrice (x y : ℝ) :
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
   field_simp
 
-omit [Fintype ι] [DecidableEq ι] in
 /-- **The equal-weight two-token out-amount is the constant-product swap output**: the
 whitepaper's Out-Given-In at `w i = w j = 1/2` is `swapOutput x y Δ = y * Δ / (x + Δ)`. -/
 theorem swapOut_two_eq_swapOutput (x y Δ : ℝ) (hx : 0 < x) (hΔ : 0 < Δ) :

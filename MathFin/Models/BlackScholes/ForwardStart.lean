@@ -130,7 +130,8 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
         max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
           ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0 := by
     intro ω
-    rw [pathAssets_eq_mul_bsTerminal B hτ S_0 r σ ω, mul_comm α (pathAssets S_0 r σ B () t₁ ω), ← mul_sub]
+    rw [pathAssets_eq_mul_bsTerminal B hτ S_0 r σ ω,
+      mul_comm α (pathAssets S_0 r σ B () t₁ ω), ← mul_sub]
     by_cases hle : bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) ≤ α
     · have hle' : bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))

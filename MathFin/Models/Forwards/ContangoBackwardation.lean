@@ -20,8 +20,8 @@ same formula, not a separate derivation: `δ` is a continuous multiplicative yie
 `TheoryOfStorage.lean`'s convenience yield `Y` is an additive amount paid at delivery.
 `continuousYieldAmount` converts one to the other (the delivery-date value
 `S e^{rT}(1 − e^{−δT})` of the yield) and `storageForward_continuousYield_iff` proves that the
-storage no-arbitrage forward with that additive yield is `fxForward S r δ T`. The forward is the deterministic-rate curve; futures and
-forwards agree only under deterministic rates (`thm:futures-forward-convexity` is the gap).
+storage no-arbitrage forward with that additive yield is `fxForward S r δ T`. The forward is the
+deterministic-rate curve; futures and forwards agree only under deterministic rates (`thm:futures-forward-convexity` is the gap).
 This module adds the qualitative market structure that formula
 induces, for `S > 0`:
 
