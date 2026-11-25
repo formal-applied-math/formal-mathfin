@@ -361,7 +361,7 @@ lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
     have hint (u : ℝ) :
         Integrable (fun x ↦ Real.exp (u * x)) (nuPos.map fun ω ↦ ∑ i, lam i * B (τ i) ω) := by
       rw [integrable_map_measure
-        (measurable_exp.comp (measurable_const.mul measurable_id)).aestronglyMeasurable
+        (Real.measurable_exp.comp (measurable_const.mul measurable_id)).aestronglyMeasurable
         hY.aemeasurable]
       change Integrable (fun ω ↦ Real.exp (u * ∑ i, lam i * B (τ i) ω)) nuPos
       rw [hnuPos, integrable_withDensity_ofReal_iff hfae]
