@@ -52,8 +52,8 @@ gains-cone closedness).
 
 ## The one-period EMM of the library
 
-`IsEMM` here is the library's one notion of an equivalent martingale measure for a single
-trading period. The other one-period encodings are proved equivalent to it, and the
+`IsCentringMeasure` here is the library's one notion of an equivalent martingale measure for a
+single trading period (named apart from the multi-period `MathFin.IsEMM`). The other one-period encodings are proved equivalent to it, and the
 continuous-time notion restricts to it:
 
 * the scalar `OnePeriod.IsEMM` (`Pricing/FTAP/FTAPOnePeriod.lean`) is defined as this notion
@@ -72,7 +72,7 @@ continuous-time notion restricts to it:
 
 * `NoArbitrage`: any constant portfolio `θ ∈ F` whose gain `⟪θ, Y⟫` is `P`-a.e. nonnegative has
   `⟪θ, Y⟫ = 0` a.e.
-* `IsEMM`: `Q ~ P`, `Y` is `Q`-integrable and `E_Q[Y] = 0 ∈ F`.
+* `IsCentringMeasure`: `Q ~ P`, `Y` is `Q`-integrable and `E_Q[Y] = 0 ∈ F`.
 * `gainsKernel`: the subspace `{θ : ⟪θ, Y⟫ = 0 a.e.}` of portfolios with a.e. zero gain.
 * `softplus`, `logistic`: `log (1 + eᵘ)` and its derivative `eᵘ / (1 + eᵘ)`.
 * `potential`: the softplus potential `θ ↦ ∫ softplus ⟪θ, Y⟫ ∂P`, whose minimiser's first-order
@@ -113,7 +113,7 @@ def NoArbitrage : Prop :=
 /-- **Equivalent martingale measure** (one period, finite-dim): `Q ~ P`, `Y` is
 `Q`-integrable, and `E_Q[Y] = 0 ∈ F`. The library's canonical one-period notion; see the
 module docstring for the encodings proved equivalent to it. -/
-structure IsEMM (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
+structure IsCentringMeasure (Q : Measure Ω) : Prop extends IsEquivProbMeasure P Q where
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
@@ -125,7 +125,7 @@ for the one-step market iff it is one for the one-period excess return `S 1 − 
 `E_Q[S 1 − S 0] = 0`. The finite-`Ω` scalar form is `isEMM_one_iff_onePeriod`. -/
 theorem isEMM_one_iff {𝓕 : Filtration ℕ mΩ} {S : ℕ → Ω → F} (hS : StronglyAdapted 𝓕 S)
     (h0 : 𝓕 0 = ⊥) {Q : Measure Ω} :
-    MathFin.IsEMM 𝓕 P S 1 Q ↔ IsEMM P (S 1 - S 0) Q := by
+    MathFin.IsEMM 𝓕 P S 1 Q ↔ IsCentringMeasure P (S 1 - S 0) Q := by
   constructor
   · intro hQ
     have := hQ.isProb
@@ -161,7 +161,7 @@ market is the horizon-`1` market with `𝓕 0 = ⊥`, the `F`-valued price `S 0 
 constant holding `θ`: `E_Q[Y] = 0` makes `S` a `Q`-martingale up to the horizon
 (`isEMM_one_iff`), the gain is `⟪θ, S 1 − S 0⟫ = ⟪θ, Y⟫`, and `MathFin.IsEMM.noArbitrage` does the
 rest. -/
-theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsEMM P Y Q) :
+theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsCentringMeasure P Y Q) :
     NoArbitrage P Y := by
   have := hQ.isProb
   intro θ hpos
@@ -582,7 +582,7 @@ minimiser is strictly positive, bounded, and fair, so `Q = P.withDensity (z / �
 EMM. -/
 theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
     (hNA : NoArbitrage P Y) :
-    ∃ Q, IsEMM P Y Q := by
+    ∃ Q, IsCentringMeasure P Y Q := by
   by_cases hY0 : (gainsKernel P Y)ᗮ = ⊥
   · -- `Nᗮ = ⊥ ⟹ N = ⊤`: `Y` is a.e. orthogonal to every `θ`, so `E[Y] = 0` and `Q = P`
     refine ⟨P, ⟨inferInstance, .rfl, .rfl⟩, hYint, ?_⟩
@@ -660,7 +660,7 @@ measurable `Y`, no arbitrage gives an EMM. Pass to the equivalent probability me
 an a.e. notion preserved by `P̃ ~ P`, so the integrable backward direction applies, and
 `Q ~ P̃ ~ P` by transitivity. -/
 theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) :
-    ∃ Q, IsEMM P Y Q := by
+    ∃ Q, IsCentringMeasure P Y Q := by
   set w : Ω → ℝ := fun ω ↦ (1 + ‖Y ω‖)⁻¹ with hwdef
   have hw_meas : Measurable w := (measurable_const.add hY.norm).inv
   have hden_pos : ∀ ω, (0 : ℝ) < 1 + ‖Y ω‖ := fun ω ↦ by positivity
@@ -719,7 +719,7 @@ explicit: minimise the softplus potential over the gains kernel's orthogonal com
 (its logistic weight is the density), needing no Hahn–Banach, no L⁰-cone closedness,
 no measurable selection, and **no non-redundancy hypothesis**. -/
 theorem ftap_one_period_vector (hY : Measurable Y) :
-    NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
+    NoArbitrage P Y ↔ ∃ Q, IsCentringMeasure P Y Q :=
   ⟨fun hNA ↦ exists_isEMM_of_noArbitrage P Y hY hNA,
    fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM P Y hY hQ⟩
 

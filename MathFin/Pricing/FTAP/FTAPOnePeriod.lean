@@ -19,7 +19,7 @@ equivalent martingale measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`.
 
 ## Relation to the vector and discrete-time theorems
 
-`IsEMM` is the vector notion `OnePeriodVector.IsEMM` at `F = ℝ`, and `NoArbitrage` is the
+`IsEMM` is the vector notion `OnePeriodVector.IsCentringMeasure` at `F = ℝ`, and `NoArbitrage` is the
 vector no-arbitrage condition at `F = ℝ` (`noArbitrage_iff_vector`: on `ℝ` the inner
 product `⟪θ, y⟫` is `θ · y`). So `ftap_one_period` is a corollary of
 `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`, and carries no proof of its own: the
@@ -40,7 +40,7 @@ measurable selection theorem) is not formalised.
 * `NoArbitrage`: any scalar position `θ` whose gain `θ · Y` is `P`-a.e. nonnegative has
   `θ · Y = 0` a.e.
 * `IsEMM`: `Q ~ P`, `Y` is `Q`-integrable and `E_Q[Y] = 0`; the vector notion
-  `OnePeriodVector.IsEMM` at `F = ℝ`.
+  `OnePeriodVector.IsCentringMeasure` at `F = ℝ`.
 
 ## Main results
 
@@ -74,15 +74,15 @@ def NoArbitrage : Prop :=
   ∀ θ : ℝ, 0 ≤ᵐ[P] (fun ω ↦ θ * Y ω) → (fun ω ↦ θ * Y ω) =ᵐ[P] 0
 
 /-- **Equivalent martingale measure** (one period, scalar): `Q ~ P`, `Y` is `Q`-integrable,
-and `E_Q[Y] = 0`. This is the library's one-period notion `OnePeriodVector.IsEMM` at
+and `E_Q[Y] = 0`. This is the library's one-period notion `OnePeriodVector.IsCentringMeasure` at
 `F = ℝ`, with the same fields `toIsEquivProbMeasure` (`isProb`, `ac`, `ac'`), `int`, `fair`. -/
 abbrev IsEMM (Q : Measure Ω) : Prop :=
-  OnePeriodVector.IsEMM P Y Q
+  OnePeriodVector.IsCentringMeasure P Y Q
 
 omit [IsProbabilityMeasure P] in
 /-- **The scalar no-arbitrage condition is the vector one at `F = ℝ`.** On `ℝ` the inner
 product `⟪θ, y⟫` is the product `θ · y`, so a scalar position `θ` with gain `θ · Y` is the
-vector portfolio `θ ∈ ℝ`. With `IsEMM` defined as `OnePeriodVector.IsEMM` at `F = ℝ`, this
+vector portfolio `θ ∈ ℝ`. With `IsEMM` defined as `OnePeriodVector.IsCentringMeasure` at `F = ℝ`, this
 identifies `ftap_one_period` with `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`. -/
 theorem noArbitrage_iff_vector : NoArbitrage P Y ↔ OnePeriodVector.NoArbitrage P Y := by
   simp only [NoArbitrage, OnePeriodVector.NoArbitrage, Real.inner_apply]

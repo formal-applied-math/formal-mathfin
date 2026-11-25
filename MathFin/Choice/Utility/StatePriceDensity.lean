@@ -58,7 +58,7 @@ Differentiability of `u` at the optimal wealths is implied by `deriv u (W ω) > 
 * `exists_statePrices_of_isLocalMaxOn`: marginal utility, normalised, is a strictly positive
   state-price vector.
 * `exists_hasEMMMultiState_of_isLocalMaxOn`: the optimum defines a pricing measure.
-* `exists_isEMM_of_isLocalMaxOn`: the same as a measure `Q` with `OnePeriodVector.IsEMM`.
+* `exists_isEMM_of_isLocalMaxOn`: the same as a measure `Q` with `OnePeriodVector.IsCentringMeasure`.
 * `hasEMMMultiState_of_statePrices`: strictly positive state prices give `HasEMMMultiState`.
 * `logUtility_statePrices_of_stationary`: for `u = log`, the density is `w₀ * p / W`.
 
@@ -278,7 +278,7 @@ theorem exists_hasEMMMultiState_of_isLocalMaxOn [NeZero N] {p : Fin N → ℝ} {
 /-- **The optimum defines a pricing measure on the state space.** For a probability `P` on the
 states charging every state, the optimum of `exists_hasEMMMultiState_of_isLocalMaxOn` gives
 strictly positive state prices `q = p u'(W)/μ`, for some `μ > 0`, and a measure `Q` that is an
-equivalent martingale measure (`OnePeriodVector.IsEMM`) for the excess-return vector
+equivalent martingale measure (`OnePeriodVector.IsCentringMeasure`) for the excess-return vector
 `A k ω - pr k / ∑ q`. -/
 theorem exists_isEMM_of_isLocalMaxOn [NeZero N] (P : Measure (Fin N)) [IsProbabilityMeasure P]
     (hP : ∀ i, P {i} ≠ 0) {p : Fin N → ℝ} {u : ℝ → ℝ} {A : Fin M → Fin N → ℝ}
@@ -289,7 +289,7 @@ theorem exists_isEMM_of_isLocalMaxOn [NeZero N] (P : Measure (Fin N)) [IsProbabi
     ∃ q : Fin N → ℝ, (∀ ω, 0 < q ω) ∧ (∃ μ : ℝ, 0 < μ ∧
         ∀ ω, q ω = p ω * deriv u (portfolioPayoff A θ ω) / μ) ∧
       (∀ k, statePricePricing Finset.univ q (A k) = pr k) ∧
-      ∃ Q, OnePeriodVector.IsEMM P
+      ∃ Q, OnePeriodVector.IsCentringMeasure P
         (multiStateReturn fun k ω ↦ A k ω - pr k / ∑ ω', q ω') Q := by
   obtain ⟨q, hq, hμ, hprice, hemm⟩ := exists_hasEMMMultiState_of_isLocalMaxOn hmax hθ hw₀ hp hW hu
   exact ⟨q, hq, hμ, hprice, (hasEMMMultiState_iff_exists_isEMM _ P hP).mp hemm⟩

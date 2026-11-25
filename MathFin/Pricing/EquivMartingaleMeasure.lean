@@ -19,7 +19,7 @@ discrete market (`FTAP.lean`, time `ℕ`) and the continuous one (`ContinuousMar
 price need not be a `Q`-martingale past it; a `Q`-martingale on all of time is an EMM at every
 horizon (`IsEMM.of_martingale`).
 
-The one-period market keeps its own `OnePeriodVector.IsEMM` (a measure under which the price
+The one-period market keeps its own `OnePeriodVector.IsCentringMeasure` (a measure under which the price
 increment is centred); `isEMM_one_iff_onePeriod` (`FTAP.lean`) shows it is this notion at `T = 1`
 with `𝓕 0 = ⊥`.
 
