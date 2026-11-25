@@ -1684,7 +1684,12 @@ The numéraire measure `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))` reprices e
 consistently: `changeOfNumeraire` is the invariance `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`, a pure
 measure-transport identity plus cancellation of `N_T` — no integrability hypothesis.
 `numeraireMeasure_isProbabilityMeasure` is the companion normalization (`N/B` a `Q`-martingale ⟹
-`Q^N` a probability measure). The abstract backbone is genuinely CONSUMED:
+`Q^N` a probability measure). The measure-theoretic interface is pinned too:
+`numeraireMeasure_rnDeriv` makes the density the Radon–Nikodym derivative of `Q^N` against `Q`
+(for σ-finite `Q` and measurable numéraire terminals), and
+`numeraireMeasure_absolutelyContinuous` / `numeraireMeasure_absolutelyContinuous'` give the
+two one-sided absolute continuities (measurable positive numéraires for the converse). The
+abstract backbone is genuinely CONSUMED:
 `numeraireMeasure` at `B_T = e^{rT}`, `B₀ = 1`, `N = S` is the Black–Scholes stock numéraire
 `dQ^(S)/dQ = e^{−rT}·S_T/S₀` (`stockNumeraire_exercise_probability`). -/
 
@@ -1699,6 +1704,18 @@ measure-transport identity plus cancellation of `N_T` — no integrability hypot
 /-- info: 'MathFin.stockNumeraire_exercise_probability' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.stockNumeraire_exercise_probability
+
+/-- info: 'MathFin.numeraireMeasure_rnDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.numeraireMeasure_rnDeriv
+
+/-- info: 'MathFin.numeraireMeasure_absolutelyContinuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.numeraireMeasure_absolutelyContinuous
+
+/-- info: 'MathFin.numeraireMeasure_absolutelyContinuous'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.numeraireMeasure_absolutelyContinuous'
 
 /-! ## Two further numéraire seams: the Kelly portfolio ⟹ EMM, and the exchange option
 
