@@ -220,9 +220,9 @@ theorem hasDerivAt_price_update (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ
       (G.rate k (t i))
   have hc := (hasDerivAt_coupon_term (c i) (t i)
     (y := G.rate k (t i) + (k j - k j) * G.hat j (t i)) (by simpa using hk i hi)).comp (k j) hin
-  show HasDerivAt (fun x ↦ c i / (1 + G.rate (Function.update k j x) (t i)) ^ t i) _ _
+  change HasDerivAt (fun x ↦ c i / (1 + G.rate (Function.update k j x) (t i)) ^ t i) _ _
   rw [e]
-  simpa using hc
+  exact hc.congr_deriv (by ring)
 
 /-- **The parallel-shift derivative on a grid.** On the grid curve with node rates `k`, the price
 along `ε ↦ P(k + ε·1)` has derivative `-∑ᵢ tᵢ cᵢ / (1 + rᵢ)^{tᵢ+1}` at `0`, since a parallel shift of
@@ -238,9 +238,9 @@ theorem hasDerivAt_price_parallel (s : Finset ι) (t : ι → ℕ) (c : ι → �
     funext fun ε ↦ by rw [G.rate_add_const]
   have hc := (hasDerivAt_coupon_term (c i) (t i) (y := G.rate k (t i) + 0)
     (by simpa using hk i hi)).comp 0 ((hasDerivAt_id (0 : ℝ)).const_add (G.rate k (t i)))
-  show HasDerivAt (fun ε ↦ c i / (1 + G.rate (fun j ↦ k j + ε) (t i)) ^ t i) _ _
+  change HasDerivAt (fun ε ↦ c i / (1 + G.rate (fun j ↦ k j + ε) (t i)) ^ t i) _ _
   rw [e]
-  simpa using hc
+  exact hc
 
 variable (G)
 
@@ -292,7 +292,7 @@ node `j − 1` for `1 ≤ j ≤ n`, and the constant `0` beyond the last node. -
 noncomputable def cumRamp (τ : ℕ → ℝ) (n j : ℕ) (u : ℝ) : ℝ :=
   if j = 0 then 1 else if j ≤ n then ramp τ (j - 1) u else 0
 
-/-- At the nodes of a strictly increasing grid the ramp from `m` is `1` past `m` and `0` up to it. -/
+/-- At the nodes of a strictly increasing grid the ramp from `m` is `1` past `m`, `0` up to it. -/
 theorem ramp_node {τ : ℕ → ℝ} (hτ : StrictMono τ) (m i : ℕ) :
     ramp τ m (τ i) = if m < i then 1 else 0 := by
   have hd : 0 < τ (m + 1) - τ m := sub_pos.2 (hτ (Nat.lt_succ_self m))

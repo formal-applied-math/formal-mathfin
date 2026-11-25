@@ -80,8 +80,9 @@ theorem integral_residual_mul_affine (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar
     have e (ω : Ω) : ((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X])
         = (Y ω - P[Y]) * (X ω - P[X]) - β * ((X ω - P[X]) * (X ω - P[X])) := by ring
     simp_rw [e]
-    rw [integral_sub (hYc.integrable_mul hXc) ((hXc.integrable_mul hXc).const_mul β),
-      integral_const_mul]
+    have i1 : Integrable (fun ω ↦ (Y ω - P[Y]) * (X ω - P[X])) P := hYc.integrable_mul hXc
+    have i2 : Integrable (fun ω ↦ (X ω - P[X]) * (X ω - P[X])) P := hXc.integrable_mul hXc
+    rw [integral_sub i1 (i2.const_mul β), integral_const_mul]
     have hc : ∫ ω, (Y ω - P[Y]) * (X ω - P[X]) ∂P = cov[Y, X; P] := rfl
     have hv : ∫ ω, (X ω - P[X]) * (X ω - P[X]) ∂P = Var[X; P] := by
       rw [← covariance_self hX.aemeasurable]; rfl
@@ -90,8 +91,9 @@ theorem integral_residual_mul_affine (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar
       = (c + d * P[X]) * ((Y ω - P[Y]) - β * (X ω - P[X]))
         + d * (((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X])) := by ring
   simp_rw [e]
-  rw [integral_add (hR.integrable one_le_two |>.const_mul _)
-      ((hR.integrable_mul hXc).const_mul d),
+  have i3 : Integrable (fun ω ↦ ((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X])) P :=
+    hR.integrable_mul hXc
+  rw [integral_add ((hR.integrable one_le_two).const_mul (c + d * P[X])) (i3.const_mul d),
     integral_const_mul, integral_const_mul, h0, h1]
   simp
 
@@ -126,8 +128,10 @@ theorem integral_sq_affine_eq_add (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar : 
   have key (ω : Ω) : (Y ω - (a + b * X ω)) ^ 2 = R ω ^ 2 + 2 * (R ω * A ω) + A ω ^ 2 := by
     rw [hRd, hAd]; ring
   simp_rw [key, ← hRd, ← hAd]
-  rw [integral_add (hRm.integrable_sq.add (hRA.const_mul 2)) hAm.integrable_sq,
-    integral_add hRm.integrable_sq (hRA.const_mul 2), integral_const_mul, horth']
+  have i1 : Integrable (fun ω ↦ R ω ^ 2) P := hRm.integrable_sq
+  have i2 : Integrable (fun ω ↦ 2 * (R ω * A ω)) P := hRA.const_mul 2
+  have i3 : Integrable (fun ω ↦ A ω ^ 2) P := hAm.integrable_sq
+  rw [integral_add (i1.add i2) i3, integral_add i1 i2, integral_const_mul, horth']
   ring
 
 /-- **The CAPM beta is the least-squares slope**: for square-integrable `Y`, `X` with

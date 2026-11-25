@@ -222,8 +222,7 @@ theorem variance_oneFactorPD_pos (π : ℝ) {ρ : ℝ} (hρ : ρ ∈ Ioo 0 1) {F
   refine lt_of_le_of_ne (variance_nonneg _ _) fun h0 ↦ ?_
   have hL : MemLp (oneFactorPD π ρ) 2 (gaussianReal 0 1) :=
     MemLp.of_bound hm.aestronglyMeasurable 1 (ae_of_all _ fun x ↦ by
-      rw [Real.norm_of_nonneg (Phi_nonneg _)]
-      exact Phi_le_one _)
+      exact (Real.norm_of_nonneg (Phi_nonneg _)).trans_le (Phi_le_one _))
   have hae := ae_eq_integral_of_variance_eq_zero hL h0.symm
   set m := (gaussianReal 0 1)[oneFactorPD π ρ]
   have hs : {x | oneFactorPD π ρ x = m}.Subsingleton := fun x hx y hy ↦
