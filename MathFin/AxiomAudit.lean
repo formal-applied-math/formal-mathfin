@@ -3334,6 +3334,10 @@ and `uncovered_interest_parity` from the risk-neutral expectation. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.price_constantMeanPayoff
 
+/-- info: 'MathFin.DeFi.price_constantMeanPayoff_eq_hodl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_constantMeanPayoff_eq_hodl
+
 /-- info: 'MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff
