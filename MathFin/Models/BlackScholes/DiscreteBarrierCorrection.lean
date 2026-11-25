@@ -104,7 +104,7 @@ only.
   for discretely sampled options. Part 1: barrier options*][HowisonSteinberg2005], §1, §2 and §3.7
 * [E. G. Haug, *The Complete Guide to Option Pricing Formulas*][Haug2007] (2nd ed., 2007), ch. 4
 * [E. Reiner and M. Rubinstein, *Breaking down the barriers*][ReinerRubinstein1991]
-* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (10th ed., Pearson, 2018), ch. 26
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 26
 
 ## Tags
 

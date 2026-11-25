@@ -35,7 +35,7 @@ needs `σ > 0`, `0 < τ` and `0 < S, K`.
 
 ## References
 
-* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull] (10th ed., Pearson, 2018), ch. 15
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 15
   (the Black–Scholes closed form)
 
 ## Tags
