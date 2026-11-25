@@ -81,10 +81,6 @@ namespace MathFin.Contracts.Binomial
 
 variable {u d ρ h : ℝ}
 
-/-- The step count `t ↦ ⌊t / h⌋₊` is monotone for a step `h ≥ 0`. -/
-theorem monotone_floor_div (hh : 0 ≤ h) : Monotone fun t : ℝ≥0 ↦ ⌊(t : ℝ) / h⌋₊ :=
-  fun _ _ hst ↦ Nat.floor_mono (div_le_div_of_nonneg_right (NNReal.coe_le_coe.2 hst) hh)
-
 /-- **The binomial market** with step `h ≥ 0`, under a physical law `P` of the flips: the
 information of the flips made by `t`, the spot after them, and the money market `e^{ρ n}` after
 `n` steps as numéraire. -/

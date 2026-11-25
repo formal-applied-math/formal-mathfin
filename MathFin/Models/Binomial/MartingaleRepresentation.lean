@@ -46,7 +46,9 @@ needs none, so it is stated once, here.
   the `martingaleTransform` of a predictable hedge against `S`.
 * `binomialPrice_replication` — under `BinomialNoArb` and `S₀ ≠ 0`, the tree price of a European
   claim is the initial capital of a hedge: the representation applied to the discounted tree value
-  and the discounted spot.
+  and the discounted spot; the hedge is named, `H (n + 1) = hedgeRatio ..`.
+* `hedgeRatio_discountedTreeValue` — the hedge in closed form, the tree's delta
+  `(V(S u) − V(S d)) / (S (u − d))`.
 
 ## References
 
@@ -78,15 +80,17 @@ variable {q : ℝ≥0} {M S : ℕ → (ℕ → Bool) → ℝ}
 every node differ: `M_N = M_0 + ∑_{k<N} A_{k+1}·(S_{k+1} − S_k)`. The holding `A_{k+1}` over
 `(k, k+1]` is `ℱₖ`-strongly measurable, i.e. depends only on the first `k` flips; it is the
 node-wise delta `hedgeRatio M S k`. The binomial market is complete: every claim is replicable by
-a self-financing strategy. -/
+a self-financing strategy, and the strategy is named: `A (n + 1) = hedgeRatio M S n`. -/
 theorem binomial_martingale_representation (hq0 : 0 < q) (hq1 : q < 1)
     (hM : Martingale M flipFiltration (coinFlipMeasure q hq1.le))
     (hS : Martingale S flipFiltration (coinFlipMeasure q hq1.le))
     (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true)
         ≠ S (n + 1) (Function.update ω n false)) :
     ∃ A : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ A (n + 1)) ∧
+      (∀ n, A (n + 1) = hedgeRatio M S n) ∧
       ∀ N ω, M N ω = M 0 ω + martingaleTransform A S N ω := by
-  refine ⟨fun n ↦ hedgeRatio M S (n - 1), fun n ↦ stronglyMeasurable_flipFiltration_iff.2 ?_, ?_⟩
+  refine ⟨fun n ↦ hedgeRatio M S (n - 1), fun n ↦ stronglyMeasurable_flipFiltration_iff.2 ?_,
+    fun n ↦ by simp, ?_⟩
   · -- predictability: the hedge ratio depends only on the first `n` flips
     intro ω ω' hω
     have hM' := stronglyMeasurable_flipFiltration_iff.1 (hM.stronglyAdapted (n + 1))
@@ -115,16 +119,31 @@ The two martingales are the discounted tree value (`martingale_discountedTreeVal
 discounted spot (`martingale_discountedSpot`) under `Bernoulli(crrUpProb u d r)` flips. -/
 theorem binomialPrice_replication {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ} (hS₀ : S₀ ≠ 0)
     (g : ℝ → ℝ) (N : ℕ) :
-    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
-      Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧
+      (∀ n, H (n + 1) = hedgeRatio (discountedTreeValue u d r g N S₀) (discountedSpot S₀ u d r) n)
+      ∧ ∀ ω, Real.exp (-(r * N)) * g (spotPath S₀ u d N ω) = binomialPrice u d r g N S₀
         + martingaleTransform H (discountedSpot S₀ u d r) N ω := by
   have hp := crrUpProb_mem_Ioo h
   obtain ⟨q, hqcrr⟩ : ∃ q : ℝ≥0, crrUpProb u d r = q := ⟨⟨_, hp.1.le⟩, rfl⟩
   have hq0 : 0 < q := by exact_mod_cast hqcrr ▸ hp.1
   have hq1 : q < 1 := by exact_mod_cast hqcrr ▸ hp.2
-  obtain ⟨H, hH, hrep⟩ := binomial_martingale_representation hq0 hq1
+  obtain ⟨H, hH, hΔ, hrep⟩ := binomial_martingale_representation hq0 hq1
     (martingale_discountedTreeValue u d r g N S₀ hq1.le hqcrr)
     (martingale_discountedSpot h S₀ hq1.le hqcrr) (discountedSpot_update_ne h hS₀)
-  exact ⟨H, hH, fun ω ↦ by simpa [discountedTreeValue] using hrep N ω⟩
+  exact ⟨H, hH, hΔ, fun ω ↦ by simpa [discountedTreeValue] using hrep N ω⟩
+
+/-- **The hedge in closed form** (the delta of the tree): before the horizon, the hedge ratio of
+the discounted tree value against the discounted spot at a node with spot `S` is the change in the
+remaining tree price over the change in the spot,
+`(V_{N-n-1}(S u) − V_{N-n-1}(S d)) / (S (u − d))`. The discount factor `e^{−r(n+1)}` cancels. -/
+theorem hedgeRatio_discountedTreeValue (u d r : ℝ) (g : ℝ → ℝ) {N n : ℕ} (hn : n < N) (S₀ : ℝ)
+    (ω : ℕ → Bool) :
+    hedgeRatio (discountedTreeValue u d r g N S₀) (discountedSpot S₀ u d r) n ω
+      = (binomialPrice u d r g (N - (n + 1)) (spotPath S₀ u d n ω * u)
+          - binomialPrice u d r g (N - (n + 1)) (spotPath S₀ u d n ω * d))
+        / (spotPath S₀ u d n ω * (u - d)) := by
+  simp only [hedgeRatio, discountedTreeValue, discountedSpot, min_eq_left (Nat.succ_le_of_lt hn),
+    spotPath_update_succ_true, spotPath_update_succ_false]
+  rw [← mul_sub, ← mul_sub, mul_div_mul_left _ _ (Real.exp_pos _).ne', mul_sub]
 
 end MathFin

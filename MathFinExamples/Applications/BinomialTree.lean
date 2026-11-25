@@ -24,7 +24,8 @@ This file checks the first three on a sample tree and the fourth on a separate C
 2. proves its no-arbitrage condition `d < eʳ < u` from the numbers (`sample_noArb`), using only
    `1 + x ≤ eˣ`;
 3. prices a call on it, and proves the price is the cost of a hedge, `½` a share and a short bond,
-   that pays the call in both states (`TreeSheet.hedge`, `sample_price`);
+   that pays the call in both states (`TreeSheet.hedge`, `sample_price`), and is the only such
+   position, so the only arbitrage-free price (`TreeSheet.hedge_unique`);
 4. applies put–call parity `C − P = S − K e^{−nr}` on the `n`-step tree
    (`binomialPrice_callPut_parity`), which follows from the linearity of the tree price and the
    fact that the tree prices the stock at spot and cash at its discount;
@@ -40,7 +41,8 @@ This file checks the first three on a sample tree and the fourth on a separate C
 
 * `MathFin.BinomialNoArb`: the no-arbitrage condition.
 * `MathFin.binomialOptionPriceOnePeriod`, `replicating_portfolio_cost`, `replicating_payoff_up`,
-  `replicating_payoff_down`: the one-period price and its hedge.
+  `replicating_payoff_down`, `binomial_replicatingPortfolio_unique`,
+  `binomial_replication_cost_eq_price`: the one-period price, its hedge, and their uniqueness.
 * `MathFin.binomialPrice_callPut_parity`: put–call parity on the `n`-step tree, from
   `binomialPrice_add`, `binomialPrice_smul`, `binomialPrice_id` and `binomialPrice_const`.
 * `MathFin.Contracts.Binomial.market`, `isPricingMeasure_coinFlipMeasure`,
@@ -116,6 +118,20 @@ theorem hedge (t : TreeSheet) (h : BinomialNoArb t.up t.down t.rate) :
       t.shares * (t.spot * t.down) + t.bond * Real.exp t.rate = t.callDown :=
   ⟨replicating_portfolio_cost t.spot_pos h, replicating_payoff_up t.spot_pos h,
     replicating_payoff_down t.spot_pos h⟩
+
+/-- **The hedge is the only one, and its cost the only arbitrage-free price.** On an
+arbitrage-free tree, any position of `Δ` shares and `B` in the bond that pays the call in both
+states is the hedge `shares`, `bond` (`binomial_replicatingPortfolio_unique`), and so costs the tree
+price (`binomial_replication_cost_eq_price`): a different price would be an arbitrage. -/
+theorem hedge_unique (t : TreeSheet) (h : BinomialNoArb t.up t.down t.rate) {Δ B : ℝ}
+    (hup : Δ * (t.spot * t.up) + B * Real.exp t.rate = t.callUp)
+    (hdown : Δ * (t.spot * t.down) + B * Real.exp t.rate = t.callDown) :
+    Δ = t.shares ∧ B = t.bond ∧ Δ * t.spot + B = t.price := by
+  obtain ⟨p, -, hp⟩ := binomial_replicatingPortfolio_unique (V_u := t.callUp) (V_d := t.callDown)
+    t.spot_pos h
+  obtain ⟨h₁, h₂⟩ := Prod.mk.inj ((hp (Δ, B) ⟨hup, hdown⟩).trans
+    (hp (t.shares, t.bond) ⟨(t.hedge h).2.1, (t.hedge h).2.2⟩).symm)
+  exact ⟨h₁, h₂, binomial_replication_cost_eq_price t.spot_pos h hup hdown⟩
 
 end TreeSheet
 

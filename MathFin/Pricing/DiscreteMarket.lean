@@ -101,6 +101,11 @@ theorem discreteAssets_natCast (S : ℕ → Ω → ℝ) (T n : ℕ) (ω : Ω) :
     discreteAssets S T () (n : ℝ≥0) ω = S (min n T) ω := by
   simp [discreteAssets]
 
+/-- A price that starts at the constant `S₀` gives the constant model map `S₀` at date `0`. -/
+theorem discreteAssets_zero {S : ℕ → Ω → ℝ} {S₀ : ℝ} (T : ℕ) (hS₀ : ∀ ω, S 0 ω = S₀) :
+    discreteAssets S T () 0 = fun _ ↦ S₀ :=
+  funext fun ω ↦ by simp [discreteAssets, hS₀]
+
 variable {𝓕 : Filtration ℕ mΩ} {P Q : Measure Ω} {S : ℕ → Ω → ℝ} {T : ℕ} {S₀ : ℝ}
 
 /-- Under an equivalent martingale measure the model's (undiscounted) price is a martingale for
@@ -118,10 +123,7 @@ theorem value_forward (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 0 ω = S₀) 
   haveI := hQ.isProb
   have := value_forward_of_martingale (K := K) (T := τ) (𝓕 := floorFiltration 𝓕)
     (martingale_discreteAssets hQ) rfl
-    (fun ω ↦ by
-      show S (min ⌊(0 : ℝ≥0)⌋₊ T) ω = S₀
-      rw [Nat.floor_zero, Nat.zero_min]
-      exact hS₀ ω)
+    (fun ω ↦ congrFun (discreteAssets_zero T hS₀) ω)
   simpa using this
 
 /-- **Put–call parity under an equivalent martingale measure**: at any maturity, call minus put
@@ -133,10 +135,7 @@ theorem value_europeanCall_sub_put (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 
   haveI := hQ.isProb
   have := value_europeanCall_sub_put_of_martingale (K := K) (T := τ) (𝓕 := floorFiltration 𝓕)
     (martingale_discreteAssets hQ) rfl
-    (fun ω ↦ by
-      show S (min ⌊(0 : ℝ≥0)⌋₊ T) ω = S₀
-      rw [Nat.floor_zero, Nat.zero_min]
-      exact hS₀ ω)
+    (fun ω ↦ congrFun (discreteAssets_zero T hS₀) ω)
   simpa using this
 
 /-! ### The discrete market as a `Market` -/
