@@ -363,7 +363,11 @@ theorem americanPrice_premium_mul_weight_le {u d r : ℝ} (h : BinomialNoArb u d
     have hE : Real.exp (-r) ^ j * Real.exp (-r) ^ i = Real.exp (-(r * (j + i : ℕ))) := by
       rw [← pow_add, ← Real.exp_nat_mul]; congr 1; push_cast; ring
     rw [wordWeight_append, wordWeight_replicate, wordWeight_replicate, mul_pow, mul_pow, ← hE]
-    simp only [Bool.false_eq_true, ite_true, ite_false]
+    have e1 : (if (true : Bool) then crrUpProb u d r else 1 - crrUpProb u d r)
+        = crrUpProb u d r := rfl
+    have e2 : (if (false : Bool) then crrUpProb u d r else 1 - crrUpProb u d r)
+        = 1 - crrUpProb u d r := rfl
+    rw [e1, e2]
     ring
   rw [hlen, hspot, hwt, ← Nat.sub_sub] at key
   exact key
