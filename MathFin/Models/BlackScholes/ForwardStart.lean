@@ -86,27 +86,22 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     intro ω
     unfold pathAssets
     exact mul_nonneg hS₀.le (Real.exp_pos _).le
-  -- the law of the standardized increment `(B_T − B_{t₁})/√τ`
+  -- the standardized increment's law: the library's increment law, scaled by
+  -- Mathlib's Gaussian division lemma
   have hZlaw : HasLaw (fun ω ↦ (B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
       (gaussianReal 0 1) Q := by
-    have hB' : IsPreBrownianReal B Q := hB.toIsPreBrownianReal
-    have hshift := scaled_isPreBrownian_eval_law
-      (fun t ω ↦ B (t₁ + t) ω - B t₁ ω) (hB'.shift t₁)
-      (T := (T : ℝ) - (t₁ : ℝ)) (sub_pos.2 hτ)
-    have hcoe : t₁ + Real.toNNReal ((T : ℝ) - (t₁ : ℝ)) = T := by
+    have hdiv := gaussianReal_div_const (hasLaw_increment hB.toIsPreBrownianReal ht₁T)
+      (Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
+    have h1 : ((T - t₁ : ℝ≥0) /
+        NNReal.mk ((Real.sqrt ((T : ℝ) - (t₁ : ℝ))) ^ 2) (sq_nonneg _)) = 1 := by
+      have hnn : (0 : ℝ) ≤ (T : ℝ) - (t₁ : ℝ) := sub_nonneg.2 (by exact_mod_cast ht₁T)
       apply NNReal.eq
-      push_cast
-      rw [Real.coe_toNNReal _ (sub_nonneg.2 (by exact_mod_cast hτ.le))]
-      ring
-    have hfun : (fun ω ↦ (fun t ω ↦ B (t₁ + t) ω - B t₁ ω)
-          (Real.toNNReal ((T : ℝ) - (t₁ : ℝ))) ω / Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
-        = fun ω ↦ (B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ)) := by
-      funext ω
-      simp only []
-      rw [hcoe]
-    rw [hfun] at hshift
-    exact hshift
-  -- the two legs' Black-Scholes hypotheses
+      rw [NNReal.coe_div, NNReal.coe_mk, NNReal.coe_sub (by exact_mod_cast ht₁T)]
+      rw [Real.sq_sqrt hnn]
+      field_simp
+      exact NNReal.coe_one.symm
+    refine ⟨hdiv.aemeasurable, ?_⟩
+    rw [hdiv.map_eq, zero_div, h1]
   have hZ₁ : BSCallHyp Q S_0 1 r σ (t₁ : ℝ) (fun ω ↦ B t₁ ω / Real.sqrt (t₁ : ℝ)) := by
     simpa using BSCallHyp.of_isPreBrownian Q B hB.toIsPreBrownianReal hS₀ one_pos hσ ht₁
   have hZT : BSCallHyp Q S_0 1 r σ (T : ℝ) (fun ω ↦ B T ω / Real.sqrt (T : ℝ)) := by
@@ -114,7 +109,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
   have hZ₂ : BSCallHyp Q 1 α r σ ((T : ℝ) - (t₁ : ℝ))
       (fun ω ↦ (B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) :=
     ⟨one_pos, hα, hσ, sub_pos.2 hτ, hZlaw⟩
-  -- integrability of the two legs
   have hint₁ : Integrable (fun ω ↦ pathAssets S_0 r σ B () t₁ ω) Q := by
     rw [funext fun ω ↦ pathAssets_eq_bsTerminal B ht₁ S_0 r σ ω]
     exact integrable_bsTerminal hZ₁.Z_law S_0 r σ (t₁ : ℝ)
@@ -126,7 +120,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0) Q :=
     ((integrable_bsTerminal hZlaw 1 r σ ((T : ℝ) - (t₁ : ℝ))).sub'
       (integrable_const α)).pos_part
-  -- the frozen leg is strongly measurable for `𝓕 t₁`
   have hXm : StronglyMeasurable[𝓕 t₁]
       (fun ω ↦ Real.exp (-(r * (T : ℝ))) * pathAssets S_0 r σ B () t₁ ω) := by
     simp only [pathAssets]
@@ -136,7 +129,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
       (Measurable.const_mul (Measurable.exp (Measurable.const_add
         (Measurable.const_mul hm σ) ((r - σ ^ 2 / 2) * (t₁ : ℝ)))) S_0)
       (Real.exp (-(r * (T : ℝ)))))
-  -- the ratio leg is measurable for the σ-algebra of the increment
   have hYm : StronglyMeasurable[MeasurableSpace.comap (B T - B t₁) inferInstance]
       (fun ω ↦ max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0) := by
@@ -145,11 +137,9 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
       unfold bsTerminal
       fun_prop
     exact hcont.stronglyMeasurable.comp_measurable (comap_measurable _)
-  -- the increment's σ-algebra is inside the ambient one
   have hmeasΔ : Measurable (B T - B t₁) :=
     ((hB.stronglyAdapted T).measurable.mono (𝓕.le T) le_rfl).sub
       ((hB.stronglyAdapted t₁).measurable.mono (𝓕.le t₁) le_rfl)
-  -- the pointwise factorization of the discounted payoff
   have hfactor : ∀ ω, Real.exp (-(r * (T : ℝ))) *
       max (pathAssets S_0 r σ B () T ω - α * pathAssets S_0 r σ B () t₁ ω) 0
       = (Real.exp (-(r * (T : ℝ))) * pathAssets S_0 r σ B () t₁ ω) *
@@ -182,7 +172,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
         sub_nonneg.2 (le_of_lt (not_le.mp hle))
       rw [max_eq_left (mul_nonneg (hpos₁ ω) hlt), max_eq_left hlt]
       ring
-  -- the product is integrable
   have hint : Integrable (fun ω ↦ (Real.exp (-(r * (T : ℝ))) * pathAssets S_0 r σ B () t₁ ω) *
       max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0) Q := by
@@ -205,7 +194,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     refine Integrable.mono' ((hintT.add (hint₁.const_mul α)).const_mul _) ?_
       (ae_of_all _ hbound)
     exact ((hXm.mono (𝓕.le t₁)).mul (hYm.mono hmeasΔ.comap_le)).aestronglyMeasurable
-  -- the expectation of the product splits
   have hsplit : ∫ ω, (Real.exp (-(r * (T : ℝ))) * pathAssets S_0 r σ B () t₁ ω) *
       max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0 ∂Q
@@ -221,7 +209,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
           (∫ ω, max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
             ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0 ∂Q) := hmul
     rw [← integral_condExp (𝓕.le t₁), integral_congr_ae hmul', integral_mul_const]
-  -- the frozen leg's mean is the spot
   have hEX : ∫ ω, Real.exp (-(r * (T : ℝ))) * pathAssets S_0 r σ B () t₁ ω ∂Q
       = S_0 * Real.exp (-(r * ((T : ℝ) - (t₁ : ℝ)))) := by
     rw [integral_const_mul, integral_congr_ae
@@ -235,7 +222,6 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
       ring
     rw [hexp]
     linear_combination Real.exp (-(r * ((T : ℝ) - (t₁ : ℝ)))) * hd
-  -- the ratio leg is `bsV` on a unit spot
   have hEY := integral_bsCall_payoff_eq_bsV hZ₂
   rw [integral_const_mul] at hEY
   rw [forwardStartCall, Contract.value_pay]

@@ -117,8 +117,8 @@ import MathFin.Models.BlackScholes.BlackScholesAsian
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
-import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.ForwardStart
+import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
