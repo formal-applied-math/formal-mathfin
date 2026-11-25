@@ -384,6 +384,7 @@ public import MathFin.Pricing.NoArbitrageDerivations
 -- representation)
 public import MathFin.Pricing.SuperhedgingDuality
 public import MathFin.Pricing.Value
+public import MathFin.Pricing.ValueOrder
 public import MathFin.Pricing.Market
 public import MathFin.Pricing.BondPrice
 public import MathFin.Pricing.AmericanPrice
