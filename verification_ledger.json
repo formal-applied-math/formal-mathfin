@@ -2908,6 +2908,13 @@
       "input_hash": "863483aabad9efa4ed5a64fc3b4f1038bc74547568b6e88f915580c99409fd28",
       "verified_at_commit": "54c0176d"
     },
+    "mf-forward-start-call": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-25",
+      "elapsed_s": 4.3,
+      "input_hash": "2551c3b47221a773fb464d118a7a572c6a6fc29ab8d29af442abaeb06a269f2a",
+      "verified_at_commit": "4b86232"
+    },
     "mf-frac-diff-binomial-series": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-19",
