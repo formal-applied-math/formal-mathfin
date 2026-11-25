@@ -141,6 +141,7 @@ lemma condExp_comp_increment_eq_const {s t : ℝ≥0} (hst : s ≤ t)
   rwa [h_int_eq] at this
 
 omit [IsFiniteMeasure P] in
+include hX in
 /-- The increment `X_t − X_s` is measurable. -/
 private lemma measurable_increment (s t : ℝ≥0) : Measurable (fun ω ↦ X t ω - X s ω) :=
   (((hX.stronglyAdapted t).mono (𝓕.le t)).measurable).sub
@@ -148,25 +149,28 @@ private lemma measurable_increment (s t : ℝ≥0) : Measurable (fun ω ↦ X t 
 
 /-- **Kernel 1**: the increment has zero conditional mean, `P[X_t − X_s | 𝓕_s] =ᵐ 0`. -/
 lemma condExp_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
-    P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) :=
-  condExp_comp_increment_eq_const hst (measurable_increment s t) measurable_id <| by
-    have hL : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
-      MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
+    P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) := by
+  have hL : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
+    MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
+  have h : ∫ ω, (X t ω - X s ω) ∂P = 0 := by
     rw [show (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) from rfl, hL.integral_eq,
       integral_id_gaussianReal]
+  exact condExp_comp_increment_eq_const hst (measurable_increment s t) measurable_id h
 
 /-- **Kernel 2**: the squared increment conditions on the elapsed time,
 `P[(X_t − X_s)² | 𝓕_s] =ᵐ t − s`. -/
 lemma condExp_increment_sq {s t : ℝ≥0} (hst : s ≤ t) :
     P[fun ω ↦ (X t ω - X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)]
-      =ᵐ[P] fun _ ↦ (t : ℝ) - s :=
-  condExp_comp_increment_eq_const hst (measurable_increment s t) (measurable_id.pow_const 2) <| by
-    have hL : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
-      MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
+      =ᵐ[P] fun _ ↦ (t : ℝ) - s := by
+  have hL : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
+    MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
+  have h : ∫ ω, (X t ω - X s ω) ^ 2 ∂P = (t : ℝ) - s := by
     have h_change : ∫ ω, (X t ω - X s ω) ^ 2 ∂P = ∫ x, x ^ 2 ∂(gaussianReal 0 (t - s)) := by
       simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, MathFin.integral_sq_gaussianReal]
     exact NNReal.coe_sub hst
+  exact condExp_comp_increment_eq_const hst (measurable_increment s t)
+    (measurable_id.pow_const 2) h
 
 /-- For a filtered pre-Brownian motion `X`, the process `t ↦ (X t)² − t` is a martingale
 w.r.t. `𝓕`.

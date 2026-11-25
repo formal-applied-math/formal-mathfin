@@ -263,7 +263,7 @@ inequality `(u(C+x)+v(C+y))⁻¹ ≤ u(C+x)⁻¹ + v(C+y)⁻¹` is Mathlib's `co
 theorem convexOn_inv_shift (C : ℝ) (hC : 0 < C) :
     ConvexOn ℝ (Set.Ici (0 : ℝ)) (fun x : ℝ ↦ (C + x)⁻¹) :=
   (((convexOn_zpow (-1)).translate_right C).subset
-    (fun _ hx ↦ by simpa using add_pos_of_pos_of_nonneg hC hx) (convex_Ici 0)).congr
+    (fun _ hx ↦ show 0 < C + _ from add_pos_of_pos_of_nonneg hC hx) (convex_Ici 0)).congr
     fun _ _ ↦ zpow_neg_one _
 
 /-- **The CMS rate is convex in the discount factor on the nonnegative
