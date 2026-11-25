@@ -29,7 +29,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ### Kyle single-period equilibrium (2026-11-25)
 
 Entry `mf-kyle-equilibrium` (benchmarks/market_microstructure.json), module
-`MathFin/Markets/Microstructure/Kyle.lean`. Corpus 906 -> 907 entries.
+`MathFin/Markets/Microstructure/Kyle.lean`. Corpus 906 → 907 entries.
 
 Proved: in the one-period Kyle model (KyleModel: Gaussian value v ~ N(p0, sigma_v^2),
 independent Gaussian noise u ~ N(0, sigma_u^2)), the linear demand x = beta*(v - p0) and
