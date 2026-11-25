@@ -167,9 +167,9 @@ heading overstated the corpus by five.
   in `BSCallHypFromBrownian.lean`, replacing a 15-line block of the forward-start proof; the
   American put module's thrice-written deep-in-the-money step and twice-written one-period
   continuation each became one lemma.
-- **The Balancer landmark** is `eval_constantMeanPayoff_eq_reserves`, which ties the pool's
-  invariant and spot price to the priced position, instead of a one-line unfolding of the
-  pricing functional.
+- **The Balancer entry** now proves the reserves identity its description claimed. Moving the
+  blueprint tag onto that identity was tried and undone: the identity reaches no other node,
+  and the island count rose to 1. The tag stays on `price_constantMeanPayoff` (backlog 11).
 - `SECURITY.md` names every workflow that pushes with `contents: write` and says no workflow
   runs on `pull_request_target`; the pin-bump page drops a stale corpus size.
 
@@ -249,6 +249,9 @@ convergence on a deterministic curve, and the statement now says futures are not
     via `integrable_exp_mul_gaussianReal`, the Balancer `variable` instances, the contango sign
     proofs as `mul_pos_iff_of_pos_right`/`mul_eq_zero_iff_right`, `tendsto_bgkDownBarrier` by
     `Tendsto` combinators, `absolutelyContinuous_numeraireMeasure` for the converse direction (S).
+11. A Balancer landmark with content that joins the tree: a priced statement at the pool's own
+    spot price, through `eval_constantMeanPayoff_eq_reserves` and `price_constantMeanPayoff`,
+    to carry the `thm:balancer-invariant` tag in place of the unfolding (S).
 
 ### Evidence
 

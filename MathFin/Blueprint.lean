@@ -1502,12 +1502,11 @@ attribute [blueprint "thm:balancer-invariant"
   on $X$, marked at the price $P$ of $X$ in $Y$, is worth $V P^w/(w^w (1-w)^{1-w})$ in $Y$
   (`constantMeanPayoff`, `eval_constantMeanPayoff`); at the pool's own spot price the mark is
   the reserves $xP + y$, the constant value distribution $B_Y/W_Y$
-  (`eval_constantMeanPayoff_eq_reserves`, the tagged statement, which ties the pool's
-  invariant and spot price to the priced position); paying it at $T$ is worth the discounted
-  expectation of the mark (`price_constantMeanPayoff`); and at $w = 1/2$ the position is the
-  constant-product payoff of invariant $V^2$
-  (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
-  MathFin.DeFi.eval_constantMeanPayoff_eq_reserves
+  (`eval_constantMeanPayoff_eq_reserves`); paying it at $T$ is worth the discounted
+  expectation of the mark (`price_constantMeanPayoff`, the tagged statement, the market's price
+  of a payment unfolded); and at $w = 1/2$ the position is the constant-product payoff of
+  invariant $V^2$ (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
+  MathFin.DeFi.price_constantMeanPayoff
 
 attribute [blueprint "def:v3-position-value"
   (title := "Value of a concentrated-liquidity position")

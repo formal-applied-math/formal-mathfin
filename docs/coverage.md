@@ -205,7 +205,7 @@ One `full` entry in `benchmarks/defi.json`. It adds one entry to the corpus.
   constant-product payoff of invariant `V²`
   (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
   the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
-  tagged on `eval_constantMeanPayoff_eq_reserves` and the frontier entry is deleted; the node joins the
+  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
   trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
   (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
   Axioms-clean, `full`.
