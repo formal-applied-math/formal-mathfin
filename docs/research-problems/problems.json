@@ -871,11 +871,10 @@
           "status": "blocked",
           "blueprint": "thm:raw-filtration-mimicking-martingale",
           "needs": [
-            "def:convex-order",
             "def:markov-martingale"
           ],
           "lean": null,
-          "note": "Needs convex order (peacocks) and Markov martingales for a given filtration."
+          "note": "Needs Markov martingales for a given filtration; convex order (peacocks) is in the library (MathFin.ConvexOrder)."
         }
       }
     },
@@ -1360,7 +1359,8 @@
       "difficulty": "unassessed",
       "mathematical_status": "open",
       "known_results": [
-        "Counterexample class exists; smallest element exists for decreasing densities; Bernoulli marginals always have one (cited from search summary, not opened)."
+        "Counterexample class exists; smallest element exists for decreasing densities; Bernoulli marginals always have one (cited from search summary, not opened).",
+        "A smaller counterexample than Bernard-Jiang-Wang's: marginals uniform on {0,0,4}, {0,2,5}, {0,4,6} (machine-checked, MathFin.exists_not_convexOrder_sum, 2026-11-25)."
       ],
       "sources": [
         {
@@ -1408,6 +1408,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-25",
+          "status": "open",
+          "reason": "Convex order added to the library with one counterexample instance; the characterisation stays open."
         }
       ],
       "issue_number": 554,
@@ -1419,11 +1424,9 @@
         "lean_statement": {
           "status": "not_a_proposition",
           "blueprint": "thm:convex-order-minimal-sum",
-          "needs": [
-            "def:convex-order"
-          ],
+          "needs": [],
           "lean": null,
-          "note": "The question asks for necessary and sufficient conditions; candidate conditions are statable once convex order exists."
+          "note": "The question asks for necessary and sufficient conditions, so it is not one proposition. Convex order is in the library (MathFin.ConvexOrder); candidate conditions are statable. One instance without a minimum is proved: MathFin.exists_not_convexOrder_sum (marginals uniform on {0,0,4}, {0,2,5}, {0,4,6}; corpus entry mf-convex-order-no-minimal-sum)."
         }
       }
     }

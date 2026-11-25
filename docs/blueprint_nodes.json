@@ -153,18 +153,6 @@
   "label": "def:gbm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/BlackScholesAsian.lean"},
- {"uses": ["def:snell-envelope", "thm:doob-decomposition"],
-  "title": "Doob decomposition of the Snell envelope",
-  "text":
-  "For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time\n  filtered probability space, the Snell envelope is $U = M + A$ with $M$ a martingale and $A$\n  predictable, $A_0 = 0$, unique up to almost-sure equality (Doob's decomposition). Its\n  compensator $A$ is almost surely nonincreasing and does not move on the continuation region:\n  at a step $i < N$ where $Z_i < U_i$, $A_{i+1} = A_i$ almost surely.",
-  "name": "MathFin.snellEnvelope_doob_decomposition",
-  "module": "MathFin.Probability.Discrete.SnellDoobDecomposition",
-  "line": 58,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:snell-doob-decomposition",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/SnellDoobDecomposition.lean"},
  {"uses": [],
   "title": "Law-invariant risk functional",
   "text":
@@ -177,6 +165,18 @@
   "label": "def:law-invariant",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+ {"uses": ["def:snell-envelope", "thm:doob-decomposition"],
+  "title": "Doob decomposition of the Snell envelope",
+  "text":
+  "For an adapted integrable reward $Z$ with horizon $N$ on a discrete-time\n  filtered probability space, the Snell envelope is $U = M + A$ with $M$ a martingale and $A$\n  predictable, $A_0 = 0$, unique up to almost-sure equality (Doob's decomposition). Its\n  compensator $A$ is almost surely nonincreasing and does not move on the continuation region:\n  at a step $i < N$ where $Z_i < U_i$, $A_{i+1} = A_i$ almost surely.",
+  "name": "MathFin.snellEnvelope_doob_decomposition",
+  "module": "MathFin.Probability.Discrete.SnellDoobDecomposition",
+  "line": 58,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:snell-doob-decomposition",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/SnellDoobDecomposition.lean"},
  {"uses": [],
   "title": "Survival curve of a hazard rate",
   "text":
@@ -201,6 +201,18 @@
   "label": "def:emm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/EquivMartingaleMeasure.lean"},
+ {"uses": [],
+  "title": "Convex order",
+  "text":
+  "$\\mu \\le_{cx} \\nu$ when $\\int \\varphi\\,d\\mu \\le \\int \\varphi\\,d\\nu$ for every\n  convex $\\varphi$ integrable under both laws. Ordered laws have equal means and ordered call and\n  put prices, and, when the call or put at $t$ is integrable under both laws, $\\mu$ lives in\n  every half-line bounded by $t$ that $\\nu$ lives in (`ConvexOrder.ae_le_of_ae_le`).",
+  "name": "MathFin.ConvexOrder",
+  "module": "MathFin.Probability.Laws.ConvexOrder",
+  "line": 61,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:convex-order",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/ConvexOrder.lean"},
  {"uses": ["thm:doob-maximal-inequality"],
   "title": "Convergence of L²-bounded martingales",
   "text":
@@ -213,18 +225,23 @@
   "label": "thm:martingale-convergence",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/L2MartingaleConvergence.lean"},
- {"uses": ["def:brownian-motion", "thm:doob-maximal-inequality"],
-  "title": "Doob's maximal inequality for Brownian motion on a grid",
+ {"uses":
+  ["def:expected-shortfall",
+   "def:convex-order",
+   "def:value-at-risk",
+   "thm:quantile-transform",
+   "def:quantile"],
+  "title": "Expected shortfall respects convex order",
   "text":
-  "For a filtered pre-Brownian motion $B$ and times $t_0 \\le t_1 \\le \\cdots$,\n  $\\bigl\\|\\max_{k \\le n} |B_{t_k}|\\bigr\\|_{L^2} \\le 2\\sqrt{t_n}$ for every $n$: Doob's $L^2$\n  maximal inequality for the discrete martingale $k \\mapsto B_{t_k}$ of the sampled filtration,\n  with $\\|B_t\\|_{L^2} = \\sqrt t$. A finite grid only; the continuous-time supremum is not\n  treated.",
-  "name": "ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le",
-  "module": "MathFin.Probability.Brownian.BrownianDoobMaximal",
-  "line": 63,
+  "If the law of $X$ is below the law of $Y$ in convex order, then\n  $\\mathrm{ES}_\\alpha(X) \\le \\mathrm{ES}_\\alpha(Y)$ for every $\\alpha \\in (0,1)$: the\n  Rockafellar–Uryasev objective of $X$ at $c = \\mathrm{VaR}_\\alpha(Y)$ is below that of $Y$.",
+  "name": "MathFin.expectedShortfall_le_of_convexOrder",
+  "module": "MathFin.Risk.ConvexOrderSums",
+  "line": 62,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:brownian-doob-maximal",
+  "label": "thm:es-convex-order",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/BrownianDoobMaximal.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ConvexOrderSums.lean"},
  {"uses":
   ["def:market",
    "def:standard-normal-cdf",
@@ -243,6 +260,18 @@
   "label": "thm:svi-market-realisation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/SVI/MarketRealisation.lean"},
+ {"uses": ["def:brownian-motion", "thm:doob-maximal-inequality"],
+  "title": "Doob's maximal inequality for Brownian motion on a grid",
+  "text":
+  "For a filtered pre-Brownian motion $B$ and times $t_0 \\le t_1 \\le \\cdots$,\n  $\\bigl\\|\\max_{k \\le n} |B_{t_k}|\\bigr\\|_{L^2} \\le 2\\sqrt{t_n}$ for every $n$: Doob's $L^2$\n  maximal inequality for the discrete martingale $k \\mapsto B_{t_k}$ of the sampled filtration,\n  with $\\|B_t\\|_{L^2} = \\sqrt t$. A finite grid only; the continuous-time supremum is not\n  treated.",
+  "name": "ProbabilityTheory.IsFilteredPreBrownian.eLpNorm_runMax_le",
+  "module": "MathFin.Probability.Brownian.BrownianDoobMaximal",
+  "line": 63,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:brownian-doob-maximal",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/BrownianDoobMaximal.lean"},
  {"uses": [],
   "title": "Standard normal distribution function Φ",
   "text":
@@ -353,18 +382,6 @@
   "label": "thm:marginal-utility-is-sdf",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
- {"uses": ["def:market"],
-  "title": "The American price of an exercise right",
-  "text":
-  "In a market $M$ under a measure $Q$, the right to receive the payoff $g_t$ at a\n  time $t \\le T$ of the holder's choosing is priced at the supremum, over the stopping rules of the\n  market's filtration bounded by $T$, of $E_Q[(N_0/N_\\tau)\\, g_\\tau(S)]$. It is a price when $Q$\n  is a pricing measure and the expected exercise values are integrable and bounded above; under\n  that bound the European claim paying $g_T$ at $T$ is worth at most it\n  (`price_pay_le_americanPrice`).",
-  "name": "MathFin.Market.americanPrice",
-  "module": "MathFin.Pricing.AmericanPrice",
-  "line": 74,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:american-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/AmericanPrice.lean"},
  {"uses": ["def:quantile"],
   "title": "Value-at-risk",
   "text":
@@ -377,6 +394,18 @@
   "label": "def:value-at-risk",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
+ {"uses": ["def:market"],
+  "title": "The American price of an exercise right",
+  "text":
+  "In a market $M$ under a measure $Q$, the right to receive the payoff $g_t$ at a\n  time $t \\le T$ of the holder's choosing is priced at the supremum, over the stopping rules of the\n  market's filtration bounded by $T$, of $E_Q[(N_0/N_\\tau)\\, g_\\tau(S)]$. It is a price when $Q$\n  is a pricing measure and the expected exercise values are integrable and bounded above; under\n  that bound the European claim paying $g_T$ at $T$ is worth at most it\n  (`price_pay_le_americanPrice`).",
+  "name": "MathFin.Market.americanPrice",
+  "module": "MathFin.Pricing.AmericanPrice",
+  "line": 74,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:american-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/AmericanPrice.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Merton's default probability",
   "text":
@@ -437,6 +466,37 @@
   "label": "def:convex-risk-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
+ {"uses":
+  ["def:expected-shortfall",
+   "def:coherent-risk-measure",
+   "def:law-invariant",
+   "def:value-at-risk",
+   "thm:quantile-transform",
+   "def:quantile",
+   "def:convex-risk-measure"],
+  "title": "Expected shortfall is a law-invariant coherent risk measure",
+  "text":
+  "For $\\alpha \\in (0,1)$, expected shortfall is a coherent risk measure on\n  the integrable losses (`expectedShortfall_isCoherentRiskMeasure`) and is law invariant. Kusuoka's\n  theorem, the converse, is not proved.",
+  "name": "MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant",
+  "module": "MathFin.Risk.LawInvariance",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:expected-shortfall-coherent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
+ {"uses": ["def:value-at-risk"],
+  "title": "Expected shortfall",
+  "text":
+  "$\\mathrm{ES}_\\alpha(X) = (1-\\alpha)^{-1}\\int_\\alpha^1\n  \\mathrm{VaR}_u(X)\\,du$, the average value-at-risk over the levels above $\\alpha$.",
+  "name": "MathFin.expectedShortfall",
+  "module": "MathFin.Risk.ValueAtRisk",
+  "line": 79,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:expected-shortfall",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
  {"uses": [],
   "title": "Sharpe ratio",
   "text":
@@ -461,37 +521,6 @@
   "label": "thm:doob-decomposition",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Discrete/DoobDecomposition.lean"},
- {"uses": ["def:value-at-risk"],
-  "title": "Expected shortfall",
-  "text":
-  "$\\mathrm{ES}_\\alpha(X) = (1-\\alpha)^{-1}\\int_\\alpha^1\n  \\mathrm{VaR}_u(X)\\,du$, the average value-at-risk over the levels above $\\alpha$.",
-  "name": "MathFin.expectedShortfall",
-  "module": "MathFin.Risk.ValueAtRisk",
-  "line": 79,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:expected-shortfall",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ValueAtRisk.lean"},
- {"uses":
-  ["def:expected-shortfall",
-   "def:coherent-risk-measure",
-   "def:law-invariant",
-   "def:value-at-risk",
-   "thm:quantile-transform",
-   "def:quantile",
-   "def:convex-risk-measure"],
-  "title": "Expected shortfall is a law-invariant coherent risk measure",
-  "text":
-  "For $\\alpha \\in (0,1)$, expected shortfall is a coherent risk measure on\n  the integrable losses (`expectedShortfall_isCoherentRiskMeasure`) and is law invariant. Kusuoka's\n  theorem, the converse, is not proved.",
-  "name": "MathFin.expectedShortfall_isCoherentRiskMeasure_and_isLawInvariant",
-  "module": "MathFin.Risk.LawInvariance",
-  "line": 79,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:expected-shortfall-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/LawInvariance.lean"},
  {"uses": [],
   "title": "Quantile function",
   "text":
@@ -537,22 +566,6 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/American/Stopping/PhysicalBoundaryConvexity.lean"},
  {"uses":
   ["def:market",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "The Esscher premium is a price",
-  "text":
-  "In a market with the unit numéraire, the claim paying the asset at $T$ is\n  worth, under the Esscher tilt of the reference measure with parameter $h$ (density\n  $e^{hX}/E[e^{hX}]$), the Esscher premium $E[Xe^{hX}]/E[e^{hX}]$ of the asset at $T$.",
-  "name": "MathFin.esscherPremium_eq_price",
-  "module": "MathFin.Insurance.EsscherPremium",
-  "line": 84,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:esscher-premium-is-price",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
- {"uses":
-  ["def:market",
    "def:pricing-measure",
    "def:contract",
    "def:pricing-functional",
@@ -568,6 +581,22 @@
   "label": "thm:market-call-price-normalized",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/ModelFree/MarketCallPrice.lean"},
+ {"uses":
+  ["def:market",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "The Esscher premium is a price",
+  "text":
+  "In a market with the unit numéraire, the claim paying the asset at $T$ is\n  worth, under the Esscher tilt of the reference measure with parameter $h$ (density\n  $e^{hX}/E[e^{hX}]$), the Esscher premium $E[Xe^{hX}]/E[e^{hX}]$ of the asset at $T$.",
+  "name": "MathFin.esscherPremium_eq_price",
+  "module": "MathFin.Insurance.EsscherPremium",
+  "line": 84,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:esscher-premium-is-price",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses": ["def:value-at-risk", "def:quantile", "thm:gaussian-quantile"],
   "title": "Potential future exposure",
   "text":
@@ -733,18 +762,6 @@
   "label": "def:survival-function",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/SurvivalModel.lean"},
- {"uses": ["def:convex-risk-measure"],
-  "title": "Coherent risk measure",
-  "text":
-  "The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable\n  losses of $(\\Omega, P)$: monotonicity, translation invariance, positive homogeneity and\n  subadditivity.",
-  "name": "MathFin.IsCoherentRiskMeasure",
-  "module": "MathFin.Risk.Coherent",
-  "line": 102,
-  "leanOk": true,
-  "latexEnv": "definition",
-  "label": "def:coherent-risk-measure",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
  {"uses":
   ["def:standard-normal-cdf",
    "def:coin-flip-measure",
@@ -761,6 +778,18 @@
   "label": "thm:crr-bs-convergence",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/CRRClosedForm.lean"},
+ {"uses": ["def:convex-risk-measure"],
+  "title": "Coherent risk measure",
+  "text":
+  "The Artzner–Delbaen–Eber–Heath axioms for a functional on the integrable\n  losses of $(\\Omega, P)$: monotonicity, translation invariance, positive homogeneity and\n  subadditivity.",
+  "name": "MathFin.IsCoherentRiskMeasure",
+  "module": "MathFin.Risk.Coherent",
+  "line": 102,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:coherent-risk-measure",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Coherent.lean"},
  {"uses": [],
   "title": "Chain-ladder prediction",
   "text":
@@ -803,6 +832,18 @@
   "label": "thm:forward-measure",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ForwardMeasure.lean"},
+ {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
+  "title": "The insured market and its Esscher pricing measure",
+  "text":
+  "The market of a loss $X$ quoted at its Esscher premium until a date $T$ and\n  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the\n  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim\n  paying the loss is worth the Esscher premium. The market is built to quote the loss at that\n  premium, with no dynamics before $T$.",
+  "name": "MathFin.isPricingMeasure_insuredMarket_tilted",
+  "module": "MathFin.Insurance.EsscherPremium",
+  "line": 105,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:insured-market",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -820,18 +861,6 @@
   "label": "thm:market-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/FTAP/MarketFTAP.lean"},
- {"uses": ["def:market", "def:pricing-measure", "thm:one-date-market"],
-  "title": "The insured market and its Esscher pricing measure",
-  "text":
-  "The market of a loss $X$ quoted at its Esscher premium until a date $T$ and\n  equal to $X$ at $T$, with the unit numéraire, is priced up to $T$ by the Esscher tilt of the\n  reference probability measure when $e^{hX}$ and $Xe^{hX}$ are integrable; under it the claim\n  paying the loss is worth the Esscher premium. The market is built to quote the loss at that\n  premium, with no dynamics before $T$.",
-  "name": "MathFin.isPricingMeasure_insuredMarket_tilted",
-  "module": "MathFin.Insurance.EsscherPremium",
-  "line": 105,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:insured-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/EsscherPremium.lean"},
  {"uses": [],
   "title": "Duration and immunization",
   "text":
@@ -1066,18 +1095,6 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Forwards/FxForwardParity.lean"},
  {"uses": [],
-  "title": "Separation theorem for closed convex cones",
-  "text":
-  "In $\\mathbb{R}^\\iota$ with $\\iota$ finite, if $C$ is a closed convex cone\n  and $x_0 \\notin C$, there is $p$ with $\\langle p, v\\rangle \\le 0$ for all $v \\in C$ and\n  $\\langle p, x_0\\rangle > 0$. The engine of the finite-state representation of coherent risk\n  measures. Finite dimension only.",
-  "name": "MathFin.exists_separating_of_not_mem_cone",
-  "module": "MathFin.Pricing.Duality.ConvexDuality",
-  "line": 135,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:cone-separation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Duality/ConvexDuality.lean"},
- {"uses": [],
   "title": "Expected utility",
   "text":
   "The expected utility $E_p[u] = \\sum_{i \\in s} p_iu_i$ of a lottery $p$\n  over a finite support $s$ under the utility $u$.",
@@ -1089,6 +1106,18 @@
   "label": "def:expected-utility",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
+ {"uses": [],
+  "title": "Separation theorem for closed convex cones",
+  "text":
+  "In $\\mathbb{R}^\\iota$ with $\\iota$ finite, if $C$ is a closed convex cone\n  and $x_0 \\notin C$, there is $p$ with $\\langle p, v\\rangle \\le 0$ for all $v \\in C$ and\n  $\\langle p, x_0\\rangle > 0$. The engine of the finite-state representation of coherent risk\n  measures. Finite dimension only.",
+  "name": "MathFin.exists_separating_of_not_mem_cone",
+  "module": "MathFin.Pricing.Duality.ConvexDuality",
+  "line": 135,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:cone-separation",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Duality/ConvexDuality.lean"},
  {"uses": [],
   "title": "The superhedging price dominates every martingale price",
   "text":
@@ -1114,6 +1143,18 @@
   "label": "thm:large-portfolio-limit",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Credit/VasicekIRB.lean"},
+ {"uses": ["def:market", "def:pricing-measure", "thm:marginal-utility-is-sdf"],
+  "title": "A stationary log portfolio is the numéraire portfolio, one period",
+  "text":
+  "In the market of `thm:marginal-utility-is-sdf` with $u = \\log$, a stationary\n  portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\\mathrm{sdf}(\\omega) = w_0 / W_\\omega$ in\n  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$\n  (`integral_div_logOptimal_mul`): prices\n  deflated by that wealth are $P$-martingales over the one period. The continuous-time\n  statement is `thm:log-optimal-numeraire`.",
+  "name": "MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal",
+  "module": "MathFin.Choice.Utility.MarketMarginalUtility",
+  "line": 138,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:log-optimal-numeraire-one-period",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
  {"uses": [],
   "title": "Change of numéraire",
   "text":
@@ -1138,18 +1179,6 @@
   "label": "thm:empirical-cdf-strong-law",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/QuantileConvergence.lean"},
- {"uses": ["def:market", "def:pricing-measure", "thm:marginal-utility-is-sdf"],
-  "title": "A stationary log portfolio is the numéraire portfolio, one period",
-  "text":
-  "In the market of `thm:marginal-utility-is-sdf` with $u = \\log$, a stationary\n  portfolio of cost $w_0 > 0$ and wealth $W > 0$ has $\\mathrm{sdf}(\\omega) = w_0 / W_\\omega$ in\n  every state, so $E_P[S_k(T)/W] = S_k(0)/w_0$ for every asset $k$\n  (`integral_div_logOptimal_mul`): prices\n  deflated by that wealth are $P$-martingales over the one period. The continuous-time\n  statement is `thm:log-optimal-numeraire`.",
-  "name": "MathFin.Market.IsPricingMeasure.sdf_eq_div_of_logOptimal",
-  "module": "MathFin.Choice.Utility.MarketMarginalUtility",
-  "line": 138,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:log-optimal-numeraire-one-period",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/MarketMarginalUtility.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1181,6 +1210,24 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
  {"uses":
   ["def:market",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "Bachelier call price formula",
+  "text":
+  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
+  "name": "MathFin.Bachelier.price_europeanCall",
+  "module": "MathFin.Models.Bachelier.BachelierMarket",
+  "line": 144,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bachelier-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
+ {"uses":
+  ["def:market",
    "def:standard-normal-cdf",
    "def:contract",
    "def:pricing-functional",
@@ -1198,24 +1245,6 @@
   "label": "thm:jump-diffusion-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
- {"uses":
-  ["def:market",
-   "def:brownian-motion",
-   "def:standard-normal-cdf",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "Bachelier call price formula",
-  "text":
-  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
-  "name": "MathFin.Bachelier.price_europeanCall",
-  "module": "MathFin.Models.Bachelier.BachelierMarket",
-  "line": 144,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bachelier-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1372,6 +1401,22 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/EntropicRisk.lean"},
  {"uses":
+  ["def:expected-shortfall",
+   "def:value-at-risk",
+   "thm:quantile-transform",
+   "def:quantile"],
+  "title": "Rockafellar–Uryasev formula",
+  "text":
+  "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$\n  is the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is\n  assumed. The same minimisation holds for a compound-Poisson loss $L = \\sum_{i<N}X_i$ with $N\n  \\sim \\mathrm{Poisson}(\\lambda)$ independent of identically distributed integrable claims\n  (`isLeast_rockafellarUryasev_compoundPoisson`).",
+  "name": "MathFin.isLeast_rockafellarUryasev",
+  "module": "MathFin.Risk.ExpectedShortfall",
+  "line": 161,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:rockafellar-uryasev",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
+ {"uses":
   ["def:market",
    "def:pricing-measure",
    "def:contract",
@@ -1392,34 +1437,6 @@
   "label": "thm:jump-diffusion-market-incomplete",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
- {"uses":
-  ["def:expected-shortfall",
-   "def:value-at-risk",
-   "thm:quantile-transform",
-   "def:quantile"],
-  "title": "Rockafellar–Uryasev formula",
-  "text":
-  "For an integrable loss $X$ and $\\alpha \\in (0,1)$, $\\mathrm{ES}_\\alpha(X)$\n  is the least value of $c \\mapsto c + (1-\\alpha)^{-1}E[(X-c)^+]$. No continuity of the law is\n  assumed. The same minimisation holds for a compound-Poisson loss $L = \\sum_{i<N}X_i$ with $N\n  \\sim \\mathrm{Poisson}(\\lambda)$ independent of identically distributed integrable claims\n  (`isLeast_rockafellarUryasev_compoundPoisson`).",
-  "name": "MathFin.isLeast_rockafellarUryasev",
-  "module": "MathFin.Risk.ExpectedShortfall",
-  "line": 161,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:rockafellar-uryasev",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ExpectedShortfall.lean"},
- {"uses": [],
-  "title": "CAPM from a discount factor affine in the market return",
-  "text":
-  "If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the\n  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and\n  $\\operatorname{Var}R_m \\ne 0$, then $E[R_i] = r_f + \\beta_i (E[R_m] - r_f)$ with\n  $\\beta_i = \\operatorname{Cov}(R_i, R_m) / \\operatorname{Var} R_m$.",
-  "name": "MathFin.capm_of_affine_discountFactor",
-  "module": "MathFin.Choice.Portfolio.StochasticDiscountFactor",
-  "line": 164,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:sdf-capm-hansen-jagannathan",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
  {"uses": [],
   "title": "The Kelly fraction is a critical point of the growth rate",
   "text":
@@ -1433,6 +1450,18 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/Ratios.lean"},
  {"uses": [],
+  "title": "CAPM from a discount factor affine in the market return",
+  "text":
+  "If $m = a - bR_m$ prices a return $R_i$, the market return $R_m$ and the\n  riskless return $r_f$ ($E[mR_i] = E[mR_m] = 1$, $r_f E[m] = 1$) and\n  $\\operatorname{Var}R_m \\ne 0$, then $E[R_i] = r_f + \\beta_i (E[R_m] - r_f)$ with\n  $\\beta_i = \\operatorname{Cov}(R_i, R_m) / \\operatorname{Var} R_m$.",
+  "name": "MathFin.capm_of_affine_discountFactor",
+  "module": "MathFin.Choice.Portfolio.StochasticDiscountFactor",
+  "line": 164,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:sdf-capm-hansen-jagannathan",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/StochasticDiscountFactor.lean"},
+ {"uses": [],
   "title": "Contract",
   "text":
   "A contract says what is paid and when, built from payoffs by combination.",
@@ -1444,18 +1473,6 @@
   "label": "def:contract",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Contracts/Core.lean"},
- {"uses": ["def:contract", "def:contract-value"],
-  "title": "Put-call parity",
-  "text":
-  "If the discounted price $D_tX_t$ is a $Q$-martingale with $D_0 = 1$ and\n  $X_0 = S_0$, the value of the European call minus the European put at strike $K$ and\n  maturity $T$ is $S_0 - KD_T$. In a finite-state market with non-negative state prices $q$\n  summing to the discount factor $DF$ and spot $S_0 = \\sum_i q_iS_i$, call minus put is $S_0 -\n  K\\cdot DF$ (`putCall_parity_from_no_arbitrage`).",
-  "name": "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
-  "module": "MathFin.Pricing.Parity",
-  "line": 167,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:put-call-parity",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Parity.lean"},
  {"uses": [],
   "title": "The Vasicek bond price solves the term-structure equation",
   "text":
@@ -1468,6 +1485,18 @@
   "label": "thm:vasicek-bond-pde",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/AffineTermStructurePDE.lean"},
+ {"uses": ["def:contract", "def:contract-value"],
+  "title": "Put-call parity",
+  "text":
+  "If the discounted price $D_tX_t$ is a $Q$-martingale with $D_0 = 1$ and\n  $X_0 = S_0$, the value of the European call minus the European put at strike $K$ and\n  maturity $T$ is $S_0 - KD_T$. In a finite-state market with non-negative state prices $q$\n  summing to the discount factor $DF$ and spot $S_0 = \\sum_i q_iS_i$, call minus put is $S_0 -\n  K\\cdot DF$ (`putCall_parity_from_no_arbitrage`).",
+  "name": "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
+  "module": "MathFin.Pricing.Parity",
+  "line": 167,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:put-call-parity",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/Parity.lean"},
  {"uses":
   ["def:gbm", "def:brownian-motion", "def:contract", "def:contract-value"],
   "title": "Black–Scholes pricing under the physical measure",
@@ -1493,18 +1522,6 @@
   "label": "thm:quantile-transform",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/Quantile.lean"},
- {"uses": [],
-  "title": "Marginal utility is a state-price density",
-  "text":
-  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let the\n  portfolio $\\theta$ cost $w_0>0$, with payoff $W = A^\\top\\theta > 0$, probabilities $p>0$ and\n  marginal utility $u'(W_\\omega)>0$, and let it be stationary for $\\sum_\\omega p_\\omega\n  u(W_\\omega)$ on the budget set: $\\sum_\\omega p_\\omega u'(W_\\omega) W^d_\\omega = 0$ for every\n  portfolio $d$ of zero cost. Then there is $\\mu>0$ with $\\sum_\\omega p_\\omega u'(W_\\omega)\n  A_{k\\omega} = \\mu\\,\\pi_k$ for every asset $k$: the normalised marginal utility\n  $p_\\omega u'(W_\\omega)/\\mu$ is a state-price vector (the Euler equation). A local maximum on the\n  budget set is stationary, and on a finite probability space charging every state the state prices\n  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`).",
-  "name": "MathFin.exists_pos_smul_eq_of_stationary",
-  "module": "MathFin.Choice.Utility.StatePriceDensity",
-  "line": 176,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:utility-state-price-density",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1527,6 +1544,18 @@
   "label": "thm:bs-call",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/Market.lean"},
+ {"uses": [],
+  "title": "Marginal utility is a state-price density",
+  "text":
+  "In the finite-state market with payoff matrix $A$ and prices $\\pi$, let the\n  portfolio $\\theta$ cost $w_0>0$, with payoff $W = A^\\top\\theta > 0$, probabilities $p>0$ and\n  marginal utility $u'(W_\\omega)>0$, and let it be stationary for $\\sum_\\omega p_\\omega\n  u(W_\\omega)$ on the budget set: $\\sum_\\omega p_\\omega u'(W_\\omega) W^d_\\omega = 0$ for every\n  portfolio $d$ of zero cost. Then there is $\\mu>0$ with $\\sum_\\omega p_\\omega u'(W_\\omega)\n  A_{k\\omega} = \\mu\\,\\pi_k$ for every asset $k$: the normalised marginal utility\n  $p_\\omega u'(W_\\omega)/\\mu$ is a state-price vector (the Euler equation). A local maximum on the\n  budget set is stationary, and on a finite probability space charging every state the state prices\n  give an equivalent martingale measure (`exists_isEMM_of_isLocalMaxOn`).",
+  "name": "MathFin.exists_pos_smul_eq_of_stationary",
+  "module": "MathFin.Choice.Utility.StatePriceDensity",
+  "line": 176,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:utility-state-price-density",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/StatePriceDensity.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
@@ -1545,18 +1574,6 @@
   "label": "thm:market-sdf-capm",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarketSDF.lean"},
- {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
-  "title": "The Vasicek bond market",
-  "text":
-  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
-  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
-  "module": "MathFin.Models.Rates.VasicekMarket",
-  "line": 178,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:vasicek-market",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/VasicekMarket.lean"},
  {"uses":
   ["def:value-at-risk",
    "def:quantile",
@@ -1574,18 +1591,18 @@
   "label": "thm:euler-allocation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ComponentVaR.lean"},
- {"uses": ["def:hazard-survival"],
-  "title": "Thiele's differential equation",
+ {"uses": ["def:market", "def:brownian-motion", "def:pricing-measure"],
+  "title": "The Vasicek bond market",
   "text":
-  "For continuous force of interest $\\delta$, force of mortality $\\mu$, premium rate\n  $\\pi$ and death benefit $b$ on $[0, T]$, the prospective reserve $V(t)$, the discounted future\n  death benefits less premiums plus the terminal payment (discounted by $e^{-\\int \\delta}$ times the\n  survival factor of the force $\\mu$, a probability when $\\mu \\ge 0$), satisfies\n  $V'(t) = (\\delta + \\mu) V(t) + \\pi - \\mu b$ for $0 < t < T$. The discrete one-step recursion is not covered.",
-  "name": "MathFin.hasDerivAt_thieleReserve",
-  "module": "MathFin.Insurance.Mortality",
-  "line": 179,
+  "For a pre-Brownian motion $B$, the market of the bank account\n  $N_t = \\exp\\int_0^t r$ of the Vasicek short rate as numéraire and the zero-coupon bond of\n  maturity $T$ as the one asset, under the natural filtration of $B$, is priced by the reference\n  measure at the horizon $T$: the deflated bond is $\\mathbb{E}[\\exp(-\\int_0^T r) \\mid\n  \\mathcal{F}_t]$ almost surely, a martingale; and the price of a unit payment at $T$ is\n  $A(T)e^{-B(T)r_0}$. The model is specified under the pricing measure (no physical measure), the\n  market uses $\\mathcal{F}_t$-measurable representatives of the Wiener integrals, and uniqueness\n  of the pricing measure is not proved.",
+  "name": "MathFin.Rates.isPricingMeasure_vasicekMarket",
+  "module": "MathFin.Models.Rates.VasicekMarket",
+  "line": 178,
   "leanOk": true,
   "latexEnv": "theorem",
-  "label": "thm:thiele-reserve",
+  "label": "thm:vasicek-market",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/Mortality.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/VasicekMarket.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1602,6 +1619,18 @@
   "label": "thm:zero-coupon-bond-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
+ {"uses": ["def:hazard-survival"],
+  "title": "Thiele's differential equation",
+  "text":
+  "For continuous force of interest $\\delta$, force of mortality $\\mu$, premium rate\n  $\\pi$ and death benefit $b$ on $[0, T]$, the prospective reserve $V(t)$, the discounted future\n  death benefits less premiums plus the terminal payment (discounted by $e^{-\\int \\delta}$ times the\n  survival factor of the force $\\mu$, a probability when $\\mu \\ge 0$), satisfies\n  $V'(t) = (\\delta + \\mu) V(t) + \\pi - \\mu b$ for $0 < t < T$. The discrete one-step recursion is not covered.",
+  "name": "MathFin.hasDerivAt_thieleReserve",
+  "module": "MathFin.Insurance.Mortality",
+  "line": 179,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:thiele-reserve",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Insurance/Mortality.lean"},
  {"uses": ["def:survival-function"],
   "title": "Whole-life insurance and the life annuity-due: A = 1 − d ä",
   "text":
@@ -1705,6 +1734,21 @@
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Markets/DeFi/LPContract.lean"},
  {"uses":
+  ["def:coherent-risk-measure",
+   "thm:superhedging-price-lower-bound",
+   "def:convex-risk-measure"],
+  "title": "The superhedging price is a coherent risk measure",
+  "text":
+  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
+  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
+  "module": "MathFin.Risk.Superhedging",
+  "line": 209,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:superhedging-coherent",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+ {"uses":
   ["def:value-at-risk",
    "def:quantile",
    "def:portfolio-variance",
@@ -1720,21 +1764,6 @@
   "label": "thm:gaussian-portfolio-var",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/GaussianRiskMarkowitz.lean"},
- {"uses":
-  ["def:coherent-risk-measure",
-   "thm:superhedging-price-lower-bound",
-   "def:convex-risk-measure"],
-  "title": "The superhedging price is a coherent risk measure",
-  "text":
-  "In the one-period finite-state market with a martingale probability vector, and\n  for a reference measure charging every state, the superhedging price of a claim, read as a\n  loss, is monotone, cash-invariant, positively homogeneous and subadditive. The equality with\n  the supremum of the martingale prices is `thm:superhedging-duality`.",
-  "name": "MathFin.isCoherentRiskMeasure_superhedgingPrice",
-  "module": "MathFin.Risk.Superhedging",
-  "line": 209,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:superhedging-coherent",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1801,6 +1830,18 @@
   "label": "thm:black76-caplet",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
+ {"uses": ["def:coin-flip-measure"],
+  "title": "Binomial barrier prices via reflection",
+  "text":
+  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
+  "name": "MathFin.binomial_upAndIn_reflection",
+  "module": "MathFin.Models.Binomial.BarrierReflection",
+  "line": 245,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:binomial-barrier-reflection",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1818,18 +1859,6 @@
   "label": "thm:immunization-market-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
- {"uses": ["def:coin-flip-measure"],
-  "title": "Binomial barrier prices via reflection",
-  "text":
-  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
-  "name": "MathFin.binomial_upAndIn_reflection",
-  "module": "MathFin.Models.Binomial.BarrierReflection",
-  "line": 245,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:binomial-barrier-reflection",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility satisfies independence and continuity",
   "text":
@@ -2026,18 +2055,6 @@
   "label": "thm:quantile-elicitability",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Elicitability.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Lévy's characterization of Brownian motion",
-  "text":
-  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
-  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
-  "module": "MathFin.Probability.Brownian.LevyCharacterization",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:levy-characterization",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Martingale representation theorem",
   "text":
@@ -2081,6 +2098,18 @@
   "label": "thm:market-completeness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Lévy's characterization of Brownian motion",
+  "text":
+  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
+  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
+  "module": "MathFin.Probability.Brownian.LevyCharacterization",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:levy-characterization",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses": ["def:standard-normal-cdf"],
   "title": "Black–Scholes Greeks",
   "text":
@@ -2124,6 +2153,18 @@
   "label": "thm:sde-pathwise-uniqueness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/SDE/SDEUniqueness.lean"},
+ {"uses": ["thm:compound-poisson-mgf"],
+  "title": "Risk-neutral drift of a jump-diffusion",
+  "text":
+  "For a jump-diffusion $X$ with drift $b$, volatility $\\sigma$, jump\n  intensity $\\Lambda$ and a jump law $\\nu$ with $\\mathbb{E}[e^J] < \\infty$, and $S_0 \\ne 0$,\n  the discounted price $e^{-rt}S_0e^{X_t}$ is a martingale if and only if $b = r - \\sigma^2/2\n  - \\Lambda(\\mathbb{E}[e^J] - 1)$. Merton's log-normal jumps have $\\mathbb{E}[e^J] - 1 =\n  \\kappa$ (`integral_exp_mertonJump`), the compensation $r - \\lambda\\kappa$.",
+  "name": "MathFin.JumpDiffusionProcess.martingale_iff",
+  "module": "MathFin.Models.Jumps.JumpDiffusionProcess",
+  "line": 344,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:merton-risk-neutral-drift",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
  {"uses":
   ["def:market",
    "thm:log-optimal-numeraire-one-period",
@@ -2144,18 +2185,6 @@
   "label": "thm:kelly-is-log-optimal",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Performance/KellyNumeraire.lean"},
- {"uses": ["thm:compound-poisson-mgf"],
-  "title": "Risk-neutral drift of a jump-diffusion",
-  "text":
-  "For a jump-diffusion $X$ with drift $b$, volatility $\\sigma$, jump\n  intensity $\\Lambda$ and a jump law $\\nu$ with $\\mathbb{E}[e^J] < \\infty$, and $S_0 \\ne 0$,\n  the discounted price $e^{-rt}S_0e^{X_t}$ is a martingale if and only if $b = r - \\sigma^2/2\n  - \\Lambda(\\mathbb{E}[e^J] - 1)$. Merton's log-normal jumps have $\\mathbb{E}[e^J] - 1 =\n  \\kappa$ (`integral_exp_mertonJump`), the compensation $r - \\lambda\\kappa$.",
-  "name": "MathFin.JumpDiffusionProcess.martingale_iff",
-  "module": "MathFin.Models.Jumps.JumpDiffusionProcess",
-  "line": 344,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:merton-risk-neutral-drift",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/JumpDiffusionProcess.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",

@@ -38,6 +38,7 @@ and a small instance without a minimum: three risks on three atoms each.
 * [C. Bernard, X. Jiang and R. Wang, *Risk aggregation with dependence
   uncertainty*][BernardJiangWang2014], Example 3.1
 * [R. Wang, *Current open questions in complete mixability*][Wang2015CompleteMixability]
+* [M. Shaked and J. G. Shanthikumar, *Stochastic Orders*][ShakedShanthikumar2007], Ch. 3
 * [R. T. Rockafellar and S. Uryasev, *Conditional value-at-risk for general loss
   distributions*][RockafellarUryasev2002]
 
@@ -92,7 +93,8 @@ variable {α β : Type*} [MeasurableSpace α] [MeasurableSpace β]
 
 /-- The uniform law on three atoms `x, y, z`, `(δ_x + δ_y + δ_z)/3`; a repeated atom carries its
 multiplicity. -/
-noncomputable def uniform3 (x y z : α) : Measure α := (3 : ℝ≥0∞)⁻¹ • (Measure.dirac x + Measure.dirac y + Measure.dirac z)
+noncomputable def uniform3 (x y z : α) : Measure α :=
+  (3 : ℝ≥0∞)⁻¹ • (Measure.dirac x + Measure.dirac y + Measure.dirac z)
 
 instance (x y z : α) : IsProbabilityMeasure (uniform3 x y z) :=
   ⟨by
@@ -103,7 +105,8 @@ instance (x y z : α) : IsProbabilityMeasure (uniform3 x y z) :=
 /-- The image of a uniform three-atom law is the uniform law on the images. -/
 lemma map_uniform3 {f : α → β} (hf : Measurable f) (x y z : α) :
     (uniform3 x y z).map f = uniform3 (f x) (f y) (f z) := by
-  simp only [uniform3, Measure.map_smul _ hf.aemeasurable, Measure.map_add _ _ hf, Measure.map_dirac' hf]
+  simp only [uniform3, Measure.map_smul _ hf.aemeasurable, Measure.map_add _ _ hf,
+    Measure.map_dirac' hf]
 
 /-- A property holds almost surely under `uniform3 x y z` iff it holds at the three atoms. -/
 lemma ae_uniform3_iff [MeasurableSingletonClass α] {x y z : α} {p : α → Prop} :
@@ -167,11 +170,13 @@ theorem exists_not_convexOrder_sum {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : 
     rw [map_uniform3 .of_discrete, ae_uniform3_iff]; exact h
   have hlo : ∀ᵐ x ∂P.map (X₁ + X₂ + X₃), 6 ≤ x :=
     c₁.ae_ge_of_ae_ge (integrable_of_ae_mem_Icc (hput 6) hSI)
-      (integrable_of_ae_mem_Icc (hput 6) (hν _ (· ∈ Icc (0 : ℝ) 15) measurableSet_Icc (by norm_num)))
+      (integrable_of_ae_mem_Icc (hput 6)
+        (hν _ (· ∈ Icc (0 : ℝ) 15) measurableSet_Icc (by norm_num)))
       (hν _ (6 ≤ ·) measurableSet_Ici (by norm_num))
   have hhi : ∀ᵐ x ∂P.map (X₁ + X₂ + X₃), x ≤ 8 :=
     c₂.ae_le_of_ae_le (integrable_of_ae_mem_Icc (hcall 8) hSI)
-      (integrable_of_ae_mem_Icc (hcall 8) (hν _ (· ∈ Icc (0 : ℝ) 15) measurableSet_Icc (by norm_num)))
+      (integrable_of_ae_mem_Icc (hcall 8)
+        (hν _ (· ∈ Icc (0 : ℝ) 15) measurableSet_Icc (by norm_num)))
       (hν _ (· ≤ 8) measurableSet_Iic (by norm_num))
   -- where `X₂ = 5` the sum avoids `[6, 8]`, so that event is null; but it has mass `1/3`
   have h5 : ∀ᵐ ω ∂P, X₂ ω ≠ 5 := by

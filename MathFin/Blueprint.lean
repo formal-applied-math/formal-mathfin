@@ -1886,8 +1886,8 @@ attribute [blueprint "def:convex-order"
   (title := "Convex order")
   (statement := /-- $\mu \le_{cx} \nu$ when $\int \varphi\,d\mu \le \int \varphi\,d\nu$ for every
   convex $\varphi$ integrable under both laws. Ordered laws have equal means and ordered call and
-  put prices, and $\mu$ lives inside every half-line $\nu$ lives in
-  (`ConvexOrder.ae_le_of_ae_le`). -/)]
+  put prices, and, when the call or put at $t$ is integrable under both laws, $\mu$ lives in
+  every half-line bounded by $t$ that $\nu$ lives in (`ConvexOrder.ae_le_of_ae_le`). -/)]
   MathFin.ConvexOrder
 
 attribute [blueprint "thm:es-convex-order"

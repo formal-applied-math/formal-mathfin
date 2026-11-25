@@ -63,6 +63,7 @@ graph TD
   chainLadderPrediction["Chain-ladder prediction"]:::proved
   coinFlipMeasure["The coin-flip path law"]:::proved
   contract["Contract"]:::proved
+  convexOrder["Convex order"]:::proved
   convexRiskMeasure["Convex risk measure"]:::proved
   copula["Copula"]:::proved
   emm["Equivalent martingale measure"]:::proved
@@ -197,6 +198,7 @@ graph TD
   bsAmericanMarket["The Black–Scholes market's American put is the canonical American put"]:::proved
   bsCall["The Black–Scholes price of a call in the Black–Scholes market"]:::proved
   bsDeltaHedge["Black–Scholes delta hedging"]:::proved
+  esConvexOrder["Expected shortfall respects convex order"]:::proved
   esscherPremiumIsPrice["The Esscher premium is a price"]:::proved
   eulerAllocation["Euler allocation of Gaussian value at risk"]:::proved
   expectedShortfallCoherent["Expected shortfall is a law-invariant coherent risk measure"]:::proved
@@ -373,7 +375,6 @@ graph TD
     varianceGammaCall["Variance-gamma European call"]:::frontier
   end
   subgraph frontier_valuationModelFree["⏳ frontier · Valuation · Static replication and model-free bounds"]
-    convexOrder["Convex order"]:::frontier
     nondominatedModel["Nondominated models"]:::frontier
     balancerInvariant["Balancer constant-mean AMM"]:::frontier
     compoundExchangeRateBridge["Compound's exchange rate as a money-market account"]:::frontier
@@ -627,6 +628,11 @@ graph TD
   bsDelta --> bsDeltaHedge
   feynmanKacHeatEq --> bsDeltaHedge
   itoFormulaC2 --> bsDeltaHedge
+  convexOrder --> esConvexOrder
+  expectedShortfall --> esConvexOrder
+  quantile --> esConvexOrder
+  valueAtRisk --> esConvexOrder
+  quantileTransform --> esConvexOrder
   contract --> esscherPremiumIsPrice
   contractValue --> esscherPremiumIsPrice
   market --> esscherPremiumIsPrice
@@ -855,7 +861,6 @@ graph TD
   oneDateMarket --> kellyIsLogOptimal
   emm --> calibratedMartingaleMeasures
   marketCarrMadan --> calibratedMartingaleMeasures
-  marketCarrMadan --> convexOrder
   brownianMotion --> markovMartingale
   emm --> nondominatedModel
   cramerLundbergClaims --> optimalDividendProblem
@@ -1034,6 +1039,7 @@ graph TD
 | `def:chain-ladder-prediction` Chain-ladder prediction | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Achain-ladder-prediction%22%20in%3Abody) |
 | `def:coin-flip-measure` The coin-flip path law | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoin-flip-measure%22%20in%3Abody) |
 | `def:contract` Contract | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract%22%20in%3Abody) |
+| `def:convex-order` Convex order | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-order%22%20in%3Abody) |
 | `def:convex-risk-measure` Convex risk measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-risk-measure%22%20in%3Abody) |
 | `def:copula` Copula | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acopula%22%20in%3Abody) |
 | `def:emm` Equivalent martingale measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aemm%22%20in%3Abody) |
@@ -1168,6 +1174,7 @@ graph TD
 | `thm:bs-american-market` The Black–Scholes market's American put is the canonical American put | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-american-market%22%20in%3Abody) |
 | `thm:bs-call` The Black–Scholes price of a call in the Black–Scholes market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-call%22%20in%3Abody) |
 | `thm:bs-delta-hedge` Black–Scholes delta hedging | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-delta-hedge%22%20in%3Abody) |
+| `thm:es-convex-order` Expected shortfall respects convex order | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aes-convex-order%22%20in%3Abody) |
 | `thm:esscher-premium-is-price` The Esscher premium is a price | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aesscher-premium-is-price%22%20in%3Abody) |
 | `thm:euler-allocation` Euler allocation of Gaussian value at risk | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aeuler-allocation%22%20in%3Abody) |
 | `thm:expected-shortfall-coherent` Expected shortfall is a law-invariant coherent risk measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-coherent%22%20in%3Abody) |
@@ -1211,7 +1218,6 @@ graph TD
 | `thm:svi-market-realisation` A butterfly-free SVI slice is a market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Asvi-market-realisation%22%20in%3Abody) |
 | `thm:kelly-is-log-optimal` The Kelly wealth is the numéraire portfolio of the betting market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Akelly-is-log-optimal%22%20in%3Abody) |
 | `def:calibrated-martingale-measures` Calibrated martingale measures of finite entropy | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acalibrated-martingale-measures%22%20in%3Abody) |
-| `def:convex-order` Convex order | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-order%22%20in%3Abody) |
 | `def:markov-martingale` Markov martingales | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Amarkov-martingale%22%20in%3Abody) |
 | `def:nondominated-model` Nondominated models | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Anondominated-model%22%20in%3Abody) |
 | `def:optimal-dividend-problem` Optimal dividend problems | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aoptimal-dividend-problem%22%20in%3Abody) |

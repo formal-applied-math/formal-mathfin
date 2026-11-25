@@ -22,7 +22,8 @@ are stated in it.
 The definition quantifies over the convex `φ` integrable under both laws. The results below use
 three families of convex functions: the identity, the calls `(x − K)⁺` and the puts `(K − x)⁺`.
 A call with price zero under `ν` pins `ν` below its strike, so convex order passes bounds on the
-support down: `μ ≤cx ν` lives inside every interval `ν` lives in.
+support down: when the calls and puts at the bounds are integrable under both laws, `μ ≤cx ν`
+lives inside every interval `ν` lives in.
 
 ## Main definitions
 
