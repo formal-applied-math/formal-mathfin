@@ -548,6 +548,7 @@ public import MathFin.Models.StochVol.HestonSmallVolOfVol
 -- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
 -- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 public import MathFin.Models.BlackScholes.Lookback
+public import MathFin.Models.BlackScholes.BarrierReflection
 public import MathFin.Models.BlackScholes.BarrierParity
 public import MathFin.Models.BlackScholes.BinaryBarrierOption
 -- Also consumes the bivariate normal CDF (Probability/Gaussian/BivariateNormalCDF),
@@ -797,6 +798,7 @@ public import MathFin.Models.ModelFree.SVI.TraceForm
 public import MathFin.Models.ModelFree.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 public import MathFin.Models.ModelFree.SVI.TailCondition
+public import MathFin.Models.ModelFree.SVI.SSVI
 -- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
 public import MathFin.Models.ModelFree.CalendarArbitrage
 -- Fisher/Sraffa own rate: Sraffa's implied own rate from spot, forward and financing rate

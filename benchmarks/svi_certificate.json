@@ -194,6 +194,32 @@
           "source": "mathfin"
         }
       }
+    },
+    {
+      "id": "mf-ssvi-tail-condition",
+      "name": "The Tail Condition for an SSVI Slice, by Instantiation of Raw SVI",
+      "description": "For one SSVI slice with at-the-money total variance theta >= 0, skew-scale phi > 0 and rho^2 <= 1, whose total variance (theta/2)(1 + rho phi k + sqrt((phi k + rho)^2 + 1 - rho^2)) is positive at every log-moneyness, the SVI-smiled Black–Scholes call tends to 0 at large strikes exactly when theta phi (1 + rho) < 4. The slice is the raw SVI slice with a = theta(1-rho^2)/2, b = theta phi/2, m = -rho/phi, sigma = sqrt(1-rho^2)/phi (ssviVariance_eq_variance), and the condition is the raw tail condition b(1+rho) < 2 at those parameters.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.SVI.SSVI\n\nopen MathFin MathFin.SVI Filter Topology\n\n/-- **The tail condition for an SSVI slice.** For `θ ≥ 0`, `φ > 0`, `ρ² ≤ 1` and SSVI total\n    variance positive at every log-moneyness, the SVI-smiled call at the raw parameters of the\n    slice tends to `0` at large strikes exactly when `θ φ (1 + ρ) < 4`. Re-export of\n    `MathFin.SVI.tendsto_bsSmile_ssviParams_zero_iff`. -/\ntheorem ssvi_call_tendsto_zero_iff {θ φ ρ : ℝ} (hθ : 0 ≤ θ) (hφ : 0 < φ) (hρ : ρ ^ 2 ≤ 1)\n    (hw : ∀ k : ℝ, 0 < ssviVariance θ φ ρ k) :\n    Tendsto (bsSmile (ssviParams θ φ ρ)) atTop (𝓝 0) ↔ θ * φ * (1 + ρ) < 4 :=\n  tendsto_bsSmile_ssviParams_zero_iff hθ hφ hρ hw\n"
+      },
+      "metadata": {
+        "alignment_source": "Gatheral and Jacquier (2014), Section 4",
+        "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces (2014), Section 4 for the SSVI slice and Lemma 2.2 for the raw tail condition it is instantiated at.",
+        "citations": [
+          {
+            "key": "GatheralJacquier2014",
+            "locator": "Section 4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.SVI.tendsto_bsSmile_ssviParams_zero_iff (MathFin/Models/ModelFree/SVI/SSVI.lean), which instantiates tendsto_bsSmile_zero_iff at ssviParams theta phi rho through ssviVariance_eq_variance: the SSVI square root is phi times the raw one because (phi k + rho)^2 + 1 - rho^2 = phi^2((k - m)^2 + sigma^2). SCOPE. (1) One slice only: the surface, the dependence of phi on theta, and the SSVI calendar-spread conditions are not formalised. (2) Positive variance at every log-moneyness is a hypothesis. (3) Only the tail condition is stated for SSVI; butterfly-freeness of the slice follows from the raw SVI results by the same instantiation but is not restated. (4) Strikes are positive; the forward and discount factor are normalised to one.",
+        "provenance": {
+          "source": "mathfin",
+          "note": "The raw SVI tail condition it instantiates is MathFin's."
+        }
+      }
     }
   ]
 }
