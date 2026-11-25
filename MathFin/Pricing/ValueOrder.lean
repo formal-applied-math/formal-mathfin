@@ -48,6 +48,7 @@ of `pathPV` against `Q`.
 
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 1.1
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII], ch. 5
+* [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
 
 ## Tags
 
