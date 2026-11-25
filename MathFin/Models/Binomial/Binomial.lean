@@ -160,7 +160,8 @@ theorem value_forward (hna : BinomialNoArb u d ρ) (hh : 0 ≤ h) :
     (forward K T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = S₀ - K * Real.exp (-(ρ * N)) := by
   have hfl : ⌊(T : ℝ) / h⌋₊ = N := by rw [hTN, Nat.floor_natCast]
-  have hM : Martingale (fun t ω ↦ Real.exp (-(ρ * ⌊(t : ℝ) / h⌋₊)) * assets S₀ u d h () t ω)
+  have hM : Martingale
+      (fun (t : ℝ≥0) ω ↦ Real.exp (-(ρ * ⌊(t : ℝ) / h⌋₊)) * assets S₀ u d h () t ω)
       (flipFiltration.comp (monotone_floor_div hh)) (coinFlipMeasure q hq) :=
     (martingale_discountedSpot hna S₀ hq hqcrr).comp (monotone_floor_div hh)
   have key := value_forward_of_martingale (K := K) (T := T) (S₀ := S₀)
