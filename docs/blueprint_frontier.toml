@@ -81,14 +81,6 @@ area = "valuation/smile"
 family = "volatility"
 
 [[node]]
-label = "thm:forward-start-call"
-title = "Forward-start call"
-statement = "In the Black–Scholes model, a call struck at a fixed multiple of the asset price at a future date T₁ and expiring at T₂ has the Rubinstein closed-form price, a multiple of a Black–Scholes call price at time T₁."
-uses = ["thm:bs-call"]
-area = "valuation/diffusions"
-family = "diffusions"
-
-[[node]]
 label = "thm:implied-vol-existence"
 title = "Implied volatility for every arbitrage-free price"
 statement = "For every call price in the open interval allowed by no arbitrage, there is exactly one Black–Scholes volatility that reproduces it, and bisection and a safeguarded Newton iteration converge to it."

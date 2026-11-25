@@ -581,6 +581,34 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-forward-start-call",
+      "name": "Forward-Start Call Price (Rubinstein)",
+      "domain": "mathematical_finance",
+      "description": "Rubinstein's forward-start call price, derived: in the Black-Scholes market of a pre-Brownian motion, the call whose strike is set at a future reset date t1 as the multiple alpha of the then-observed price, paying max(S_T - alpha * S_t1, 0) at the maturity T > t1, has price S0 * bsV(alpha, r, sigma, 1, T - t1) under the Girsanov pricing measure of the market price of risk, whatever the physical drift. The derivation factors the payoff as the price at t1 against the ratio S_T/S_t1, a function of the Brownian increment B_T - B_t1 which is independent of the information at t1, so the discounted expectation splits; the frozen leg has the martingale mean e^{-r t1} E[S_t1] = S0 and the ratio leg is the Black-Scholes call price on a unit spot. The market's asset pays no dividends, so the general formula's dividend scaling S0 * e^{-qT} is absent (the q = 0 case); a dividend yield, cliquets and employee stock options are out of scope.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ForwardStart\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- **The forward-start call in the Black-Scholes market.** Re-exports\n`BlackScholes.price_forwardStartCall_constGirsanovMeasure`. -/\ntheorem forward_start_call_price {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {W : ℝ≥0 → Ω → ℝ} (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S_0 m r σ α : ℝ} {t₁ T H : ℝ≥0} (hTH : T ≤ H)\n    (hS₀ : 0 < S_0) (hα : 0 < α) (hσ : 0 < σ) (ht₁ : 0 < (t₁ : ℝ))\n    (hτ : (t₁ : ℝ) < (T : ℝ)) :\n    (BlackScholes.market μ hWmeas S_0 m r σ).price\n        (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (forwardStartCall α t₁ T)\n      = S_0 * bsV α r σ 1 ((T : ℝ) - (t₁ : ℝ)) :=\n  BlackScholes.price_forwardStartCall_constGirsanovMeasure hW hWmeas hTH hS₀ hα hσ ht₁ hτ\n"
+      },
+      "metadata": {
+        "chapter": 26,
+        "reference": "Rubinstein, Pay now, choose later, Risk 4(2) (1991); Hull, Options, Futures, and Other Derivatives, ch. 26 sec. 5 (11th ed.)",
+        "citations": [
+          {
+            "key": "Rubinstein1991PayNow"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 26 sec. 5"
+          },
+          {
+            "key": "QuantLibForwardEngine"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation of the closed form S0 * bsV(alpha, r, sigma, 1, T - t1) for the reified forwardStartCall contract in the library's Black-Scholes market, under the Girsanov pricing measure, with hypotheses 0 < S0, 0 < alpha, 0 < sigma, 0 < t1 < T and a Girsanov horizon covering the maturity. Rubinstein's general formula carries a dividend yield q through the whole-formula factor e^{-qT} and the ratio leg's rate r - q, this market's single asset pays no dividends, so the delivered statement is the q = 0 case and the dividend extension is not formalized. Cliquets (series of forward starts) and employee stock options are out of scope."
+      }
     }
   ]
 }

@@ -133,6 +133,29 @@ before, 867 after; 18 library wrappers and 22 reduced cores unchanged).
   statement, the superhedging characterization, and a CRR limit of the premium; the market-level
   statement takes the physical law to be i.i.d. flips with `0 < p < 1` and prices at time 0
   only.
+### Forward-start call: Rubinstein's factorization (2026-11-24)
+
+One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier node
+`thm:forward-start-call`. Corpus 906 → 907 on this branch.
+
+- **`mf-forward-start-call`** (MathFin/Models/BlackScholes/ForwardStart.lean): the forward-start
+  call — strike set at a reset date `t₁` as the multiple `α` of the observed price, payoff
+  `max (S_T − α S_{t₁}) 0` — has price `S₀ · bsV α r σ 1 (T − t₁)` in the library's Black–Scholes
+  market under the Girsanov pricing measure (`price_forwardStartCall_constGirsanovMeasure`),
+  whatever the physical drift. The theorem is a market price (a `Market.price` statement), derived
+  by Rubinstein's factorization: the payoff splits as the price at `t₁` against the ratio
+  `S_T/S_{t₁}`, a function of the Brownian increment `B_T − B_{t₁}` independent of `𝓕_{t₁}`
+  (`condExp_mul_of_indep`); the frozen leg has the martingale mean `e^{−rt₁}𝔼[S_{t₁}] = S₀`
+  (`discounted_terminal_eq_S0`) and the ratio leg is `bsV` on a unit spot
+  (`integral_bsCall_payoff_eq_bsV`). The reified `forwardStartCall` contract is added to
+  `Contracts/Instruments/Options.lean` — the first payoff in the language whose strike is an
+  observation of the same underlying at an earlier date. What is not proved: the dividend-yield generalization (the market's asset pays no
+  dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
+  whole-formula dividend scaling `S₀ e^{−qT}` and the ratio leg's rate `r − q`), and cliquets (a
+  series of forward starts) are out of scope. The Risk column is 4(2), February 1991, pp. 44–47
+  (per Hull's bibliography); the delivered closed form at
+  `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
+  computes.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 

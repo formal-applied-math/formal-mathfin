@@ -181,9 +181,9 @@ alignment:
       status: full 4 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 27 statements
+      lean: 28 statements
       module: benchmarks/exotic_options.json
-      status: full 22 · wrapper 0 · reduced 5 · placeholder 0
+      status: full 23 · wrapper 0 · reduced 5 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 27 statements
