@@ -290,7 +290,7 @@
   "latexEnv": "definition",
   "label": "def:brownian-motion",
   "file":
-  "/var/home/yangye/devv/study/study-mathlib/mathfin/.lake/packages/mathlib/Mathlib/Probability/BrownianMotion/Basic.lean"},
+  "/home/runner/work/formal-mathfin/formal-mathfin/.lake/packages/mathlib/Mathlib/Probability/BrownianMotion/Basic.lean"},
  {"uses": ["def:snell-envelope"],
   "title": "Snell's theorem: the envelope is the value of optimal stopping",
   "text":

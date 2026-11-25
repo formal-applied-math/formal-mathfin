@@ -34,7 +34,7 @@ loading columns.
 
 * `exists_premia_of_exactFactorNoArbitrage`: the decomposition `a i = lam₀ + ∑ k ∈ t,
   lam k * β i k` from the condition at unit prices, over a finite asset set and a finite
-  factor set (Ross 1976, theorem 1's exact-factor case). The proof is the finite-dimensional
+  factor set (Ross 1976, the exact-factor case). The proof is the finite-dimensional
   duality `(Uᗮ)ᗮ = U` for the span `U` of the price vector and the loading columns in the
   Euclidean space of portfolios on `s`, consumed as a private lemma.
 * `exactFactorNoArbitrage_of_pricingMeasure`: a pricing measure (`MathFin.Market.
@@ -311,7 +311,7 @@ theorem factorPremium_eq_marketPremium {ι : Type*} {s : Finset ι}
     (h_var : portfolioVarN s w_M Sg ≠ 0)
     {i₀ i₁ : ι} (hi₀ : i₀ ∈ s) (hi₁ : i₁ ∈ s)
     (hβ₀ : β i₀ = 0) (hβ₁ : β i₁ ≠ 0)
-    (hNA : ExactFactorNoArbitrage s ({() } : Finset Unit) (fun _ => (1 : ℝ)) μ_excess
+    (hNA : ExactFactorNoArbitrage s ({()} : Finset Unit) (fun _ => (1 : ℝ)) μ_excess
       (fun i (_ : Unit) => β i))
     (hload : ∀ i ∈ s, β i = beta (marginalVariance s Sg w_M i) (portfolioVarN s w_M Sg)) :
     ∃ lam₀ : ℝ, ∃ lam : ℝ, (∀ i ∈ s, μ_excess i = lam₀ + lam * β i) ∧
