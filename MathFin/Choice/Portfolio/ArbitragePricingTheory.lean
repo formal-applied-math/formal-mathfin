@@ -45,14 +45,16 @@ loading columns.
   positive constant `f 0 / f T`.
 * `exists_premia_of_isPricingMeasure`: the decomposition with general prices, packaged from
   the two steps.
-* `lam0_eq_of_zeroLoadingAsset`: the intercept `lam₀` of any premia decomposition is the
-  payoff of an asset with zero loadings, the risk-free return at unit prices.
+* `lam0_eq_of_zeroLoadingAsset`: the intercept `lam₀` of any unit-price premia decomposition
+  is the payoff of an asset with zero loadings, the risk-free return of the market.
 * `factorPremium_eq_marketPremium`: the one-factor case prices exactly as the CAPM
   equilibrium. With the loading equal to the CAPM beta (`MathFin.beta`) and the market
-  portfolio tangent (`CAPM_from_market_equilibrium`), the factor premium is the market's
-  expected excess return and the intercept is zero, so the decomposition takes the security
-  market line's form. This does not derive the CAPM: the equilibrium hypothesis is assumed,
-  exactly as in `Choice.Portfolio.CAPMEquilibrium`.
+  portfolio tangent (`CAPM_from_market_equilibrium`), every premia decomposition is
+  determined: any pair `lam₀, lam` reproducing the returns on `s` has `lam₀ = 0` and
+  `lam` the market's expected excess return, so the decomposition takes the security
+  market line's form. Existence is the exact-factor condition's job
+  (`exists_premia_of_exactFactorNoArbitrage`). This does not derive the CAPM: the
+  equilibrium hypothesis is assumed, exactly as in `Choice.Portfolio.CAPMEquilibrium`.
 
 ## References
 
@@ -283,9 +285,10 @@ theorem exists_premia_of_isPricingMeasure
   exists_coeffs_of_exactFactorNoArbitrage
     (exactFactorNoArbitrage_of_pricingMeasure hQ f hN hR)
 
-/-- The intercept `lam₀` of any premia decomposition is the payoff of an asset with zero
-loadings: at unit prices that asset is riskless, so `lam₀` is the risk-free return of the
-market. -/
+/-- The intercept `lam₀` of any unit-price premia decomposition is the payoff of an asset
+with zero loadings: that asset is riskless, so `lam₀` is the risk-free return of the
+market. At general prices the intercept is the per-unit-price coefficient, and the
+corollary does not apply to it. -/
 theorem lam0_eq_of_zeroLoadingAsset {ι κ : Type*}
     {s : Finset ι} {t : Finset κ} {a : ι → ℝ} {β : ι → κ → ℝ}
     {i₀ : ι} (hi₀ : i₀ ∈ s) (hβ : ∀ k ∈ t, β i₀ k = 0)
@@ -298,13 +301,15 @@ theorem lam0_eq_of_zeroLoadingAsset {ι κ : Type*}
 
 /-- The one-factor case prices exactly as the CAPM equilibrium: if the single factor's loading
 is the CAPM beta (`MathFin.beta` of the asset's marginal variance in the market portfolio over
-the market variance `portfolioVarN s w_M Sg`) and the market
-portfolio satisfies the tangency first-order condition, the factor premium of the arbitrage
-pricing theory is the market's expected excess return and the intercept is zero, so the
-decomposition takes the security market line's form `μ i = lam * β i`. The hypothesis `hNA`
-is the exact-factor no-arbitrage condition for the one-factor model; the equilibrium relation
-is `CAPM_from_market_equilibrium`. The market needs an asset with zero loading (which fixes
-the intercept) and one with nonzero loading (which identifies the premium). -/
+the market variance `portfolioVarN s w_M Sg`) and the market portfolio satisfies the tangency
+first-order condition, the premia of the arbitrage pricing theory, should they exist (the
+exact-factor no-arbitrage condition supplies them at unit prices,
+`exists_premia_of_exactFactorNoArbitrage`), are determined: every pair `lam₀, lam` with
+`μ_excess i = lam₀ + lam * β i` on `s` has `lam₀ = 0` and `lam = portfolioReturn s w_M
+μ_excess`, the market's expected excess return, so the decomposition takes the security
+market line's form `μ i = lam * β i`. The market needs an asset with zero loading (which pins
+the intercept) and one with nonzero loading (which identifies the premium); the equilibrium
+relation is `CAPM_from_market_equilibrium`. -/
 theorem factorPremium_eq_marketPremium {ι : Type*} {s : Finset ι}
     {Sg : ι → ι → ℝ} {w_M μ_excess β : ι → ℝ}
     (h_FOC : ∀ j ∈ s, ∀ k ∈ s, μ_excess k * marginalVariance s Sg w_M j =
@@ -312,27 +317,19 @@ theorem factorPremium_eq_marketPremium {ι : Type*} {s : Finset ι}
     (h_var : portfolioVarN s w_M Sg ≠ 0)
     {i₀ i₁ : ι} (hi₀ : i₀ ∈ s) (hi₁ : i₁ ∈ s)
     (hβ₀ : β i₀ = 0) (hβ₁ : β i₁ ≠ 0)
-    (hNA : ExactFactorNoArbitrage s ({()} : Finset Unit) (fun _ => (1 : ℝ)) μ_excess
-      (fun i (_ : Unit) => β i))
     (hload : ∀ i ∈ s, β i = beta (marginalVariance s Sg w_M i) (portfolioVarN s w_M Sg)) :
-    ∃ lam₀ : ℝ, ∃ lam : ℝ, (∀ i ∈ s, μ_excess i = lam₀ + lam * β i) ∧
+    ∀ lam₀ : ℝ, ∀ lam : ℝ, (∀ i ∈ s, μ_excess i = lam₀ + lam * β i) →
       lam₀ = 0 ∧ lam = portfolioReturn s w_M μ_excess := by
-  obtain ⟨lam₀, lam, hdec⟩ := exists_coeffs_of_exactFactorNoArbitrage hNA
-  have hdec' : ∀ i ∈ s, μ_excess i = lam₀ + lam () * β i := by
-    intro i hi
-    rw [hdec i hi, one_mul, Finset.sum_singleton]
   have hcapm : ∀ i ∈ s, μ_excess i = β i * portfolioReturn s w_M μ_excess := fun i hi => by
     rw [hload i hi]
     exact CAPM_from_market_equilibrium s w_M μ_excess Sg i hi h_var h_FOC
-  have h0' : lam₀ = 0 := by
-    have h0 := hdec' i₀ hi₀
-    rw [hcapm i₀ hi₀, hβ₀, zero_mul, mul_zero] at h0
-    linarith [h0]
-  have h1 : μ_excess i₁ = lam () * β i₁ := by rw [hdec' i₁ hi₁, h0', zero_add]
-  have h2 : μ_excess i₁ = β i₁ * portfolioReturn s w_M μ_excess := hcapm i₁ hi₁
-  have hlam : lam () = portfolioReturn s w_M μ_excess := by
-    rw [← mul_left_inj' hβ₁]
-    linarith [h1.symm.trans h2, mul_comm (β i₁) (portfolioReturn s w_M μ_excess)]
-  exact ⟨lam₀, lam (), fun i hi => hdec' i hi, h0', hlam⟩
+  have h0 : μ_excess i₀ = 0 := by rw [hcapm i₀ hi₀, hβ₀, zero_mul]
+  intro lam₀ lam hdec
+  have h1 := hdec i₀ hi₀
+  rw [hβ₀, mul_zero, add_zero, h0, eq_comm] at h1
+  have h2 := hdec i₁ hi₁
+  rw [h1, zero_add, hcapm i₁ hi₁, mul_comm (β i₁) (portfolioReturn s w_M μ_excess),
+    mul_left_inj' hβ₁] at h2
+  exact ⟨h1, h2.symm⟩
 
 end MathFin
