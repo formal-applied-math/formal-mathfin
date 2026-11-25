@@ -108,12 +108,10 @@ theorem eval_constantMeanPayoff_eq_reserves (x y : ℝ) (w : ℝ≥0) (hx : 0 < 
   have hone : (1 - (w : ℝ)) + (w : ℝ) = 1 := by ring
   have hone' : (w : ℝ) + (1 - (w : ℝ)) = 1 := by ring
   have hspot' : s () T = (y / (1 - (w : ℝ))) / (x / (w : ℝ)) := by
-    rw [hspot]
-    simp only [spotPrice, Matrix.cons_val_zero, Matrix.cons_val_one]
+    rw [hspot, spotPrice_pair]
   have hVeq : constantMeanInvariant ![x, y] ![↑w, 1 - ↑w]
-      = x ^ (w : ℝ) * y ^ (1 - (w : ℝ)) := by
-    simp only [constantMeanInvariant, Fin.prod_univ_two, Matrix.cons_val_zero,
-      Matrix.cons_val_one]
+      = x ^ (w : ℝ) * y ^ (1 - (w : ℝ)) :=
+    constantMeanInvariant_pair x y (w : ℝ) (1 - (w : ℝ))
   have hye : y ^ (1 - (w : ℝ)) * y ^ (w : ℝ) = y := by
     rw [← Real.rpow_add hy (1 - (w : ℝ)) (w : ℝ)]
     simp only [hone, Real.rpow_one]

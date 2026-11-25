@@ -228,6 +228,20 @@ theorem hasDerivAt_swapOut_zero (B : ι → ℝ) (w : ι → ℝ) (i j : ι)
   ring
 
 omit [Fintype ι] [DecidableEq ι] in
+/-- The invariant of a two-token pool with weights `w₁` on X and `w₂` on Y. -/
+theorem constantMeanInvariant_pair (x y w₁ w₂ : ℝ) :
+    constantMeanInvariant ![x, y] ![w₁, w₂] = x ^ w₁ * y ^ w₂ := by
+  simp only [constantMeanInvariant, Fin.prod_univ_two, Matrix.cons_val_zero,
+    Matrix.cons_val_one]
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- The spot price of a two-token pool with weights `w₁` on X and `w₂` on Y: the units of
+token Y per unit of token X. -/
+theorem spotPrice_pair (x y w₁ w₂ : ℝ) :
+    spotPrice ![x, y] ![w₁, w₂] 0 1 = (y / w₂) / (x / w₁) := by
+  simp only [spotPrice, Matrix.cons_val_zero, Matrix.cons_val_one]
+
+omit [Fintype ι] [DecidableEq ι] in
 /-- **The equal-weight two-token invariant is the constant-product invariant**: at `n = 2` with
 `w = ![1/2, 1/2]`, the squared constant-mean invariant is the product of the two reserves,
 so the surface `V = √(x·y)` is the Uniswap curve `x·y = k` written in squared form. -/
