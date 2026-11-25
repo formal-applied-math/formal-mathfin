@@ -241,6 +241,32 @@ theorem coe_itoIntegralAgainstCLM_weightLp :
       = sIntegral T hBmeas φ hB w := by
   rw [sIntegral, weightLp_eq_integrandLp T hBmeas φ hw_pred hw_bdd]
 
+/-- **Riemann–Stieltjes sums against `M = φ●B` converge in measure** to the integral against
+`M`, for any process `M` that agrees with the Itô integral process almost surely at each time
+of `[0, T]`: the mean-square convergence `tendsto_itoIntegralAgainst_stepσ`, read on the
+sums. -/
+theorem tendstoInMeasure_riemannStieltjes (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    {M : ℝ≥0 → Ω → ℝ} (hM : ∀ t ≤ T, M t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ)
+    {w : ℝ≥0 → Ω → ℝ} (hw_pred : IsStronglyPredictable (natFiltration hBmeas) w)
+    (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) {Cw : ℝ}
+    (hw_bdd : ∀ s ω, |w s ω| ≤ Cw) :
+    TendstoInMeasure μ (fun n ω ↦ ∑ k ∈ Finset.range n, w (unifPart T n k) ω
+        * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) atTop
+      (itoIntegralAgainstCLM hB T hBmeas φ (weightLp T hBmeas φ hw_pred hw_bdd)) := by
+  refine (tendstoInMeasure_of_tendsto_Lp
+    (tendsto_itoIntegralAgainst_stepσ hB T hBmeas φ hw_pred hw_cont hw_bdd)).congr
+    (fun n ↦ (itoIntegralAgainst_stepσ hB T hBmeas φ hw_pred hw_bdd n).trans ?_)
+    (Filter.EventuallyEq.refl _ _)
+  have hMn : ∀ᵐ ω ∂μ, ∀ j : ℕ, j ≤ n →
+      M (unifPart T n j) ω = itoProcessCLM hB T (unifPart T n j) hBmeas φ ω := by
+    refine ae_all_iff.2 fun j ↦ ?_
+    by_cases hj : j ≤ n
+    · filter_upwards [hM _ (unifPart_le_T hj)] with ω hω _ using hω
+    · exact ae_of_all _ fun ω h ↦ absurd h hj
+  filter_upwards [hMn] with ω hω
+  exact Finset.sum_congr rfl fun k hk ↦ by
+    rw [hω (k + 1) (Finset.mem_range.mp hk), hω k (Finset.mem_range.mp hk).le]
+
 end AdaptedRiemannStieltjes
 
 end MathFin

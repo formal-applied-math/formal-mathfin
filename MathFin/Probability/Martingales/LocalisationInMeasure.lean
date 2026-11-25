@@ -262,5 +262,27 @@ theorem tendsto_measure_compl_abs_le_of_stronglyAdapted {Ω : Type*} {mΩ : Meas
   tendsto_measure_compl_abs_le (fun t ↦ ((hX t).mono (𝓕.le t)).measurable)
     (.of_forall fun ω ↦ (hXc ω).continuousOn)
 
+/-- A sequence converging in measure has, inside any subsequence, a further subsequence
+converging almost everywhere. -/
+theorem exists_seq_tendsto_ae_comp {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
+    {g : ℕ → Ω → ℝ} {g' : Ω → ℝ} (h : TendstoInMeasure μ g atTop g') {ns : ℕ → ℕ}
+    (hns : Tendsto ns atTop atTop) :
+    ∃ ms : ℕ → ℕ, StrictMono ms ∧
+      ∀ᵐ ω ∂μ, Tendsto (fun i ↦ g (ns (ms i)) ω) atTop (𝓝 (g' ω)) :=
+  TendstoInMeasure.exists_seq_tendsto_ae fun ε hε ↦ (h ε hε).comp hns
+
+/-- Convergence in `L¹`, stated on integrals of absolute differences, gives convergence in
+measure. -/
+theorem tendstoInMeasure_of_tendsto_integral_abs {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
+    {g : ℕ → Ω → ℝ} {g' : Ω → ℝ} (hint : ∀ n, Integrable (fun ω ↦ g n ω - g' ω) μ)
+    (h : Tendsto (fun n ↦ ∫ ω, |g n ω - g' ω| ∂μ) atTop (𝓝 0)) :
+    TendstoInMeasure μ g atTop g' := by
+  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero ?_
+  have h' := ENNReal.tendsto_ofReal h
+  rw [ENNReal.ofReal_zero] at h'
+  refine h'.congr fun n ↦ ?_
+  exact (ofReal_integral_norm_eq_lintegral_enorm (hint n)).trans
+    (eLpNorm_one_eq_lintegral_enorm (hint n).aestronglyMeasurable).symm
+
 end LocalisationInMeasure
 end MathFin
