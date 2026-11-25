@@ -278,12 +278,7 @@ theorem cumHazard_surjOn_Ici {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s
 `ν(−∞, x] = 1 − e^{−x}`. -/
 theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Iic x) = ENNReal.ofReal (1 - rexp (-x)) := by
-  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
-  rw [← ENNReal.ofReal_toReal (measure_ne_top _ _),
-    show ENNReal.toReal (expMeasure 1 (Set.Iic x)) = cdf (expMeasure 1) x from by
-      rw [cdf_eq_real, measureReal_def],
-    cdf_expMeasure_eq one_pos x, ite_eq_left hx]
-  simp only [one_mul]
+  simpa using expMeasure_Iic 1 one_pos hx
 
 /-- **Tail of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(x, ∞) = e^{−x}`. -/

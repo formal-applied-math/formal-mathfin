@@ -20,8 +20,9 @@ independence (`iIndepFun.meas_iInter`) and the individual exponential laws
 
 ## Main results
 
-* `expMeasure_real_Ioi`, `expMeasure_Ioi`: the survival function `Exp(r)(t, ∞) = exp (-(r * t))`
-  for `t ≥ 0` (`max t 0` in the real form, valid for all `t`), the one place it is stated.
+* `expMeasure_real_Ioi`, `expMeasure_Ioi`, `expMeasure_Iic`: the survival function
+  `Exp(r)(t, ∞) = exp (-(r * t))` for `t ≥ 0` (`max t 0` in the real form, valid for all `t`) and
+  the distribution function `1 - exp (-(r * t))`, the one place they are stated.
 * `minimum_survival`: for jointly independent `τ i` with exponential laws of rates `rates i > 0`
   and `t ≥ 0`, `μ {ω | t < min_i τ_i ω} = exp (-(∑ rates) * t)`. The law of the minimum as a
   measure is not stated.
@@ -66,6 +67,14 @@ lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
   have h := expMeasure_real_Ioi hr t
   rw [max_eq_left ht] at h
   rw [← h, ofReal_measureReal (measure_ne_top _ _)]
+
+/-- **The exponential distribution function**: `Exp(r)(−∞, t] = 1 − exp(−(r t))` for `t ≥ 0`, the
+complement of the survival function `expMeasure_Ioi`. -/
+lemma expMeasure_Iic (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
+    expMeasure r (Set.Iic t) = ENNReal.ofReal (1 - Real.exp (-(r * t))) := by
+  have := isProbabilityMeasure_expMeasure hr
+  rw [← Set.compl_Ioi, prob_compl_eq_one_sub measurableSet_Ioi, expMeasure_Ioi r hr ht,
+    ENNReal.ofReal_sub _ (Real.exp_nonneg _), ENNReal.ofReal_one]
 
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
 lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
