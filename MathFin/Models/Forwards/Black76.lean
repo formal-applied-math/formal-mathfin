@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.Call
 public import MathFin.Models.BlackScholes.GarmanNormalForm
+public import MathFin.Models.BlackScholes.ScalingInvariance
 
 /-!
 # Black-76 formula for options on futures
@@ -216,16 +217,9 @@ theorem blackCaplet_sqrt_variance (F K σ T α : ℝ) (hσ : 0 < σ) (hT : 0 < T
     blackCaplet F K (Real.sqrt (σ ^ 2 * T)) 1 α = blackCaplet F K σ T α := by
   have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
     rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ.le]
-  have hsq : (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T := by
-    rw [mul_pow, Real.sq_sqrt hT.le]
-  have hd1 : bsd1 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd1 F K 0 σ T := by
-    rw [hs]
-    unfold bsd1
-    rw [Real.sqrt_one, mul_one, hsq]
-    ring_nf
-  have hd2 : bsd2 F K 0 (Real.sqrt (σ ^ 2 * T)) 1 = bsd2 F K 0 σ T := by
-    unfold bsd2
-    rw [hd1, hs, Real.sqrt_one, mul_one]
+  have hd1 := bsd1_timeScale (S := F) (K := K) (r := 0) (σ := σ) (τ := T) hT
+  have hd2 := bsd2_timeScale (S := F) (K := K) (r := 0) (σ := σ) (τ := T) hT
+  rw [mul_zero, div_self hT.ne', ← hs] at hd1 hd2
   unfold blackCaplet
   rw [hd1, hd2]
 

@@ -182,7 +182,7 @@ theorem jyVarIntegrand_nonneg {ar an σI σr σn ρrI ρnI ρnr : ℝ} (T t : �
 theorem jyVariance_nonneg {ar an σI σr σn ρrI ρnI ρnr : ℝ} {T : ℝ} (hT : 0 ≤ T)
     (hrI : ρrI ^ 2 ≤ 1) (hnI : ρnI ^ 2 ≤ 1) (hdet : 0 ≤ jyCorrDet ρrI ρnI ρnr) :
     0 ≤ jyVariance ar an σI σr σn ρrI ρnI ρnr T :=
-  intervalIntegral.integral_nonneg hT fun t _ => jyVarIntegrand_nonneg T t hrI hnI hdet
+  intervalIntegral.integral_nonneg hT fun t _ ↦ jyVarIntegrand_nonneg T t hrI hnI hdet
 
 /-- **Zero rate volatilities.** With `σ_r = σ_n = 0` only the index volatility remains:
 `V(0,T) = σ_I²·T`; in particular `V(0,T) = 0` when `σ_I = 0` as well. -/
@@ -218,7 +218,7 @@ theorem jyForwardIndex_lognormal_eq_curves (BT : Ω → ℝ) (Pn0T Pr0T I0 F0 V 
     (hZ : HasLaw Z (gaussianReal 0 1) (MathFin.forwardMeasure Qn BT)) :
     F0 = I0 * Pr0T / Pn0T := by
   have h := ZCSwap.forwardIndex_eq (Qn := Qn) BT Pn0T Pr0T I0
-    (fun ω => bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) hBTpos hBTmeas hPn0T hP hident
+    (fun ω ↦ bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) hBTpos hBTmeas hPn0T hP hident
   have h2 := integral_discounted_bsTerminal hZ F0 0 (Real.sqrt V) (T := 1) zero_le_one
   simp only [neg_zero, zero_mul, Real.exp_zero, one_mul] at h2
   rw [← h]
@@ -233,7 +233,7 @@ measurable, and `Qn` a probability measure (inherited from the section variable 
 `F = I₀·Pʳ(0,T)/Pⁿ(0,T)` the curve forward, i.e. `Pⁿ(0,T)·[F Φ(d₁) − K Φ(d₂)]` with
 `d₁ = bsd1 F K 0 √V 1`, `d₂ = bsd2 F K 0 √V 1`. That `Q^T` is a probability measure follows from
 `hZ`. The caplet is the contract `caplet () 0 0 1 K` of `MathFin.Contracts.value_caplet_black76`
-with deflator `D = fun _ => 1/B_T` and observed index `fun _ _ => I_T`; both are time-constant, so
+with deflator `D = fun _ ↦ 1/B_T` and observed index `fun _ _ ↦ I_T`; both are time-constant, so
 the contract's reset and payment dates `0, 0` are placeholders and the payment date `T` enters only
 through `B_T`, hence `zeroCurve Qn D 0 = Pⁿ(0,T)`; `jyForwardIndex_lognormal_eq_curves` gives
 `F₀ = F`. Strike convention: the market payoff `N[(I_T/I₀ − 1) − κ]⁺` (notional `N`, `κ` the total,
@@ -253,21 +253,21 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
     hident hZ
   have hQ' : IsProbabilityMeasure (MathFin.forwardMeasure Qn BT) :=
     hZ.isProbabilityMeasure_iff.2 inferInstance
-  have hint : Integrable (fun ω => 1 / BT ω) Qn :=
+  have hint : Integrable (fun ω ↦ 1 / BT ω) Qn :=
     Integrable.of_integral_ne_zero (by rw [← hP]; exact hPn0T.ne')
   have hyp : BSCallHyp (MathFin.forwardMeasure Qn BT) F0 K 0 (Real.sqrt V) 1 Z :=
     ⟨hF0, hK, Real.sqrt_pos.2 hV, one_pos, hZ⟩
   have hfm : (MathFin.forwardMeasure Qn BT)
-      = MathFin.forwardMeasure Qn fun ω => 1 / (fun (_ : ℝ≥0) ω => 1 / BT ω) 0 ω := by
+      = MathFin.forwardMeasure Qn fun ω ↦ 1 / (fun (_ : ℝ≥0) ω ↦ 1 / BT ω) 0 ω := by
     congr 1
     funext ω
     simp
   have key := Contracts.value_caplet_black76 (Q := Qn)
-    (D := fun (_ : ℝ≥0) ω => 1 / BT ω) (X := fun (_ : Unit) (_ : ℝ≥0) ω =>
+    (D := fun (_ : ℝ≥0) ω ↦ 1 / BT ω) (X := fun (_ : Unit) (_ : ℝ≥0) ω ↦
       bsTerminal F0 0 (Real.sqrt V) 1 (Z ω)) (ℓ := ()) (T₀ := 0) (T₁ := 0) (δ := 1)
-    (hQ' := hfm) (fun ω => by simpa using hBTpos ω) (measurable_const.div hBTmeas) hint hyp
-    (Filter.Eventually.of_forall fun _ => rfl)
-  have hz : Contracts.zeroCurve Qn (fun (_ : ℝ≥0) ω => 1 / BT ω) 0 = Pn0T := by
+    (hQ' := hfm) (fun ω ↦ by simpa using hBTpos ω) (measurable_const.div hBTmeas) hint hyp
+    (Filter.Eventually.of_forall fun _ ↦ rfl)
+  have hz : Contracts.zeroCurve Qn (fun (_ : ℝ≥0) ω ↦ 1 / BT ω) 0 = Pn0T := by
     simp [Contracts.zeroCurve, hP]
   simp only [Contracts.caplet, Contracts.Contract.value_pay, Contracts.capletPayoff,
     Contracts.Payoff.eval, Contracts.scenarioAt, hz] at key
@@ -275,7 +275,7 @@ theorem jyZcCaplet_price [IsProbabilityMeasure Qn] (BT : Ω → ℝ)
   have key' : ∫ ω, max (bsTerminal F0 0 (Real.sqrt V) 1 (Z ω) - K) 0 / BT ω ∂Qn
       = Pn0T * blackCaplet F0 K (Real.sqrt V) 1 1 := by
     rw [← key]
-    refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+    refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
     simp [div_eq_inv_mul]
   rw [key']
 
@@ -327,17 +327,17 @@ module's import closure free of the FTAP chain. -/
 theorem jyYoyForward_eq_bondRatio {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
-    (hIT : Integrable IT μ) (hITS : Integrable (fun ω => IT ω / IS ω) μ)
-    (hmart : μ[IT | mS] =ᵐ[μ] fun ω => IS ω * RS ω) :
+    (hIT : Integrable IT μ) (hITS : Integrable (fun ω ↦ IT ω / IS ω) μ)
+    (hmart : μ[IT | mS] =ᵐ[μ] fun ω ↦ IS ω * RS ω) :
     ∫ ω, IT ω / IS ω ∂μ = ∫ ω, RS ω ∂μ := by
-  have hinv : StronglyMeasurable[mS] fun ω => (IS ω)⁻¹ := hIS.measurable.inv.stronglyMeasurable
-  have hprod : Integrable (fun ω => (IS ω)⁻¹ * IT ω) μ := by
+  have hinv : StronglyMeasurable[mS] fun ω ↦ (IS ω)⁻¹ := hIS.measurable.inv.stronglyMeasurable
+  have hprod : Integrable (fun ω ↦ (IS ω)⁻¹ * IT ω) μ := by
     simpa [div_eq_inv_mul] using hITS
-  have hpull : μ[fun ω => (IS ω)⁻¹ * IT ω | mS]
-      =ᵐ[μ] fun ω => (IS ω)⁻¹ * (μ[IT | mS]) ω :=
+  have hpull : μ[fun ω ↦ (IS ω)⁻¹ * IT ω | mS]
+      =ᵐ[μ] fun ω ↦ (IS ω)⁻¹ * (μ[IT | mS]) ω :=
     condExp_mul_of_stronglyMeasurable_left hinv hprod hIT
   have h1 : ∫ ω, IT ω / IS ω ∂μ = ∫ ω, (IS ω)⁻¹ * (μ[IT | mS]) ω ∂μ := by
-    have := (integral_condExp hmS (f := fun ω => (IS ω)⁻¹ * IT ω)).symm.trans
+    have := (integral_condExp hmS (f := fun ω ↦ (IS ω)⁻¹ * IT ω)).symm.trans
       (integral_congr_ae hpull)
     simpa [div_eq_inv_mul] using this
   rw [h1]
@@ -370,8 +370,8 @@ positive in the model, and the statement is an identity about `hR`, so it carrie
 theorem jyYoyForward_eq_convexity {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
     [SigmaFinite (μ.trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
-    (hIT : Integrable IT μ) (hITS : Integrable (fun ω => IT ω / IS ω) μ)
-    (hmart : μ[IT | mS] =ᵐ[μ] fun ω => IS ω * RS ω)
+    (hIT : Integrable IT μ) (hITS : Integrable (fun ω ↦ IT ω / IS ω) μ)
+    (hmart : μ[IT | mS] =ᵐ[μ] fun ω ↦ IS ω * RS ω)
     (mn mr Vn Vr ρ Bn Br Pn0T Pn0S Pr0T Pr0S Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
@@ -386,7 +386,7 @@ theorem jyYoyForward_eq_convexity {mS : MeasurableSpace Ω} (hmS : mS ≤ m)
         * Real.exp (-(Br * mr) + Bn * mn + Bn ^ 2 * Vn - Br * Bn * Cov) := by
   have hR' : ∀ ω, RS ω = (Pr0T * Pn0S / (Pr0S * Pn0T)) * Real.exp (Convexity.hwD Br Vr
         - Convexity.hwD Bn Vn + (Bn * (mn + Real.sqrt Vn * Z1 ω)
-          - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω)))) := fun ω => by
+          - Br * (mr + Real.sqrt Vr * (ρ * Z1 ω + Real.sqrt (1 - ρ ^ 2) * Z2 ω)))) := fun ω ↦ by
     rw [hR ω]
     congr 2
     ring
@@ -416,9 +416,9 @@ theorem jyYoyPayment_price {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measur
     [SigmaFinite ((MathFin.forwardMeasure Qn BT).trim hmS)] (IS IT RS : Ω → ℝ)
     (hIS : StronglyMeasurable[mS] IS) (hISpos : ∀ ω, 0 < IS ω)
     (hIT : Integrable IT (MathFin.forwardMeasure Qn BT))
-    (hITS : Integrable (fun ω => IT ω / IS ω) (MathFin.forwardMeasure Qn BT))
+    (hITS : Integrable (fun ω ↦ IT ω / IS ω) (MathFin.forwardMeasure Qn BT))
     (hmart : (MathFin.forwardMeasure Qn BT)[IT | mS]
-      =ᵐ[MathFin.forwardMeasure Qn BT] fun ω => IS ω * RS ω)
+      =ᵐ[MathFin.forwardMeasure Qn BT] fun ω ↦ IS ω * RS ω)
     (mn mr Vn Vr ρ Bn Br Pn0S Pr0T Pr0S Cov : ℝ)
     (hVn : 0 ≤ Vn) (hVr : 0 ≤ Vr) (hρ : ρ ^ 2 ≤ 1) (hCov : Cov = ρ * Real.sqrt (Vn * Vr))
     {Z1 Z2 : Ω → ℝ}
@@ -432,7 +432,7 @@ theorem jyYoyPayment_price {Ω : Type*} {mS m : MeasurableSpace Ω} {Qn : Measur
     ∫ ω, IT ω / IS ω / BT ω ∂Qn
       = Pn0T * ((Pr0T * Pn0S / (Pr0S * Pn0T))
         * Real.exp (-(Br * mr) + Bn * mn + Bn ^ 2 * Vn - Br * Bn * Cov)) := by
-  have hprice := MathFin.forwardMeasure_price (Q := Qn) (fun ω => IT ω / IS ω) hBTmeas hBTpos
+  have hprice := MathFin.forwardMeasure_price (Q := Qn) (fun ω ↦ IT ω / IS ω) hBTmeas hBTpos
     (hP ▸ hPn0T)
   rw [← hP] at hprice
   rw [← hprice]

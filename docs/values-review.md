@@ -173,19 +173,54 @@ heading overstated the corpus by five.
 - `SECURITY.md` names every workflow that pushes with `contents: write` and says no workflow
   runs on `pull_request_target`; the pin-bump page drops a stale corpus size.
 
+- **From the panel**: `blackCaplet_sqrt_variance` now consumes `bsd1_timeScale` and
+  `bsd2_timeScale` (all three panellists who read `Black76.lean` flagged the hand re-derivation
+  behind a `ring_nf`); the deep-in-the-money European closed form reuses the lifted one-period
+  lemma instead of re-deriving it inline; the contango snippet states its sign facts at every
+  maturity `T > 0`, as its description says, not at `T = 1`; the Balancer description says
+  its price conjunct is the market's price unfolded; the contango description says the
+  no-arbitrage derivation lives in `FxForwardParity.lean`; `JarrowYildirim.lean` writes `↦`.
+
 ### Lens gradients
 
-- **Coherence.** Exemplar: `jyZcCaplet_price` goes through `value_caplet_black76` and
-  `forwardMeasure_price`; the forward-start price is `Market.price` of a reified contract.
-  Next: the constant-product pool as the equal-weight instance of the constant-mean one, not a
-  bridged sibling (backlog 1).
-- **Concept clarity.** Exemplar: `numeraireMeasure_absolutelyContinuous'` named as the
-  integrability-free half of `numeraireMeasure_isEquivProbMeasure`. Next: `fxForward` is the
-  general carry forward under an FX name (backlog 4).
-- **Zero slop.** Exemplar: `expSum_pos_iff_of_root` proves the single crossing without a
-  monotonicity `expSum` lacks. Next: the JY quadratic-form lemmas speak the library's
-  `Matrix.PosSemidef` (backlog 2).
-- **Junk values.** The BGK `H = 0` corners are named lemmas, as `docs/design.md` §2 asks.
+The panel: four independent read-only reviewers, two lenses each (1+8, 2+6, 3+5, 4+7), on the
+merged tree after the per-PR fixes; adjudicated below.
+
+1. **Inspired math.** Exemplar: `expSum_pos_iff_of_root`, the single crossing of a signed
+   exponential sum, which is what makes the Gaussian closed form of the conditioning bound
+   possible. Thin: contango is `Real.exp` monotonicity, BGK proves a definition and a
+   continuity limit, `ScalingInvariance`'s homogeneity trio is lemma-grade. Each is one corpus
+   entry and says what it is. Next: the BGK shift compared with discrete monitoring on the
+   binomial barrier market (backlog 7).
+2. **Coherence.** Exemplar: Ho–Lee's `bondPrice_eq`, one `.trans` onto the Wiener moment lemma
+   and the shared kernel; `jyZcCaplet_price` through `value_caplet_black76`. Next: the
+   constant-product pool as an instance of the constant-mean one (backlog 1).
+3. **Zero slop.** Exemplar: `bsV_eq_totalVarianceCall` in four lines through `bsV_timeScale`.
+   Next: the American put's two near-mirror 35-line `calc` branches in
+   `americanPrice_premium_mul_weight_le` (backlog 9).
+4. **Architecture.** Exemplar: `ScalingInvariance` as its own module, consumed from
+   `ModelFree/`, `Forwards/` and the barrier files. Next: `mf-bgk-discrete-barrier-shift`
+   bundles five claims; split the `ptDownOutCall` facts from the BGK shift (backlog 8).
+5. **First principles.** No `full` entry hides a reduced core; the JY `hZ` lognormal index is
+   the real assumption and is disclosed; `hcond` is the defining property of a conditional
+   mean, not the conclusion. Exemplar: `value_forwardStartCall`, a derivation through
+   independence of the increment. Next: `hcond` from the Brownian model (backlog 6).
+6. **Idiomatic register.** Exemplar: `ScalingInvariance`'s hypotheses, `c ≠ 0` or `0 < c`
+   exactly where each is needed. Next: generic names in broad namespaces (`MathFin.expSum`,
+   `condBoundCall`, JY's `quad2_nonneg`), the Balancer file's `variable` instances forcing nine
+   `omit`s, `Real.one_le_exp` over `exp 0` rewriting (backlog 10).
+7. **Concept clarity.** Exemplar: `mf-balancer-invariant`, description matching snippet clause
+   by clause. Next: the JY and BGK descriptions run to 2–3k characters with a notation glossary
+   in a published field; lead with the claim (backlog 8).
+8. **Elegance.** Most beautiful: `americanPrice_premium_supermartingale`, three lines (the `max`
+   adds a nonnegative term and the one-period price is affine). Ugliest: the 120-line double
+   induction beside it, whose idea is that same step iterated along a path (backlog 9).
+
+Dissolved: "eight contango corpus entries" and "`price_constantMeanPayoff` as an entry" (each is
+one conjunct of one entry); "the numéraire lemmas have no consumer" (issue #323 asked for them
+as named API for the change between two numéraire measures); retitling
+`thm:futures-basis-convergence` (`F(T) → S` as time to maturity vanishes is the textbook basis
+convergence on a deterministic curve, and the statement now says futures are not covered).
 
 ### Ranked backlog
 
@@ -198,25 +233,32 @@ heading overstated the corpus by five.
 4. `fxForward` read as the carry forward (a carry name, or a stated generality), and a bridge
    from its continuous yield to `TheoryOfStorage`'s additive convenience yield (S–M).
 5. The GBM ratio decomposition `S_T = S_{t₁}·bsTerminal 1 r σ (T − t₁) …` as a lemma shared by
-   the forward-start, chooser and vanilla path proofs; the dividend-yield forward start (M).
+   the forward-start, chooser and vanilla path proofs; `pathAssets_nonneg`; the dividend-yield
+   forward start (M).
 6. The Jarrow–Yildirim SDE step (the real-rate drift shift and `V(0,T)`), `hcond` from the
    Brownian model for discrete fixings, the exact YoY caplet, a tightness statement for the
    conditioning bound (#583's backlog, carried) (L).
 7. The reflection step and `β = −ζ(1/2)/√(2π)` behind the BGK shift
-   (`thm:barrier-lookback-closed-forms`) (L).
-8. A market-level deep-in-the-money corollary of the strict American put premium; the
-   numéraire density's `rnDeriv` under `AEMeasurable` terminals (S).
+   (`thm:barrier-lookback-closed-forms`), and its comparison with discrete monitoring on
+   `Binomial/BarrierMarket` (L).
+8. Split `mf-bgk-discrete-barrier-shift` into the `ptDownOutCall` image form and scaling and
+   the BGK shift and limit; shorten the JY and BGK descriptions to claim first (S).
+9. `americanPrice_premium_mul_weight_le` as one step lemma (weight `q` or `1 − q`) iterated on
+   a path word; `BinomialNoArb.one_le_u`; a market-level deep-in-the-money corollary (M).
+10. Register pass: the Asian helpers into their own namespace, `integrable_exp_mul_gaussianPDFReal`
+    via `integrable_exp_mul_gaussianReal`, the Balancer `variable` instances, the contango sign
+    proofs as `mul_pos_iff_of_pos_right`/`mul_eq_zero_iff_right`, `tendsto_bgkDownBarrier` by
+    `Tendsto` combinators, `absolutelyContinuous_numeraireMeasure` for the converse direction (S).
 
 ### Evidence
 
-One read-only review per pull request against CLAUDE.md (parallel developments, prose against
-statement, junk values, blueprint linkage, layers, register, references), all eight returning
-"ready after small fixes"; every finding above is from them. A security pass over every diff:
-no workflow, tool, script, lakefile or pin file touched; no `#eval`, `run_cmd`, `initialize`,
-IO, custom syntax, `unsafe`, `extern` or new axiom in any added Lean or snippet; every added
-import is MathFin or Mathlib; no bidirectional-text or zero-width characters. Ledger rows
-restored only where the recorded input hash equals the merged tree's; the rest re-verified on
-runners. One umbrella `lake build` and the blueprint export on a runner, then `build.yml`.
+One read-only review per pull request against CLAUDE.md, all eight "ready after small fixes";
+then the four-reviewer lens panel above on the fixed tree. A security pass over every diff: no
+workflow, tool, script, lakefile or pin file touched; no `#eval`, `run_cmd`, `initialize`, IO,
+custom syntax, `unsafe`, `extern` or new axiom in any added Lean or snippet; every added import
+is MathFin or Mathlib; no bidirectional-text or zero-width characters. Ledger rows restored only
+where the recorded input hash equals the merged tree's; the rest re-verified on runners. One
+umbrella `lake build` and the blueprint export on a runner, then `build.yml`.
 
 ## 2026-11-19 — corpus 903, modules 790 — one concept, one object: the seven duplicates of the trunk table tied or removed
 

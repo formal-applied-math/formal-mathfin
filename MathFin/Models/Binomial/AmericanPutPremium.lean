@@ -147,22 +147,9 @@ theorem binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money
     rw [binomialPrice_succ_eq_onePeriod]
     obtain ⟨hup, hdp⟩ := mul_pow_children_le h hS n hSK
     rw [ih (S * u) (mul_pos hS h.u_pos) hup, ih (S * d) (mul_pos hS h.d_pos) hdp]
-    have hmart := crrUpProb_mul_up_add u d r h
-    unfold binomialOptionPriceOnePeriod
-    rw [show crrUpProb u d r * (K * Real.exp (-(r * n)) - S * u)
-          + (1 - crrUpProb u d r) * (K * Real.exp (-(r * n)) - S * d)
-        = K * Real.exp (-(r * n)) - S * (crrUpProb u d r * u + (1 - crrUpProb u d r) * d)
-          from by ring,
-      hmart]
-    have h1 : Real.exp (-r) * Real.exp r = 1 := by
-      rw [← Real.exp_add]; simp
-    have h2 : Real.exp (-r) * Real.exp (-(r * n)) = Real.exp (-(r * (n + 1 : ℕ))) := by
+    have h2 : Real.exp (-(r * n)) * Real.exp (-r) = Real.exp (-(r * (n + 1 : ℕ))) := by
       rw [← Real.exp_add]; congr 1; push_cast; ring
-    calc Real.exp (-r) * (K * Real.exp (-(r * n)) - S * Real.exp r)
-        = K * (Real.exp (-r) * Real.exp (-(r * n))) - S * (Real.exp (-r) * Real.exp r) := by
-          ring
-      _ = K * Real.exp (-(r * (n + 1 : ℕ))) - S * 1 := by rw [h2, h1]
-      _ = K * Real.exp (-(r * (n + 1 : ℕ))) - S := by ring
+    rw [binomialOptionPriceOnePeriod_intrinsic h (K * Real.exp (-(r * n))) S, mul_assoc, h2]
 
 /-- **The American put deep in the money is the intrinsic value.** When the whole remaining
 subtree ends in the money (`0 < S` and `S * u ^ n ≤ K`) and `0 ≤ r`, the American put price
