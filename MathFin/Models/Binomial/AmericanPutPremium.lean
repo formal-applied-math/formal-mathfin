@@ -215,7 +215,6 @@ theorem binomialPrice_lt_americanPrice_put_of_deep_in_the_money
   rw [hA, hE]
   nlinarith
 
-
 /-! ### Propagation of the premium to the root -/
 
 /-- **The premium dominates its own discounted continuation.** For any payoff, the difference
