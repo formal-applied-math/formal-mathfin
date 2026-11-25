@@ -55,7 +55,11 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   sycophancy). For each lens, name the current **exemplar** (the bar to
   propagate) and the next **upgrade** (the gradient). Genuine slop uncovered
   is fixed in-session; larger upgrades become ranked backlog items with
-  owners (usually a future session's opening move).
+  owners (usually a future session's opening move). Each item is filed as an
+  issue before the entry is recorded and ends with its outcome tag: `[#N]`,
+  later `[done: <where>]` or `[retired: <why>]`
+  (`tools/verify/review_backlog.py`, gated by
+  `test_every_review_backlog_item_has_an_outcome`).
 - **The standing first pass — read the prose against its own statement.**
   Before the lenses, for everything the session touched: does the docstring,
   the corpus `description`, or the doc paragraph claim more than the Lean

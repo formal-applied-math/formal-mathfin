@@ -326,6 +326,26 @@ def test_values_review_is_current() -> None:
         )
 
 
+def test_every_review_backlog_item_has_an_outcome() -> None:
+    """Each backlog item ends with its outcome: an issue, `[done: …]` or `[retired: …]`.
+
+    docs/status.md makes the issue tracker the one backlog. Until 2026-11-25 nothing held that,
+    and an audit of all 326 items found 102 that were neither done nor in an issue.
+    """
+    from tools.verify import review_backlog
+
+    untagged = [
+        f"{VALUES_REVIEW_PATH}:{it.line}: {it.text.splitlines()[0][:90]}"
+        for it in review_backlog.items(VALUES_REVIEW_PATH.read_text())
+        if it.outcome is None
+    ]
+    assert not untagged, (
+        "backlog items with no outcome tag: end each with [#N] (the issue that tracks it), "
+        "[done: <where>] or [retired: <why>] (tools/verify/review_backlog.py):\n"
+        + "\n".join(untagged)
+    )
+
+
 # --------------------------------------------------------------------------
 # The prose-vs-statement gate.
 #

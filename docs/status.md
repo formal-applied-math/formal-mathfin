@@ -58,7 +58,9 @@ Work that is ready to pick up carries
 work waiting on a design or on upstream carries `status:blocked-design` or
 `status:blocked-upstream`. Each values review ends in a ranked backlog
 ([`values-review.md`](values-review.md)), and its items are filed as issues. The backlog lists in
-older review entries are a record of what each review found, not a second tracker.
+older review entries are a record of what each review found, not a second tracker: each item ends
+with its outcome (`[#N]`, `[done: …]` or `[retired: …]`), and
+`python3 -m tools.verify.review_backlog --open` lists any that do not.
 
 ## Where to read next
 
