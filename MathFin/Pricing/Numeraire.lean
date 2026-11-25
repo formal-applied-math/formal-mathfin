@@ -56,8 +56,8 @@ choosing `B`, `N` and reading off the density.
   numeraireDensity BT NT B0 N0`, for σ-finite `Q` and measurable numéraire terminals.
 * `MathFin.numeraireMeasure_absolutelyContinuous` — `Q^N ≪ Q`, with no hypothesis beyond
   the definition.
-* `MathFin.numeraireMeasure_absolutelyContinuous'` — with positive numéraires (`B0 > 0`,
-  `N0 > 0`) also `Q ≪ Q^N`, the density being strictly positive at every state.
+* `MathFin.numeraireMeasure_absolutelyContinuous'` — with measurable, positive numéraires
+  (`B0 > 0`, `N0 > 0`) also `Q ≪ Q^N`, the density being strictly positive at every state.
 * `MathFin.numeraireMeasure_isEquivProbMeasure` — `Q^N` is a probability measure
   equivalent to `Q` (`Q^N ≪ Q` and `Q ≪ Q^N`), under the martingale/normalization
   condition `𝔼^Q[N_T/B_T] = N₀/B₀`; `numeraireMeasure_isProbabilityMeasure` is its first
@@ -135,19 +135,20 @@ theorem numeraireMeasure_absolutelyContinuous :
     numeraireMeasure Q BT NT B0 N0 ≪ Q :=
   withDensity_absolutelyContinuous Q _
 
-/-- **`Q` is absolutely continuous with respect to the numéraire measure** when the numéraires
-are positive (`B0 > 0`, `N0 > 0` included): the density `(N_T·B₀)/(N₀·B_T)` is then strictly
-positive at every state, so the a.e.-nonvanishing hypothesis of Mathlib's
-`withDensity_absolutelyContinuous'` holds everywhere. -/
+/-- **`Q` is absolutely continuous with respect to the numéraire measure** when the numéraire
+terminals are measurable and positive (`B0 > 0`, `N0 > 0` included): the density
+`(N_T·B₀)/(N₀·B_T)` is then strictly positive at every state, so the a.e.-positivity
+hypothesis of the library's `absolutelyContinuous_withDensity_ofReal` holds everywhere. -/
 theorem numeraireMeasure_absolutelyContinuous' (hNTmeas : Measurable NT)
     (hBTmeas : Measurable BT) (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω)
     (hB0 : 0 < B0) (hN0 : 0 < N0) :
     Q ≪ numeraireMeasure Q BT NT B0 N0 :=
-  withDensity_absolutelyContinuous'
-    (hf := (((hNTmeas.mul measurable_const).div
-      (measurable_const.mul hBTmeas)).ennreal_ofReal).aemeasurable)
-    (ae_of_all Q fun ω ↦ ne_of_gt (ENNReal.ofReal_pos.2
-      (div_pos (mul_pos (hNTpos ω) hB0) (mul_pos hN0 (hBTpos ω)))))
+  absolutelyContinuous_withDensity_ofReal Q
+    (g := fun ω ↦ NT ω * B0 / (N0 * BT ω))
+    (hmeas := ((hNTmeas.mul measurable_const).div
+      (measurable_const.mul hBTmeas)).aemeasurable)
+    (hpos := ae_of_all Q fun ω ↦
+      div_pos (mul_pos (hNTpos ω) hB0) (mul_pos hN0 (hBTpos ω)))
 
 /-- **The numéraire measure is an equivalent probability measure.** Under the tradeability /
 normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀` (equivalently: `N/B` is a `Q`-martingale), the

@@ -38,7 +38,8 @@ the lemmas, and `mf-change-of-numeraire` already covers the node. Corpus 906 →
   definition (`withDensity_absolutelyContinuous`).
 - **`numeraireMeasure_absolutelyContinuous'`** — with measurable, positive numéraires
   (`B0 > 0`, `N0 > 0`) also `Q ≪ Q^N`: the density is then strictly positive at every state
-  (`withDensity_absolutelyContinuous'`).
+  (the library's `absolutelyContinuous_withDensity_ofReal`, which wraps Mathlib's
+  `withDensity_absolutelyContinuous'`).
 
 The `## Honest scope` note of `MathFin/Pricing/ForwardMeasure.lean` now cites the stochastic-rate
 instance, the Hull–White `S`-forward measure of `Models/Rates/TimingAdjustment`
