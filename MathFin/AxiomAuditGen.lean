@@ -2392,9 +2392,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedShortfall_of_hasLaw_lomaxMeasure
 
-/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
+#print axioms MathFin.expectedShortfall_of_hasLaw_studentT
 
 /-- info: 'MathFin.expectedUtility_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4148,14 +4148,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.strictlyElicits_pinballLoss
 
-/-- info: 'MathFin.studentTMeasure_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.studentTMeasure_one
-
-/-- info: 'MathFin.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.studentTPDFReal_eq
-
 /-- info: 'MathFin.submartingale_optional_sampling' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.submartingale_optional_sampling
@@ -4432,9 +4424,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.valueAtRisk_gbm_loss
 
-/-- info: 'MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure
+#print axioms MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentT
 
 /-- info: 'MathFin.valueAtRisk_of_hasGaussianLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4444,9 +4436,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.valueAtRisk_of_hasLaw_gaussianReal
 
-/-- info: 'MathFin.valueAtRisk_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.valueAtRisk_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.valueAtRisk_of_hasLaw_studentTMeasure
+#print axioms MathFin.valueAtRisk_of_hasLaw_studentT
 
 /-- info: 'MathFin.valueAtRisk_portfolio_add_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4667,6 +4659,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale
+
+/-- info: 'ProbabilityTheory.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms ProbabilityTheory.studentTPDFReal_eq
+
+/-- info: 'ProbabilityTheory.studentT_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms ProbabilityTheory.studentT_one
 
 /-! ## Upstream constants cited by `library_wrapper` entries
 
