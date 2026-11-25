@@ -223,7 +223,8 @@ which takes hours on one machine.
 [`lean-toolchain`](lean-toolchain) pins the Lean version and
 [`lake-manifest.json`](lake-manifest.json) pins Mathlib and BrownianMotion. BrownianMotion and the
 library itself are compiled from source. [`CONTRIBUTING.md`](CONTRIBUTING.md) describes a prebuilt
-Docker image and a faster edit-and-check loop for contributors.
+Docker image and a faster edit-and-check loop for contributors. [`docs/pin-bumps.md`](docs/pin-bumps.md)
+says when the pins move and what must be true before a bump merges.
 
 ## Using the library in a project
 
