@@ -838,10 +838,10 @@
     },
     "mf-balancer-invariant": {
       "benchmark_file": "defi.json",
-      "date": "2026-11-23",
+      "date": "2026-11-25",
       "elapsed_s": 3.2,
-      "input_hash": "b9e4c54d37651ad56a6a49eea11b1223dc0ad1ab17112eeeda0dc6e02adc3b77",
-      "verified_at_commit": "24254e6"
+      "input_hash": "cb0be0af3222a711b0c80d00dd8f999cb883356915dcd339eb094a6e955bdf04",
+      "verified_at_commit": "8d53ea3"
     },
     "mf-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
