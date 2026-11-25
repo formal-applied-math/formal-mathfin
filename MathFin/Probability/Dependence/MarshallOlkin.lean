@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Dependence.HoeffdingCovariance
+public import MathFin.Probability.Laws.ExpMin
 
 /-!
 # The Marshall–Olkin common-shock model
@@ -83,20 +84,6 @@ exponential clocks, survival copula, MSC 91G40, MSC 62H05, JEL G33
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Set
-
-/-- The exponential survival function: `Exp(r)` puts mass `exp(−r · max(t, 0))` on `(t, ∞)`. -/
-lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
-    (expMeasure r).real (Ioi t) = Real.exp (-(r * max t 0)) := by
-  have := isProbabilityMeasure_expMeasure hr
-  rw [← compl_Iic, probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
-    cdf_expMeasure_eq hr]
-  rcases le_total 0 t with ht | ht
-  · rw [ite_eq_left ht, max_eq_left ht]
-    ring
-  · rcases ht.lt_or_eq with ht | rfl
-    · rw [ite_eq_right (not_le.2 ht), max_eq_right ht.le]
-      simp
-    · simp
 
 /-- An exponential clock outlasts any horizon with positive probability. -/
 lemma expMeasure_Ioi_ne_zero {r : ℝ} (hr : 0 < r) (t : ℝ) : expMeasure r (Ioi t) ≠ 0 := by
