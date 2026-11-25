@@ -72,6 +72,30 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.AdaptedRiemannStieltjes.tendsto_itoIntegralAgainst_stepσ
 
+/-- info: 'MathFin.AsianAverageStrike.condBoundCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.AsianAverageStrike.condBoundCall
+
+/-- info: 'MathFin.AsianAverageStrike.condBoundCall_le_integral_max' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.AsianAverageStrike.condBoundCall_le_integral_max
+
+/-- info: 'MathFin.AsianAverageStrike.condBoundCall_one_fixing_eq_marketPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.AsianAverageStrike.condBoundCall_one_fixing_eq_marketPrice
+
+/-- info: 'MathFin.AsianAverageStrike.condRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.AsianAverageStrike.condRate
+
+/-- info: 'MathFin.AsianAverageStrike.condShift' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.AsianAverageStrike.condShift
+
+/-- info: 'MathFin.AsianAverageStrike.integral_max_expSum_hasLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.AsianAverageStrike.integral_max_expSum_hasLaw
+
 /-- info: 'MathFin.Bachelier.isPricingMeasure_market' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Bachelier.isPricingMeasure_market
@@ -2040,18 +2064,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.compoundPoisson_mgf_of_indepFun
 
-/-- info: 'MathFin.condBoundCall' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.condBoundCall
-
-/-- info: 'MathFin.condBoundCall_le_integral_max' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.condBoundCall_le_integral_max
-
-/-- info: 'MathFin.condBoundCall_one_fixing_eq_marketPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.condBoundCall_one_fixing_eq_marketPrice
-
 /-- info: 'MathFin.condDefault_eq_oneFactorPD' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.condDefault_eq_oneFactorPD
@@ -2071,14 +2083,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.condExp_stoppedValue_le_snellEnvelope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.condExp_stoppedValue_le_snellEnvelope
-
-/-- info: 'MathFin.condRate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.condRate
-
-/-- info: 'MathFin.condShift' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.condShift
 
 /-- info: 'MathFin.continuous_jumpDiffusionDensity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3087,10 +3091,6 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.integral_lpValue_eq_exp_mul_integral_hodlValue' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.integral_lpValue_eq_exp_mul_integral_hodlValue
-
-/-- info: 'MathFin.integral_max_expSum_hasLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.integral_max_expSum_hasLaw
 
 /-- info: 'MathFin.integral_max_sub_compoundPoisson' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

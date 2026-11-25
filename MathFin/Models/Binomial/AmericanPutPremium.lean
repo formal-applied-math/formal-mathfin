@@ -47,6 +47,11 @@ price of the put
 composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
 `americanPrice_market_europeanPutPayoff` with the tree-level gap.
 
+## Main definitions
+
+* `wordWeight`: the risk-neutral discounted weight of a path word of the tree.
+* `wordSpot`: the spot reached from a given spot along a path word.
+
 ## Main results
 
 * `americanPutPrice_eq_intrinsic_of_deep_in_the_money`: for `0 < S` with `S * u ^ n ≤ K` and

@@ -81,6 +81,8 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real Finset
 open scoped NNReal
 
+namespace AsianAverageStrike
+
 /-! ### Exponential sums and their single crossing -/
 
 /-- The exponential sum `z ↦ ∑ₖ aₖ exp(dₖ + cₖ z)`. With `aₖ` the signed weights of `S_{tₖ}` in
@@ -136,10 +138,15 @@ theorem expSum_pos_iff_of_root {n : ℕ} {a d c : Fin n → ℝ} {p zs : ℝ}
 
 /-! ### The Gaussian closed form -/
 
+/-- `exp(c z)` is integrable against the standard normal density: Mathlib's
+`integrable_exp_mul_gaussianReal`, read through the density. -/
 lemma integrable_exp_mul_gaussianPDFReal (c : ℝ) :
     Integrable (fun z ↦ Real.exp (c * z) * gaussianPDFReal 0 1 z) := by
-  simp_rw [exp_mul_gaussianPDFReal_zero_one]
-  exact (integrable_gaussianPDFReal c 1).const_mul _
+  have h := integrable_exp_mul_gaussianReal (μ := 0) (v := 1) c
+  rw [gaussianReal_of_var_ne_zero _ one_ne_zero,
+    integrable_withDensity_iff_integrable_smul' (measurable_gaussianPDF 0 1)
+      (ae_of_all _ fun _ ↦ gaussianPDF_lt_top)] at h
+  simpa [toReal_gaussianPDF, mul_comm] using h
 
 /-- The closed form: `E[(expSum Z)⁺]` for a standard normal density, when the sum is positive
 exactly to the right of `zs`. -/
@@ -394,5 +401,7 @@ theorem condBoundCall_one_fixing_eq_marketPrice {Ω : Type*} [MeasurableSpace Ω
     (S_0 := 1) (m := r) (r := r) (σ := σ) (α := 1) hW hWmeas hTH one_pos one_pos hσ ht₁ htT
   rw [sub_self, zero_div] at key
   rw [key, (condBoundCall_one_fixing S r σ t₁ T hS hσ htT).2, one_mul]
+
+end AsianAverageStrike
 
 end MathFin
