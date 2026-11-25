@@ -325,16 +325,17 @@ theorem integral_mertonSpot (S_0 k : ℝ) (Λ : ℝ≥0) :
     show -(k * (Λ : ℝ)) + (Λ : ℝ) * k = 0 from by ring,
     Real.exp_zero, mul_one]
 
-/-- **Term-wise put–call parity** for the conditional values: pure
-`Φ(x) + Φ(−x) = 1` algebra, no hypotheses. -/
+/-- **Term-wise put–call parity** for the conditional values, in price form (the put as a
+function of the call, as `bsP_eq_bsV`): pure `Φ(x) + Φ(−x) = 1` algebra, no hypotheses. -/
+@[pricing =]
 theorem mertonTerm_parity (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) (n : ℕ) :
-    mertonCallTerm S_0 K r σ T k δ Λ n - mertonPutTerm S_0 K r σ T k δ Λ n
-      = mertonSpot S_0 k Λ n - K * rexp (-r * T) := by
+    mertonPutTerm S_0 K r σ T k δ Λ n
+      = mertonCallTerm S_0 K r σ T k δ Λ n - mertonSpot S_0 k Λ n + K * rexp (-r * T) := by
   unfold mertonCallTerm mertonPutTerm
   linear_combination
-    mertonSpot S_0 k Λ n
-      * Phi_add_Phi_neg (bsd1 (mertonSpot S_0 k Λ n) K r (mertonVol σ δ T n) T)
-    - K * rexp (-r * T)
+    -(mertonSpot S_0 k Λ n
+      * Phi_add_Phi_neg (bsd1 (mertonSpot S_0 k Λ n) K r (mertonVol σ δ T n) T))
+    + K * rexp (-r * T)
       * Phi_add_Phi_neg (bsd2 (mertonSpot S_0 k Λ n) K r (mertonVol σ δ T n) T)
 
 /-- **Merton put–call parity**: `C − P = S₀ − K e^{−rT}`. Parity survives
@@ -346,10 +347,12 @@ theorem merton_put_call_parity {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
     mertonCallPrice S_0 K r σ T k δ Λ - mertonPutPrice S_0 K r σ T k δ Λ
       = S_0 - K * rexp (-r * T) := by
   unfold mertonCallPrice mertonPutPrice
+  have hterm (n : ℕ) : mertonCallTerm S_0 K r σ T k δ Λ n - mertonPutTerm S_0 K r σ T k δ Λ n
+      = mertonSpot S_0 k Λ n - K * rexp (-r * T) := by
+    rw [mertonTerm_parity]; ring
   rw [← integral_sub (integrable_mertonCallTerm δ Λ hS_0 hK hσ hT hk)
       (integrable_mertonPutTerm δ Λ hS_0 hK hσ hT hk),
-    integral_congr_ae (ae_of_all _ fun n ↦
-      mertonTerm_parity S_0 K r σ T k δ Λ n),
+    integral_congr_ae (ae_of_all _ hterm),
     integral_sub (integrable_mertonSpot Λ hS_0 hk) (integrable_const _),
     integral_mertonSpot, integral_const, probReal_univ, one_smul]
 
