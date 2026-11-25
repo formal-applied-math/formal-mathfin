@@ -183,7 +183,7 @@ theorem sample_price :
     nlinarith [mul_pos (sub_pos.2 ha) (Real.exp_pos (-0.2))]
   have hne : Real.exp 0.2 + 1 ≠ 0 := by positivity
   have hsub : Real.exp 0.2 - Real.exp (-0.2) ≠ 0 := by linarith
-  have hUp : sample.callUp = 100 * (Real.exp 0.2 - 1) := by
+  have hUp : sample.callUp = 100 * Real.exp 0.2 - 100 := by
     rw [TreeSheet.callUp, sample_spot, sample_strike, sample_up]
     exact max_eq_left (by linarith)
   have hDown : sample.callDown = 0 := by
