@@ -937,9 +937,9 @@
     "mf-bgk-discrete-barrier-shift": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-25",
-      "elapsed_s": 2.3,
-      "input_hash": "fbd8987500375cd3b3eb181bc99b0266e73a8a7ad7e8e239b66a076a45aa3297",
-      "verified_at_commit": "256ace0"
+      "elapsed_s": 4.0,
+      "input_hash": "8aa08630960428706ffc39d9e38fcd6a42276aa49b93b67fc8752c1e9e4e749a",
+      "verified_at_commit": "eef415c"
     },
     "mf-binary-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
@@ -2894,6 +2894,13 @@
       "input_hash": "863483aabad9efa4ed5a64fc3b4f1038bc74547568b6e88f915580c99409fd28",
       "verified_at_commit": "54c0176d"
     },
+    "mf-forward-start-call": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-25",
+      "elapsed_s": 3.3,
+      "input_hash": "3b59c183da8114339b83dbec8cc6a4a50d744571635285a62b05b770c06435d6",
+      "verified_at_commit": "eef415c"
+    },
     "mf-frac-diff-binomial-series": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-19",
@@ -4528,9 +4535,9 @@
     "mf-partial-time-barrier-down-add-up": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-25",
-      "elapsed_s": 3.4,
-      "input_hash": "7fdfb483120d9053a0c1f8dea70e86693b1c786dc115c684c92538e7e4c245fb",
-      "verified_at_commit": "256ace0"
+      "elapsed_s": 3.0,
+      "input_hash": "a4b65255ba6b67357aaedf3be6341d9ece7ff19a33a654699787aab8ebe9997b",
+      "verified_at_commit": "eef415c"
     },
     "mf-performance-gain_to_pain": {
       "benchmark_file": "portfolio_and_performance.json",
