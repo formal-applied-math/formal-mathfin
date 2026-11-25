@@ -256,8 +256,7 @@ theorem itoIntegralCLM_surjective_onto_centered (hBmeas : ∀ t, Measurable (B t
           (Lp.const 2 μ (∫ x, F x ∂μ)), Lp.coeFn_const 2 μ (∫ x, F x ∂μ)] with ω h1 h2 h3
         rw [h1, h2, Pi.add_apply, h3, Function.const_apply, add_comm])]
     exact Submodule.add_mem_sup (LinearMap.mem_range_self _ φ)
-      (by rw [lpConst_eq_smul_one]
-          exact Submodule.mem_span_singleton.mpr ⟨_, rfl⟩)
+      (Submodule.mem_span_singleton.mpr ⟨_, (lpConst_eq_smul_one _).symm⟩)
 
 /-! ### The isometry onto the centered subspace -/
 
