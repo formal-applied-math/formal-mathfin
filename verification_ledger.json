@@ -2460,6 +2460,13 @@
       "input_hash": "01077973271923f327c15e0b0372d9af976928b6532dd31963f1fff444a54861",
       "verified_at_commit": "b0d5578"
     },
+    "mf-contract-value-order": {
+      "benchmark_file": "contracts.json",
+      "date": "2026-11-25",
+      "elapsed_s": 4.4,
+      "input_hash": "c4ada258c56940e17bd2e2e3bd2e5d53db5c7666acb02d15abd7d0b6bf224db3",
+      "verified_at_commit": "9ae89b2"
+    },
     "mf-convex-duality-root": {
       "benchmark_file": "no_arbitrage.json",
       "date": "2026-11-16",
