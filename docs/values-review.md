@@ -124,88 +124,99 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
-## 2026-11-25 — corpus 916, modules 793 — the Jarrow–Yildirim and average-strike companions, brought onto the library's objects before they land
 
-Scope: the branch `integration-comb-20261123`, the combined tree of the two queued topic
-branches (`ecodev-jarrow-yildirim` final head `cbf9fe15`; `asian-arith-avgstrike-bound`
-`dde23748`). It adds five corpus entries and two modules —
-`MathFin/Models/Rates/JarrowYildirim.lean` (the ZC inflation caplet on the curve forward, the
-year-on-year forward and its convexity factor) and
-`MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean` (the discrete arithmetic
-average-strike conditioning lower bound) — both `reduced_core`, with the regenerated
-artifacts (README counts 911/866/18/27, coverage, benchmarks, bib, the four
-`formalization.yaml` files, `AxiomAuditGen`, ledger). No existing entry changed
-(`mf-jarrow-yildirim-zc-inflation-caplet`, `mf-jarrow-yildirim-yoy-forward-convexity`,
-`mf-asian-avgstrike-conditioning-lower-bound`, `mf-asian-avgstrike-expsum-gaussian-positive-part`,
-`mf-asian-avgstrike-one-fixing-market-price` added; 0 removed or re-keyed).
+## 2026-11-25 — corpus 917, modules 801 — the eleven-PR wave of 2026-11-25, brought onto the library's objects before it lands
+
+Scope: pull requests #558 and #577–#586, merged on `integ/2026-11-25`. Eleven corpus entries
+(906 → 917; full 866 → 871, reduced cores 22 → 28) and ten modules: the Ho–Lee bond price,
+contango and basis convergence, the strict American put premium, the forward-start call, the
+Balancer constant-mean pool and its priced position, Black–Scholes scaling invariance and the
+Broadie–Glasserman–Kou discrete barrier shift, Jarrow–Yildirim and the average-strike
+conditioning bound; the numéraire density as a Radon–Nikodym derivative; a security policy and
+a pin-bump policy. This entry replaces the one #583 carried for its own two modules, whose
+heading overstated the corpus by five.
 
 ### The standing first pass: prose against statement
 
-- JY's module docstring states its results as conditional on the four hypotheses (index-linked
-  bond priced on the real curve, lognormal index, forward-index martingale, Hull–White bond
-  ratio) and denies in Scope the SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift and of
-  `V(0,T)`; the benchmark `description`s carry the same disclosure. The quadratic-form lemmas
-  state their validity region exactly — pairwise `|ρ| ≤ 1` is *not* enough for three factors,
-  `jyCorrDet ≥ 0` is required — rather than writing "correlation matrix" and letting the
-  reader assume positive semidefiniteness.
-- Asian's docstring denies by name what it does not deliver: the bound's closeness ("a
-  numerical question this file does not address"), the identification of the conditional mean
-  with the Brownian model (`hcond`, a hypothesis of the general statements), and the monotone
-  sign pattern for general fixings. The junk-valued helpers say "junk" in their own docstrings
-  (`condRate` at zero variance, `condShift` at `Fₖ ≤ 0`).
-- Both scope paragraphs disclose the unread primary source by name (Jarrow–Yildirim 2003;
-  Rogers–Shi 1995) and name the restatement actually followed (Brigo–Mercurio /
-  Dam–Macrina–Skovmand / Bagaria; Thompson wp0209 §3).
+- The contango module, its blueprint node and coverage said `BlackScholes/Dividends.lean`
+  gives the same forward; it names none. The prose now says the commodity reading is the FX
+  formula, not a separate derivation, that its continuous `δ` and `TheoryOfStorage`'s additive
+  `Y` are unbridged, and (in the published `description`) that the curve is the
+  deterministic-rate forward, not a futures price.
+- The Balancer `description` claimed the reserves identity, which the snippet did not prove;
+  the snippet now carries it as a conjunct. `price_constantMeanPayoff`'s docstring no longer
+  reads as conditional: it is an unconditional unfolding.
+- The American put docstring tied the general strict premium to `r > 0`; only the
+  deep-in-the-money strictness needs it. A published `reference` field carried an authoring
+  note about local files; removed.
+- The forward-start prose called its payoff the first of its kind in the language (true today,
+  aging tomorrow); dropped. The Risk column's pages are marked as Hull's citation, not checked.
+- The average-strike docstring asserted, unreferenced, that the two-moment approximation is
+  biased low; dropped. The Ho–Lee scope no longer says its kernel variance is proved there.
 
 ### Upgrades executed
 
-- The two modules themselves (theorem inventory in the PR text).
-- Tree-level fixes from the integration rounds: the README contributor bullet's inflation
-  credit now names the JY caplet/YoY forward and the Asian bound instead of crediting only
-  Inflation.lean's earlier work (`a0d63768`); coverage.md's per-step corpus deltas restated on
-  the merged tree — the branch-local 882 was not the tree's delivery-ready figure
-  (`dd9891cf`, `f6a05713`); generated artifacts regenerated in one commit (`d3206c10`).
+- **One Brownian kernel.** Ho–Lee had re-defined the kernel `T − u`, its `L²` element and
+  `T³/3` beside `VasicekZeroMeanReversionLimit`'s; it now uses those.
+- **One total-variance step.** `bsV_eq_totalVarianceCall` is derived from the new
+  `bsV_timeScale`; the Black caplet's `blackCaplet_sqrt_variance` moved from Jarrow–Yildirim
+  to `Black76.lean`, beside `blackCaplet`.
+- **Facts beside their object.** The six `ptDownOutCall` lemmas moved from the BGK module to
+  `PartialTimeBarrierOption.lean`, where `ptDownOutCall` lives.
+- **Lifts.** `scaled_increment_law` (the standardized Brownian increment is standard normal)
+  in `BSCallHypFromBrownian.lean`, replacing a 15-line block of the forward-start proof; the
+  American put module's thrice-written deep-in-the-money step and twice-written one-period
+  continuation each became one lemma.
+- **The Balancer landmark** is `eval_constantMeanPayoff_eq_reserves`, which ties the pool's
+  invariant and spot price to the priced position, instead of a one-line unfolding of the
+  pricing functional.
+- `SECURITY.md` names every workflow that pushes with `contents: write` and says no workflow
+  runs on `pull_request_target`; the pin-bump page drops a stale corpus size.
 
 ### Lens gradients
 
-- **Inspired math.** Exemplar: `quad2_nonneg`/`quad3_nonneg` — the 3×3 validity region stated
-  exactly, with the pairwise-is-not-enough fact as its own takeaway. Next: deriving `hcond`
-  (the conditional-mean identification) from the Brownian model for general fixing dates.
-- **Coherence.** Exemplar: `jyZcCaplet_price` routes through the library's own
-  `value_caplet_black76` and `forwardMeasure_price` instead of private Black-76 copies; the
-  Asian one-fixing case is stated as `S` times the market's price of the forward-start call.
-  Next: the YoY convexity factor phrased in the library's existing adjustment vocabulary
-  where one exists.
-- **Zero slop.** Exemplar: `expSum_pos_iff_of_root` proves the single crossing without
-  claiming monotonicity `expSum` does not have — the tilted sum is the monotone object, and
-  the docstring says so.
-- **Junk values.** The Asian helpers carry their junk conventions at definition; the JY
-  statements keep `T ≥ 0`, `√V` (so `V > 0`), `K > 0` where the term needs them.
+- **Coherence.** Exemplar: `jyZcCaplet_price` goes through `value_caplet_black76` and
+  `forwardMeasure_price`; the forward-start price is `Market.price` of a reified contract.
+  Next: the constant-product pool as the equal-weight instance of the constant-mean one, not a
+  bridged sibling (backlog 1).
+- **Concept clarity.** Exemplar: `numeraireMeasure_absolutelyContinuous'` named as the
+  integrability-free half of `numeraireMeasure_isEquivProbMeasure`. Next: `fxForward` is the
+  general carry forward under an FX name (backlog 4).
+- **Zero slop.** Exemplar: `expSum_pos_iff_of_root` proves the single crossing without a
+  monotonicity `expSum` lacks. Next: the JY quadratic-form lemmas speak the library's
+  `Matrix.PosSemidef` (backlog 2).
+- **Junk values.** The BGK `H = 0` corners are named lemmas, as `docs/design.md` §2 asks.
 
 ### Ranked backlog
 
-1. The JY SDE step: the real-rate drift shift and `V(0,T)` derived from the three-SDE form,
-   retiring the martingale/bond-ratio hypotheses (L).
-2. The exact YoY caplet; calibration and seasonality (S–M).
-3. `hcond` from the Brownian model for discrete fixings (S–M).
-4. Bound tightness as mathematics — a gap statement, not numerics — for the conditioning
-   bound (S).
+1. Constant-product AMM as the `n = 2`, `w = 1/2` instance of the constant-mean pool:
+   `swap_preserves_invariant`, `hasDerivAt_swapOutput_zero` derived, not re-proved (M).
+2. Jarrow–Yildirim's `quad2_nonneg`/`quad3_nonneg` stated through `Matrix.PosSemidef`, or one
+   bridge to it, joining the PSD vocabulary of `Choice/Portfolio` (S).
+3. `condBoundCall_one_fixing_eq_marketPrice` restated as `S` times the price of
+   `forwardStartCall 1 t T`, the payoff #585 reified, instead of a rescaled vanilla call (S).
+4. `fxForward` read as the carry forward (a carry name, or a stated generality), and a bridge
+   from its continuous yield to `TheoryOfStorage`'s additive convenience yield (S–M).
+5. The GBM ratio decomposition `S_T = S_{t₁}·bsTerminal 1 r σ (T − t₁) …` as a lemma shared by
+   the forward-start, chooser and vanilla path proofs; the dividend-yield forward start (M).
+6. The Jarrow–Yildirim SDE step (the real-rate drift shift and `V(0,T)`), `hcond` from the
+   Brownian model for discrete fixings, the exact YoY caplet, a tightness statement for the
+   conditioning bound (#583's backlog, carried) (L).
+7. The reflection step and `β = −ζ(1/2)/√(2π)` behind the BGK shift
+   (`thm:barrier-lookback-closed-forms`) (L).
+8. A market-level deep-in-the-money corollary of the strict American put premium; the
+   numéraire density's `rnDeriv` under `AEMeasurable` terminals (S).
 
 ### Evidence
 
-This entry reuses the two topics' own review records rather than re-reviewing: JY ~41 rounds
-to three consecutive clean at `cbf9fe15` (findings: imprecise prose, citation shape, dedup;
-no math defect); Asian 13 rounds plus two independent Fable passes — the first found four
-real issues the three clean rounds had missed (silent junk above the volatility cap and below
-the stored data), the second a duplicate of an existing library lemma and two wording errors.
-The rule-10 tree gate then ran on the combined tree: merge resolutions checked, targeted and
-full `lake build` green, generated-file freshness, bib/coverage sanity, README counts
-recounted independently, the two modules' docstrings checked bijectively against their ledger
-rows, tree-wide name-collision grep, 100-char rule, rule-22 sweep; the one low finding (the
-README credit) fixed at `a0d63768` and a confirming round run clean. Hosted on the fork
-branch: `ledger sweep` green (bot re-stamp `bd96f874`; ledger fresh 911, stale 0, missing 0)
-and `build` green (Python gates incl. pytest, full `lake build` with the Mathlib cache,
-declaration-index and ratchet/index checks). Axioms are the standard three.
+One read-only review per pull request against CLAUDE.md (parallel developments, prose against
+statement, junk values, blueprint linkage, layers, register, references), all eight returning
+"ready after small fixes"; every finding above is from them. A security pass over every diff:
+no workflow, tool, script, lakefile or pin file touched; no `#eval`, `run_cmd`, `initialize`,
+IO, custom syntax, `unsafe`, `extern` or new axiom in any added Lean or snippet; every added
+import is MathFin or Mathlib; no bidirectional-text or zero-width characters. Ledger rows
+restored only where the recorded input hash equals the merged tree's; the rest re-verified on
+runners. One umbrella `lake build` and the blueprint export on a runner, then `build.yml`.
 
 ## 2026-11-19 — corpus 903, modules 790 — one concept, one object: the seven duplicates of the trunk table tied or removed
 
