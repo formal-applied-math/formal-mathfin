@@ -290,8 +290,6 @@ theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
 theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Ioi x) = ENNReal.ofReal (rexp (-x)) := by
   simpa using expMeasure_Ioi 1 one_pos hx
-  congr 1
-  ring
 
 /-- The unit exponential clock is almost surely nonnegative. -/
 theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)

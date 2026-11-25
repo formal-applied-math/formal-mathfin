@@ -182,7 +182,7 @@ theorem hasDerivAt_integral_div_exp_neg_integral (lam G : ℝ → ℝ) (c T : �
   have hSderiv : HasDerivAt (fun u ↦ Real.exp (-∫ v in (0 : ℝ)..u, lam v))
       (Real.exp (-∫ v in (0 : ℝ)..t, lam v) * -lam t) t := hPderiv.neg.exp
   have hAderiv : HasDerivAt (fun u ↦ (∫ s in u..T, G s) + c) (-G t) t := by
-    simpa using (integral_hasDerivAt_left hGInt hGM (hGAt t ⟨ht0, htT⟩)).add (hasDerivAt_const t c)
+    exact (integral_hasDerivAt_left hGInt hGM (hGAt t ⟨ht0, htT⟩)).add_const c
   have hSt := Real.exp_ne_zero (-∫ v in (0 : ℝ)..t, lam v)
   refine (hAderiv.div hSderiv hSt).congr_deriv ?_
   first | (field_simp; ring) | field_simp
@@ -284,4 +284,7 @@ theorem hasDerivAt_thieleReserve (δ μ prem b : ℝ → ℝ) (g T : ℝ) (hT : 
   rw [hVeq t ⟨ht0.le, htT.le⟩]
   change lam t * (A t / S t) - G t / S t = _
   rw [hGs t, hlamt]
-  first | (field_simp; ring) | field_simp
+  field_simp
+  ring
+
+end MathFin
