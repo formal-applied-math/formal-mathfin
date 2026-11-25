@@ -45,7 +45,8 @@ One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (86
   (`swapOut_two_eq_swapOutput`), all three in `Markets/DeFi/ConstantProductAMM.lean`.
   Cited: Martinelli & Mushegian, *Balancer* whitepaper, v2019-09-19 ("Theory": Value
   Function, Spot Price, Out-Given-In; the spot price there is printed with in/out exchanged,
-  `SPⁱₒ = (Bᵢ/Wᵢ)/(Bₒ/Wₒ)`, the same ratio reciprocated). Disclosed out of scope: fees
+  `SP^o_i = (Bᵢ/Wᵢ)/(Bₒ/Wₒ)`, the price of `o` in units of `i`, the same ratio
+  reciprocated). Disclosed out of scope: fees
   (the fee factor is one); the weights need only be positive — the sum-to-one normalization
   that makes `V` a portfolio value, the constant-value-share theorem, In-Given-Out,
   In-Given-Price and liquidity provision are not formalized. Axioms-clean, `full`.

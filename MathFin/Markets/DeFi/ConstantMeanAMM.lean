@@ -82,8 +82,10 @@ namespace DeFi
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 /-- **Constant-mean invariant**: the weighted product `∏ k, B k ^ w k` of the pool's reserves.
-This is a value only for positive reserves and weights, the hypotheses every theorem here
-carries; on a nonpositive reserve `Real.rpow` is junk. The whitepaper normalizes the weights
+This is a value only for positive reserves and weights, the hypotheses the theorems here
+carry at the minimum their proofs need (the derivative theorem needs only the input
+reserve's positivity); on a nonpositive reserve `Real.rpow` is junk. The whitepaper
+normalizes the weights
 (`∑ k, w k = 1`), which makes `V` the value of the weighted portfolio; the statements proved
 here need only positivity. -/
 noncomputable def constantMeanInvariant (B : ι → ℝ) (w : ι → ℝ) : ℝ :=
@@ -101,14 +103,16 @@ noncomputable def swapOut (B : ι → ℝ) (w : ι → ℝ) (i j : ι) (Δ : ℝ
 /-- **Spot price of a constant-mean pool**: the units of token `j` out per unit of token `i`
 in, `(B j / w j) / (B i / w i)`, a ratio of reserve-to-weight ratios. That this is the marginal
 rate of `swapOut` at zero trade is `hasDerivAt_swapOut_zero`; the whitepaper prints the same
-ratio with in and out exchanged (`SPⁱₒ = (B i / w i) / (B o / w o)`, the cost in `i` of one unit
-of `o`). Meaningful for positive reserves and weights. -/
+ratio with in and out exchanged (`SP^o_i = (B i / w i) / (B o / w o)`, the price of `o` in
+units of `i`, the paper's superscript naming the priced asset). Meaningful for positive
+reserves and weights. -/
 noncomputable def spotPrice (B : ι → ℝ) (w : ι → ℝ) (i j : ι) : ℝ :=
   (B j / w j) / (B i / w i)
 
 /-- **Post-trade reserve vector** of a constant-mean swap of `Δ` of token `i` in for
 `swapOut B w i j Δ` of token `j` out: token `i`'s reserve grows by `Δ`, token `j`'s shrinks by
-the out-amount, the others are untouched. -/
+the out-amount, the others are untouched. At `i = j` the second write wins and the value is
+not a post-trade reserve; every consuming theorem carries `i ≠ j`. -/
 noncomputable def swapReserves (B : ι → ℝ) (w : ι → ℝ) (i j : ι) (Δ : ℝ) : ι → ℝ :=
   Function.update (Function.update B i (B i + Δ)) j (B j - swapOut B w i j Δ)
 
