@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.Forwards.FxForwardParity
+public import MathFin.Models.Forwards.TheoryOfStorage
 
 /-!
 # Contango, backwardation and basis convergence
@@ -16,8 +17,10 @@ the slot of the foreign rate of covered interest parity. The forward is derived,
 in that FX reading: `covered_interest_parity` gets it from `forward_price_from_no_arbitrage` and
 `uncovered_interest_parity` from `expected_terminal_eq_forward`. The commodity reading is the
 same formula, not a separate derivation: `δ` is a continuous multiplicative yield, whereas
-`TheoryOfStorage.lean`'s convenience yield `Y` is an additive amount paid at delivery, and no
-bridge between the two is proved. The forward is the deterministic-rate curve; futures and
+`TheoryOfStorage.lean`'s convenience yield `Y` is an additive amount paid at delivery.
+`continuousYieldAmount` converts one to the other (the delivery-date value
+`S e^{rT}(1 − e^{−δT})` of the yield) and `storageForward_continuousYield_iff` proves that the
+storage no-arbitrage forward with that additive yield is `fxForward S r δ T`. The forward is the deterministic-rate curve; futures and
 forwards agree only under deterministic rates (`thm:futures-forward-convexity` is the gap).
 This module adds the qualitative market structure that formula
 induces, for `S > 0`:
@@ -36,10 +39,16 @@ regardless of the rates): everything is `Real.exp` monotonicity.
 
 ## Main definitions
 
-None: the module states facts about the existing `fxForward`.
+* `continuousYieldAmount`: the additive delivery-date amount `S e^{rT}(1 − e^{−δT})` that a
+  continuous yield `δ` is worth.
+
+The other results state facts about the existing `fxForward`.
 
 ## Main results
 
+* `storageForward_continuousYield_iff` : the storage forward with zero cost and the additive yield
+  `continuousYieldAmount S r δ T` has zero value exactly at `F = fxForward S r δ T`: the bridge
+  from the continuous yield to `TheoryOfStorage`'s additive one.
 * `fxForward_eq_spot_iff` : `fxForward S r δ T = S ↔ r = δ` for `0 < S`, `0 < T`.
 * `fxForward_contango_iff` : `S < fxForward S r δ T ↔ δ < r` for `0 < S`, `0 < T`.
 * `fxForward_backwardation_iff` : `fxForward S r δ T < S ↔ r < δ` for `0 < S`, `0 < T`.
@@ -175,5 +184,32 @@ theorem fxForward_basis_tendsto_zero (S r δ : ℝ) :
     fun_prop
   simpa only [hval] using
     (hcont.continuousAt (x := 0)).tendsto.mono_left nhdsWithin_le_nhds
+
+/-! ### The bridge to the additive convenience yield -/
+
+/-- **The additive amount a continuous yield is worth at delivery**: a commodity of spot `S`
+financed at `r` and yielding `δ` continuously has carry `S e^{rT} − S e^{(r−δ)T}` over `[0, T]`,
+that is `S e^{rT}(1 − e^{−δT})`, the amount `Y` of `TheoryOfStorage.lean` paid at delivery. -/
+noncomputable def continuousYieldAmount (S r δ T : ℝ) : ℝ :=
+  S * Real.exp (r * T) * (1 - Real.exp (-(δ * T)))
+
+/-- **The storage forward with a continuous yield is the cost-of-carry forward.** In a
+finite-state market with state prices `q` and bond price `e^{−rT}`, the commodity at spot `S`
+priced as the claim on `S_T + Y` with the additive yield `Y = continuousYieldAmount S r δ T` and
+no storage cost (`storageForward_from_no_arbitrage` at `C = 0`), the forward struck at `F` has
+zero value exactly when `F = fxForward S r δ T = S e^{(r−δ)T}`: the additive convenience yield
+of the theory of storage and the continuous yield of the cost-of-carry forward are one carry. -/
+theorem storageForward_continuousYield_iff {ι : Type*} (s : Finset ι) (q S_T : ι → ℝ)
+    (S r δ T F : ℝ) (h_bond : ∑ i ∈ s, q i = Real.exp (-(r * T)))
+    (h_carry : ∑ i ∈ s, q i * (S_T i - 0 + continuousYieldAmount S r δ T) = S) :
+    (∑ i ∈ s, q i * (S_T i - F) = 0) ↔ F = fxForward S r δ T := by
+  have hexp : Real.exp ((r - δ) * T) = Real.exp (r * T) * Real.exp (-(δ * T)) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hcarry : S / Real.exp (-(r * T)) + 0 - continuousYieldAmount S r δ T
+      = fxForward S r δ T := by
+    rw [continuousYieldAmount, fxForward, hexp, Real.exp_neg (r * T), div_inv_eq_mul]
+    ring
+  rw [storageForward_from_no_arbitrage s q S_T _ S 0 _ F (Real.exp_pos _).ne' h_bond h_carry,
+    hcarry]
 
 end MathFin
