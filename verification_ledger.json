@@ -2848,9 +2848,9 @@
     "mf-forward-start-call": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-25",
-      "elapsed_s": 3.4,
-      "input_hash": "11f8fdfeeeb08a52dcce38dec2acc348488d01a72525af70b8e3921667edf322",
-      "verified_at_commit": "a75e7d7"
+      "elapsed_s": 2.8,
+      "input_hash": "8d8f77af01e7c49e1a23fb4bb099da942008f4ccd942416c8c4696675a879614",
+      "verified_at_commit": "ef8ff0e"
     },
     "mf-frac-diff-binomial-series": {
       "benchmark_file": "portfolio_and_performance.json",
