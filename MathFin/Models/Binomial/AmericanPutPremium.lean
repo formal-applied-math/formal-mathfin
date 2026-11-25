@@ -21,8 +21,9 @@ counterpart of `MertonAmericanCallTree`'s American call = European call.
 
 Three steps. Deep in the money (the spot so low that the whole remaining subtree, including
 every up-move, ends in the money: `S * u ^ n ≤ K`), both prices are closed forms: the American
-price is the intrinsic value `K − S` (every continuation is worth less than exercising now,
-`americanPutPrice_eq_intrinsic_of_deep_in_the_money`) and the European price is the discounted
+price is the intrinsic value `K − S` (every continuation is worth at most exercising now —
+strictly less for `r > 0`; `americanPutPrice_eq_intrinsic_of_deep_in_the_money`) and the
+European price is the discounted
 strike minus the spot `K * e^{-r*n} − S`
 (`binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`).
 With `r > 0` and `n ≥ 1` the two differ by `K * (1 - e^{-r*n}) > 0`
@@ -46,8 +47,8 @@ composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
 
 ## Main results
 
-* `americanPutPrice_eq_intrinsic_of_deep_in_the_money`: for `0 < S` with `S * u ^ n ≤ K`, the
-  American put price with `n` steps remaining is `K − S`.
+* `americanPutPrice_eq_intrinsic_of_deep_in_the_money`: for `0 < S` with `S * u ^ n ≤ K` and
+  `0 ≤ r`, the American put price with `n` steps remaining is `K − S`.
 * `binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`: under the same
   condition the European put price is `K * e^{-r*n} − S`.
 * `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: with `r > 0` and `n ≥ 1` the
@@ -139,11 +140,12 @@ theorem binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money
       _ = K * Real.exp (-(r * (n + 1 : ℕ))) - S := by ring
 
 /-- **The American put deep in the money is the intrinsic value.** When the whole remaining
-subtree ends in the money (`0 < S` and `S * u ^ n ≤ K`) and `r > 0`, the American put price
-with `n` steps remaining is `K − S`: the one-period continuation `K * e^{-r} − S` is worth
-strictly less, so the Bellman `max` takes the intrinsic value at every node. -/
+subtree ends in the money (`0 < S` and `S * u ^ n ≤ K`) and `0 ≤ r`, the American put price
+with `n` steps remaining is `K − S`: the one-period continuation `K * e^{-r} − S` is worth at
+most the intrinsic value (strictly less when `r > 0`), so the Bellman `max` takes the
+intrinsic value at every node. -/
 theorem americanPutPrice_eq_intrinsic_of_deep_in_the_money
-    {u d r K : ℝ} (h : BinomialNoArb u d r) (hr : 0 < r) :
+    {u d r K : ℝ} (h : BinomialNoArb u d r) (hr : 0 ≤ r) :
     ∀ (n : ℕ) (S : ℝ), 0 < S → S * u ^ n ≤ K →
       americanPrice u d r (fun S' ↦ max (K - S') 0) n S = K - S := by
   intro n
@@ -171,9 +173,9 @@ theorem americanPutPrice_eq_intrinsic_of_deep_in_the_money
       ih (S * d) (mul_pos hS h.d_pos) hdp]
     have hmart := crrUpProb_mul_up_add u d r h
     have hKpos : 0 < K := lt_of_lt_of_le (mul_pos hS (pow_pos h.u_pos _)) hSK
-    have hexp : Real.exp (-r) < 1 := by
+    have hexp : Real.exp (-r) ≤ 1 := by
       rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
-      exact Real.exp_lt_exp.mpr (by linarith)
+      exact Real.exp_le_exp.mpr (by linarith)
     have hu1 : (1 : ℝ) ≤ u ^ (n + 1) := by
       have h1 : (1 : ℝ) ≤ Real.exp r := by
         rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
@@ -205,7 +207,7 @@ theorem binomialPrice_lt_americanPrice_put_of_deep_in_the_money
     (S : ℝ) (hS : 0 < S) (hSK : S * u ^ n ≤ K) :
     binomialPrice u d r (fun S' ↦ max (K - S') 0) n S
       < americanPrice u d r (fun S' ↦ max (K - S') 0) n S := by
-  have hA := americanPutPrice_eq_intrinsic_of_deep_in_the_money h hr n S hS hSK
+  have hA := americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) n S hS hSK
   have hE := binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money h n S hS hSK
   have hKpos : 0 < K := lt_of_lt_of_le (mul_pos hS (pow_pos h.u_pos _)) hSK
   have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn

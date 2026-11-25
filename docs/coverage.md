@@ -43,7 +43,7 @@ before, 867 after; 18 library wrappers and 22 reduced cores unchanged).
   it rests on (`americanPrice_premium_supermartingale`: the premium dominates its one-period
   discounted continuation, any payoff; `americanPrice_premium_mul_weight_le`: the root premium
   bounds every path-weighted premium below it); and the deep-in-the-money closed forms
-  (`americanPutPrice_eq_intrinsic_of_deep_in_the_money`: `K − S`, with `r > 0` in the
+  (`americanPutPrice_eq_intrinsic_of_deep_in_the_money`: `K − S`, with `r ≥ 0` in the
   hypothesis;
   `binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`: `K e^{−rn} − S`;
   `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: the premium `K (1 − e^{−rn}) > 0`

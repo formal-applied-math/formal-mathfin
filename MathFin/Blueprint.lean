@@ -1077,8 +1077,8 @@ attribute [blueprint "thm:american-put-premium"
   under the risk-neutral coin flips (a pricing measure), the price of the European put with
   horizon $N$ is strictly below the market's American price of the put, both being the tree
   prices, and the premium at the root bounds every path-weighted premium below it. Deep in the
-  money with $r > 0$ the closed forms hold: the American price $K - S$, the European price
-  $K e^{-rN} - S$, the premium $K (1 - e^{-rN}) > 0$. -/)]
+  money the closed forms hold: the American price $K - S$ (for $r \ge 0$), the European price
+  $K e^{-rN} - S$, the premium $K (1 - e^{-rN}) > 0$ (for $r > 0$ and $N \ge 1$). -/)]
   MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
 
 -- ===== valuation/volatility: Volatility =====

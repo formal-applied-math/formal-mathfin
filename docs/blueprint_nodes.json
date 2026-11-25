@@ -2344,11 +2344,11 @@
    "def:contract-value"],
   "title": "American put early-exercise premium",
   "text":
-  "In the binomial tree under no-arbitrage, if at some node — every node is\n  reached with positive probability, the risk-neutral up-probability lying in $(0, 1)$ —\n  immediate exercise of the put is worth strictly more than the one-period discounted\n  continuation of the American price, then the American put is worth strictly more than the\n  European put of the same strike and expiry at the root: in the binomial market at unit step\n  under the risk-neutral coin flips (a pricing measure), the price of the European put with\n  horizon $N$ is strictly below the market's American price of the put, both being the tree\n  prices, and the premium at the root bounds every path-weighted premium below it. Deep in the\n  money with $r > 0$ the closed forms hold: the American price $K - S$, the European price\n  $K e^{-rN} - S$, the premium $K (1 - e^{-rN}) > 0$.",
+  "In the binomial tree under no-arbitrage, if at some node — every node is\n  reached with positive probability, the risk-neutral up-probability lying in $(0, 1)$ —\n  immediate exercise of the put is worth strictly more than the one-period discounted\n  continuation of the American price, then the American put is worth strictly more than the\n  European put of the same strike and expiry at the root: in the binomial market at unit step\n  under the risk-neutral coin flips (a pricing measure), the price of the European put with\n  horizon $N$ is strictly below the market's American price of the put, both being the tree\n  prices, and the premium at the root bounds every path-weighted premium below it. Deep in the\n  money the closed forms hold: the American price $K - S$ (for $r \\ge 0$), the European price\n  $K e^{-rN} - S$, the premium $K (1 - e^{-rN}) > 0$ (for $r > 0$ and $N \\ge 1$).",
   "name":
   "MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation",
   "module": "MathFin.Models.Binomial.AmericanPutPremium",
-  "line": 440,
+  "line": 442,
   "leanOk": true,
   "latexEnv": "theorem",
   "label": "thm:american-put-premium",
