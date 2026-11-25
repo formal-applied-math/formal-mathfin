@@ -29,8 +29,8 @@ identity and what it lets one solve for.
   common correlation by exactly `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` (`bossuProxy_eq_add_gap`), the
   idiosyncratic share, so it sits between the correlation and one (`bossuProxy_between`). The
   variance-denominated variant of the proxy that the source prints for the realised correlation
-  is a lower bound for it at nonnegative weights summing to one, by Jensen's inequality
-(`jensenProxy_le_bossuProxy`).
+  is a lower bound for it at nonnegative weights summing to one, nonnegative volatilities and a
+  nonnegative observed variance, by Jensen's inequality (`jensenProxy_le_bossuProxy`).
 * A **correlation swap** pays the pairwise correlations averaged over the pairwise weight
   products `wᵢwⱼ` (an average where the normalisation is positive, as it is at nonnegative
   index weights). Under equicorrelation that ratio, read off the dispersion identity as the
@@ -209,9 +209,10 @@ theorem bossuProxy_between (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ 
   rw [hrw, div_le_one hSpos]
   exact key
 
-/-- **The variance-denominated proxy is a lower bound**: at nonnegative weights summing to one,
-the observed variance divided by the weighted variance sum `∑ wᵢσᵢ²` understates the Bossu
-proxy, which divides by the squared weighted-volatility sum instead. The source prints this
+/-- **The variance-denominated proxy is a lower bound**: at nonnegative weights summing to
+one, nonnegative volatilities and a nonnegative observed variance, the observed variance
+divided by the weighted variance sum `∑ wᵢσᵢ²` understates the Bossu proxy, which divides by
+the squared weighted-volatility sum instead. The source prints this
 variant for the realised correlation and notes the bound is Jensen's. When every `wᵢσᵢ`
 vanishes both denominators are zero and both sides are the junk `0`; no correlation is at
 issue there. -/

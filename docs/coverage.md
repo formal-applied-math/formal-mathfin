@@ -40,13 +40,16 @@ One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 906 → 
   sum differs from the weighted variance sum (`impliedCorrelation_unique`), and the boundary
   where the two agree: every common correlation reproduces the same variance and the observation
   identifies none (`indexVar_const_of_sq_sum_eq`). The Bossu proxy `V/(∑ wᵢσᵢ)²` and its exact
-  gap `(1 − ρ)·∑ wᵢ²σᵢ²/(∑ wᵢσᵢ)²` over the common correlation (`bossuProxy_eq_add_gap`), the
-  proxy sitting between the correlation and one at nonnegative weights and volatilities
-  (`bossuProxy_between`), and the Jensen lower bound for the variance-denominated variant
-  `V/∑ wᵢσᵢ²` at nonnegative weights summing to one (`jensenProxy_le_bossuProxy`). The dispersion P&L
+  gap `(1 − ρ)·∑ wᵢ²σᵢ²/(∑ wᵢσᵢ)²` over the common correlation at a nonzero squared
+  weighted-volatility sum (`bossuProxy_eq_add_gap`), the proxy sitting between the correlation
+  and one at nonnegative weights and volatilities with `ρ ≤ 1` (`bossuProxy_between`), and the
+  Jensen lower bound for the variance-denominated variant `V/∑ wᵢσᵢ²` at nonnegative weights
+  summing to one, nonnegative volatilities and a nonnegative observed variance
+  (`jensenProxy_le_bossuProxy`). The dispersion P&L
   identity `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`), the flat-weight index variance
   `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²` (`indexVar_equicorrelation_flat_weights`), and the
-  correlation swap's floating leg realising the common correlation
+  correlation swap's floating leg realising the common correlation at index weights whose
+  off-diagonal weight mass `(∑ wᵢ)² − ∑ wᵢ²` is nonzero
   (`realisedCorrelation_equicorrelation`). Cited: Jacquier & Slaoui, arXiv:1004.0125 (2010),
   §3.1–§3.2 (the implied correlation, its Bossu proxy, the correlation swap), §5.1–§5.4 and
   Appendix D (the dispersion P&L and the weighting schemes). Disclosed out of scope: the static,
