@@ -28,7 +28,7 @@ stands, with no modification:
   development).
 
 The pathwise limit process `driftContinuousMod` of the `L²` drift operator is this path for the
-rate `(s, ω) ↦ ⇑g (s, ω)`: `driftContinuousMod_eq_setIntegral` gives, for each `t ≤ T`, almost
+rate `(s, ω) ↦ ⇑g (s, ω)`: `driftContinuousMod_ae_eq_driftPath` gives, for each `t ≤ T`, almost
 surely `driftContinuousMod T hBmeas g t ω = driftPath (fun s ω ↦ ⇑g (s, ω)) t ω`.
 
 ## Main results

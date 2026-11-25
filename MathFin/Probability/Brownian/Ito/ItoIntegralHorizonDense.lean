@@ -150,6 +150,19 @@ noncomputable def trimMeasure (T : ℝ≥0)
     (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
 
 omit [IsProbabilityMeasure μ] in
+/-- **Product-conull predictable sets are trim-conull.** A set measurable for the predictable
+σ-algebra that holds `timeMeasureHorizon T ⊗ μ`-almost everywhere holds `trimMeasure T`-almost
+everywhere: the trim agrees with the product on predictable sets (`trim_measurableSet_eq`). -/
+lemma ae_trimMeasure_of_ae_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {C : Set (ℝ≥0 × Ω)}
+    (hC : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] C)
+    (h : ∀ᵐ z ∂((timeMeasureHorizon T).prod μ), z ∈ C) :
+    ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), z ∈ C := by
+  rw [ae_iff, trimMeasure,
+    trim_measurableSet_eq (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+      hC.compl]
+  exact h
+
+omit [IsProbabilityMeasure μ] in
 /-- **The time origin is trim-null.** For any s-finite time measure `ν` that charges no point at
 the origin, the predictable trim of `ν ⊗ μ` gives no mass to a bottom rectangle `{0} × F` with `F`
 in `𝓕 ⊥`: the trim agrees with the product on predictable sets, and the product of the rectangle is
