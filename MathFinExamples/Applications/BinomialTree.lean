@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: a binomial tree you can trust
@@ -73,7 +74,7 @@ open scoped Topology NNReal
 
 /-- A one-period binomial tree for a call: the spot, the strike, the up and down factors, and the
 continuously compounded rate per step, with what the tree leaves out. -/
-structure TreeSheet where
+structure TreeSheet extends Provenance String where
   spot : ℝ
   strike : ℝ
   /-- The factor the underlying moves by in the up state. -/
@@ -83,10 +84,6 @@ structure TreeSheet where
   /-- The continuously compounded rate per step. -/
   rate : ℝ
   spot_pos : 0 < spot
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the tree does not model. -/
-  unmodelled : List String
 
 namespace TreeSheet
 

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: from a term sheet to a checked price
@@ -67,7 +68,7 @@ structure Clause where
 
 /-- The terms of a capped call as a term sheet states them, with the clauses they come from and
 the features of the instrument the formal contract leaves out. -/
-structure CappedCallSheet where
+structure CappedCallSheet extends Provenance Clause where
   /-- The strike `K₁`. -/
   strike : ℝ
   /-- The cap level `K₂`: the payoff stops growing once the index passes it. -/
@@ -77,10 +78,6 @@ structure CappedCallSheet where
   strike_pos : 0 < strike
   strike_le_cap : strike ≤ cap
   maturity_pos : 0 < maturity
-  /-- The clauses the terms above are read from. -/
-  sources : List Clause
-  /-- Features of the instrument that the contract below does not model. -/
-  unmodelled : List String
 
 /-- An illustrative sheet: strike `100`, cap `120`, one year. -/
 noncomputable def sample : CappedCallSheet where

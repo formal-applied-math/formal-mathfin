@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: a risk report for a Gaussian portfolio
@@ -76,7 +77,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbability
 /-- A book of two positions, by the mean and the volatility of each position's loss over the
 horizon and the correlation of the two losses, with where the numbers come from and what the
 report leaves out. -/
-structure Book where
+structure Book extends Provenance String where
   /-- The mean loss of each position. -/
   mean : Fin 2 → ℝ
   /-- The volatility of each position's loss. -/
@@ -85,10 +86,6 @@ structure Book where
   corr : ℝ
   vol_pos : ∀ i, 0 < vol i
   corr_mem : corr ∈ Ioo (-1) 1
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the report does not model. -/
-  unmodelled : List String
 
 namespace Book
 

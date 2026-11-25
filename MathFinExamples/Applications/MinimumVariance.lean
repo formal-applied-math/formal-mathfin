@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: a minimum-variance portfolio
@@ -63,7 +64,7 @@ open MeasureTheory ProbabilityTheory
 
 /-- Two assets, by their annual volatilities and their correlation, with where the numbers come
 from and what the allocation leaves out. -/
-structure AssetPair where
+structure AssetPair extends Provenance String where
   /-- The volatility of asset 1. -/
   vol₁ : ℝ
   /-- The volatility of asset 2. -/
@@ -76,10 +77,6 @@ structure AssetPair where
   vol₂_pos : 0 < vol₂
   /-- The returns are not perfectly correlated. -/
   corr_mem : corr ∈ Set.Ioo (-1) 1
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the allocation does not model. -/
-  unmodelled : List String
 
 /-- Illustrative assets: volatilities `20%` and `30%`, correlation `0.25`. -/
 noncomputable def sample : AssetPair where
