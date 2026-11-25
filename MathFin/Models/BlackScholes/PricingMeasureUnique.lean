@@ -283,22 +283,21 @@ lemma itoIntegralCLM_processToLpPredictable_const_ae (θ : ℝ) (H : ℝ≥0) :
     (θ := fun _ _ ↦ θ) hcont (C := |θ|) (fun _ _ ↦ le_rfl) H
   have hmem : MemLp (fun ω ↦ θ * (W H ω - W 0 ω)) 2 μ :=
     ((ItoIntegralBrownian.memLp_eval hW H).sub (ItoIntegralBrownian.memLp_eval hW 0)).const_mul θ
-  have heq (n : ℕ) : (ItoIntegralRiemannBridge.memLp_riemannσ hW hWmeas hadap
+  have heq (n : ℕ) (hn : n ≠ 0) : (ItoIntegralRiemannBridge.memLp_riemannσ hW hWmeas hadap
       (θ := fun _ _ ↦ θ) (fun _ _ ↦ le_rfl) H n).toLp
         (ItoIntegralRiemannBridge.riemannσ (B := W) (fun _ _ ↦ θ) H n) = hmem.toLp _ := by
     refine (MemLp.toLp_eq_toLp_iff _ _).mpr (Filter.Eventually.of_forall fun ω ↦ ?_)
     simp only [ItoIntegralRiemannBridge.riemannσ]
     rw [← Finset.mul_sum]
-    rcases eq_or_ne n 0 with rfl | hn
-    · simp [unifPart]
-    · rw [Finset.sum_range_sub (fun k ↦ W (unifPart H n k) ω), unifPart_self H hn, unifPart_zero]
+    rw [Finset.sum_range_sub (fun k ↦ W (unifPart H n k) ω), unifPart_self H hn, unifPart_zero]
   have hP : processToLp (μ := μ) H hWmeas hadap hcont (fun _ _ ↦ le_rfl)
       = processToLpPredictable (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
         (fun _ _ ↦ le_rfl) :=
     Lp.ext ((processToLp_coeFn (μ := μ) H hWmeas hadap hcont (fun _ _ ↦ le_rfl)).trans
       (processToLpPredictable_coeFn (μ := μ) H hWmeas (isStronglyPredictable_const hWmeas θ)
         (fun _ _ ↦ le_rfl)).symm)
-  rw [← hP, tendsto_nhds_unique hlim (tendsto_const_nhds.congr fun n ↦ (heq n).symm)]
+  rw [← hP, tendsto_nhds_unique hlim (tendsto_const_nhds.congr'
+    (Filter.eventually_atTop.2 ⟨1, fun n hn ↦ (heq n (by omega)).symm⟩))]
   exact hmem.coeFn_toLp
 
 include hW in
@@ -320,7 +319,7 @@ density `exp(−θW_H − ½θ²H)`, the measure of `Btheta_isBrownianOn`. -/
 lemma constGirsanovMeasure_eq_withDensity_wald (θ : ℝ) (H : ℝ≥0) :
     constGirsanovMeasure hW hWmeas θ H
       = μ.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * W H ω - θ ^ 2 * (H : ℝ) / 2)) :=
-  withDensity_congr_ae ((ae_ZTconst_eq_wald hW hWmeas θ H).mono fun _ h ↦ by rw [h])
+  withDensity_congr_ae ((ae_ZTconst_eq_wald hW hWmeas θ H).mono fun _ h ↦ congrArg ENNReal.ofReal h)
 
 include hW in
 /-- **The Doléans densities of `θ` and `−θ` multiply to a constant.** For the constant integrand
