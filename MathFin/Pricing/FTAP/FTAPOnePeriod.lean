@@ -83,7 +83,8 @@ omit [IsProbabilityMeasure P] in
 /-- **The scalar no-arbitrage condition is the vector one at `F = ℝ`.** On `ℝ` the inner
 product `⟪θ, y⟫` is the product `θ · y`, so a scalar position `θ` with gain `θ · Y` is the
 vector portfolio `θ ∈ ℝ`. With `IsEMM` defined as `OnePeriodVector.IsCentringMeasure` at
-`F = ℝ`, this identifies `ftap_one_period` with `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`. -/
+`F = ℝ`, this identifies `ftap_one_period` with `OnePeriodVector.ftap_one_period_vector` at
+`F = ℝ`. -/
 theorem noArbitrage_iff_vector : NoArbitrage P Y ↔ OnePeriodVector.NoArbitrage P Y := by
   simp only [NoArbitrage, OnePeriodVector.NoArbitrage, Real.inner_apply]
 
