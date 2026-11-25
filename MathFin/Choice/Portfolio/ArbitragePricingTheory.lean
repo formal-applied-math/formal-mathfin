@@ -184,7 +184,7 @@ theorem exactFactorNoArbitrage_of_pricingMeasure
   have hD : ∀ τ ω, M.deflator τ ω = f 0 / f τ := fun τ ω => Market.deflator_of_numeraire hN τ ω
   have hfpos : ∀ τ, 0 < f τ := fun τ => by
     simpa [hN τ] using M.numeraire_pos τ (Classical.arbitrary Ω)
-  -- the deflated payoff `D T * R i` is integrable for every asset
+  -- each deflated asset at `T` is integrable, hence so is the product with the deflator
   have hint : ∀ i ∈ s, Integrable (fun ω => M.deflator T ω * M.asset i T ω) Q := by
     intro i _
     have hd := (hQ.martingale i).integrable T
@@ -296,7 +296,8 @@ theorem lam0_eq_of_zeroLoadingAsset {ι κ : Type*}
   exact h.symm
 
 /-- The one-factor case prices exactly as the CAPM equilibrium: if the single factor's loading
-is the CAPM beta (`MathFin.beta` of the market portfolio's marginal variance) and the market
+is the CAPM beta (`MathFin.beta` of the asset's marginal variance in the market portfolio over
+the market variance `portfolioVarN s w_M Sg`) and the market
 portfolio satisfies the tangency first-order condition, the factor premium of the arbitrage
 pricing theory is the market's expected excess return and the intercept is zero, so the
 decomposition takes the security market line's form `μ i = lam * β i`. The hypothesis `hNA`
