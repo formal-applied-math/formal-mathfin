@@ -142,6 +142,9 @@ The pull request run summary lists the declarations a change adds, removes and r
 statements it changes. A golf or refactor change should change no statement. Use the pull request
 template (`.github/PULL_REQUEST_TEMPLATE.md`).
 
+A change to a pin file (`lean-toolchain`, `lakefile.lean`, `lake-manifest.json`) follows
+[`docs/pin-bumps.md`](docs/pin-bumps.md).
+
 ## 8. Style
 
 - One theorem per file when it is non-trivial; helper lemmas live in the same file as `private`.

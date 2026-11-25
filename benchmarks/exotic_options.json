@@ -581,6 +581,142 @@
           }
         ]
       }
+    },
+    {
+      "id": "mf-forward-start-call",
+      "name": "Forward-Start Call Price (Rubinstein)",
+      "domain": "mathematical_finance",
+      "description": "Rubinstein's forward-start call price, derived: in the Black-Scholes market of a pre-Brownian motion, the call whose strike is set at a future reset date t1 as the multiple alpha of the then-observed price, paying max(S_T - alpha * S_t1, 0) at the maturity T > t1, has price S0 * bsV(alpha, r, sigma, 1, T - t1) under the Girsanov pricing measure of the market price of risk, whatever the physical drift. The derivation factors the payoff as the price at t1 against the ratio S_T/S_t1, a function of the Brownian increment B_T - B_t1 which is independent of the information at t1, so the discounted expectation splits; the frozen leg has the martingale mean e^{-r t1} E[S_t1] = S0 and the ratio leg is the Black-Scholes call price on a unit spot. The market's asset pays no dividends, so the general formula's dividend scaling S0 * e^{-qT} is absent (the q = 0 case); a dividend yield, cliquets and employee stock options are out of scope.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ForwardStart\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\n/-- **The forward-start call in the Black-Scholes market.** Re-exports\n`BlackScholes.price_forwardStartCall_constGirsanovMeasure`. -/\ntheorem forward_start_call_price {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {W : ℝ≥0 → Ω → ℝ} (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) {S_0 m r σ α : ℝ} {t₁ T H : ℝ≥0} (hTH : T ≤ H)\n    (hS₀ : 0 < S_0) (hα : 0 < α) (hσ : 0 < σ) (ht₁ : 0 < (t₁ : ℝ))\n    (hτ : (t₁ : ℝ) < (T : ℝ)) :\n    (BlackScholes.market μ hWmeas S_0 m r σ).price\n        (BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (forwardStartCall α t₁ T)\n      = S_0 * bsV α r σ 1 ((T : ℝ) - (t₁ : ℝ)) :=\n  BlackScholes.price_forwardStartCall_constGirsanovMeasure hW hWmeas hTH hS₀ hα hσ ht₁ hτ\n"
+      },
+      "metadata": {
+        "chapter": 26,
+        "reference": "Rubinstein, Pay now, choose later, Risk 4(2) (1991); Hull, Options, Futures, and Other Derivatives, ch. 26 sec. 5 (11th ed.)",
+        "citations": [
+          {
+            "key": "Rubinstein1991PayNow"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 26 sec. 5"
+          },
+          {
+            "key": "QuantLibForwardEngine"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation of the closed form S0 * bsV(alpha, r, sigma, 1, T - t1) for the reified forwardStartCall contract in the library's Black-Scholes market, under the Girsanov pricing measure, with hypotheses 0 < S0, 0 < alpha, 0 < sigma, 0 < t1 < T and a Girsanov horizon covering the maturity. Rubinstein's general formula carries a dividend yield q through the whole-formula factor e^{-qT} and the ratio leg's rate r - q, this market's single asset pays no dividends, so the delivered statement is the q = 0 case and the dividend extension is not formalized. Cliquets (series of forward starts) and employee stock options are out of scope."
+      }
+    },
+    {
+      "id": "mf-bgk-discrete-barrier-shift",
+      "name": "Broadie–Glasserman–Kou Barrier Shift for Discrete Monitoring",
+      "domain": "mathematical_finance",
+      "description": "Reduced core: the library's transcribed full-life down-and-out call closed form ptDownOutCall (Reiner–Rubinstein, X ≥ H branch) at cost of carry r equals, for positive spot, strike, barrier and volatility, the image form (Black–Scholes call price minus (H/S)^(2r/σ²−1) times the Black–Scholes price at H²/S), the reciprocal-ratio form of the display of Howison and Steinberg for a strike above the barrier; the same identity with a dividend yield q, carry r − q and the printed ratio (S/H)^(1−2(r−q)/σ²) also holds. The BGK expression evaluates ptDownOutCall at the barrier H·exp(−βσ√(T/m)), the shift for m equally spaced monitoring dates, for an arbitrary constant β. Proved: ptDownOutCall is homogeneous of degree one under (S, K, H) ↦ c(S, K, H) (ptDownOutCall_scale), the shifted-barrier expression tends to ptDownOutCall at the unshifted barrier as m grows (for nonzero spot and barrier; a price reading needs σ > 0, T > 0, positive S, K, H, 1 ≤ m, and the shifted barrier at most K and below the spot), and it is unchanged under (r, σ, T) ↦ (cr, σ√c, T/c) at fixed m. The Black–Scholes call price bsV satisfies the same two scaling identities (bsV_scale, bsV_timeScale). The scaling statements are identities of the closed forms at every input (the time-volatility rescaling for c > 0, the spatial homogeneity for every real c) and are price statements only for σ > 0, T > 0, positive S, K, H, and, for ptDownOutCall, barrier at most K and S > H (for the BGK expression 1 ≤ m, and the shifted barrier at most K and below the spot). At H = 0 the closed form is the junk value 0, not the vanilla price, and the BGK knock-in expression is the whole vanilla price bsV, also a junk value. NOT PROVED: that ptDownOutCall is the down-and-out price (the reflection-principle derivation), any rate of convergence in m, the numerical value of the constant β = −ζ(1/2)/√(2π) ≈ 0.5826, and the accuracy of the shift as an approximation to the discretely monitored price (BGK's stated error order, which Howison and Steinberg note is limited as written). A further theorem is only a rearrangement of in–out parity for an arbitrary barrier event and says nothing about monitoring dates.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.DiscreteBarrierCorrection\n\nopen Filter Topology MathFin\n\ntheorem bgk_image_form_example {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K) (hH : 0 < H)\n    (hσ : 0 < σ) :\n    ptDownOutCall S K H r r σ T =\n      bsV K r σ S T - (H / S) ^ (2 * r / σ ^ 2 - 1) * bsV K r σ (H ^ 2 / S) T :=\n  ptDownOutCall_eq_image hS hK hH hσ\n\ntheorem bgk_image_form_printed_example {K H r q σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)\n    (hH : 0 < H) (hσ : 0 < σ) :\n    ptDownOutCall S K H (r - q) r σ T =\n      bsVDiv K r q σ S T\n        - (S / H) ^ (1 - 2 * (r - q) / σ ^ 2) * bsVDiv K r q σ (H ^ 2 / S) T :=\n  ptDownOutCall_eq_image_printed hS hK hH hσ\n\ntheorem bgk_zero_barrier_example {β : ℝ} {m : ℕ} {K b r σ S T : ℝ} :\n    ptDownOutCall S K 0 b r σ T = 0 ∧ bgkDownOutCall β m K 0 r σ S T = 0 ∧\n      bgkKnockIn β m K 0 r σ S T = bsV K r σ S T :=\n  ⟨ptDownOutCall_zero_barrier, bgkDownOutCall_zero_barrier, bgkKnockIn_zero_barrier⟩\n\ntheorem bgk_spatial_scaling_example {K H b r σ S T c : ℝ} :\n    ptDownOutCall (c * S) (c * K) (c * H) b r σ T = c * ptDownOutCall S K H b r σ T :=\n  ptDownOutCall_scale\n\ntheorem bgk_many_dates_limit_example {β K H r σ S T : ℝ} (hS : S ≠ 0) (hH : H ≠ 0) :\n    Tendsto (fun m : ℕ ↦ bgkDownOutCall β m K H r σ S T) atTop\n      (𝓝 (ptDownOutCall S K H r r σ T)) :=\n  tendsto_bgkDownOutCall hS hH\n\ntheorem bgk_time_scaling_example {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc : 0 < c) :\n    bgkDownOutCall β m K H (c * r) (σ * Real.sqrt c) S (T / c) =\n      bgkDownOutCall β m K H r σ S T :=\n  bgkDownOutCall_timeScale hc\n\ntheorem bgk_bs_spatial_scaling_example {K r σ S τ c : ℝ} :\n    bsV (c * K) r σ (c * S) τ = c * bsV K r σ S τ :=\n  bsV_scale\n\ntheorem bgk_bs_time_scaling_example {K r σ S τ c : ℝ} (hc : 0 < c) :\n    bsV K (c * r) (σ * Real.sqrt c) S (τ / c) = bsV K r σ S τ :=\n  bsV_timeScale hc\n\ntheorem bgk_knock_in_error_example {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : MeasureTheory.Measure Ω} [MeasureTheory.IsProbabilityMeasure Q]\n    {S K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S K r σ T Z) {A : Set Ω}\n    (hA : MeasurableSet A) {β : ℝ} {m : ℕ} {H ε : ℝ}\n    (hout : |(Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q\n        (fun _ _ ↦ Real.exp (-r * T))\n        (fun _ _ ↦ Aᶜ.indicator (fun ω ↦ max (bsTerminal S r σ T (Z ω) - K) 0))\n        - bgkDownOutCall β m K H r σ S T| ≤ ε) :\n    |(Contracts.Contract.pay 0 (Contracts.Payoff.obs () 0)).value Q\n        (fun _ _ ↦ Real.exp (-r * T))\n        (fun _ _ ↦ A.indicator (fun ω ↦ max (bsTerminal S r σ T (Z ω) - K) 0))\n        - bgkKnockIn β m K H r σ S T| ≤ ε :=\n  abs_knockIn_sub_bgkKnockIn_le h hA hout\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "M. Broadie, P. Glasserman and S. Kou, A continuity correction for discrete barrier options, Mathematical Finance 7(4) (1997) 325–349, as restated in S. Howison and M. Steinberg, A matched asymptotic expansions approach to continuity corrections for discretely sampled options. Part 1: barrier options, working paper (2005), §1, whose §2 prints the image form (an unnumbered display, restated as eq. (7) in §3.7, with a dividend yield q; q = 0 is ptDownOutCall_eq_image, general q is ptDownOutCall_eq_image_printed); closed form transcribed as in E. G. Haug, The Complete Guide to Option Pricing Formulas (2nd ed., 2007), ch. 4, after E. Reiner and M. Rubinstein, Breaking down the barriers, Risk 4(8) (1991) 28–35; J. C. Hull, Options, Futures, and Other Derivatives (10th ed., Pearson, 2018), ch. 26",
+        "citations": [
+          {
+            "key": "BroadieGlassermanKou1997"
+          },
+          {
+            "key": "HowisonSteinberg2005",
+            "locator": "sec. 1, 2, 3.7"
+          },
+          {
+            "key": "Haug2007",
+            "locator": "ch. 4"
+          },
+          {
+            "key": "ReinerRubinstein1991"
+          },
+          {
+            "key": "Hull",
+            "locator": "ch. 26"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. MathFin/Models/BlackScholes/PartialTimeBarrierOption.lean carries the ptDownOutCall facts and MathFin/Models/BlackScholes/DiscreteBarrierCorrection.lean the bgk facts: ptDownOutCall_eq_image and ptDownOutCall_eq_image_printed (ptDownOutCall at carry r, or r − q with a dividend yield q, is the image form; ptMu, ptHSmu1, ptF1, ptF2; bsVDiv from MathFin/Models/BlackScholes/DividendsGreeks.lean), ptDownOutCall_zero_barrier, bgkDownOutCall_zero_barrier and bgkKnockIn_zero_barrier (the junk values at H = 0), tendsto_bgkDownOutCall (continuousAt_ptDownOutCall_barrier and tendsto_bgkDownBarrier; the proofs consume only a nonzero spot and barrier, which keep them off the junk corners, so they hold at every strike, rate, volatility and maturity, including junk values, and read as price statements only for σ > 0, 0 < T, positive S, K, H and 1 ≤ m, with the shifted barrier at most K and below the spot, true for all large m when H < K and S > H), ptDownOutCall_scale (bsd1_scale, bsd2_scale in MathFin/Models/BlackScholes/ScalingInvariance.lean), bgkDownOutCall_timeScale (ptDownOutCall_timeScale, with bsd1_timeScale and bsd2_timeScale from the same file, and the invariance of the shift σ√(T/m)), bsV_scale and bsV_timeScale (the Black–Scholes call price itself, same file), and abs_knockIn_sub_bgkKnockIn_le (knockIn_add_knockOut_eq_bsV). SCOPE: statements about the closed-form expression, with the hypotheses each theorem states, and the definition of the shifted barrier; it reads as the down-and-out price only for σ > 0, 0 < T, 0 < S, K, H, a (shifted) barrier at most K and spot above it (and 1 ≤ m for the BGK expression). The scaling theorems are identities of the closed forms at every input (the time-volatility rescaling for c > 0, the spatial homogeneity for every real c), including the junk corners (division by zero, square root of a negative, logarithm of a nonpositive), because both sides are the same expression of the junk value, up to the factor c for the homogeneity statements; they are not price claims. abs_knockIn_sub_bgkKnockIn_le is a linear rearrangement of in–out parity for an arbitrary event A, not tied to H or the monitoring dates. NOT PROVED: that ptDownOutCall is the discounted expected knock-out payoff (the barrier density), any rate of convergence in m, the value of β, and the accuracy of the BGK shift as an approximation to the discretely monitored price, which enters only as the hypothesis of abs_knockIn_sub_bgkKnockIn_le. No up-and-out closed form is given."
+      }
+    },
+    {
+      "id": "mf-asian-avgstrike-expsum-gaussian-positive-part",
+      "name": "Gaussian Positive Part of a Signed Exponential Sum",
+      "domain": "mathematical_finance",
+      "description": "Reduced core: for a standard normal Z and a signed sum of exponentials g(z) = sum a_k exp(d_k + c_k z) that is positive exactly to the right of a point z*, E[g(Z)+] = sum a_k exp(d_k + c_k^2/2) Phi(c_k - z*). The single-crossing hypothesis is carried explicitly; the companion lemma proves it, given a root z* of g, when a_k(c_k - p) >= 0 for a pivot p, strictly for one k. That g is the conditional mean of an average-strike Asian payoff is not derived here.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Gaussian positive part of an exponential sum.** Re-exports\n`MathFin.integral_max_expSum_hasLaw`. -/\ntheorem asian_avgstrike_expsum_gaussian_positive_part\n    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} {Z : Ω → ℝ}\n    (hZ : HasLaw Z (gaussianReal 0 1) P) {n : ℕ} (a d c : Fin n → ℝ) (zs : ℝ)\n    (hpos : ∀ z, 0 < expSum a d c z ↔ zs < z) :\n    ∫ ω, max (expSum a d c (Z ω)) 0 ∂P\n      = ∑ k, a k * Real.exp (d k + c k ^ 2 / 2) * Phi (c k - zs) :=\n  MathFin.integral_max_expSum_hasLaw hZ a d c zs hpos\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "G. W. P. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management working paper wp0209, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
+        "citations": [
+          {
+            "key": "ThompsonAsianBounds"
+          },
+          {
+            "key": "RogersShi1995"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.integral_max_expSum_hasLaw (MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean), which writes max(g, 0) as the indicator of (z*, infinity) and integrates term by term with integral_exp_mul_gaussianPDFReal_Ioi. SCOPE: the single crossing of g at z* is a hypothesis of the entry (expSum_pos_iff_of_root proves it, given a root z*, from a sign pattern); the identification of g with a conditional mean is not part of this entry."
+      }
+    },
+    {
+      "id": "mf-asian-avgstrike-conditioning-lower-bound",
+      "name": "Conditioning Lower Bound for the Average-Strike Asian Call",
+      "domain": "mathematical_finance",
+      "description": "Reduced core: if g(Z) is the conditional mean of an integrable X given a standard normal Z (stated as the defining integral property over sigma(Z)-sets; X = S_T - A in the application) and g is positive exactly to the right of z*, then the closed form D * sum a_k exp(d_k + c_k^2/2) Phi(c_k - z*) is at most D * E[X+], for any integrable X. Not derived here: the identification of E[S_T - A | Z] with g(Z) in the Brownian model. Not proved: the closeness of the bound to the price. The conditioning idea is after Rogers and Shi (1995), as presented in Thompson's working paper; the discrete form is derived here.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Conditioning lower bound.** Re-exports `MathFin.condBoundCall_le_integral_max`. -/\ntheorem asian_avgstrike_conditioning_lower_bound\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {Z : Ω → ℝ} (hZm : Measurable Z) (hZ : HasLaw Z (gaussianReal 0 1) P)\n    {X : Ω → ℝ} (hX : Integrable X P) {n : ℕ} (a d c : Fin n → ℝ) (zs D : ℝ)\n    (hD : 0 ≤ D) (hpos : ∀ z, 0 < expSum a d c z ↔ zs < z)\n    (hcond : ∀ s, MeasurableSet[MeasurableSpace.comap Z inferInstance] s →\n      ∫ ω in s, expSum a d c (Z ω) ∂P = ∫ ω in s, X ω ∂P) :\n    condBoundCall D a d c zs ≤ D * ∫ ω, max (X ω) 0 ∂P :=\n  MathFin.condBoundCall_le_integral_max hZm hZ hX a d c zs D hD hpos hcond\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "G. W. P. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management working paper wp0209, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
+        "citations": [
+          {
+            "key": "ThompsonAsianBounds"
+          },
+          {
+            "key": "RogersShi1995"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.condBoundCall_le_integral_max (MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean): Jensen for the positive part (integral_posPart_sub_condExp_le) composed with the Gaussian closed form (integral_max_expSum_hasLaw). SCOPE: the conditional-mean property of g(Z) and the single crossing are hypotheses. NOT PROVED: that E[S_T - A | Z] = g(Z) under geometric Brownian motion, and that the bound is close to the price."
+      }
+    },
+    {
+      "id": "mf-asian-avgstrike-one-fixing-market-price",
+      "name": "Average-Strike Conditioning Bound with One Fixing Is the Forward-Start Call",
+      "domain": "mathematical_finance",
+      "description": "Reduced core: with one fixing at t < T, forwards S e^{rt} and S e^{rT}, the closed form of the conditioning bound with discount e^{-rT} equals S times the Black-Scholes market's pricing-measure price of the call struck at 1 with maturity T - t (which is bsV 1 r sigma 1 (T-t)): the forward-start call struck at the fixing. This is an identity between closed forms; that the bound is an expected payoff is not derived here.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **One-fixing case, grounded in the pricing functional.** Re-exports\n`MathFin.condBoundCall_one_fixing_eq_marketPrice`. -/\ntheorem asian_avgstrike_one_fixing_market_price {Ω : Type*} [MeasurableSpace Ω]\n    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    (hW : IsPreBrownianReal W μ) (hWmeas : ∀ s, Measurable (W s)) (S r σ t T : ℝ)\n    {τ H : ℝ≥0} (hS : 0 < S) (hσ : 0 < σ) (htT : t < T) (hτ : (τ : ℝ) = T - t)\n    (hτH : τ ≤ H) :\n    let ts : Fin 2 → ℝ := ![t, T]\n    let u : Fin 2 → ℝ := ![-1, 1]\n    let F : Fin 2 → ℝ := ![S * Real.exp (r * t), S * Real.exp (r * T)]\n    let c := condRate σ ts u\n    let d := condShift F c\n    let zs := σ * Real.sqrt (T - t) / 2 - r * (T - t) / (σ * Real.sqrt (T - t))\n    condBoundCall (Real.exp (-(r * T))) u d c zs\n      = S * (Contracts.BlackScholes.market μ hWmeas 1 r r σ).price\n          (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H)\n          (Contracts.europeanCall 1 τ) :=\n  MathFin.condBoundCall_one_fixing_eq_marketPrice hW hWmeas S r σ t T hS hσ htT hτ hτH\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "G. W. P. Thompson, Fast narrow bounds on the value of Asian options, Judge Institute of Management working paper wp0209, section 3; L. C. G. Rogers and Z. Shi, The value of an Asian option, Journal of Applied Probability 32 (1995) 1077-1088",
+        "citations": [
+          {
+            "key": "ThompsonAsianBounds"
+          },
+          {
+            "key": "RogersShi1995"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core. Re-export of MathFin.condBoundCall_one_fixing_eq_marketPrice (MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean): condBoundCall_one_fixing (the crossing and the Black-Scholes form for N = 1) composed with price_europeanCall_constGirsanovMeasure. SCOPE: an identity between closed forms for N = 1. NOT PROVED: that the closed form is the discounted expected payoff (it needs the conditional-mean identification), and the N > 1 sign pattern of the rates."
+      }
     }
   ]
 }
