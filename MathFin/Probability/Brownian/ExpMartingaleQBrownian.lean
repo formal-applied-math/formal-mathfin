@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Probability.Dependence.IndepPast
 public import MathFin.Probability.Laws.Esscher
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
@@ -40,7 +41,8 @@ function `𝔼_Q[exp(a·Y_t)] = exp(½a²t)`, hence the marginal law, and the co
 and integrated over `A ∈ 𝓕_s` it says that the law of `Y_t − Y_s` under `Q` restricted to `A` has
 the moment-generating function of `Q(A)·N(0,t−s)`, hence is that measure
 (`measure_eq_of_mgf_id_eq`): the increment is independent of `𝓕_s`. Adaptedness and independence
-of the past give independent increments (`hasIndepIncrements_of_indep_past`, process-agnostic).
+of the past give independent increments (`hasIndepIncrements_of_indep_past`, in
+`Dependence/IndepPast.lean`).
 
 The value of the abstraction is coherence: the constant-, simple-, continuous- and
 predictable-`θ` Girsanov drift-corrected processes each need only supply their own
@@ -61,8 +63,6 @@ one theorem.
 * `MathFin.map_eq_gaussianReal_of_expMartingale` — the marginal law `Q.map Y_t = N(0,t)`.
 * `MathFin.increment_map_eq_gaussianReal_of_expMartingale` — the increment law `N(0,t−s)`.
 * `MathFin.indep_increment_of_expMartingale` — `Y_t − Y_s` is `Q`-independent of `𝓕_s`.
-* `MathFin.hasIndepIncrements_of_indep_past` — adapted, with increments independent of the past,
-  gives `HasIndepIncrements` (process-agnostic).
 * `MathFin.hasIndepIncrements_of_expMartingale` — `Y` has independent increments on `[0,T]`.
 * `MathFin.IsExpQMartingale.isGaussianProcess` — `Y` is a Gaussian process on `[0,T]`.
 * `MathFin.isBrownianOn_of_expMartingale` — `IsExpQMartingale Q 𝓕 Y T → IsBrownianOn Q T Y`.
@@ -285,60 +285,6 @@ theorem indep_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {s t 
   simp only [Measure.map_apply hD hB, Measure.restrict_apply (hD hB), Measure.smul_apply,
     smul_eq_mul, ← hlaw] at hB'
   rw [hB', mul_comm]
-
-/-! ### Independent increments from independence of the past -/
-
-/-- **Sequential independence gives joint independence.** If `𝒢` is monotone, `D k` is
-`𝒢 (k+1)`-measurable, and `D k` is independent of `𝒢 k`, then the `D k` are jointly independent:
-on a finite index set the earlier `D i` are all `𝒢 n`-measurable for the largest `n`, so the
-product formula peels off the factor of `D n` at once. -/
-theorem iIndepFun_of_indep_past {β : Type*} [MeasurableSpace β] {μ : Measure Ω}
-    [IsProbabilityMeasure μ] {D : ℕ → Ω → β} {𝒢 : ℕ → MeasurableSpace Ω} (h𝒢 : Monotone 𝒢)
-    (hD : ∀ k, Measurable[𝒢 (k + 1)] (D k))
-    (hind : ∀ k, Indep (MeasurableSpace.comap (D k) inferInstance) (𝒢 k) μ) : iIndepFun D μ := by
-  refine iIndepFun_iff_measure_inter_preimage_eq_mul.2 fun S sets hsets ↦ ?_
-  obtain ⟨N, hN⟩ := S.exists_nat_subset_range
-  induction N generalizing S with
-  | zero =>
-    obtain rfl : S = ∅ := Finset.subset_empty.1 (by simpa using hN)
-    simp
-  | succ n ih =>
-    by_cases hn : n ∈ S
-    · have hS : S.erase n ⊆ Finset.range n := fun i hi ↦ by
-        have h1 := Finset.mem_range.1 (hN (Finset.mem_of_mem_erase hi))
-        have h2 := Finset.ne_of_mem_erase hi
-        rw [Finset.mem_range]
-        omega
-      have hmeas : MeasurableSet[𝒢 n] (⋂ i ∈ S.erase n, D i ⁻¹' sets i) :=
-        Finset.measurableSet_biInter _ fun i hi ↦
-          (hD i).mono (h𝒢 (Finset.mem_range.1 (hS hi))) le_rfl
-            (hsets i (Finset.mem_of_mem_erase hi))
-      rw [← Finset.insert_erase hn, Finset.set_biInter_insert,
-        Finset.prod_insert (Finset.notMem_erase n S),
-        (Indep_iff _ _ _).1 (hind n) _ _ ⟨sets n, hsets n hn, rfl⟩ hmeas,
-        ih (S.erase n) (fun i hi ↦ hsets i (Finset.mem_of_mem_erase hi)) hS]
-    · refine ih S hsets fun i hi ↦ ?_
-      have h1 := Finset.mem_range.1 (hN hi)
-      have h2 : i ≠ n := fun h ↦ hn (h ▸ hi)
-      rw [Finset.mem_range]
-      omega
-
-/-- **Adapted, with increments independent of the past, gives independent increments.** If `X` is
-adapted to a monotone family `𝒢` of σ-algebras and each increment `X t − X s` (`s ≤ t`) is
-independent of `𝒢 s`, then `X` has independent increments in Mathlib's sense
-(`HasIndepIncrements`): along a monotone sequence of times, the earlier increments are measurable
-for the σ-algebra of the last time, from which the last increment is independent
-(`iIndepFun_of_indep_past`). -/
-theorem hasIndepIncrements_of_indep_past {ι E : Type*} [Preorder ι] [Sub E] [MeasurableSpace E]
-    [MeasurableSub₂ E] {X : ι → Ω → E} {P : Measure Ω} [IsProbabilityMeasure P]
-    (𝒢 : ι → MeasurableSpace Ω) (h𝒢 : Monotone 𝒢) (hX : ∀ t, Measurable[𝒢 t] (X t))
-    (hind : ∀ s t, s ≤ t →
-      Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) inferInstance) (𝒢 s) P) :
-    HasIndepIncrements X P :=
-  HasIndepIncrements.of_nat fun τ hτ _ ↦
-    iIndepFun_of_indep_past (𝒢 := fun k ↦ 𝒢 (τ k)) (fun _ _ hij ↦ h𝒢 (hτ hij))
-      (fun k ↦ (hX (τ (k + 1))).sub ((hX (τ k)).mono (h𝒢 (hτ (Nat.le_succ k))) le_rfl))
-      fun k ↦ hind _ _ (hτ (Nat.le_succ k))
 
 /-- **Independent increments under `Q`.** On `[0,T]`, `Y` has independent increments under `Q` in
 Mathlib's sense: for times `t₀ ≤ ⋯ ≤ tₙ` in `[0,T]`, the increments `Y_{t₁} − Y_{t₀}, …,

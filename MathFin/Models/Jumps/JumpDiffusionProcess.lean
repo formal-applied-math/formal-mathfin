@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.Jumps.JumpDiffusionCanonical
+public import MathFin.Probability.Dependence.IndepPast
 public import MathFin.Probability.Jumps.ExpMartingaleIndepIncrements
 public import Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic
 
@@ -49,7 +50,7 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 ## Main results
 
 * `JumpDiffusionProcess.hasIndepIncrements`: a jump-diffusion has independent increments in
-  Mathlib's sense (`HasIndepIncrements`), through `iIndepFun_of_indep_past`.
+  Mathlib's sense (`HasIndepIncrements`), through `hasIndepIncrements_of_indep_past`.
 * `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
   `cgf_id_jumpDiffusionIncrementLaw`: for `θ` with `∫ e^{θx} dν < ∞`, its moment-generating
   function is `e^{κ(θ)τ}`.
@@ -301,33 +302,6 @@ structure JumpDiffusionProcess {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Meas
   law : ∀ s t, s ≤ t →
     HasLaw (fun ω ↦ X t ω - X s ω) (jumpDiffusionIncrementLaw b σ Λ ν (t - s)) P
 
-/-- **Independence from the past gives joint independence.** If `Yᵢ` is `𝒢ᵢ₊₁`-measurable and
-independent of `𝒢ᵢ`, along an increasing family `𝒢`, then `(Yᵢ)` is an independent family: peel off
-the largest index of a finite subfamily, which is independent of the intersection of the others
-(all `𝒢ₐ`-measurable). -/
-lemma iIndepFun_of_indep_past {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-    [IsProbabilityMeasure P] {𝒢 : ℕ → MeasurableSpace Ω} {Y : ℕ → Ω → ℝ} (h𝒢 : Monotone 𝒢)
-    (hY : ∀ i, Measurable[𝒢 (i + 1)] (Y i))
-    (hind : ∀ i, Indep (MeasurableSpace.comap (Y i) inferInstance) (𝒢 i) P) :
-    iIndepFun Y P := by
-  rw [iIndepFun_iff_iIndep, iIndep_iff]
-  intro S
-  induction S using Finset.induction_on_max with
-  | empty =>
-    intro f _
-    simp
-  | insert a S hlt ih =>
-    intro f hf
-    have ha : a ∉ S := fun h ↦ lt_irrefl _ (hlt a h)
-    have hS : MeasurableSet[𝒢 a] (⋂ i ∈ S, f i) := by
-      letI : MeasurableSpace Ω := 𝒢 a
-      exact Finset.measurableSet_biInter S fun i hi ↦
-        h𝒢 (Nat.succ_le_of_lt (hlt i hi)) _
-          ((hY i).comap_le _ (hf i (Finset.mem_insert_of_mem hi)))
-    rw [Finset.set_biInter_insert, Finset.prod_insert ha,
-      ← ih (f := f) fun i hi ↦ hf i (Finset.mem_insert_of_mem hi)]
-    exact (Indep_iff _ _ P).1 (hind a) _ _ (hf a (Finset.mem_insert_self _ _)) hS
-
 namespace JumpDiffusionProcess
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
@@ -352,13 +326,10 @@ lemma integral_exp_increment (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsP
 each increment is independent of the past `𝓕_s` (`indep`), and the earlier increments of a
 partition are `𝓕_s`-measurable (`adapted`). -/
 theorem hasIndepIncrements (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν] :
-    HasIndepIncrements X P := by
+    HasIndepIncrements X P :=
   haveI := h.isProbabilityMeasure
-  refine HasIndepIncrements.of_nat fun τ hτ _ ↦ iIndepFun_of_indep_past
-    (𝒢 := fun i ↦ (𝓕 (τ i) : MeasurableSpace Ω)) (fun i j hij ↦ 𝓕.mono (hτ hij)) (fun i ↦ ?_)
-    fun i ↦ h.indep _ _ (hτ (Nat.le_succ i))
-  exact (h.adapted _).measurable.sub
-    (((h.adapted (τ i)).mono (𝓕.mono (hτ (Nat.le_succ i)))).measurable)
+  hasIndepIncrements_of_indep_past (fun t ↦ 𝓕 t) (fun _ _ hst ↦ 𝓕.mono hst)
+    (fun t ↦ (h.adapted t).measurable) h.indep
 
 /-- **The law of `X_t`** is the log-return law over `t`: `X_t = X_t − X_0` almost surely. -/
 lemma hasLaw (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) (t : ℝ≥0) :
