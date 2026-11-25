@@ -134,4 +134,134 @@ theorem sum_deriv_keyRate_eq_deriv_bondPriceDisc [DecidableEq ι] (s : Finset ι
   sum_keyRate_partials_eq_deriv_bondPriceDisc s t c hy fun _ hj ↦
     (hasDerivAt_bondPriceKeyRate_update s t c _ hj hy).differentiableAt.hasDerivAt
 
+/-! ### Key-rate durations on a tenor grid
+
+The nodes above are one per cash flow. A desk quotes the curve at a few tenors instead, and the
+rate at every other tenor is interpolated from them. A **tenor grid** is the interpolation, the
+hat function `hat j` of each node `j`, the weight of node `j`'s rate in the rate at tenor `u`.
+The weights sum to `1`, so a parallel shift of the node rates is the same shift of the whole curve,
+and the bump of one node is the bump of its hat function. -/
+
+section TenorGrid
+
+variable {κ : Type*} [Fintype κ] [DecidableEq κ]
+
+/-- A **tenor grid**: the hat function `hat j u` of each node `j`, the weight of node `j`'s rate in
+the interpolated rate at tenor `u`, with the weights summing to `1` at every tenor. Piecewise-linear
+interpolation with flat ends is one such grid, the hats of linear interpolation between adjacent
+nodes. -/
+structure TenorGrid (κ : Type*) [Fintype κ] where
+  /-- The hat function of node `j`. -/
+  hat : κ → ℝ → ℝ
+  /-- The hat functions sum to `1`: the bumps of all nodes together are the constant `1`. -/
+  sum_hat : ∀ u, ∑ j, hat j u = 1
+
+namespace TenorGrid
+
+variable (G : TenorGrid κ)
+
+/-- The **interpolated zero rate** at tenor `u` from the node rates `k`: `∑ⱼ kⱼ · hat j u`. -/
+noncomputable def rate (k : κ → ℝ) (u : ℝ) : ℝ := ∑ j, k j * G.hat j u
+
+/-- The **price of the cash flows `c i` at the integer tenors `t i`** on the grid curve with node
+rates `k`: the key-rate price (`bondPriceKeyRate`) at the interpolated rates. -/
+noncomputable def price (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (k : κ → ℝ) : ℝ :=
+  bondPriceKeyRate s t c fun i ↦ G.rate k (t i)
+
+/-- A parallel shift of the node rates is the same shift of the interpolated curve. -/
+theorem rate_add_const (k : κ → ℝ) (ε u : ℝ) : G.rate (fun j ↦ k j + ε) u = G.rate k u + ε := by
+  simp only [rate, add_mul, Finset.sum_add_distrib]
+  rw [← Finset.mul_sum, G.sum_hat, mul_one]
+
+/-- Moving the rate of node `j` alone to `x` moves the interpolated rate at tenor `u` by
+`(x - kⱼ) · hat j u`. -/
+theorem rate_update (k : κ → ℝ) (j : κ) (x u : ℝ) :
+    G.rate (Function.update k j x) u = G.rate k u + (x - k j) * G.hat j u := by
+  have h1 := Finset.add_sum_erase Finset.univ (fun i ↦ Function.update k j x i * G.hat i u)
+    (Finset.mem_univ j)
+  have h2 := Finset.add_sum_erase Finset.univ (fun i ↦ k i * G.hat i u) (Finset.mem_univ j)
+  have e : ∑ i ∈ Finset.univ.erase j, Function.update k j x i * G.hat i u
+      = ∑ i ∈ Finset.univ.erase j, k i * G.hat i u :=
+    Finset.sum_congr rfl fun i hi ↦ by rw [Function.update_of_ne (Finset.ne_of_mem_erase hi)]
+  simp only [rate]
+  rw [← h1, ← h2, e, Function.update_self]
+  ring
+
+variable {G}
+
+/-- **Key-rate partial derivative on a grid.** Bumping the rate of node `j` bumps the curve by its
+hat function, so, when every interpolated rate has `1 + r ≠ 0`, `∂P/∂kⱼ = -∑ᵢ tᵢ cᵢ hat j tᵢ /
+(1 + rᵢ)^{tᵢ+1}`, the per-cash-flow derivatives weighted by the hat. -/
+theorem hasDerivAt_price_update (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (k : κ → ℝ) (j : κ)
+    (hk : ∀ i ∈ s, 1 + G.rate k (t i) ≠ 0) :
+    HasDerivAt (fun x ↦ G.price s t c (Function.update k j x))
+      (∑ i ∈ s, -((t i : ℝ) * c i / (1 + G.rate k (t i)) ^ (t i + 1)) * G.hat j (t i)) (k j) := by
+  unfold price bondPriceKeyRate
+  refine HasDerivAt.fun_sum fun i hi ↦ ?_
+  have e : (fun x ↦ c i / (1 + G.rate (Function.update k j x) (t i)) ^ t i)
+      = fun x ↦ c i / (1 + (G.rate k (t i) + (x - k j) * G.hat j (t i))) ^ t i :=
+    funext fun x ↦ by rw [G.rate_update]
+  have hin : HasDerivAt (fun x ↦ G.rate k (t i) + (x - k j) * G.hat j (t i)) (G.hat j (t i))
+      (k j) := by
+    simpa using (((hasDerivAt_id (k j)).sub_const (k j)).mul_const (G.hat j (t i))).const_add
+      (G.rate k (t i))
+  have hc := (hasDerivAt_coupon_term (c i) (t i)
+    (y := G.rate k (t i) + (k j - k j) * G.hat j (t i)) (by simpa using hk i hi)).comp (k j) hin
+  show HasDerivAt (fun x ↦ c i / (1 + G.rate (Function.update k j x) (t i)) ^ t i) _ _
+  rw [e]
+  simpa using hc
+
+/-- **The parallel-shift derivative on a grid.** On the grid curve with node rates `k`, the price
+along `ε ↦ P(k + ε·1)` has derivative `-∑ᵢ tᵢ cᵢ / (1 + rᵢ)^{tᵢ+1}` at `0`, since a parallel shift of
+the nodes shifts every interpolated rate by `ε` (`rate_add_const`). -/
+theorem hasDerivAt_price_parallel (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (k : κ → ℝ)
+    (hk : ∀ i ∈ s, 1 + G.rate k (t i) ≠ 0) :
+    HasDerivAt (fun ε ↦ G.price s t c fun j ↦ k j + ε)
+      (∑ i ∈ s, -((t i : ℝ) * c i / (1 + G.rate k (t i)) ^ (t i + 1))) 0 := by
+  unfold price bondPriceKeyRate
+  refine HasDerivAt.fun_sum fun i hi ↦ ?_
+  have e : (fun ε ↦ c i / (1 + G.rate (fun j ↦ k j + ε) (t i)) ^ t i)
+      = fun ε ↦ c i / (1 + (G.rate k (t i) + ε)) ^ t i :=
+    funext fun ε ↦ by rw [G.rate_add_const]
+  have hc := (hasDerivAt_coupon_term (c i) (t i) (y := G.rate k (t i) + 0)
+    (by simpa using hk i hi)).comp 0 ((hasDerivAt_id (0 : ℝ)).const_add (G.rate k (t i)))
+  show HasDerivAt (fun ε ↦ c i / (1 + G.rate (fun j ↦ k j + ε) (t i)) ^ t i) _ _
+  rw [e]
+  simpa using hc
+
+variable (G)
+
+/-- The **key-rate duration** of node `j`: `KRDⱼ = -(1/P) ∂P/∂kⱼ`, the partial derivative of the
+price along the bump of node `j` (`Function.update`), relative to the price. -/
+noncomputable def keyRateDuration (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (k : κ → ℝ) (j : κ) :
+    ℝ :=
+  -deriv (fun x ↦ G.price s t c (Function.update k j x)) (k j) / G.price s t c k
+
+/-- The **effective duration** of the grid curve: `-(1/P) dP/dε` along the parallel shift
+`k ↦ k + ε·1` of the node rates, at `ε = 0`. -/
+noncomputable def effectiveDuration (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (k : κ → ℝ) : ℝ :=
+  -deriv (fun ε ↦ G.price s t c fun j ↦ k j + ε) 0 / G.price s t c k
+
+/-- **The key-rate durations sum to the effective duration.** On any grid curve with `1 + rᵢ ≠ 0`
+at the cash-flow tenors, the key-rate durations of the nodes sum to the effective duration of the
+parallel shift: the bumps of the nodes sum to the constant `1` (`sum_hat`), so the node partials
+sum to the parallel-shift derivative. -/
+theorem sum_keyRateDuration_eq_effectiveDuration (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ)
+    (k : κ → ℝ) (hk : ∀ i ∈ s, 1 + G.rate k (t i) ≠ 0) :
+    ∑ j, G.keyRateDuration s t c k j = G.effectiveDuration s t c k := by
+  have hsum : ∑ j, deriv (fun x ↦ G.price s t c (Function.update k j x)) (k j)
+      = deriv (fun ε ↦ G.price s t c fun j ↦ k j + ε) 0 := by
+    have h1 (j : κ) : deriv (fun x ↦ G.price s t c (Function.update k j x)) (k j)
+        = ∑ i ∈ s, -((t i : ℝ) * c i / (1 + G.rate k (t i)) ^ (t i + 1)) * G.hat j (t i) :=
+      (hasDerivAt_price_update s t c k j hk).deriv
+    simp only [h1]
+    rw [(hasDerivAt_price_parallel s t c k hk).deriv, Finset.sum_comm]
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
+    rw [← Finset.mul_sum, G.sum_hat, mul_one]
+  simp only [keyRateDuration, effectiveDuration, ← Finset.sum_div, Finset.sum_neg_distrib, hsum]
+
+end TenorGrid
+
+end TenorGrid
+
 end MathFin
