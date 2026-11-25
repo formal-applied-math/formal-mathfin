@@ -827,7 +827,7 @@
       "description": "The squared Sharpe ratio Sh²(w) has a critical point (HasDerivAt = 0) at weight w iff the cross-product condition r₂·(Σw)₁ = r₁·(Σw)₂ holds — the genuine first-order condition derived from HasDerivAt of Sh² (not an algebraic identity). Non-degeneracy: variance ≠ 0, expected excess return ≠ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Choice.Portfolio.SharpeFOCDerivation\n\nopen Real\nopen MathFin\n\ntheorem sharpe_foc_via_calculus_thm\n    (w r₁ r₂ σ₁ σ₂ ρ : ℝ)\n    (hV : MathFin.portfolioVarTwo σ₁ σ₂ ρ w ≠ 0)\n    (hE : MathFin.expectedReturnTwo w r₁ r₂ ≠ 0) :\n    HasDerivAt (fun w' => MathFin.sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔\n      r₂ * MathFin.marginalVarOne w σ₁ σ₂ ρ = r₁ * MathFin.marginalVarTwo w σ₁ σ₂ ρ :=\n  MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC w r₁ r₂ σ₁ σ₂ ρ hV hE\n"
+        "lean": "import MathFin.Choice.Portfolio.SharpeFOCDerivation\n\nopen Real\nopen MathFin\n\ntheorem sharpe_foc_via_calculus_thm\n    (w r₁ r₂ σ₁ σ₂ ρ : ℝ)\n    (hV : MathFin.portfolioVarTwo σ₁ σ₂ ρ w ≠ 0)\n    (hE : MathFin.expectedReturnTwo w r₁ r₂ ≠ 0) :\n    HasDerivAt (fun w' => MathFin.sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔\n      r₂ * MathFin.marginalVariance Finset.univ (MathFin.covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0 =\n        r₁ * MathFin.marginalVariance Finset.univ (MathFin.covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1 :=\n  MathFin.sharpeSqTwo_critical_iff_crossProduct_FOC w r₁ r₂ σ₁ σ₂ ρ hV hE\n"
       },
       "metadata": {
         "chapter": 10,
