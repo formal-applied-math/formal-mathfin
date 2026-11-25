@@ -51,6 +51,8 @@ discounted spot (`pathPV_eq_value_add_gains`). The strategy comes from the tree
 * `Binomial.value_europeanCall`, `value_europeanPut`, `value_digitalCall` — each is the tree
   price of its payoff.
 * `Binomial.value_forward` — under no-arbitrage the forward is worth `S₀ − K e^{−ρN}`.
+* `Binomial.pathPV_eq_value_add_gains_of_obs` — the same for a contract paying a function of the
+  whole path up to `N`.
 * `Binomial.value_cappedCall` — the capped call is worth the difference of two call values.
 * `Binomial.pathPV_eq_value_add_gains` — a European contract's value is the cost of its hedge: on
   every path its discounted payoff is its value plus the gains of a predictable strategy in the
@@ -211,6 +213,31 @@ theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠
   refine ⟨H, hH, fun ω ↦ ?_⟩
   rw [value_pay_eq_binomialPrice hq hqcrr S₀ hTN hg, ← hrep ω]
   simp [Contract.pathPV, Contract.cashflows, hg, scenarioAt, assets, discount, hTN]
+
+omit hTN in
+/-- **A path-dependent contract's binomial value is the cost of its hedge.** Under no-arbitrage,
+with paths drawn under the risk-neutral up-probability and `S₀ ≠ 0`, for a fixed-dated contract
+that observes the underlying only within the first `N` steps (payments may fall later), there is a
+predictable strategy `H` with
+
+  `pathPV = value + ∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)`
+
+on every path. This is `binomial_replication_of_pathAdaptedAt` for the discounted payoff, a
+function of the first `N` flips; `pathPV_eq_value_add_gains` is the case of a payoff of the spot at
+`T`, which also names the hedge. -/
+theorem pathPV_eq_value_add_gains_of_obs (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0)
+    {c : Contract Unit} (hc : c.FixedDated)
+    (hobs : ∀ p ∈ c.obsList, ⌊((p.2 : ℝ≥0) : ℝ) / h⌋₊ ≤ N) :
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
+      c.pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
+        = c.value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
+          + martingaleTransform H (discountedSpot S₀ u d ρ) N ω := by
+  have hY : PathAdaptedAt N fun ω ↦ c.pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω) :=
+    fun ω ω' hω ↦ c.pathPV_congr hc (fun _ _ ↦ rfl) fun p hp ↦
+      (pathAdaptedAt_spotPath S₀ u d ⌊((p.2 : ℝ≥0) : ℝ) / h⌋₊).mono (hobs p hp) ω ω' hω
+  obtain ⟨H, hH, hrep⟩ := binomial_replication_of_pathAdaptedAt hna hS₀ hq hqcrr hY
+    (integrable_pathPV hq S₀ u d h (discount ρ h) hc)
+  exact ⟨H, hH, hrep⟩
 
 end MathFin.Contracts.Binomial
 

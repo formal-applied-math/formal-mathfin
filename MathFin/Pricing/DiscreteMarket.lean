@@ -52,7 +52,9 @@ the call's price less the put's is `S₀ − K`.
 * `floorFiltration`: the continuous-time filtration `t ↦ 𝓕 ⌊t⌋₊` of a discrete one, the time
   change `𝓕.comp Nat.floor_mono`.
 * `discreteAssets`: the discrete market as a contract model map, frozen at the horizon.
-* `toMarket`: the discrete market as a `Market`, with the unit numéraire.
+* `ofTimeChange`: a discrete price and numéraire read along a time change, as a `Market`.
+* `toMarket`: the discrete market as a `Market`, with the unit numéraire: `ofTimeChange` along
+  `⌊t⌋₊`.
 
 ## Main results
 
@@ -140,25 +142,36 @@ theorem value_europeanCall_sub_put (hQ : IsEMM 𝓕 P S T Q) (hS₀ : ∀ ω, S 
 
 /-! ### The discrete market as a `Market` -/
 
+/-- **A discrete-time market read along a time change `φ`**: a price `S` and a numéraire `B` indexed
+by the steps, the information of the steps made by `t` (`𝓕.comp hφ`), the price after them as the
+asset, and the numéraire after them as the numéraire. It is the one construction of a `Market` from
+a discrete one: `toMarket` is the step count `⌊t⌋₊` with the price frozen at the horizon and the unit
+numéraire, and the binomial market (`Binomial.market`) is the step count `⌊t / h⌋₊` with the spot
+and the money market `e^{ρ n}`. -/
+noncomputable def ofTimeChange (P : Measure Ω) (𝓕 : Filtration ℕ mΩ) {φ : ℝ≥0 → ℕ}
+    (hφ : Monotone φ) (S : ℕ → Ω → ℝ) (B : ℕ → ℝ) (hB : ∀ n, 0 < B n)
+    (hS : StronglyAdapted 𝓕 S) : Market Unit Ω where
+  P := P
+  𝓕 := 𝓕.comp hφ
+  asset _ t := S (φ t)
+  numeraire t _ := B (φ t)
+  numeraire_pos _ _ := hB _
+  asset_adapted _ t := hS (φ t)
+  numeraire_adapted _ := stronglyMeasurable_const
+
 /-- **The discrete market as a `Market`**: the price frozen at the horizon (`discreteAssets`), the
 floor filtration, and the unit numéraire, since the price is already quoted in numéraire units. The
-price need only be adapted up to the horizon. -/
+price need only be adapted up to the horizon. It is `ofTimeChange` along the step count `⌊t⌋₊`. -/
 noncomputable def toMarket (P : Measure Ω) (𝓕 : Filtration ℕ mΩ) (S : ℕ → Ω → ℝ) (T : ℕ)
-    (hS : ∀ n ≤ T, StronglyMeasurable[𝓕 n] (S n)) : Market Unit Ω where
-  P := P
-  𝓕 := floorFiltration 𝓕
-  asset := discreteAssets S T
-  numeraire _ _ := 1
-  numeraire_pos _ _ := one_pos
-  asset_adapted _ t :=
-    (hS (min ⌊t⌋₊ T) (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _))
-  numeraire_adapted _ := stronglyMeasurable_const
+    (hS : ∀ n ≤ T, StronglyMeasurable[𝓕 n] (S n)) : Market Unit Ω :=
+  ofTimeChange P 𝓕 (Nat.floor_mono (R := ℝ≥0)) (fun n ↦ S (min n T)) (fun _ ↦ 1)
+    (fun _ ↦ one_pos) fun n ↦ (hS (min n T) (min_le_right _ _)).mono (𝓕.mono (min_le_left _ _))
 
 variable {hS : ∀ n ≤ T, StronglyMeasurable[𝓕 n] (S n)}
 
 theorem deflator_toMarket : (toMarket P 𝓕 S T hS).deflator = fun _ _ ↦ 1 := by
   funext t ω
-  simp [Market.deflator, toMarket]
+  simp [Market.deflator, toMarket, ofTimeChange]
 
 /-- The price in the discrete market is the contract value with the unit discount `D ≡ 1`. -/
 theorem price_toMarket (c : Contract Unit) :
@@ -173,7 +186,7 @@ theorem deflated_toMarket_min (u : Unit) :
   funext t ω
   have hfl : ⌊min t (T : ℝ≥0)⌋₊ = min ⌊t⌋₊ T := by
     rw [Nat.floor_mono.map_min, Nat.floor_natCast]
-  simp [Market.deflated, toMarket, discreteAssets, hfl, min_assoc]
+  simp [Market.deflated, toMarket, ofTimeChange, discreteAssets, hfl, min_assoc]
 
 /-- **An equivalent martingale measure is a pricing measure of the discrete market**: the floor
 extension of the frozen price is a martingale for the floor filtration (`Martingale.comp`). -/

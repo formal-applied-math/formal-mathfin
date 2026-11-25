@@ -146,4 +146,44 @@ theorem hedgeRatio_discountedTreeValue (u d r : ℝ) (g : ℝ → ℝ) {N n : �
     spotPath_update_succ_true, spotPath_update_succ_false]
   rw [← mul_sub, ← mul_sub, mul_div_mul_left _ _ (Real.exp_pos _).ne', mul_sub]
 
+/-- **Replication of a path-dependent claim.** Under no-arbitrage and `S₀ ≠ 0`, with flips going up
+at the risk-neutral probability, every integrable claim `Y` that depends on the first `N` flips
+only (any function of the path up to `N`, not only of the spot at `N`) is its mean plus the
+`martingaleTransform` of a predictable hedge against the discounted spot, on every path:
+
+  `Y = E[Y] + ∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)`.
+
+The representation is applied to the martingale `E[Y | ℱₙ]`
+(`martingale_condExp`), which is `Y` at `N` (`condExp_of_stronglyMeasurable`) and, since `ℱ₀` is
+trivial, the constant `E[Y]` at `0`. -/
+theorem binomial_replication_of_pathAdaptedAt {u d r : ℝ} (h : BinomialNoArb u d r) {S₀ : ℝ}
+    (hS₀ : S₀ ≠ 0) (hq : q ≤ 1) (hqcrr : crrUpProb u d r = q) {N : ℕ} {Y : (ℕ → Bool) → ℝ}
+    (hY : PathAdaptedAt N Y) (hYi : Integrable Y (coinFlipMeasure q hq)) :
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
+      Y ω = ∫ ω', Y ω' ∂coinFlipMeasure q hq
+        + martingaleTransform H (discountedSpot S₀ u d r) N ω := by
+  have hp := crrUpProb_mem_Ioo h
+  have hq0 : 0 < q := by exact_mod_cast hqcrr ▸ hp.1
+  have hq1 : q < 1 := by exact_mod_cast hqcrr ▸ hp.2
+  obtain ⟨H, hH, -, hrep⟩ := binomial_martingale_representation hq0 hq1
+    (martingale_condExp Y flipFiltration (coinFlipMeasure q hq))
+    (martingale_discountedSpot h S₀ hq hqcrr) (discountedSpot_update_ne h hS₀)
+  refine ⟨H, hH, fun ω ↦ ?_⟩
+  have hN : condExp (flipFiltration N) (coinFlipMeasure q hq) Y = Y :=
+    condExp_of_stronglyMeasurable (flipFiltration.le N)
+      (stronglyMeasurable_flipFiltration_iff.2 hY) hYi
+  have h0 (ω : ℕ → Bool) :
+      condExp (flipFiltration 0) (coinFlipMeasure q hq) Y ω = ∫ ω', Y ω' ∂coinFlipMeasure q hq := by
+    have hc := stronglyMeasurable_flipFiltration_iff.1
+      (stronglyMeasurable_condExp (m := flipFiltration 0) (μ := coinFlipMeasure q hq) (f := Y))
+    have hconst (ω' : ℕ → Bool) :
+        condExp (flipFiltration 0) (coinFlipMeasure q hq) Y ω'
+          = condExp (flipFiltration 0) (coinFlipMeasure q hq) Y ω :=
+      hc ω' ω fun i hi ↦ absurd hi (Nat.not_lt_zero i)
+    have := integral_condExp (μ := coinFlipMeasure q hq) (f := Y) (flipFiltration.le 0)
+    rwa [integral_congr_ae (.of_forall hconst), integral_const, probReal_univ, one_smul] at this
+  have := hrep N ω
+  simp only [hN, h0] at this
+  exact this
+
 end MathFin

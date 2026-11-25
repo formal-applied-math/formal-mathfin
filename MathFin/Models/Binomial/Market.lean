@@ -8,6 +8,7 @@ module
 public import MathFin.Models.Binomial.Binomial
 public import MathFin.Models.Binomial.Girsanov
 public import MathFin.Models.Binomial.MultiPeriodFTAP
+public import MathFin.Pricing.DiscreteMarket
 public import MathFin.Pricing.Market
 public import MathFin.Probability.Martingales.TimeChange
 
@@ -42,7 +43,8 @@ flips as the traded asset, and the money market `e^{ρ n}` after `n` steps as nu
 
 ## Main definitions
 
-* `Binomial.market`: the binomial tree with step `h` as a `Market`.
+* `Binomial.market`: the binomial tree with step `h` as a `Market`, the discrete market
+  `DiscreteMarket.ofTimeChange` along the step count `⌊t / h⌋₊`.
 
 ## Main results
 
@@ -85,21 +87,17 @@ variable {u d ρ h : ℝ}
 information of the flips made by `t`, the spot after them, and the money market `e^{ρ n}` after
 `n` steps as numéraire. -/
 noncomputable def market (P : Measure (ℕ → Bool)) (S₀ u d ρ : ℝ) (hh : 0 ≤ h) :
-    Market Unit (ℕ → Bool) where
-  P := P
-  𝓕 := flipFiltration.comp (monotone_floor_div hh)
-  asset := assets S₀ u d h
-  numeraire t _ := Real.exp (ρ * ⌊(t : ℝ) / h⌋₊)
-  numeraire_pos _ _ := Real.exp_pos _
-  asset_adapted _ t := (stronglyMeasurable_flipFiltration_iff (n := ⌊(t : ℝ) / h⌋₊)).2
-    (pathAdaptedAt_spotPath S₀ u d _)
-  numeraire_adapted _ := stronglyMeasurable_const
+    Market Unit (ℕ → Bool) :=
+  DiscreteMarket.ofTimeChange P flipFiltration (monotone_floor_div hh) (spotPath S₀ u d)
+    (fun n ↦ Real.exp (ρ * n)) (fun _ ↦ Real.exp_pos _) fun n ↦
+      stronglyMeasurable_flipFiltration_iff.2 (pathAdaptedAt_spotPath S₀ u d n)
 
 /-- The deflated spot of the binomial market is the discounted spot after the steps made. -/
 theorem deflated_market (P : Measure (ℕ → Bool)) (S₀ : ℝ) (hh : 0 ≤ h) (t : ℝ≥0) :
     (market P S₀ u d ρ hh).deflated () t = discountedSpot S₀ u d ρ ⌊(t : ℝ) / h⌋₊ := by
   funext ω
-  simp only [Market.deflated, market, assets, discountedSpot, Real.exp_neg, div_eq_inv_mul]
+  simp only [Market.deflated, market, DiscreteMarket.ofTimeChange, discountedSpot, Real.exp_neg,
+    div_eq_inv_mul]
 
 variable {q : ℝ≥0} (hq : q ≤ 1)
 
@@ -134,7 +132,7 @@ theorem price_market (P Q : Measure (ℕ → Bool)) (S₀ : ℝ) (hh : 0 ≤ h) 
   simp only [Market.price, Contract.value]
   refine integral_congr_ae (.of_forall fun ω ↦ c.pathPV_congr hc (fun t ht ↦ ?_) fun _ _ ↦ rfl)
   obtain ⟨n, hn⟩ := hgrid t ht
-  simp [Market.deflator, market, discount, hn, Real.exp_neg]
+  simp [Market.deflator, market, DiscreteMarket.ofTimeChange, discount, hn, Real.exp_neg]
 
 /-- **The price of a European payoff in the binomial market is its tree price.** Under the
 risk-neutral law, a cash flow at `T`, on step `N`, paying `g` of the spot at `T`, is priced at the
