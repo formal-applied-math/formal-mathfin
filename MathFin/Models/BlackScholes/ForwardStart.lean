@@ -235,10 +235,10 @@ price is the contract's value on the physical asset (`price_market`), which unde
 asset as the risk-neutral path (`value_physical_eq_riskNeutral`), and that value is
 `value_forwardStartCall`. The hypotheses mirror `price_europeanCall_constGirsanovMeasure` (positive
 spot, strike multiple and volatility), with the reset date `t₁` strictly between now and the
-maturity `T`. -/
+maturity `T` and a Girsanov horizon covering the maturity. -/
 theorem price_forwardStartCall_constGirsanovMeasure {μ : Measure Ω} [IsProbabilityMeasure μ]
     {W : ℝ≥0 → Ω → ℝ} (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t))
-    {S_0 m r σ α : ℝ} {t₁ T H : ℝ≥0} (hT₁H : t₁ ≤ H) (hTH : T ≤ H) (hS₀ : 0 < S_0)
+    {S_0 m r σ α : ℝ} {t₁ T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S_0)
     (hα : 0 < α) (hσ : 0 < σ) (ht₁ : 0 < (t₁ : ℝ)) (hτ : (t₁ : ℝ) < (T : ℝ)) :
     (market μ hWmeas S_0 m r σ).price (constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
         (forwardStartCall α t₁ T)
@@ -247,6 +247,7 @@ theorem price_forwardStartCall_constGirsanovMeasure {μ : Measure Ω} [IsProbabi
     constGirsanovMeasure_isProbabilityMeasure hW hWmeas ((m - r) / σ) H
   have hfix : (forwardStartCall α t₁ T).FixedDated := by
     simp [forwardStartCall, Contract.FixedDated]
+  have ht₁H : t₁ ≤ H := by exact_mod_cast hτ.le.trans hTH
   have hval : (forwardStartCall α t₁ T).value
       (constGirsanovMeasure hW hWmeas ((m - r) / σ) H) (fun t _ ↦ Real.exp (-r * t))
       (pathAssets S_0 r σ (constBtheta (μ := μ) hWmeas ((m - r) / σ) H))
@@ -258,7 +259,7 @@ theorem price_forwardStartCall_constGirsanovMeasure {μ : Measure Ω} [IsProbabi
     refine integral_congr_ae (.of_forall fun ω ↦ (forwardStartCall α t₁ T).pathPV_congr hfix
       (fun t ht ↦ ?_) fun _ _ ↦ rfl)
     obtain rfl : t = T := by simpa [forwardStartCall, Contract.dates] using ht
-    show Real.exp (-r * (t : ℝ)) = Real.exp (-(r * (t : ℝ)))
+    dsimp only
     rw [neg_mul]
   rw [price_market, value_physical_eq_riskNeutral hW hWmeas hσ.ne' H _ hfix fun p hp ↦ by
     simp only [forwardStartCall, Contract.obsList, Payoff.obsList, List.append_nil,
