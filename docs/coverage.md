@@ -106,6 +106,33 @@ One `full` entry in `benchmarks/commodities.json`. Corpus 906 → 907 on the mer
   second-maturity basis-risk decomposition of hedging, which needs a contract object the
   library does not have. Cited: Hull ch. 3, ch. 5 and ch. 18 (11th ed. slide decks, slides 5, 23 and 26
   of the respective chapter files), Kaldor (1939), Working (1949).
+### American put early-exercise premium, strict (2026-11-24)
+
+One `full` entry in `benchmarks/binomial.json`. Corpus 906 → 907 on the branch (866 full
+before, 867 after; 18 library wrappers and 22 reduced cores unchanged).
+
+- **`mf-american-put-premium`** (MathFin/Models/Binomial/AmericanPutPremium.lean): the American
+  put is strictly worth more than the European put of the same strike and expiry in the binomial
+  model whenever immediate exercise is strictly optimal at some node of positive probability.
+  Proved: the market-level statement
+  (`Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation`:
+  in the binomial market at unit step under the risk-neutral coin flips, the price of
+  `europeanPut K` with horizon `N` is strictly below the market's American price of the put) and
+  its tree-level form
+  (`binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation`); the propagation
+  it rests on (`americanPrice_premium_supermartingale`: the premium dominates its one-period
+  discounted continuation, any payoff; `americanPrice_premium_mul_weight_le`: the root premium
+  bounds every path-weighted premium below it); and the deep-in-the-money closed forms
+  (`americanPutPrice_eq_intrinsic_of_deep_in_the_money`: `K − S`, with `r ≥ 0` in the
+  hypothesis;
+  `binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`: `K e^{−rn} − S`;
+  `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: the strict inequality, which with
+  the two closed forms gives the premium `K (1 − e^{−rn}) > 0` for `r > 0`, `n ≥ 1`, exhibiting
+  witnesses). Not proved: the continuous-time strict
+  premium (the Black–Scholes modules carry only the weak bound), any exercise-boundary
+  statement, the superhedging characterization, and a CRR limit of the premium; the market-level
+  statement takes the physical law to be i.i.d. flips with `0 < p < 1` and prices at time 0
+  only.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 

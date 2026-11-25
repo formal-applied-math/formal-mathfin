@@ -571,6 +571,7 @@ public import MathFin.Models.Forwards.SchwartzOneFactor
 public import MathFin.Models.Binomial.Model
 public import MathFin.Models.Binomial.American
 public import MathFin.Models.Binomial.AmericanMarket
+public import MathFin.Models.Binomial.AmericanPutPremium
 public import MathFin.Models.Binomial.CRRConvergence
 public import MathFin.Models.Binomial.DriftLimit
 public import MathFin.Models.Binomial.Bermudan

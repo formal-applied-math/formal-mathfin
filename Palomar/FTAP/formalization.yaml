@@ -139,9 +139,9 @@ alignment:
       status: full 10 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 40 statements
+      lean: 41 statements
       module: benchmarks/binomial.json
-      status: full 40 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 41 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 126 statements
