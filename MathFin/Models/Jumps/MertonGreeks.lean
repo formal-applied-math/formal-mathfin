@@ -320,12 +320,12 @@ theorem mertonGamma_pos (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) {S : ℝ} (hS 
 
 /-! ### Vega -/
 
-/-- The vega summand bound: `c φ t q ≤ c t` for `c, t, q ≥ 0`, `φ ≤ 1` and `q ≤ 1` (`ϕ ≤ 1`,
+/-- The vega summand bound: `c p t q ≤ c t` for `c, t, q ≥ 0`, `p ≤ 1` and `q ≤ 1` (`ϕ ≤ 1`,
 `σ/σₙ ≤ 1`). -/
-private lemma mertonVega_summand_le {c φ t q : ℝ} (hc : 0 ≤ c) (hφ : φ ≤ 1) (ht : 0 ≤ t)
-    (hq0 : 0 ≤ q) (hq1 : q ≤ 1) : c * φ * t * q ≤ c * t :=
-  calc c * φ * t * q ≤ c * 1 * t * 1 :=
-        mul_le_mul (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hφ hc) ht) hq1 hq0
+private lemma mertonVega_summand_le {c p t q : ℝ} (hc : 0 ≤ c) (hp : p ≤ 1) (ht : 0 ≤ t)
+    (hq0 : 0 ≤ q) (hq1 : q ≤ 1) : c * p * t * q ≤ c * t :=
+  calc c * p * t * q ≤ c * 1 * t * 1 :=
+        mul_le_mul (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hp hc) ht) hq1 hq0
           (mul_nonneg (mul_nonneg hc zero_le_one) ht)
     _ = c * t := by ring
 
