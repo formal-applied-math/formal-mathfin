@@ -7,6 +7,7 @@ module
 
 public import MathFin.Init
 public import MathFin.Probability.Gaussian.BivariateGaussian
+public import MathFin.Probability.Gaussian.GaussianPairLinearLaw
 public import Mathlib.Probability.ConditionalExpectation
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
@@ -49,6 +50,9 @@ equilibrium among all demands is a separate open problem and is not claimed here
   every signal and whose pricing rule is efficient has `λ = σ_v/(2σ_u)` and `β = σ_u/σ_v`.
 * `existsKyleEquilibrium`: the pair `β = σ_u/σ_v, λ = σ_v/(2σ_u)` satisfies both conditions: the
   linear equilibrium exists.
+* `kyleFlow_hasLaw_prod`: in the witnessed model the order flow is Gaussian,
+  `β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)` — the law the market maker's projection rule
+  presupposes.
 * `kyleModel_prod`: the model hypotheses are satisfiable, witnessed by independent Gaussian
   coordinates.
 
@@ -524,5 +528,99 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
     rw [← variance_map (X := id) (Y := Prod.snd) (by fun_prop) (by fun_prop), hmap]
     simp [hcoeu, variance_id_gaussianReal]
 
-end MathFin
+/-- The NNReal coefficient bookkeeping: the variance parameter of `σ⁻¹ · (x − μ)` over
+`N(μ, σ²)` is `1`. -/
+private lemma kyleNNRealInvSq {σ : ℝ} (hσ : σ ≠ 0) :
+    NNReal.mk (σ⁻¹ ^ 2) (sq_nonneg _) * (σ ^ 2).toNNReal = 1 := by
+  have hc : ((NNReal.mk (σ⁻¹ ^ 2) (sq_nonneg _) : ℝ) * ((σ ^ 2).toNNReal : ℝ)) = 1 := by
+    rw [NNReal.coe_mk, Real.coe_toNNReal _ (sq_nonneg _)]
+    field_simp
+  exact_mod_cast hc
 
+/-- The standardized coordinates of the witnessed model: `σ_v⁻¹·(v − p₀)` and `σ_u⁻¹·u` are
+independent standard Gaussians. -/
+theorem kyleStandardPair_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) :
+    HasLaw (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) (gaussianReal 0 1)
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+      ∧ HasLaw (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) (gaussianReal 0 1)
+        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
+      ∧ (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) ⟂ᵢ[(
+        (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))]
+        (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) := by
+  have hmodel := kyleModel_prod p₀ hσv hσu
+  have hnnv := kyleNNRealInvSq hσv.ne'
+  have hnnu := kyleNNRealInvSq hσu.ne'
+  refine ⟨?_, ?_, ?_⟩
+  · have hv0 : HasLaw (fun ω : ℝ × ℝ ↦ Prod.fst ω)
+        (gaussianReal p₀ (σ_v ^ 2).toNNReal) _ :=
+      ⟨hmodel.v_gaussian.aemeasurable, by
+        rw [hmodel.v_gaussian.map_eq_gaussianReal, hmodel.mean_v, hmodel.var_v]⟩
+    have h1 := gaussianReal_sub_const hv0 p₀
+    rw [sub_self] at h1
+    have h2 := gaussianReal_const_mul h1 σ_v⁻¹
+    rw [mul_zero, hnnv] at h2
+    exact h2
+  · have hu0 : HasLaw (fun ω : ℝ × ℝ ↦ Prod.snd ω)
+        (gaussianReal 0 (σ_u ^ 2).toNNReal) _ :=
+      ⟨hmodel.u_gaussian.aemeasurable, by
+        rw [hmodel.u_gaussian.map_eq_gaussianReal, hmodel.mean_u, hmodel.var_u]⟩
+    have h2 := gaussianReal_const_mul hu0 σ_u⁻¹
+    rw [mul_zero, hnnu] at h2
+    exact h2
+  · rw [indepFun_iff_measure_inter_preimage_eq_mul]
+    intro s t hs ht
+    have hgm : Measurable (fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) := by fun_prop
+    have hgn : Measurable (fun x : ℝ ↦ σ_u⁻¹ * x) := by fun_prop
+    have hT : MeasurableSet ((fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) ⁻¹' s) :=
+      MeasurableSet.preimage hs hgm
+    have hS : MeasurableSet ((fun x : ℝ ↦ σ_u⁻¹ * x) ⁻¹' t) :=
+      MeasurableSet.preimage ht hgn
+    have h1 : (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) ⁻¹' s
+        ∩ (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) ⁻¹' t
+        = ((fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) ⁻¹' s) ×ˢ ((fun x : ℝ ↦ σ_u⁻¹ * x) ⁻¹' t) := by
+      ext ω
+      simp [Set.mem_prod]
+    rw [h1, Measure.prod_prod _ _,
+      show ((fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) ⁻¹' s)
+        = Prod.fst ⁻¹' ((fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) ⁻¹' s) from rfl,
+      show ((fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) ⁻¹' t)
+        = Prod.snd ⁻¹' ((fun x : ℝ ↦ σ_u⁻¹ * x) ⁻¹' t) from rfl,
+      ← Measure.map_apply measurable_fst hT, Measure.map_fst_prod, measure_univ, one_smul,
+      ← Measure.map_apply measurable_snd hS, Measure.map_snd_prod, measure_univ, one_smul]
+
+/-- The order flow of the witnessed model is Gaussian: the standardized pair
+`σ_v⁻¹·(v − p₀), σ_u⁻¹·u` is standard Gaussian with zero covariance, and
+`hasLaw_linear_gaussianPair` gives the law of the flow
+`β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)`. -/
+theorem kyleFlow_hasLaw_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) (β : ℝ) :
+    HasLaw (kyleFlow β Prod.fst Prod.snd p₀)
+      (gaussianReal 0 (β ^ 2 * σ_v ^ 2 + σ_u ^ 2).toNNReal)
+      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) := by
+  obtain ⟨hU, hV, hUVindep⟩ := kyleStandardPair_prod p₀ hσv hσu
+  have hUV : HasGaussianLaw (fun ω : ℝ × ℝ ↦ (σ_v⁻¹ * (Prod.fst ω - p₀),
+      σ_u⁻¹ * Prod.snd ω)) _ :=
+    hUVindep.hasGaussianLaw hU.hasGaussianLaw hV.hasGaussianLaw
+  have hintU : AEStronglyMeasurable (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) _ :=
+    hU.hasGaussianLaw.integrable.aestronglyMeasurable
+  have hintV : AEStronglyMeasurable (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) _ :=
+    hV.hasGaussianLaw.integrable.aestronglyMeasurable
+  have hcov : cov[(fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)),
+      fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω;
+      (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)] = 0 := by
+    rw [covariance_eq_sub hU.hasGaussianLaw.memLp_two hV.hasGaussianLaw.memLp_two]
+    simp only [Pi.mul_apply]
+    rw [hUVindep.integral_fun_mul_eq_mul_integral hintU hintV]
+    ring
+  have hlaw := hasLaw_linear_gaussianPair hUV hU hV hcov (β * σ_v) σ_u
+  have hnn : (gaussianReal 0
+      (((β * σ_v) ^ 2 + 2 * (β * σ_v) * σ_u * 0 + σ_u ^ 2).toNNReal))
+      = gaussianReal 0 (β ^ 2 * σ_v ^ 2 + σ_u ^ 2).toNNReal := by
+    congr 1
+    rw [mul_zero, add_zero, mul_pow]
+  rw [hnn] at hlaw
+  refine HasLaw.congr hlaw ?_
+  refine Filter.Eventually.of_forall fun ω => ?_
+  field_simp [kyleFlow, hσv.ne', hσu.ne']
+  rfl
+
+end MathFin
