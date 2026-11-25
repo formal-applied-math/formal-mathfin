@@ -898,3 +898,28 @@ title = "Convex-order minimal sums"
 statement = "Open (MF-OP-018, Wang 2015): which conditions on marginals F₁,…,Fₙ are necessary and sufficient for the sums with these marginals to have a smallest element in convex order."
 uses = ["def:convex-order", "thm:frechet-hoeffding"]
 area = "risk/aggregation"
+
+[[node]]
+label = "thm:monte-carlo-pricing"
+title = "Monte Carlo pricing of a European payoff"
+statement = "For a European payoff of the terminal value of a model with a known simulation scheme, the Monte Carlo sample mean of the discounted payoff along independent copies of the scheme converges almost surely to the arbitrage price under the pricing measure, and √n times its error converges in distribution to a centred normal law whose variance is that of the discounted payoff, so that the estimator and its confidence interval are justified for payoffs beyond the Black–Scholes put and call."
+uses = ["thm:bs-call", "thm:bs-arbitrage-free-price"]
+core = ["mf-monte-carlo-put-call-consistency"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:finite-difference-scheme"
+title = "Finite-difference schemes for the Black–Scholes equation"
+statement = "The implicit and Crank–Nicolson finite-difference schemes for the Black–Scholes equation on a grid are stable and consistent, and so converge to the closed-form price at the order of the scheme as the grid is refined, the discrete solution being the value function of a Markov chain approximating the diffusion."
+uses = ["thm:bs-pde", "thm:bs-call"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:longstaff-schwartz"
+title = "Longstaff–Schwartz regression for American options"
+statement = "For a Bermudan option on a Markov state, the Longstaff–Schwartz algorithm, which estimates the continuation value at each exercise date by least-squares regression on a basis of the state along simulated paths and exercises when the payoff exceeds it, converges to the Snell envelope value as the number of paths and the size of the basis grow."
+uses = ["thm:snell-envelope", "thm:american-put-optimal-exercise", "thm:monte-carlo-pricing"]
+area = "valuation/american"
+family = "diffusions"
