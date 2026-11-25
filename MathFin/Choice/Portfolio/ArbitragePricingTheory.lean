@@ -210,4 +210,42 @@ theorem exactFactorNoArbitrage_of_pricingMeasure
   have hfne : f 0 / f T ≠ 0 := div_ne_zero (hfpos 0).ne' (hfpos T).ne'
   exact (mul_eq_zero.mp (by rw [← hval]; exact hinteg)).resolve_left hfne
 
+/-- **The arbitrage pricing theory decomposition from a pricing measure** (Ross 1976, exact
+factor model): if a market with deterministic numéraire `f` and a pricing measure `Q` up to `T`
+has assets `i ∈ s` paying `a i + ∑ k ∈ t, β i k * F k` at `T`, then there are a premium `lam₀`
+and factor premia `lam k` with, for every asset `i ∈ s`,
+
+`a i = p i * lam₀ + ∑ k ∈ t, lam k * β i k`, where `p i` is the price of the claim paying
+asset `i` at `T` under `Q`.
+
+This packages the two steps of the theory: `exactFactorNoArbitrage_of_pricingMeasure` derives
+the exact-factor no-arbitrage condition from the pricing measure, and the finite-dimensional
+duality inside `exists_premia_of_exactFactorNoArbitrage` turns the condition into the
+decomposition. At unit prices `p` the statement is the decomposition of
+`exists_premia_of_exactFactorNoArbitrage`; the one-factor case with the market portfolio as
+the factor is the CAPM's security market line, which `factorPremium_eq_marketPremium` derives
+under the CAPM equilibrium hypothesis. -/
+theorem exists_premia_of_isPricingMeasure
+    {ι κ Ω : Type*} [DecidableEq ι] [DecidableEq κ] [MeasurableSpace Ω] [Nonempty Ω]
+    {M : MathFin.Market ι Ω} {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q)
+    (f : ℝ≥0 → ℝ) (hN : ∀ τ ω, M.numeraire τ ω = f τ)
+    {s : Finset ι} {t : Finset κ} {a : ι → ℝ} {β : ι → κ → ℝ} {F : κ → Ω → ℝ}
+    (hR : ∀ i ∈ s, ∀ ω, M.asset i T ω = a i + ∑ k ∈ t, β i k * F k ω) :
+    ∃ lam₀ : ℝ, ∃ lam : κ → ℝ, ∀ i ∈ s,
+      a i = M.price Q (.pay T (.obs i T)) * lam₀ + ∑ k ∈ t, lam k * β i k :=
+  exists_coeffs_of_exactFactorNoArbitrage
+    (exactFactorNoArbitrage_of_pricingMeasure hQ f hN hR)
+
+/-- The intercept `lam₀` of any premia decomposition is the payoff of an asset with zero
+loadings: at unit prices that asset is riskless, so `lam₀` is the risk-free return of the
+market. -/
+theorem lam0_eq_of_zeroLoadingAsset {ι κ : Type*} [DecidableEq ι] [DecidableEq κ]
+    {s : Finset ι} {t : Finset κ} {a : ι → ℝ} {β : ι → κ → ℝ}
+    {i₀ : ι} (hi₀ : i₀ ∈ s) (hβ : ∀ k ∈ t, β i₀ k = 0)
+    (lam₀ : ℝ) (lam : κ → ℝ) (hdec : ∀ i ∈ s, a i = lam₀ + ∑ k ∈ t, lam k * β i k) :
+    lam₀ = a i₀ := by
+  have h := hdec i₀ hi₀
+  rw [Finset.sum_congr rfl fun k hk => by rw [hβ k hk, mul_zero], Finset.sum_const_zero, add_zero] at h
+  exact h.symm
+
 end MathFin
