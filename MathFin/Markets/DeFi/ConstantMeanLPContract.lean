@@ -131,6 +131,33 @@ theorem eval_constantMeanPayoff_eq_reserves (x y : ℝ) (w : ℝ≥0) (hx : 0 < 
   rw [show (1 - (w : ℝ)) * y ^ (1 - (w : ℝ)) * y ^ (w : ℝ)
       = (1 - (w : ℝ)) * (y ^ (1 - (w : ℝ)) * y ^ (w : ℝ)) from by ring, hye, hwe]
 
+/-- **The price of the constant-mean position is the discounted expectation of its mark.** In
+any market, paying the position of invariant `V` and weight `w` at `T` is worth, under any
+measure `Q`, the discounted expectation of the position's value at the observed price (its
+closed form is `eval_constantMeanPayoff`). The identity is algebraic in `V, w` and the price
+path; it says what a position costs where the mark is a value — `0 < V`, `0 < w < 1`,
+nonnegative prices — the hypotheses the theorems above carry. -/
+theorem price_constantMeanPayoff {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω)
+    (Q : Measure Ω) (T : ℝ≥0) (V : ℝ) (w : ℝ≥0) :
+    M.price Q (.pay T (constantMeanPayoff V w T)) =
+      ∫ ω, M.deflator T ω * (constantMeanPayoff V w T).eval (scenarioAt M.asset ω) ∂Q := by
+  rw [Market.price, Contract.value_pay]
+
+/-- **The equal-weight constant-mean position is the constant-product position**: the payoff
+of invariant `V` at weight `1/2` is the payoff of invariant `V²`, the constant-product
+position of `LPContract.lean`. This ties the constant-mean line to the priced
+constant-product line of `thm:impermanent-loss`. -/
+theorem constantMeanPayoff_one_half_eq_constantProductPayoff (V : ℝ) (hV : 0 < V) (T : ℝ≥0) :
+    constantMeanPayoff V (1 / 2 : ℝ≥0) T = constantProductPayoff (V ^ 2) T := by
+  have hhalf : ((1 : ℝ) / 2) ^ ((1 : ℝ) / 2) * ((1 : ℝ) / 2) ^ ((1 : ℝ) / 2) = 1 / 2 := by
+    rw [← Real.rpow_add (by norm_num : (0 : ℝ) < 1 / 2) _ _, show (1 : ℝ) / 2 + (1 : ℝ) / 2 = 1
+      from by norm_num, Real.rpow_one]
+  have hsqrt : Real.sqrt (V ^ 2) = V := Real.sqrt_sq hV.le
+  have hcoe : (((1 : ℝ≥0) / 2 : ℝ≥0) : ℝ) = 1 / 2 := by norm_num
+  simp only [constantMeanPayoff, constantProductPayoff, sqrtObs, hsqrt, hcoe]
+  rw [show (1 : ℝ) - 1 / 2 = 1 / 2 from by norm_num, hhalf]
+  field_simp
+
 end DeFi
 
 end MathFin
