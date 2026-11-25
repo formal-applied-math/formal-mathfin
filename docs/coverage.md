@@ -31,7 +31,9 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
 917 entries: 871 full (from 866), 18 library wrappers, 28 reduced cores (from 22); 889 are
 delivery-ready (`full` + `library_wrapper`). The dated sections below record what each pull
-request added.
+request added. The backlog pass then split `mf-bgk-discrete-barrier-shift` into the image form and
+scaling of `ptDownOutCall` (`mf-barrier-down-out-image-form`) and the BGK shift and limit (918
+entries, 29 reduced cores).
 
 ### The Ho–Lee bond price (2026-11-24)
 
