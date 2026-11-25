@@ -8,8 +8,10 @@ module
 public import MathFin.Probability.Laws.Esscher
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
-public import Mathlib.Probability.Independence.CharacteristicFunction
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
+public import Mathlib.Probability.HasLaw
 public import Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic
+public import Mathlib.Probability.Independence.Process.HasIndepIncrements.IsGaussianProcess
 public import Mathlib.Probability.Process.Adapted
 
 /-!
@@ -23,22 +25,22 @@ probability space `(Ω, Q)`, a filtration `𝓕`, a horizon `T`, and a real proc
   `for every a : ℝ, the process t ↦ exp(a·Y_t − ½a² t) is a Q-martingale on [0,T]`.
 
 These three data are bundled as `IsExpQMartingale Q 𝓕 Y T`. The single theorem
-`isQBrownianMotion_of_expMartingale` restates the zero start and derives two more properties of `Y`
+`isBrownianOn_of_expMartingale` restates the zero start and derives two more properties of `Y`
 under `Q` on `[0,T]`: `N(0,t−s)` increments, and independent increments in Mathlib's sense
 (`HasIndepIncrements`). Together they fix every finite-dimensional law of `Y` on `[0,T]` to that
 of a Brownian motion; that implication is not restated here (on the whole time axis `ℝ≥0` it is
-Mathlib's `HasIndepIncrements.isPreBrownianReal_of_hasLaw`). Neither path continuity nor
-independence of the increments from the past (`Y_t − Y_s` from `𝓕_s`) is part of the conclusion.
+Mathlib's `HasIndepIncrements.isPreBrownianReal_of_hasLaw`). Path continuity is not part of the
+conclusion. The independence of each increment `Y_t − Y_s` from `𝓕_s`
+(`indep_increment_of_expMartingale`) is proved here and is what gives independent increments.
 Nothing in the argument refers to how `Y` or `Q` was constructed.
 
 The mechanism: the exponential martingale at `s = 0` fixes the marginal moment-generating
 function `𝔼_Q[exp(a·Y_t)] = exp(½a²t)`, hence the marginal law, and the conditional form
-`𝔼_Q[exp(a·(Y_t − Y_s))|𝓕_s] = exp(½a²(t−s))` is deterministic, giving Gaussian increments. For
-successive increments over `t₀ ≤ t₁ ≤ ⋯ ≤ tₙ`, the earlier ones are `𝓕_{tₙ₋₁}`-measurable and
-factor out of the conditional expectation given `𝓕_{tₙ₋₁}`, so by induction the joint
-moment-generating function is the product of the Gaussian ones. Every linear combination of the
-increments is then Gaussian with the diagonal variance, and `iIndepFun_iff_charFun_pi` turns that
-into joint independence.
+`𝔼_Q[exp(a·(Y_t − Y_s))|𝓕_s] = exp(½a²(t−s))` is deterministic. That gives Gaussian increments,
+and integrated over `A ∈ 𝓕_s` it says that the law of `Y_t − Y_s` under `Q` restricted to `A` has
+the moment-generating function of `Q(A)·N(0,t−s)`, hence is that measure
+(`measure_eq_of_mgf_id_eq`): the increment is independent of `𝓕_s`. Adaptedness and independence
+of the past give independent increments (`hasIndepIncrements_of_indep_past`, process-agnostic).
 
 The value of the abstraction is coherence: the constant-, simple-, continuous- and
 predictable-`θ` Girsanov drift-corrected processes each need only supply their own
@@ -58,10 +60,12 @@ one theorem.
 
 * `MathFin.map_eq_gaussianReal_of_expMartingale` — the marginal law `Q.map Y_t = N(0,t)`.
 * `MathFin.increment_map_eq_gaussianReal_of_expMartingale` — the increment law `N(0,t−s)`.
-* `MathFin.increments_iIndepFun_of_expMartingale` — successive increments are jointly
-  `Q`-independent.
+* `MathFin.indep_increment_of_expMartingale` — `Y_t − Y_s` is `Q`-independent of `𝓕_s`.
+* `MathFin.hasIndepIncrements_of_indep_past` — adapted, with increments independent of the past,
+  gives `HasIndepIncrements` (process-agnostic).
 * `MathFin.hasIndepIncrements_of_expMartingale` — `Y` has independent increments on `[0,T]`.
-* `MathFin.isQBrownianMotion_of_expMartingale` — `IsExpQMartingale Q 𝓕 Y T → IsBrownianOn Q T Y`.
+* `MathFin.IsExpQMartingale.isGaussianProcess` — `Y` is a Gaussian process on `[0,T]`.
+* `MathFin.isBrownianOn_of_expMartingale` — `IsExpQMartingale Q 𝓕 Y T → IsBrownianOn Q T Y`.
 * `MathFin.IsBrownianOn.congr_modification` — invariance under a modification.
 
 ## Tags
@@ -83,7 +87,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 probability space `(Ω, 𝓕, Q)` that is `𝓕`-adapted, starts at `0` a.e. `Q`, and for which every
 `t ↦ exp(a·Y_t − ½a² t)` is a `Q`-martingale on `[0,T]` (stated as the set-integral identity over
 `𝓕_s`-sets). These are exactly the data output by the Bayes change-of-measure engine for a
-drift-corrected process, and exactly the data consumed by `isQBrownianMotion_of_expMartingale`. -/
+drift-corrected process, and exactly the data consumed by `isBrownianOn_of_expMartingale`. -/
 structure IsExpQMartingale (Q : Measure Ω) (𝓕 : Filtration ℝ≥0 mΩ) (Y : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) :
     Prop where
   /-- `Y` is adapted to the filtration. -/
@@ -115,6 +119,13 @@ theorem map_eq_gaussianReal_of_mgf {X : Ω → ℝ} (hX : AEMeasurable X Q) {v :
   funext a
   rw [hmgf, zero_mul, zero_add]
 
+/-- The exponential martingale's term factors as a constant times `exp(a·x)`. -/
+private theorem exp_sub_eq (a x u : ℝ) :
+    Real.exp (a * x - a ^ 2 * u / 2) = Real.exp (-(a ^ 2 * u / 2)) * Real.exp (a * x) := by
+  rw [← Real.exp_add]
+  congr 1
+  ring
+
 /-- **Marginal `Q`-MGF.** `𝔼_Q[exp(a·Y_t)] = exp(½ t a²)`: read off from the exponential
 martingale at `s = 0` (the `Q`-integral of `exp(a·Y_t − ½a²t)` equals its value at `0`, which is
 `exp(a·Y_0) = 1` a.e. since `Y_0 = 0`). -/
@@ -131,11 +142,7 @@ private theorem mgf_expY_eq (h : IsExpQMartingale Q 𝓕 Y T) {t : ℝ≥0} (htT
   have hLHS : ∫ ω, Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2) ∂Q
       = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * ∫ ω, Real.exp (a * Y t ω) ∂Q := by
     rw [← integral_const_mul]
-    refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-    change Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2)
-        = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * Y t ω)
-    rw [show a * Y t ω - a ^ 2 * (t : ℝ) / 2 = -(a ^ 2 * (t : ℝ) / 2) + a * Y t ω from by ring,
-      Real.exp_add]
+    exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ exp_sub_eq a (Y t ω) t)
   rw [hLHS, mul_comm] at hbrick
   have hfac : Real.exp (-(a ^ 2 * (t : ℝ) / 2)) ≠ 0 := (Real.exp_pos _).ne'
   rw [(mul_eq_one_iff_eq_inv₀ hfac).mp hbrick, ← Real.exp_neg]
@@ -150,11 +157,16 @@ theorem map_eq_gaussianReal_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {
 /-- **Marginal `Q`-integrability.** `exp(a·Y_u)` is `Q`-integrable for `u ≤ T` — its law is
 `N(0,u)` and the Gaussian MGF is finite. -/
 private theorem integrable_expY (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {u : ℝ≥0} (huT : u ≤ T) :
-    Integrable (fun ω ↦ Real.exp (a * Y u ω)) Q := by
-  rw [show (fun ω ↦ Real.exp (a * Y u ω)) = (fun x ↦ Real.exp (a * x)) ∘ (Y u) from rfl,
-      ← integrable_map_measure (by fun_prop) (h.measurable u).aemeasurable,
-      map_eq_gaussianReal_of_expMartingale h huT]
-  exact integrable_exp_mul_gaussianReal a
+    Integrable (fun ω ↦ Real.exp (a * Y u ω)) Q :=
+  (⟨(h.measurable u).aemeasurable, map_eq_gaussianReal_of_expMartingale h huT⟩ :
+    HasLaw (Y u) (gaussianReal 0 u) Q).integrable_fun_comp (integrable_exp_mul_gaussianReal a)
+
+/-- **Integrability of the exponential martingale's terms.** `exp(a·Y_u − ½a²u)` is
+`Q`-integrable for `u ≤ T`. -/
+private theorem integrable_expY_sub (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {u : ℝ≥0}
+    (huT : u ≤ T) : Integrable (fun ω ↦ Real.exp (a * Y u ω - a ^ 2 * (u : ℝ) / 2)) Q :=
+  ((integrable_expY h a huT).const_mul (Real.exp (-(a ^ 2 * (u : ℝ) / 2)))).congr
+    (Filter.Eventually.of_forall fun ω ↦ (exp_sub_eq a (Y u ω) u).symm)
 
 omit [IsProbabilityMeasure Q] in
 /-- **Cauchy–Schwarz for exponentials.** If `exp(2f)` and `exp(2g)` are `Q`-integrable, so is
@@ -177,21 +189,12 @@ private theorem condExp_expY (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : 
     (htT : t ≤ T) :
     Q[fun ω ↦ Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2) | 𝓕 s]
       =ᵐ[Q] fun ω ↦ Real.exp (a * Y s ω - a ^ 2 * (s : ℝ) / 2) := by
-  have hfint : ∀ u : ℝ≥0, u ≤ T →
-      Integrable (fun ω ↦ Real.exp (a * Y u ω - a ^ 2 * (u : ℝ) / 2)) Q := by
-    intro u huT
-    have hfac : (fun ω ↦ Real.exp (a * Y u ω - a ^ 2 * (u : ℝ) / 2))
-        = fun ω ↦ Real.exp (-(a ^ 2 * (u : ℝ) / 2)) * Real.exp (a * Y u ω) := by
-      funext ω
-      rw [show a * Y u ω - a ^ 2 * (u : ℝ) / 2 = -(a ^ 2 * (u : ℝ) / 2) + a * Y u ω from by ring,
-        Real.exp_add]
-    rw [hfac]; exact (integrable_expY h a huT).const_mul _
   have hsm : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)]
       (fun ω ↦ Real.exp (a * Y s ω - a ^ 2 * (s : ℝ) / 2)) := by
     have hcont : Continuous fun x : ℝ ↦ a * x - a ^ 2 * (s : ℝ) / 2 := by fun_prop
     exact Real.continuous_exp.comp_stronglyMeasurable (hcont.comp_stronglyMeasurable (h.adapted s))
-  refine (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hfint t htT)
-    (fun A _ _ ↦ (hfint s (hst.trans htT)).integrableOn) (fun A hA _ ↦ ?_)
+  refine (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (integrable_expY_sub h a htT)
+    (fun A _ _ ↦ (integrable_expY_sub h a (hst.trans htT)).integrableOn) (fun A hA _ ↦ ?_)
     hsm.aestronglyMeasurable).symm
   exact (h.martingale a hst htT hA).symm
 
@@ -207,14 +210,7 @@ theorem IsExpQMartingale.condExp_exp_increment (h : IsExpQMartingale Q 𝓕 Y T)
   have hgs_sm : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)] gs := by
     have hcont : Continuous fun x : ℝ ↦ a ^ 2 * (t : ℝ) / 2 - a * x := by fun_prop
     exact Real.continuous_exp.comp_stronglyMeasurable (hcont.comp_stronglyMeasurable (h.adapted s))
-  have hft_int : Integrable ft Q := by
-    have hfac : ft = fun ω ↦ Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * Y t ω) := by
-      funext ω
-      change Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2)
-          = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * Y t ω)
-      rw [show a * Y t ω - a ^ 2 * (t : ℝ) / 2 = -(a ^ 2 * (t : ℝ) / 2) + a * Y t ω from by ring,
-        Real.exp_add]
-    rw [hfac]; exact (integrable_expY h a htT).const_mul _
+  have hft_int : Integrable ft Q := integrable_expY_sub h a htT
   have hprod : (fun ω ↦ gs ω * ft ω) = fun ω ↦ Real.exp (a * (Y t ω - Y s ω)) := by
     funext ω; rw [hgsdef, hftdef, ← Real.exp_add]; congr 1; ring
   have hprod_int : Integrable (fun ω ↦ gs ω * ft ω) Q := by
@@ -239,190 +235,160 @@ theorem IsExpQMartingale.condExp_exp_increment (h : IsExpQMartingale Q 𝓕 Y T)
 
 /-- **Unconditional `Q`-MGF of the increment.** `𝔼_Q[exp(a·(Y_t − Y_s))] = exp(½a²(t−s))` — the
 tower property on the deterministic conditional MGF `IsExpQMartingale.condExp_exp_increment`. -/
-private theorem Y_increment_mgf (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t)
+private theorem mgf_increment_eq (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {s t : ℝ≥0} (hst : s ≤ t)
     (htT : t ≤ T) :
     ∫ ω, Real.exp (a * (Y t ω - Y s ω)) ∂Q = Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) := by
   rw [← integral_condExp (𝓕.le s), integral_congr_ae (h.condExp_exp_increment a hst htT),
     integral_const, show Q.real Set.univ = 1 from by simp, one_smul]
 
 /-- **Increment law.** `Q.map (Y_t − Y_s) = N(0, t−s)`: the unconditional increment MGF
-(`Y_increment_mgf`) is the Gaussian one. -/
+(`mgf_increment_eq`) is the Gaussian one. -/
 theorem increment_map_eq_gaussianReal_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {s t : ℝ≥0}
     (hst : s ≤ t) (htT : t ≤ T) :
     Q.map (fun ω ↦ Y t ω - Y s ω) = gaussianReal 0 (t - s) := by
   refine map_eq_gaussianReal_of_mgf ((h.measurable t).sub (h.measurable s)).aemeasurable
-    fun a ↦ (Y_increment_mgf h a hst htT).trans ?_
+    fun a ↦ (mgf_increment_eq h a hst htT).trans ?_
   rw [NNReal.coe_sub hst]
   congr 1
   ring
 
-/-- **`Q`-integrability of the increment exponential.** `exp(c·(Y_t − Y_s))` is `Q`-integrable —
-its law is `N(0,t−s)`. -/
-private theorem integrable_exp_Y_increment (h : IsExpQMartingale Q 𝓕 Y T) (c : ℝ) {s t : ℝ≥0}
+/-- **Increments are independent of the past.** For `s ≤ t ≤ T`, `Y_t − Y_s` is `Q`-independent
+of `𝓕_s`. Integrating the deterministic conditional moment-generating function
+(`IsExpQMartingale.condExp_exp_increment`) over `A ∈ 𝓕_s` shows that the law of `Y_t − Y_s` under
+`Q` restricted to `A` has the moment-generating function of `Q(A)·N(0,t−s)`, hence is that measure
+(`measure_eq_of_mgf_id_eq`); on a Borel set `B` this reads
+`Q({Y_t − Y_s ∈ B} ∩ A) = Q(A)·N(0,t−s)(B) = Q(A)·Q(Y_t − Y_s ∈ B)`. -/
+theorem indep_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {s t : ℝ≥0}
     (hst : s ≤ t) (htT : t ≤ T) :
-    Integrable (fun ω ↦ Real.exp (c * (Y t ω - Y s ω))) Q := by
-  have hincmeas : Measurable fun ω ↦ Y t ω - Y s ω := (h.measurable t).sub (h.measurable s)
-  rw [show (fun ω ↦ Real.exp (c * (Y t ω - Y s ω)))
-        = (fun x ↦ Real.exp (c * x)) ∘ (fun ω ↦ Y t ω - Y s ω) from rfl,
-      ← integrable_map_measure (by fun_prop) hincmeas.aemeasurable,
-      increment_map_eq_gaussianReal_of_expMartingale h hst htT]
-  exact integrable_exp_mul_gaussianReal c
+    Indep (MeasurableSpace.comap (fun ω ↦ Y t ω - Y s ω) inferInstance) (𝓕 s) Q := by
+  have hD : Measurable fun ω ↦ Y t ω - Y s ω := (h.measurable t).sub (h.measurable s)
+  have hlaw := increment_map_eq_gaussianReal_of_expMartingale h hst htT
+  have hlaw' : HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q :=
+    ⟨hD.aemeasurable, hlaw⟩
+  have hexp (u : ℝ) : Integrable (fun ω ↦ Real.exp (u * (Y t ω - Y s ω))) Q :=
+    hlaw'.integrable_fun_comp (integrable_exp_mul_gaussianReal u)
+  refine (Indep_iff _ _ Q).2 fun _ A ⟨B, hB, hBA⟩ hA ↦ ?_
+  subst hBA
+  have : IsFiniteMeasure (Q A • gaussianReal 0 (t - s)) :=
+    Measure.smul_finite _ (measure_ne_top Q A)
+  have hrestrict : (Q.restrict A).map (fun ω ↦ Y t ω - Y s ω) = Q A • gaussianReal 0 (t - s) := by
+    refine measure_eq_of_mgf_id_eq (fun u ↦ (integrable_map_measure (by fun_prop)
+      hD.aemeasurable).2 (hexp u).restrict) ?_
+    funext u
+    rw [mgf_id_map hD.aemeasurable, mgf_smul_measure, mgf_id_gaussianReal, mgf,
+      ← setIntegral_condExp (𝓕.le s) (hexp u) hA,
+      setIntegral_congr_ae (𝓕.le s A hA) ((h.condExp_exp_increment u hst
+        htT).mono fun _ hω _ ↦ hω), setIntegral_const, NNReal.coe_sub hst, measureReal_def,
+      smul_eq_mul]
+    ring_nf
+  have hB' := congrArg (· B) hrestrict
+  simp only [Measure.map_apply hD hB, Measure.restrict_apply (hD hB), Measure.smul_apply,
+    smul_eq_mul, ← hlaw] at hB'
+  rw [hB', mul_comm]
 
-/-! ### Independence of any number of increments -/
+/-! ### Independent increments from independence of the past -/
 
-/-- **Joint `Q`-MGF of successive increments.** For a monotone sequence of times `t` in `[0,T]` and
-reals `a`, `exp(∑_{k<n} a_k·(Y_{t_{k+1}} − Y_{t_k}))` is `Q`-integrable, with integral
-`∏_{k<n} exp(½a_k²(t_{k+1} − t_k))`. Induction on `n`: the first `n` increments are
-`𝓕_{t_n}`-measurable, so they factor out of the conditional expectation given `𝓕_{t_n}`, and the
-conditional MGF of the last one is the deterministic `exp(½a_n²(t_{n+1} − t_n))`
-(`IsExpQMartingale.condExp_exp_increment`). Integrability comes along the induction, by
-Cauchy–Schwarz (`integrable_exp_mul_exp`). -/
-private theorem Y_increments_mgf_range (h : IsExpQMartingale Q 𝓕 Y T) {t : ℕ → ℝ≥0}
-    (ht : Monotone t) (htT : ∀ k, t k ≤ T) (n : ℕ) (a : ℕ → ℝ) :
-    Integrable (fun ω ↦ Real.exp (∑ k ∈ Finset.range n, a k * (Y (t (k + 1)) ω - Y (t k) ω))) Q ∧
-      ∫ ω, Real.exp (∑ k ∈ Finset.range n, a k * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
-        = ∏ k ∈ Finset.range n, Real.exp (a k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) / 2) := by
-  induction n generalizing a with
-  | zero => constructor <;> simp
+/-- **Sequential independence gives joint independence.** If `𝒢` is monotone, `D k` is
+`𝒢 (k+1)`-measurable, and `D k` is independent of `𝒢 k`, then the `D k` are jointly independent:
+on a finite index set the earlier `D i` are all `𝒢 n`-measurable for the largest `n`, so the
+product formula peels off the factor of `D n` at once. -/
+theorem iIndepFun_of_indep_past {β : Type*} [MeasurableSpace β] {μ : Measure Ω}
+    [IsProbabilityMeasure μ] {D : ℕ → Ω → β} {𝒢 : ℕ → MeasurableSpace Ω} (h𝒢 : Monotone 𝒢)
+    (hD : ∀ k, Measurable[𝒢 (k + 1)] (D k))
+    (hind : ∀ k, Indep (MeasurableSpace.comap (D k) inferInstance) (𝒢 k) μ) : iIndepFun D μ := by
+  refine iIndepFun_iff_measure_inter_preimage_eq_mul.2 fun S sets hsets ↦ ?_
+  obtain ⟨N, hN⟩ := S.exists_nat_subset_range
+  induction N generalizing S with
+  | zero =>
+    obtain rfl : S = ∅ := Finset.subset_empty.1 (by simpa using hN)
+    simp
   | succ n ih =>
-    have htn : t n ≤ t (n + 1) := ht (Nat.le_add_right n 1)
-    -- the first `n` increments are `𝓕_{t_n}`-measurable
-    have hS : StronglyMeasurable[(𝓕 (t n) : MeasurableSpace Ω)]
-        (fun ω ↦ ∑ k ∈ Finset.range n, a k * (Y (t (k + 1)) ω - Y (t k) ω)) :=
-      Finset.stronglyMeasurable_fun_sum _ fun k hk ↦ by
-        have hk : k + 1 ≤ n := Finset.mem_range.mp hk
-        exact ((h.adapted.stronglyMeasurable_le (ht hk)).sub
-          (h.adapted.stronglyMeasurable_le (ht (Nat.le_of_succ_le hk)))).const_mul (a k)
-    set e1 : Ω → ℝ := fun ω ↦ Real.exp (∑ k ∈ Finset.range n, a k * (Y (t (k + 1)) ω - Y (t k) ω))
-    set e2 : Ω → ℝ := fun ω ↦ Real.exp (a n * (Y (t (n + 1)) ω - Y (t n) ω))
-    have he1 : StronglyMeasurable[(𝓕 (t n) : MeasurableSpace Ω)] e1 :=
-      Real.continuous_exp.comp_stronglyMeasurable hS
-    have he2 : Integrable e2 Q := integrable_exp_Y_increment h (a n) htn (htT _)
-    have h12 : Integrable (e1 * e2) Q :=
-      integrable_exp_mul_exp (hS.mono (𝓕.le (t n))).measurable
-        (((h.measurable (t (n + 1))).sub (h.measurable (t n))).const_mul (a n))
-        (by simpa only [Finset.mul_sum, mul_assoc] using (ih fun k ↦ 2 * a k).1)
-        (by simpa only [mul_assoc] using integrable_exp_Y_increment h (2 * a n) htn (htT _))
-    rw [show (fun ω ↦ Real.exp (∑ k ∈ Finset.range (n + 1), a k * (Y (t (k + 1)) ω - Y (t k) ω)))
-        = e1 * e2 from funext fun ω ↦ by
-          simp only [e1, e2, Pi.mul_apply]
-          rw [Finset.sum_range_succ, Real.exp_add]]
-    refine ⟨h12, ?_⟩
-    calc ∫ ω, (e1 * e2) ω ∂Q
-        = ∫ ω, (Q[e1 * e2 | 𝓕 (t n)]) ω ∂Q := (integral_condExp (𝓕.le (t n))).symm
-      _ = ∫ ω, e1 ω * Real.exp (a n ^ 2 * ((t (n + 1) : ℝ) - (t n : ℝ)) / 2) ∂Q := by
-          refine integral_congr_ae ?_
-          filter_upwards [condExp_mul_of_stronglyMeasurable_left
-              (m := (𝓕 (t n) : MeasurableSpace Ω)) he1 h12 he2,
-            h.condExp_exp_increment (a n) htn (htT (n + 1))] with ω hp hc
-          rw [hp, Pi.mul_apply]
-          exact congrArg (e1 ω * ·) hc
-      _ = (∫ ω, e1 ω ∂Q) * Real.exp (a n ^ 2 * ((t (n + 1) : ℝ) - (t n : ℝ)) / 2) :=
-          integral_mul_const _ _
-      _ = ∏ k ∈ Finset.range (n + 1), Real.exp (a k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) / 2) := by
-          rw [Finset.prod_range_succ]
-          exact congrArg (· * _) (ih a).2
+    by_cases hn : n ∈ S
+    · have hS : S.erase n ⊆ Finset.range n := fun i hi ↦ by
+        have h1 := Finset.mem_range.1 (hN (Finset.mem_of_mem_erase hi))
+        have h2 := Finset.ne_of_mem_erase hi
+        rw [Finset.mem_range]
+        omega
+      have hmeas : MeasurableSet[𝒢 n] (⋂ i ∈ S.erase n, D i ⁻¹' sets i) :=
+        Finset.measurableSet_biInter _ fun i hi ↦
+          (hD i).mono (h𝒢 (Finset.mem_range.1 (hS hi))) le_rfl
+            (hsets i (Finset.mem_of_mem_erase hi))
+      rw [← Finset.insert_erase hn, Finset.set_biInter_insert,
+        Finset.prod_insert (Finset.notMem_erase n S),
+        (Indep_iff _ _ _).1 (hind n) _ _ ⟨sets n, hsets n hn, rfl⟩ hmeas,
+        ih (S.erase n) (fun i hi ↦ hsets i (Finset.mem_of_mem_erase hi)) hS]
+    · refine ih S hsets fun i hi ↦ ?_
+      have h1 := Finset.mem_range.1 (hN hi)
+      have h2 : i ≠ n := fun h ↦ hn (h ▸ hi)
+      rw [Finset.mem_range]
+      omega
 
-/-- **Linear combinations of successive increments are Gaussian under `Q`.** For a monotone
-sequence of times in `[0,T]` and reals `c`, `∑_{k<n} c_k·(Y_{t_{k+1}} − Y_{t_k})` has law `N(0,v)`
-under `Q`, for `v = ∑_{k<n} c_k²(t_{k+1} − t_k)`: its `Q`-MGF is the Gaussian one
-(`Y_increments_mgf_range`). -/
-private theorem Y_linComb_range_map_eq_gaussianReal (h : IsExpQMartingale Q 𝓕 Y T)
-    {t : ℕ → ℝ≥0} (ht : Monotone t) (htT : ∀ k, t k ≤ T) (n : ℕ) (c : ℕ → ℝ) {v : ℝ≥0}
-    (hv : (v : ℝ) = ∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ))) :
-    Q.map (fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω))
-      = gaussianReal 0 v := by
-  have hlin : Measurable fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω) :=
-    Finset.measurable_sum _ fun k _ ↦ ((h.measurable _).sub (h.measurable _)).const_mul (c k)
-  refine map_eq_gaussianReal_of_mgf hlin.aemeasurable fun r ↦ ?_
-  have hr : (fun ω ↦ Real.exp (r * ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)))
-      = fun ω ↦ Real.exp (∑ k ∈ Finset.range n, (r * c k) * (Y (t (k + 1)) ω - Y (t k) ω)) := by
-    funext ω; simp only [Finset.mul_sum, mul_assoc]
-  have hmgfn :
-      ∫ ω, Real.exp (∑ k ∈ Finset.range n, (r * c k) * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
-        = ∏ k ∈ Finset.range n, Real.exp ((r * c k) ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) / 2) :=
-    (Y_increments_mgf_range h ht htT n fun k ↦ r * c k).2
-  change ∫ ω, Real.exp (r * ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)) ∂Q
-      = Real.exp (v * r ^ 2 / 2)
-  rw [hr, hmgfn, ← Real.exp_sum, hv, Finset.sum_mul, Finset.sum_div]
-  exact congrArg Real.exp (Finset.sum_congr rfl fun k _ ↦ by ring)
-
-/-- **Successive increments are jointly `Q`-independent.** For a monotone sequence of times `t` in
-`[0,T]`, the increments `Y_{t_{k+1}} − Y_{t_k}`, `k < n`, are independent under `Q`. By
-`iIndepFun_iff_charFun_pi` independence is the factorisation of the joint characteristic function.
-At `w` it is the characteristic function at `1` of the Gaussian linear combination
-`∑_k w_k·(Y_{t_{k+1}} − Y_{t_k})` (`Y_linComb_range_map_eq_gaussianReal`), which is the product of
-the marginal Gaussian characteristic functions. -/
-theorem increments_iIndepFun_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {t : ℕ → ℝ≥0}
-    (ht : Monotone t) (htT : ∀ k, t k ≤ T) (n : ℕ) :
-    iIndepFun (fun (i : Fin n) ω ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) Q := by
-  have hX (i : Fin n) : AEMeasurable (fun ω ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) Q :=
-    ((h.measurable _).sub (h.measurable _)).aemeasurable
-  refine (iIndepFun_iff_charFun_pi hX).mpr fun w ↦ ?_
-  set c : ℕ → ℝ := fun k ↦ if hk : k < n then w ⟨k, hk⟩ else 0
-  have hc (i : Fin n) : c i = w i := dite_eq_left i.isLt
-  have hσ2 : 0 ≤ ∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ)) :=
-    Finset.sum_nonneg fun k _ ↦ mul_nonneg (sq_nonneg _)
-      (sub_nonneg.mpr (NNReal.coe_le_coe.mpr (ht (Nat.le_add_right k 1))))
-  have hmarg (i : Fin n) : charFun (Q.map fun ω ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) (w i)
-      = Complex.exp ((-(w i ^ 2 * ((t ((i : ℕ) + 1) : ℝ) - (t i : ℝ)) / 2) : ℝ) : ℂ) := by
-    rw [increment_map_eq_gaussianReal_of_expMartingale h (ht (Nat.le_add_right _ 1)) (htT _),
-      charFun_gaussianReal, NNReal.coe_sub (ht (Nat.le_add_right _ 1))]
-    congr 1
-    push_cast
-    ring
-  have hsum : ∑ i : Fin n, -(w i ^ 2 * ((t ((i : ℕ) + 1) : ℝ) - (t i : ℝ)) / 2)
-      = -(∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ))) / 2 := by
-    rw [← Fin.sum_univ_eq_sum_range, neg_div, Finset.sum_div, ← Finset.sum_neg_distrib]
-    exact Finset.sum_congr rfl fun i _ ↦ by rw [hc i]
-  calc charFun (Q.map fun ω ↦ WithLp.toLp 2 fun i : Fin n ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) w
-      -- the joint characteristic function at `w` is that of `∑ₖ wₖ·(Y_{tₖ₊₁} − Y_{tₖ})` at `1`,
-      = charFun (Q.map fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω)) 1 := by
-        have hvec : Measurable fun ω ↦
-            WithLp.toLp 2 fun i : Fin n ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω :=
-          (WithLp.measurable_toLp 2 _).comp
-            (Measurable.of_eval fun i ↦ (h.measurable _).sub (h.measurable _) :
-              Measurable fun ω (i : Fin n) ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω)
-        have hlin : Measurable fun ω ↦ ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω) :=
-          Finset.measurable_sum _ fun k _ ↦ ((h.measurable _).sub (h.measurable _)).const_mul (c k)
-        rw [charFun_apply, charFun_apply_real, integral_map hvec.aemeasurable (by fun_prop),
-          integral_map hlin.aemeasurable (by fun_prop)]
-        refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
-        have hinner : ⟪WithLp.toLp 2 fun i : Fin n ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω, w⟫
-            = ∑ k ∈ Finset.range n, c k * (Y (t (k + 1)) ω - Y (t k) ω) := by
-          rw [PiLp.inner_apply, ← Fin.sum_univ_eq_sum_range]
-          refine Finset.sum_congr rfl fun i _ ↦ ?_
-          rw [hc i]
-          simp only [RCLike.inner_apply, conj_trivial]
-        simp only [hinner, Complex.ofReal_one, one_mul]
-      -- a centred Gaussian with the diagonal variance,
-      _ = Complex.exp ((-(∑ k ∈ Finset.range n, c k ^ 2 * ((t (k + 1) : ℝ) - (t k : ℝ))) / 2 : ℝ)
-            : ℂ) := by
-        rw [Y_linComb_range_map_eq_gaussianReal h ht htT n c (Real.coe_toNNReal _ hσ2),
-          charFun_gaussianReal, Real.coe_toNNReal _ hσ2]
-        congr 1
-        push_cast
-        ring
-      -- so the product of the marginal Gaussian characteristic functions
-      _ = ∏ i : Fin n, charFun (Q.map fun ω ↦ Y (t ((i : ℕ) + 1)) ω - Y (t i) ω) (w i) := by
-        rw [Finset.prod_congr rfl fun i _ ↦ hmarg i, ← Complex.exp_sum, ← Complex.ofReal_sum, hsum]
+/-- **Adapted, with increments independent of the past, gives independent increments.** If `X` is
+adapted to a monotone family `𝒢` of σ-algebras and each increment `X t − X s` (`s ≤ t`) is
+independent of `𝒢 s`, then `X` has independent increments in Mathlib's sense
+(`HasIndepIncrements`): along a monotone sequence of times, the earlier increments are measurable
+for the σ-algebra of the last time, from which the last increment is independent
+(`iIndepFun_of_indep_past`). -/
+theorem hasIndepIncrements_of_indep_past {ι E : Type*} [Preorder ι] [Sub E] [MeasurableSpace E]
+    [MeasurableSub₂ E] {X : ι → Ω → E} {P : Measure Ω} [IsProbabilityMeasure P]
+    (𝒢 : ι → MeasurableSpace Ω) (h𝒢 : Monotone 𝒢) (hX : ∀ t, Measurable[𝒢 t] (X t))
+    (hind : ∀ s t, s ≤ t →
+      Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) inferInstance) (𝒢 s) P) :
+    HasIndepIncrements X P :=
+  HasIndepIncrements.of_nat fun τ hτ _ ↦
+    iIndepFun_of_indep_past (𝒢 := fun k ↦ 𝒢 (τ k)) (fun _ _ hij ↦ h𝒢 (hτ hij))
+      (fun k ↦ (hX (τ (k + 1))).sub ((hX (τ k)).mono (h𝒢 (hτ (Nat.le_succ k))) le_rfl))
+      fun k ↦ hind _ _ (hτ (Nat.le_succ k))
 
 /-- **Independent increments under `Q`.** On `[0,T]`, `Y` has independent increments under `Q` in
 Mathlib's sense: for times `t₀ ≤ ⋯ ≤ tₙ` in `[0,T]`, the increments `Y_{t₁} − Y_{t₀}, …,
-Y_{tₙ} − Y_{tₙ₋₁}` are jointly independent. Every finite family of increments along a monotone
-sequence sits inside the first `N` of them (`increments_iIndepFun_of_expMartingale`). -/
+Y_{tₙ} − Y_{tₙ₋₁}` are jointly independent. Each increment is independent of the past
+(`indep_increment_of_expMartingale`), and independence of the past gives joint independence
+(`hasIndepIncrements_of_indep_past`). -/
 theorem hasIndepIncrements_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) :
-    HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q := by
-  refine HasIndepIncrements.of_nat fun τ hτ _ ↦ iIndepFun_iff_finset.2 fun S ↦ ?_
-  obtain ⟨N, hN⟩ := S.exists_nat_subset_range
-  exact (increments_iIndepFun_of_expMartingale h (t := fun k ↦ (τ k : ℝ≥0))
-      (fun i j hij ↦ Subtype.coe_le_coe.mpr (hτ hij)) (fun k ↦ Set.mem_Iic.mp (τ k).2) N).precomp
-    (g := fun k : S ↦ (⟨k, Finset.mem_range.mp (hN k.2)⟩ : Fin N))
-    fun a b hab ↦ Subtype.ext (congrArg Fin.val hab)
+    HasIndepIncrements (fun t : Set.Iic T ↦ Y t) Q :=
+  hasIndepIncrements_of_indep_past (fun t ↦ 𝓕 t) (fun _ _ hst ↦ 𝓕.mono hst)
+    (fun t ↦ (h.adapted t).measurable) fun _ t hst ↦ indep_increment_of_expMartingale h hst t.2
+
+/-- **`Y` is a Gaussian process on `[0,T]` under `Q`.** The marginals are `N(0,t)`
+(`map_eq_gaussianReal_of_expMartingale`), `Y_0 = 0` a.e., and the increments are independent
+(`hasIndepIncrements_of_expMartingale`), which is what
+`HasIndepIncrements.isGaussianProcess` needs; `Set.Iic T` has a bottom element. -/
+theorem IsExpQMartingale.isGaussianProcess (h : IsExpQMartingale Q 𝓕 Y T) :
+    IsGaussianProcess (fun t : Set.Iic T ↦ Y t) Q :=
+  (hasIndepIncrements_of_expMartingale h).isGaussianProcess
+    (fun t ↦ (⟨(h.measurable t).aemeasurable, map_eq_gaussianReal_of_expMartingale h t.2⟩ :
+      HasLaw (Y t) (gaussianReal 0 t) Q).hasGaussianLaw)
+    (h.zero_start.mono fun ω hω ↦ by simpa using hω)
+
+/-- **Mean.** `𝔼_Q[Y_t] = 0` for `t ≤ T`: the marginal law is the centred `N(0,t)`. -/
+theorem IsExpQMartingale.integral_eq_zero (h : IsExpQMartingale Q 𝓕 Y T) {t : ℝ≥0}
+    (htT : t ≤ T) : Q[Y t] = 0 := by
+  rw [(⟨(h.measurable t).aemeasurable, map_eq_gaussianReal_of_expMartingale h htT⟩ :
+    HasLaw (Y t) (gaussianReal 0 t) Q).integral_eq, integral_id_gaussianReal]
+
+/-- **Covariance.** `cov(Y_s, Y_t) = s` for `s ≤ t ≤ T`, that is `min s t`: write
+`Y_t = (Y_t − Y_s) + Y_s`; the increment is independent of `𝓕_s` and so of `Y_s`
+(`indep_increment_of_expMartingale`), and `Var(Y_s) = s`. -/
+theorem IsExpQMartingale.covariance_eq (h : IsExpQMartingale Q 𝓕 Y T) {s t : ℝ≥0}
+    (hst : s ≤ t) (htT : t ≤ T) : cov[Y s, Y t; Q] = s := by
+  have hs : HasLaw (Y s) (gaussianReal 0 s) Q :=
+    ⟨(h.measurable s).aemeasurable, map_eq_gaussianReal_of_expMartingale h (hst.trans htT)⟩
+  have hD : HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q :=
+    ⟨((h.measurable t).sub (h.measurable s)).aemeasurable,
+      increment_map_eq_gaussianReal_of_expMartingale h hst htT⟩
+  have hind : IndepFun (fun ω ↦ Y t ω - Y s ω) (Y s) Q :=
+    (IndepFun_iff_Indep _ _ _).2 (indep_of_indep_of_le_right
+      (indep_increment_of_expMartingale h hst htT) (h.adapted s).measurable.comap_le)
+  have h2 : Y t = (fun ω ↦ Y t ω - Y s ω) + Y s := by ext; simp
+  have hs2 := hs.hasGaussianLaw.memLp_two
+  have hD2 := hD.hasGaussianLaw.memLp_two
+  rw [h2, covariance_add_right hs2 hD2 hs2, hind.symm.covariance_eq_zero hs2 hD2,
+    covariance_self hs.aemeasurable, hs.variance_eq, variance_id_gaussianReal, zero_add]
 
 /-- **`Y` has the finite-dimensional laws of a Brownian motion on `[0,T]` under `Q`**: zero start,
-`N(0,t−s)` increments, and independent increments (`HasIndepIncrements`). Path continuity and
-independence of the increments from the past are not part of it.
+`N(0,t−s)` increments, and independent increments (`HasIndepIncrements`). Path continuity is not
+part of it.
 
 This is `IsPreBrownianReal` restricted to a horizon, and it has to be a separate predicate:
 `IsPreBrownianReal Y Q` quantifies over all of `ℝ≥0`, while a Girsanov measure
@@ -461,11 +427,11 @@ data `IsExpQMartingale Q 𝓕 Y T`, the process `Y` is Brownian on `[0,T]` under
   (`hasIndepIncrements_of_expMartingale`).
 
 Together these fix every finite-dimensional law of `Y` on `[0,T]` to that of a Brownian motion.
-Neither path continuity nor independence of the increments from `𝓕_s` is part of the conclusion.
+Path continuity is not part of the conclusion.
 Process- and measure-agnostic: any drift-corrected Girsanov process supplying its own exponential
 martingale (via the Bayes engine) gets these three properties by one application of this
 theorem. -/
-theorem isQBrownianMotion_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) : IsBrownianOn Q T Y :=
+theorem isBrownianOn_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) : IsBrownianOn Q T Y :=
   ⟨h.zero_start, fun _ _ hst htT ↦ increment_map_eq_gaussianReal_of_expMartingale h hst htT,
     hasIndepIncrements_of_expMartingale h⟩
 

@@ -14,10 +14,12 @@ public import BrownianMotion.Gaussian.BrownianMotion
 `Probability/Brownian/ExpMartingaleQBrownian.lean` turns the exponential-martingale data
 `IsExpQMartingale Q 𝓕 Y T` (`Y` adapted, `Y_0 = 0` a.e., every `t ↦ exp(a·Y_t − ½a²t)` a
 `Q`-martingale on `[0,T]`) into `N(0,t−s)` increments and Mathlib's `HasIndepIncrements` on
-`[0,T]`. Its docstring names what it leaves out: independence of the increments from the past,
-and the conclusion on the whole time axis. This module supplies both.
+`[0,T]`. Its docstring names what it leaves out: the conclusion on the whole time axis. This
+module supplies it, and strengthens it by the independence of the increments from the past.
 
-* **Independence from the past.** The conditional moment-generating function
+* **Independence from the past** (`indep_increment_of_expMartingale`, proved in
+  `ExpMartingaleQBrownian`, where it gives the independent increments). The conditional
+  moment-generating function
   `𝔼_Q[exp(a·(Y_t − Y_s)) | 𝓕_s] = exp(½a²(t−s))` is deterministic. Integrated over
   `A ∈ 𝓕_s`, it says that the law of `Y_t − Y_s` under `Q` restricted to `A` has the
   moment-generating function of `Q(A)·N(0,t−s)`, and a finite measure with every exponential
@@ -37,8 +39,6 @@ second-order expansion, not from Itô's formula.
 
 ## Main results
 
-* `MathFin.indep_increment_of_expMartingale`: `Y_t − Y_s` is `Q`-independent of `𝓕_s` for
-  `s ≤ t ≤ T`.
 * `MathFin.hasIndepIncrements_of_forall_expMartingale`: `HasIndepIncrements Y Q` on all of `ℝ≥0`
   when the data hold for every horizon.
 * `MathFin.isPreBrownianReal_of_expMartingale`: then `IsPreBrownianReal Y Q`.
@@ -60,40 +60,6 @@ open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsProbabilityMeasure Q]
   {𝓕 : Filtration ℝ≥0 mΩ} {Y : ℝ≥0 → Ω → ℝ} {T : ℝ≥0}
-
-/-- **Increments are independent of the past.** For `s ≤ t ≤ T`, `Y_t − Y_s` is `Q`-independent
-of `𝓕_s`. Integrating the deterministic conditional moment-generating function
-(`IsExpQMartingale.condExp_exp_increment`) over `A ∈ 𝓕_s` shows that the law of `Y_t − Y_s` under
-`Q` restricted to `A` has the moment-generating function of `Q(A)·N(0,t−s)`, hence is that measure
-(`measure_eq_of_mgf_id_eq`); on a Borel set `B` this reads
-`Q({Y_t − Y_s ∈ B} ∩ A) = Q(A)·N(0,t−s)(B) = Q(A)·Q(Y_t − Y_s ∈ B)`. -/
-theorem indep_increment_of_expMartingale (h : IsExpQMartingale Q 𝓕 Y T) {s t : ℝ≥0}
-    (hst : s ≤ t) (htT : t ≤ T) :
-    Indep (MeasurableSpace.comap (fun ω ↦ Y t ω - Y s ω) inferInstance) (𝓕 s) Q := by
-  have hD : Measurable fun ω ↦ Y t ω - Y s ω := (h.measurable t).sub (h.measurable s)
-  have hlaw := increment_map_eq_gaussianReal_of_expMartingale h hst htT
-  have hlaw' : HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q :=
-    ⟨hD.aemeasurable, hlaw⟩
-  have hexp (u : ℝ) : Integrable (fun ω ↦ Real.exp (u * (Y t ω - Y s ω))) Q :=
-    hlaw'.integrable_fun_comp (integrable_exp_mul_gaussianReal u)
-  refine (Indep_iff _ _ Q).2 fun _ A ⟨B, hB, hBA⟩ hA ↦ ?_
-  subst hBA
-  have : IsFiniteMeasure (Q A • gaussianReal 0 (t - s)) :=
-    Measure.smul_finite _ (measure_ne_top Q A)
-  have hrestrict : (Q.restrict A).map (fun ω ↦ Y t ω - Y s ω) = Q A • gaussianReal 0 (t - s) := by
-    refine measure_eq_of_mgf_id_eq (fun u ↦ (integrable_map_measure (by fun_prop)
-      hD.aemeasurable).2 (hexp u).restrict) ?_
-    funext u
-    rw [mgf_id_map hD.aemeasurable, mgf_smul_measure, mgf_id_gaussianReal, mgf,
-      ← setIntegral_condExp (𝓕.le s) (hexp u) hA,
-      setIntegral_congr_ae (𝓕.le s A hA) ((h.condExp_exp_increment u hst
-        htT).mono fun _ hω _ ↦ hω), setIntegral_const, NNReal.coe_sub hst, measureReal_def,
-      smul_eq_mul]
-    ring_nf
-  have hB' := congrArg (· B) hrestrict
-  simp only [Measure.map_apply hD hB, Measure.restrict_apply (hD hB), Measure.smul_apply,
-    smul_eq_mul, ← hlaw] at hB'
-  rw [hB', mul_comm]
 
 /-! ### The whole time axis -/
 

@@ -24,7 +24,7 @@ continuity is not stated. This is the bounded-**adapted**-θ Girsanov for the si
 beyond constant θ, on the existing tower with no adapted-integrand Itô formula.
 
 The route is the process-agnostic exponential characterization
-`Probability/Brownian/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale`: supply the
+`Probability/Brownian/ExpMartingaleQBrownian.isBrownianOn_of_expMartingale`: supply the
 exponential martingale `exp(a·B^θ − ½a²·)` and read off those three properties, with no
 characteristic-function chain re-derived. The two ingredients specific to simple θ are:
 * the **spine** (`simple_spine`, `simple_spine_ae`): `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`, i.e.
@@ -44,7 +44,7 @@ characteristic-function chain re-derived. The two ingredients specific to simple
   measure;
 * `MathFin.isExpQMartingale_BthetaSimple` — `B^θ` packaged as exponential-martingale data over
   `[0,T]`;
-* `MathFin.Btheta_simple_isQBrownianMotion` — under `Q`, `B^θ` starts at `0`, has `N(0,t−s)`
+* `MathFin.Btheta_simple_isBrownianOn` — under `Q`, `B^θ` starts at `0`, has `N(0,t−s)`
   increments, and has independent increments on `[0,T]`.
 
 ## Tags
@@ -421,11 +421,11 @@ under `Q = P.withDensity(E^{−c}_T)` the drift-corrected process
 `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` has, on `[0,T]`: zero start, Gaussian increments
 `N(0,t−s)`, and independent increments (`HasIndepIncrements`), which fix its finite-dimensional laws
 on `[0,T]`; path continuity is not stated. One application of the exponential characterization
-`isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaSimple` — no characteristic-function
+`isBrownianOn_of_expMartingale` to `isExpQMartingale_BthetaSimple` — no characteristic-function
 chain re-derived (the whole payoff of the abstraction). This is the general bounded-*adapted*-θ
 Girsanov for the simple case, strictly beyond constant θ, on the existing tower — no
 adapted-integrand Itô formula. -/
-theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
+theorem Btheta_simple_isBrownianOn (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
     (c : ℕ → Ω → ℝ) (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
     IsBrownianOn (P.withDensity fun ω ↦
@@ -437,7 +437,7 @@ theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) 
   have : IsProbabilityMeasure (P.withDensity fun ω ↦
       ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) :=
     simpleGirsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) s hs _ hdneg hbneg N T
-  exact isQBrownianMotion_of_expMartingale
+  exact isBrownianOn_of_expMartingale
     (isExpQMartingale_BthetaSimple (X := X) (𝓕 := 𝓕) s hs hs0 c hc hc_bdd N hNT)
 
 end MathFin
