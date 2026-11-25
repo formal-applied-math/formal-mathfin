@@ -122,6 +122,7 @@ theorem survivalFunction_eq_hazardSurvival (hnn : ∀ s, 0 ≤ h s) (hτ : Measu
     hcdf t ht, ENNReal.sub_sub_cancel ENNReal.one_ne_top (ENNReal.ofReal_le_one.2 hQ),
     ENNReal.toReal_ofReal (hazardSurvival_pos h t).le]
 
+omit [IsProbabilityMeasure P] in
 /-- **The exponential law has the constant-hazard distribution function**: a lifetime `τ` with law
 `expMeasure h₀`, `h₀ > 0`, has `P(τ ≤ a) = 1 − e^{−h₀ a}` for `a ≥ 0`
 (`expMeasure_Ioi`, the survival function). -/

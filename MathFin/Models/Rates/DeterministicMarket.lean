@@ -252,16 +252,16 @@ theorem bondPriceKeyRate_eq_price_deterministicMarket (P Q : Measure Ω) [IsProb
     have h : ∃ j < n, ((t j : ℕ) : ℝ≥0) = t i := ⟨i, hi, rfl⟩
     have hj : h.choose = i := hinj (by simpa using h.choose_spec.1) (by simpa using hi)
       (Nat.cast_injective h.choose_spec.2)
-    simp only [N, dif_pos h, hj]
+    simp only [N, dite_eq_left h, hj]
   have hN : ∀ u, 0 < N u := fun u ↦ by
     by_cases h : ∃ i < n, ((t i : ℕ) : ℝ≥0) = u
-    · simpa only [N, dif_pos h] using pow_pos (hk _ h.choose_spec.1) _
-    · simp only [N, dif_neg h, zero_lt_one]
+    · simpa only [N, dite_eq_left h] using pow_pos (hk _ h.choose_spec.1) _
+    · simp only [N, dite_eq_right h, zero_lt_one]
   have hN0 : N 0 = 1 := by
     by_cases h : ∃ i < n, ((t i : ℕ) : ℝ≥0) = 0
     · obtain ⟨i, hi, hi0⟩ := h
       rw [← hi0, hNt i hi, Nat.cast_eq_zero.1 hi0, pow_zero]
-    · simp only [N, dif_neg h]
+    · simp only [N, dite_eq_right h]
   refine ⟨N, hN, hN0, ?_⟩
   rw [price_fixedFlows_deterministicMarket, MathFin.bondPriceKeyRate]
   refine Finset.sum_congr rfl fun i hi ↦ ?_

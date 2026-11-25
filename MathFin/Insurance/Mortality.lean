@@ -185,7 +185,8 @@ theorem hasDerivAt_integral_div_exp_neg_integral (lam G : ℝ → ℝ) (c T : �
     exact (integral_hasDerivAt_left hGInt hGM (hGAt t ⟨ht0, htT⟩)).add_const c
   have hSt := Real.exp_ne_zero (-∫ v in (0 : ℝ)..t, lam v)
   refine (hAderiv.div hSderiv hSt).congr_deriv ?_
-  first | (field_simp; ring) | field_simp
+  field_simp
+  ring
 
 /-- The **Thiele discount factor** from `t` to `s`: the discount `exp(−∫ₜˢ δ)` at the force of
 interest `δ`, times the survival factor `hazardSurvival μ s / hazardSurvival μ t` from `t` to `s`

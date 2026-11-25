@@ -89,7 +89,7 @@ theorem integral_max_sub_add_of_gap (hSm : AEMeasurable S P) (hS : Integrable S 
   have hcongr (t : ℝ) : ∫ ω, max (S ω - t) 0 ∂P = ∫ ω, max (S' ω - t) 0 ∂P :=
     integral_congr_ae (hae.mono fun ω hω ↦ by simp only [hω])
   rw [hcongr, hcongr, measureReal_congr (t := {ω | c < S' ω})
-    (Filter.eventuallyEq_set.2 (hae.mono fun ω hω ↦ by simp only [Set.mem_setOf_eq, hω]))]
+    (Filter.eventuallyEqSet_iff.2 (hae.mono fun ω hω ↦ by simp only [Set.mem_ofPred_eq, hω]))]
   exact key hS'm (hS.congr hae) (hgap.mp (hae.mono fun ω hω h' h'' ↦ h' (by rwa [hω])))
 
 omit [IsFiniteMeasure P] in

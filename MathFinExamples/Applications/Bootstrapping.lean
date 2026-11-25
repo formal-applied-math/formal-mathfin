@@ -116,16 +116,17 @@ theorem sample_df_tail (n : ℕ) (hn : 2 ≤ n) : sample.df (n + 1) = sample.df 
 - the bootstrapped curve reprices every bond in the strip at par;
 - it is the only curve that does;
 - its first three discount factors are `50/51`, `1990/2091` and `65660/71791`;
-- they are positive, below `1` and strictly decreasing;
-- every later factor is the previous one over `1.03`. -/
+- every later factor is the previous one over `1.03`;
+- the first three are positive, below `1` and strictly decreasing. -/
 theorem sample_checked :
     (∀ n, sample.PricesAtPar sample.df n) ∧
       (∀ B : ℕ → ℝ, (∀ n, sample.PricesAtPar B n) → B = sample.df) ∧
       (sample.df 0 = 50 / 51 ∧ sample.df 1 = 1990 / 2091 ∧ sample.df 2 = 65660 / 71791) ∧
+      (∀ n, 2 ≤ n → sample.df (n + 1) = sample.df n / 1.03) ∧
       0 < sample.df 2 ∧ sample.df 2 < sample.df 1 ∧ sample.df 1 < sample.df 0 ∧
-      sample.df 0 < 1 ∧ ∀ n, 2 ≤ n → sample.df (n + 1) = sample.df n / 1.03 := by
+      sample.df 0 < 1 := by
   obtain ⟨h₀, h₁, h₂⟩ := sample_df
-  refine ⟨sample.df_reprices, fun B hB ↦ funext (sample.eq_df hB), sample_df, ?_, sample_df_tail⟩
+  refine ⟨sample.df_reprices, fun B hB ↦ funext (sample.eq_df hB), sample_df, sample_df_tail, ?_⟩
   rw [h₀, h₁, h₂]
   norm_num
 
