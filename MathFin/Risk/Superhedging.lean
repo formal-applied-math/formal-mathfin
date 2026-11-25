@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Pricing.Market
 public import MathFin.Pricing.SuperhedgingDuality
 public import MathFin.Risk.AcceptanceSet
 public import MathFin.Risk.Coherent
@@ -55,6 +56,10 @@ prices under the martingale probability vectors.
   upper bound of the prices `∑ qₙ Yₙ` over the martingale probability vectors `q`.
 * `MathFin.le_superhedgingPrice`: the price under every martingale probability vector is a lower
   bound of the superhedging price.
+* `MathFin.Market.IsPricingMeasure.price_pay_le_superhedgingPrice`: the joint with `Market`: the
+  price of a payment under a pricing measure of a finite-state market is at most the superhedging
+  price of its deflated payoff, in the deflated excess returns `Market.excessReturn`
+  (`Market.IsPricingMeasure.mem_martingaleProbVectors`).
 * `MathFin.martingaleProbVectors_nonempty_of_not_hasArbitrage`: no arbitrage supplies the
   hypothesis.
 
@@ -75,6 +80,7 @@ probability vector, capital requirement, MSC 91G20, MSC 91G70, JEL G13, JEL G32
 namespace MathFin
 
 open MeasureTheory
+open scoped NNReal
 
 variable {M N : ℕ} {z : Fin M → Fin N → ℝ} {Y Y' : Fin N → ℝ} {x x' : ℝ} {θ θ' : Fin M → ℝ}
 
@@ -253,5 +259,81 @@ theorem superhedgingPrice_isLUB (hz : (martingaleProbVectors z).Nonempty) (Y : F
   have hP : ∀ n, (Measure.count : Measure (Fin N)) {n} ≠ 0 := fun n ↦ by simp
   simpa only [representingSet_superhedgingPrice hz] using
     coherentRisk_isLUB (isCoherentRiskMeasure_superhedgingPrice hz hP) Y
+
+/-! ### The joint with `Market`: a pricing measure prices below the superhedging price -/
+
+section MarketBridge
+
+open MathFin.Contracts
+
+variable {K L : ℕ}
+
+/-- The **deflated excess returns** of a market on `L` states up to `T`, the excess-return matrix
+`z` of the superhedging theory: `z k ω = (N 0 / N T)(ω) · S_k(T)(ω) − pr k`, the deflated terminal
+price of asset `k` less its initial price `pr k`. -/
+noncomputable def Market.excessReturn (mk : Market (Fin K) (Fin L)) (T : ℝ≥0)
+    (pr : Fin K → ℝ) : Fin K → Fin L → ℝ :=
+  fun k ω ↦ mk.deflator T ω * mk.asset k T ω - pr k
+
+/-- **A pricing measure is a martingale probability vector of the deflated excess returns.** If
+`Q` prices the market up to `T` and the numéraire and the asset prices at `0` are deterministic
+(`n₀` and `pr`), the masses `Q {ω}` are a member of `martingaleProbVectors` of
+`Market.excessReturn`: they are nonnegative and sum to `1`, and `𝔼_Q[(N 0 / N T) S_k(T)] = pr k`
+because the deflated asset is a `Q`-martingale. -/
+theorem Market.IsPricingMeasure.mem_martingaleProbVectors {mk : Market (Fin K) (Fin L)}
+    {T : ℝ≥0} {Q : Measure (Fin L)} (hQ : mk.IsPricingMeasure T Q) {n₀ : ℝ}
+    (hN₀ : ∀ ω, mk.numeraire 0 ω = n₀) {pr : Fin K → ℝ} (hpr : ∀ k ω, mk.asset k 0 ω = pr k) :
+    (fun ω ↦ Q.real {ω}) ∈ martingaleProbVectors (mk.excessReturn T pr) := by
+  have := hQ.isProb
+  have hsum : ∑ ω, Q.real {ω} = 1 := by
+    have h := integral_fintype (f := fun _ : Fin L ↦ (1 : ℝ)) (μ := Q) Integrable.of_finite
+    simpa using h.symm
+  refine ⟨fun ω ↦ measureReal_nonneg, hsum, fun k ↦ ?_⟩
+  have h : ∫ ω, mk.deflator T ω * mk.asset k T ω ∂Q = ∫ ω, mk.asset k 0 ω ∂Q := by
+    rw [← hQ.price_pay_obs hN₀ k le_rfl, Market.price, Contract.value_pay]
+    simp [Payoff.eval, scenarioAt]
+  have h0 : ∫ ω, mk.asset k 0 ω ∂Q = pr k := by simp [hpr k]
+  have h1 := integral_fintype (μ := Q) (f := fun ω ↦ mk.deflator T ω * mk.asset k T ω)
+    Integrable.of_finite
+  simp only [smul_eq_mul] at h1
+  have e : ∑ ω, Q.real {ω} * Market.excessReturn mk T pr k ω =
+      (∑ ω, Q.real {ω} * (mk.deflator T ω * mk.asset k T ω)) - pr k * ∑ ω, Q.real {ω} := by
+    rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl fun ω _ ↦ by simp only [Market.excessReturn]; ring
+  rw [e, hsum]
+  linarith
+
+/-- **The state-price value of a claim is at most its superhedging price.** In a market on finitely
+many states with a pricing measure `Q` up to `T` and deterministic initial numéraire and prices,
+the price of the payment `Y` at `T`, `∑ ω, (N 0 / N T)(ω) Q {ω} Y ω` (`Market.statePrice`), is at
+most the superhedging price of the deflated claim `(N 0 / N T) Y` in the deflated excess returns:
+no portfolio superreplicates it more cheaply. -/
+theorem Market.IsPricingMeasure.statePricePricing_le_superhedgingPrice
+    {mk : Market (Fin K) (Fin L)} {T : ℝ≥0} {Q : Measure (Fin L)}
+    (hQ : mk.IsPricingMeasure T Q) {n₀ : ℝ} (hN₀ : ∀ ω, mk.numeraire 0 ω = n₀) {pr : Fin K → ℝ}
+    (hpr : ∀ k ω, mk.asset k 0 ω = pr k) (Y : Fin L → ℝ) :
+    statePricePricing Finset.univ (mk.statePrice Q T) Y ≤
+      superhedgingPrice (mk.excessReturn T pr) fun ω ↦ mk.deflator T ω * Y ω := by
+  refine le_trans (le_of_eq (Finset.sum_congr rfl fun ω _ ↦ ?_))
+    (le_superhedgingPrice (hQ.mem_martingaleProbVectors hN₀ hpr) fun ω ↦ mk.deflator T ω * Y ω)
+  simp only [Market.statePrice]
+  ring
+
+/-- **A contract's market price is at most the superhedging price of its payoff**: for a payment of
+`a` at `T`, `mk.price Q (.pay T a)` is at most the superhedging price, in the deflated excess
+returns, of the deflated payoff `(N 0 / N T) a`. The market price under any pricing measure `Q`
+is a lower bound of the cost of every superreplication, which is the one-sided half of the duality
+`superhedgingPrice_isLUB`. -/
+theorem Market.IsPricingMeasure.price_pay_le_superhedgingPrice
+    {mk : Market (Fin K) (Fin L)} {T : ℝ≥0} {Q : Measure (Fin L)}
+    (hQ : mk.IsPricingMeasure T Q) {n₀ : ℝ} (hN₀ : ∀ ω, mk.numeraire 0 ω = n₀) {pr : Fin K → ℝ}
+    (hpr : ∀ k ω, mk.asset k 0 ω = pr k) (a : Payoff (Fin K)) :
+    mk.price Q (.pay T a) ≤ superhedgingPrice (mk.excessReturn T pr)
+      fun ω ↦ mk.deflator T ω * a.eval (scenarioAt mk.asset ω) := by
+  haveI := hQ.isProb
+  rw [Market.price_pay_eq_statePricePricing]
+  exact hQ.statePricePricing_le_superhedgingPrice hN₀ hpr _
+
+end MarketBridge
 
 end MathFin

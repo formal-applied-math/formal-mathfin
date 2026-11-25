@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: bootstrapping a discount curve and repricing the inputs
@@ -51,14 +52,10 @@ namespace MathFin.Examples.Bootstrapping
 
 /-- A strip of annual par bonds on a face of `1`: the bond with index `n` matures in year `n + 1`,
 pays the coupon `coupon n` every year until then, and is quoted at par, a price of `1`. -/
-structure ParStrip where
+structure ParStrip extends Provenance String where
   /-- The annual coupon of the bond maturing in year `n + 1`. -/
   coupon : ℕ → ℝ
   coupon_pos : ∀ n, 0 < coupon n
-  /-- Where the coupons come from. -/
-  sources : List String
-  /-- What the curve does not model. -/
-  unmodelled : List String
 
 namespace ParStrip
 

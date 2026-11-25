@@ -12,6 +12,7 @@ public import MathFinExamples.Applications.CappedCall
 public import MathFinExamples.Applications.CreditCorrelation
 public import MathFinExamples.Applications.GaussianRiskReport
 public import MathFinExamples.Applications.MinimumVariance
+public import MathFinExamples.Applications.Provenance
 public import MathFinExamples.Applications.PutCallParity
 public import MathFinExamples.Tour
 
@@ -38,5 +39,7 @@ Each application states what the library supplies and what it does not.
 * `Applications.GaussianRiskReport`: VaR, expected shortfall and the diversification benefit of a
   two-position Gaussian book.
 * `Applications.MinimumVariance`: the minimum-variance split between two assets.
+* `Applications.Provenance`: the shared record of where an example's inputs come from and what it
+  does not model.
 * `Applications.PutCallParity`: put–call parity as a check on a pair of quoted prices.
 -/

@@ -45,6 +45,7 @@ public import MathFin.Probability.Jumps.PoissonPgf
 -- iterated integral
 public import MathFin.Probability.Laws.GammaPoissonMixturePgf
 -- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
+public import MathFin.Probability.Analysis.IdentDistribSum
 public import MathFin.Probability.Analysis.IndepFreezing
 -- Jensen's inequality through a supporting line (no closed domain needed)
 public import MathFin.Probability.Analysis.AffineMinorant

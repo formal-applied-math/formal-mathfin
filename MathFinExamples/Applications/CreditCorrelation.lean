@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: default correlation in a credit portfolio
@@ -78,7 +79,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
 /-- A pool of loans in the one-factor Gaussian threshold model: the number of obligors, the
 default probability of each, and the correlation of their asset values, with where the numbers
 come from and what the model leaves out. -/
-structure Pool where
+structure Pool extends Provenance String where
   /-- The number of obligors. -/
   size : ℕ
   /-- The default probability of each obligor over the horizon. -/
@@ -87,10 +88,6 @@ structure Pool where
   assetCorr : ℝ
   pd_mem : pd ∈ Ioo 0 1
   assetCorr_mem : assetCorr ∈ Ico 0 1
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the model leaves out. -/
-  unmodelled : List String
 
 namespace Pool
 
