@@ -8,6 +8,7 @@ module
 public import MathFin.Probability.Laws.Esscher
 public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
+public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 public import Mathlib.Probability.HasLaw
 public import Mathlib.Probability.Independence.Process.HasIndepIncrements.IsGaussianProcess
 public import Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic
