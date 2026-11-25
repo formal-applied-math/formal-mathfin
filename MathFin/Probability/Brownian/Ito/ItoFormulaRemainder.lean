@@ -135,6 +135,7 @@ theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     rwa [hfe] at h
   exact (hB.hasLaw_sub t₁ t₀).integrable_fun_comp hg
 
+omit hB in
 open Set in
 /-- **The second-order Taylor remainder under an oscillation bound on `f''`**: if `f''` stays
 within `η` of `f''(x)` between `x` and `y`, the remainder is at most `η (y − x)²`. Two
