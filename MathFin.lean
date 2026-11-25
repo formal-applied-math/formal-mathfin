@@ -124,6 +124,7 @@ public import MathFin.Probability.Dependence.HoeffdingCovariance
 public import MathFin.Probability.Dependence.MarshallOlkin
 public import MathFin.Probability.Dependence.CorrelationFallacies
 public import MathFin.Probability.Laws.ExtremeValue
+public import MathFin.Probability.Laws.ConvexOrder
 public import MathFin.Probability.Laws.GeneralizedPareto
 public import MathFin.Probability.Jumps.PoissonMaxima
 public import MathFin.Probability.Analysis.DerivOfDeriv
@@ -834,6 +835,7 @@ public import MathFin.Risk.UtilityDerivation
 -- The one coherence structure: the four ADEH axioms for losses, ρ(0) = 0, convexity, and (finite
 -- state) pointwise monotonicity and continuity
 public import MathFin.Risk.Coherent
+public import MathFin.Risk.ConvexOrderSums
 -- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
 public import MathFin.Risk.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone

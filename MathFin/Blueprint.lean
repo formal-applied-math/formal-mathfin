@@ -216,6 +216,7 @@ import MathFin.Models.Binomial.AmericanMarket
 import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Choice.Performance.KellyNumeraire
 import MathFin.Risk.JointElicitability
+import MathFin.Risk.ConvexOrderSums
 import MathFin.Models.Binomial.PathMeasure
 import MathFin.Probability.Brownian.BrownianDoobMaximal
 import MathFin.Probability.Discrete.SnellDoobDecomposition
@@ -1880,6 +1881,21 @@ attribute [blueprint "thm:rockafellar-uryasev"
   \sim \mathrm{Poisson}(\lambda)$ independent of identically distributed integrable claims
   (`isLeast_rockafellarUryasev_compoundPoisson`). -/)]
   MathFin.isLeast_rockafellarUryasev
+
+attribute [blueprint "def:convex-order"
+  (title := "Convex order")
+  (statement := /-- $\mu \le_{cx} \nu$ when $\int \varphi\,d\mu \le \int \varphi\,d\nu$ for every
+  convex $\varphi$ integrable under both laws. Ordered laws have equal means and ordered call and
+  put prices, and $\mu$ lives inside every half-line $\nu$ lives in
+  (`ConvexOrder.ae_le_of_ae_le`). -/)]
+  MathFin.ConvexOrder
+
+attribute [blueprint "thm:es-convex-order"
+  (title := "Expected shortfall respects convex order")
+  (statement := /-- If the law of $X$ is below the law of $Y$ in convex order, then
+  $\mathrm{ES}_\alpha(X) \le \mathrm{ES}_\alpha(Y)$ for every $\alpha \in (0,1)$: the
+  Rockafellar–Uryasev objective of $X$ at $c = \mathrm{VaR}_\alpha(Y)$ is below that of $Y$. -/)]
+  MathFin.expectedShortfall_le_of_convexOrder
 
 attribute [blueprint "thm:expected-shortfall-coherent"
   (title := "Expected shortfall is a law-invariant coherent risk measure")
