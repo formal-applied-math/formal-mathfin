@@ -42,7 +42,7 @@ One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier no
   (`discounted_terminal_eq_S0`) and the ratio leg is `bsV` on a unit spot
   (`integral_bsCall_payoff_eq_bsV`). The reified `forwardStartCall` contract is added to
   `Contracts/Instruments/Options.lean` — the first payoff in the language whose strike is an
-  observation. What is not proved: the dividend-yield generalization (the market's asset pays no
+  observation of the same underlying at an earlier date. What is not proved: the dividend-yield generalization (the market's asset pays no
   dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
   whole-formula dividend scaling `S₀ e^{−qT}` and the ratio leg's rate `r − q`), and cliquets (a
   series of forward starts) are out of scope. The Risk
