@@ -12,8 +12,8 @@ public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 # The order on contract values
 
 A pricing functional that is positive and preserves order: the value-level face of the
-no-arbitrage monotonicity argument. A contract whose present value is non-negative along
-every outcome is worth at least `0`; a contract whose present value dominates another's
+no-arbitrage monotonicity argument. A contract whose present value is non-negative almost
+everywhere is worth at least `0`; a contract whose present value dominates another's
 along almost every outcome is worth at least as much; and a family of contracts whose
 present value is convex in a real parameter prices to a convex function of that parameter.
 These are what let a spread, a floor or a dominance relation proved on `pathPV` lift to
@@ -28,8 +28,8 @@ of `pathPV` against `Q`.
 
 ## Main results
 
-* `Contract.value_nonneg` — present value non-negative along every outcome gives a
-  non-negative value, with **no** integrability hypothesis: `integral_nonneg` holds
+* `Contract.value_nonneg` — present value non-negative almost everywhere gives a
+  non-negative value, with **no** integrability hypothesis: `integral_nonneg_of_ae` holds
   unconditionally, and a non-integrable integrand integrates to the junk value `0`,
   which is still non-negative.
 * `Contract.value_le_value_of_pathPV_le_ae` — almost-everywhere dominance gives the order
@@ -65,15 +65,15 @@ namespace MathFin.Contracts
 
 variable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-/-- **A contract whose present value is non-negative along every outcome has a non-negative
+/-- **A contract whose present value is non-negative almost everywhere has a non-negative
 value.** No integrability hypothesis: the Bochner integral of a non-integrable function is
 `0`, and `0 ≤ 0`. -/
 theorem Contract.value_nonneg (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (c : Contract ι)
-    (h : ∀ ω, 0 ≤ c.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) :
+    (h : 0 ≤ᵐ[Q] fun ω ↦ c.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) :
     0 ≤ c.value Q D X := by
   simp only [value]
-  exact integral_nonneg h
+  exact integral_nonneg_of_ae h
 
 /-- **A contract that dominates another almost everywhere is worth at least as much**, given
 the lower contract's present value is non-negative almost everywhere and the upper

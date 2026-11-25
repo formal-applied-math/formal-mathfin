@@ -33,7 +33,7 @@ One `full` entry in `benchmarks/contracts.json`. Corpus 906 → 907 (866 full be
 
 - **`mf-contract-value-order`** (MathFin/Pricing/ValueOrder.lean): the order properties of
   `Contract.value`, stated at the `pathPV` level the file's lemmas use. Proved: a contract whose
-  present value is non-negative along every outcome has a non-negative value, with **no**
+  present value is non-negative almost everywhere has a non-negative value, with **no**
   integrability hypothesis (`Contract.value_nonneg` — the Bochner integral of a non-integrable
   function is `0`, and `0 ≤ 0`); almost-everywhere dominance gives the order on values, with the
   lower present value non-negative almost everywhere and the upper one integrable
