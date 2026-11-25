@@ -153,10 +153,11 @@ theorem price_market_pay_eq_binomialPrice (hqcrr : crrUpProb u d ρ = q) (P : Me
 /-- At a horizon of `N` steps the deflated spot frozen at the horizon is the discounted spot frozen
 at step `N`. -/
 theorem deflated_market_min (P : Measure (ℕ → Bool)) (S₀ : ℝ) (hh : 0 ≤ h) {T : ℝ≥0} {N : ℕ}
-    (hTN : ⌊(T : ℝ) / h⌋₊ = N) (t : ℝ≥0) :
+    (hTN : (T : ℝ) / h = N) (t : ℝ≥0) :
     (market P S₀ u d ρ hh).deflated () (min t T)
       = discountedSpot S₀ u d ρ (min ⌊(t : ℝ) / h⌋₊ N) := by
-  rw [deflated_market, ← hTN]
+  have hfl : ⌊(T : ℝ) / h⌋₊ = N := by rw [hTN, Nat.floor_natCast]
+  rw [deflated_market, ← hfl]
   congr 1
   exact (monotone_floor_div hh).map_min
 
@@ -165,7 +166,7 @@ variable {P Q : Measure (ℕ → Bool)} {S₀ : ℝ} {T : ℝ≥0} {N : ℕ}
 /-- **Under a pricing measure the discounted spot frozen at the horizon is a martingale for the
 flip filtration**: the deflated spot is one along the step count, and the step count has the right
 inverse `n ↦ n h` (`Martingale.of_comp`). -/
-theorem martingale_discountedSpot_of_isPricingMeasure (hh : 0 < h) (hTN : ⌊(T : ℝ) / h⌋₊ = N)
+theorem martingale_discountedSpot_of_isPricingMeasure (hh : 0 < h) (hTN : (T : ℝ) / h = N)
     (hQ : (market P S₀ u d ρ hh.le).IsPricingMeasure T Q) :
     Martingale (fun n ↦ discountedSpot S₀ u d ρ (min n N)) flipFiltration Q := by
   have hM := hQ.martingale ()
@@ -179,13 +180,14 @@ theorem martingale_discountedSpot_of_isPricingMeasure (hh : 0 < h) (hTN : ⌊(T 
 
 /-- Under a pricing measure at a horizon of `N` steps, the laws of the first `N` flips under the
 pricing measure and under the physical law are equivalent. -/
-theorem map_flips_equiv_of_isPricingMeasure (hh : 0 < h) (hTN : ⌊(T : ℝ) / h⌋₊ = N)
+theorem map_flips_equiv_of_isPricingMeasure (hh : 0 < h) (hTN : (T : ℝ) / h = N)
     (hQ : (market P S₀ u d ρ hh.le).IsPricingMeasure T Q) :
     Q.map (flips N) ≪ P.map (flips N) ∧ P.map (flips N) ≪ Q.map (flips N) := by
+  have hfl : ⌊(T : ℝ) / h⌋₊ = N := by rw [hTN, Nat.floor_natCast]
   have hmeas {S : Set (Fin N → Bool)} (hS : MeasurableSet S) :
       MeasurableSet[(market P S₀ u d ρ hh.le).𝓕 T] (flips N ⁻¹' S) := by
     show MeasurableSet[flipFiltration ⌊(T : ℝ) / h⌋₊] _
-    rw [hTN]
+    rw [hfl]
     exact MeasurableSpace.measurableSet_comap.2 ⟨S, hS, rfl⟩
   refine ⟨Measure.AbsolutelyContinuous.mk fun S hS h0 ↦ ?_,
     Measure.AbsolutelyContinuous.mk fun S hS h0 ↦ ?_⟩
@@ -202,7 +204,7 @@ agrees with i.i.d. flips going up with probability `crrUpProb u d ρ` on the fir
 of those flips under it is an equivalent martingale measure of the `N`-period tree
 (`isEMM_horizonSpot_map`), which is unique (`IsEMM.eq_horizonMeasure`). -/
 theorem trim_eq_of_isPricingMeasure (hS₀ : 0 < S₀) (hna : BinomialNoArb u d ρ)
-    (hqcrr : crrUpProb u d ρ = q) (hh : 0 < h) (hTN : ⌊(T : ℝ) / h⌋₊ = N)
+    (hqcrr : crrUpProb u d ρ = q) (hh : 0 < h) (hTN : (T : ℝ) / h = N)
     (hQ : (market P S₀ u d ρ hh.le).IsPricingMeasure T Q) :
     Q.trim (flipFiltration.le N) = (coinFlipMeasure q hq).trim (flipFiltration.le N) := by
   have := hQ.isProb
@@ -221,14 +223,11 @@ no-arbitrage, a cash flow at `T`, on step `N`, paying `g` of the spot at `T`, ha
 whatever the physical law: the discounted payoff depends on the first `N` flips only, on which every
 pricing measure is the risk-neutral law (`trim_eq_of_isPricingMeasure`). -/
 theorem price_pay_eq_binomialPrice_of_isPricingMeasure (hS₀ : 0 < S₀) (hna : BinomialNoArb u d ρ)
-    (hqcrr : crrUpProb u d ρ = q) (hh : 0 < h) (hTN : (T : ℝ) / h = N) {a : Payoff Unit}
+    (hh : 0 < h) (hTN : (T : ℝ) / h = N) {a : Payoff Unit}
     {g : ℝ → ℝ} (hg : ∀ s : Scenario Unit, a.eval s = g (s () T))
     (hQ : (market P S₀ u d ρ hh.le).IsPricingMeasure T Q) :
     (market P S₀ u d ρ hh.le).price Q (.pay T a) = binomialPrice u d ρ g N S₀ := by
-  have hq : q ≤ 1 := by
-    have := (crrUpProb_mem_Ioo hna).2
-    rw [hqcrr] at this
-    exact_mod_cast this.le
+  obtain ⟨q, hq, hqcrr⟩ := hna.exists_nnreal_crrUpProb
   have hfl : ⌊(T : ℝ) / h⌋₊ = N := by rw [hTN, Nat.floor_natCast]
   have hgrid : ∀ t ∈ (Contract.pay T a).dates, ∃ n : ℕ, (t : ℝ) / h = n := fun t ht ↦
     ⟨N, by rw [show t = T by simpa [Contract.dates] using ht]; exact hTN⟩
@@ -242,7 +241,7 @@ theorem price_pay_eq_binomialPrice_of_isPricingMeasure (hS₀ : 0 < S₀) (hna :
         rw [price_market P Q S₀ hh.le (c := .pay T a) trivial hgrid, Contract.value_pay]
     _ = ∫ ω, discount ρ h T * a.eval (scenarioAt (assets S₀ u d h) ω) ∂coinFlipMeasure q hq := by
         rw [integral_trim (flipFiltration.le N) hF, integral_trim (flipFiltration.le N) hF,
-          trim_eq_of_isPricingMeasure hq hS₀ hna hqcrr hh hfl hQ]
+          trim_eq_of_isPricingMeasure hq hS₀ hna hqcrr hh hTN hQ]
     _ = binomialPrice u d ρ g N S₀ := by
         rw [← value_pay_eq_binomialPrice hq hqcrr S₀ hTN hg, Contract.value_pay]
 
@@ -256,13 +255,12 @@ theorem exists_isPricingMeasure_iff (hS₀ : 0 < S₀) (hd : 0 < d) (hdu : d < u
     {p : ℝ≥0} (hp0 : 0 < p) (hp : p < 1) (hN : 0 < N) (hTN : (T : ℝ) / h = N) :
     (∃ Q, (market (coinFlipMeasure p hp.le) S₀ u d ρ hh.le).IsPricingMeasure T Q)
       ↔ BinomialNoArb u d ρ := by
-  have hfl : ⌊(T : ℝ) / h⌋₊ = N := by rw [hTN, Nat.floor_natCast]
   refine ⟨fun ⟨Q, hQ⟩ ↦ ?_, fun hna ↦ ?_⟩
   · have := hQ.isProb
-    obtain ⟨h₁, h₂⟩ := map_flips_equiv_of_isPricingMeasure hh hfl hQ
+    obtain ⟨h₁, h₂⟩ := map_flips_equiv_of_isPricingMeasure hh hTN hQ
     exact binomialNoArb_of_noArbitrage hS₀ hd hdu hN hp0 hp
       (isEMM_horizonSpot_map (P := horizonMeasure N p hp.le) ⟨inferInstance, h₁, h₂⟩
-        (martingale_discountedSpot_of_isPricingMeasure hh hfl hQ)).noArbitrage
+        (martingale_discountedSpot_of_isPricingMeasure hh hTN hQ)).noArbitrage
   · obtain ⟨q, hq, hqcrr⟩ := hna.exists_nnreal_crrUpProb
     exact ⟨_, isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ hh.le hp0 hp T⟩
 

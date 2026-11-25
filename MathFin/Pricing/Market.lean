@@ -244,10 +244,10 @@ theorem IsPricingMeasure.of_trim_eq {M : Market ι Ω} {T : ℝ≥0} {Q Q' : Mea
     (hQ : M.IsPricingMeasure T Q) (h : Q.trim (M.𝓕.le T) = Q'.trim (M.𝓕.le T)) :
     M.IsPricingMeasure T Q' := by
   have := hQ.isProb
-  have : IsProbabilityMeasure Q' := ⟨by
+  have hQ' : IsProbabilityMeasure Q' := ⟨by
     rw [← trim_measurableSet_eq (M.𝓕.le T) (@MeasurableSet.univ _ (M.𝓕 T)), ← h,
       trim_measurableSet_eq (M.𝓕.le T) (@MeasurableSet.univ _ (M.𝓕 T)), measure_univ]⟩
-  refine ⟨this, ?_, ?_, fun i ↦ martingale_min_of_trim_eq h (hQ.martingale i)⟩
+  refine ⟨hQ', ?_, ?_, fun i ↦ martingale_min_of_trim_eq h (hQ.martingale i)⟩
   · rw [← h]
     exact hQ.ac
   · rw [← h]
