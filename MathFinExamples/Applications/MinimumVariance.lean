@@ -70,6 +70,12 @@ structure AssetPair where
   vol₂ : ℝ
   /-- The correlation of their returns. -/
   corr : ℝ
+  /-- Asset 1 is risky. -/
+  vol₁_pos : 0 < vol₁
+  /-- Asset 2 is risky. -/
+  vol₂_pos : 0 < vol₂
+  /-- The returns are not perfectly correlated. -/
+  corr_mem : corr ∈ Set.Ioo (-1) 1
   /-- Where the numbers come from. -/
   sources : List String
   /-- What the allocation does not model. -/
@@ -80,6 +86,9 @@ noncomputable def sample : AssetPair where
   vol₁ := 0.2
   vol₂ := 0.3
   corr := 0.25
+  vol₁_pos := by norm_num
+  vol₂_pos := by norm_num
+  corr_mem := by norm_num
   sources := ["illustrative annual volatilities and correlation"]
   unmodelled :=
     ["expected returns", "estimation error in the volatilities and the correlation",
@@ -102,15 +111,16 @@ theorem sample_minVar : minPortfolioVarTwo sample.vol₁ sample.vol₂ sample.co
   rw [minPortfolioVarTwo, sample_denom]
   norm_num [sample]
 
-/-- **Returns with these moments exist**, whenever the correlation is in `[−1, 1]`: on the
+/-- **Returns with these moments exist** for every pair of assets: on the
 Cholesky pair, `R₁ = σ₁ Z₁` and `R₂ = σ₂ Z₂` (`gaussianPair` with zero means) are
 square-integrable with the pair's volatilities and correlation. So a statement about every such
 pair of returns is not about an empty class. -/
-theorem AssetPair.exists_returns (a : AssetPair) (hcorr : a.corr ^ 2 ≤ 1) :
+theorem AssetPair.exists_returns (a : AssetPair) :
     ∃ R₁ R₂ : ℝ × ℝ → ℝ, MemLp R₁ 2 (bivariateNormalLaw a.corr) ∧
       MemLp R₂ 2 (bivariateNormalLaw a.corr) ∧ Var[R₁; bivariateNormalLaw a.corr] = a.vol₁ ^ 2 ∧
       Var[R₂; bivariateNormalLaw a.corr] = a.vol₂ ^ 2 ∧
       cov[R₁, R₂; bivariateNormalLaw a.corr] = a.corr * a.vol₁ * a.vol₂ :=
+  have hcorr : a.corr ^ 2 ≤ 1 := by nlinarith [a.corr_mem.1, a.corr_mem.2]
   ⟨gaussianPair 0 ![a.vol₁, a.vol₂] 0, gaussianPair 0 ![a.vol₁, a.vol₂] 1,
     memLp_gaussianPair _ _ _ _, memLp_gaussianPair _ _ _ _,
     by simpa using variance_gaussianPair hcorr 0 ![a.vol₁, a.vol₂] 0,
@@ -154,7 +164,7 @@ theorem sample_checked :
   have hat : portfolioVarTwo sample.vol₁ sample.vol₂ sample.corr (3 / 4) = 0.03375 := by
     rw [← sample_weight, portfolioVarTwo_at_minVarWeight hD.ne', sample_minVar]
   refine ⟨sample_weight, sample_minVar, hge, hat, ?_, by norm_num [sample],
-    by norm_num [sample], sample.exists_returns (by norm_num [sample]),
+    by norm_num [sample], sample.exists_returns,
     fun P _ R₁ R₂ h₁ h₂ hv₁ hv₂ hc ↦ ⟨fun w ↦ ?_, ?_⟩⟩
   · simpa only [sample_weight] using isConstrainedVarianceCriticalPoint_minVarWeightTwo hD.ne'
   · exact (hge w).trans_eq (portfolioVarTwo_eq_variance h₁ h₂ hv₁ hv₂ hc w)
