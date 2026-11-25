@@ -547,6 +547,7 @@ public import MathFin.Models.StochVol.HestonSmallVolOfVol
 -- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
 -- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 public import MathFin.Models.BlackScholes.Lookback
+public import MathFin.Models.BlackScholes.BarrierReflection
 public import MathFin.Models.BlackScholes.BarrierParity
 public import MathFin.Models.BlackScholes.BinaryBarrierOption
 -- Also consumes the bivariate normal CDF (Probability/Gaussian/BivariateNormalCDF),

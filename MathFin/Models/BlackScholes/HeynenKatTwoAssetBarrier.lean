@@ -7,6 +7,7 @@ module
 
 public import MathFin.Probability.Gaussian.BivariateNormalCDF
 public import MathFin.Models.BlackScholes.PutGreeks
+public import MathFin.Models.BlackScholes.BarrierReflection
 
 /-!
 # Heynen & Kat two-asset barrier option: the closed form
@@ -141,11 +142,11 @@ noncomputable def heynenKatA (eta phi S1 S2 X H T r b1 b2 σ1 σ2 ρ : ℝ) : �
   let mu2 := hkMu b2 σ2
   eta * S1 * Real.exp ((b1 - r) * T) *
       (bivariateNormalCDF (eta * d1) (phi * e1) (-eta * phi * ρ) -
-        Real.exp (2 * (mu2 + ρ * σ1 * σ2) * Real.log (H / S2) / σ2 ^ 2) *
+        barrierReflection S2 H ((mu2 + ρ * σ1 * σ2) / σ2 ^ 2) *
           bivariateNormalCDF (eta * d3) (phi * e3) (-eta * phi * ρ)) -
     eta * X * Real.exp (-(r * T)) *
       (bivariateNormalCDF (eta * d2) (phi * e2) (-eta * phi * ρ) -
-        Real.exp (2 * mu2 * Real.log (H / S2) / σ2 ^ 2) *
+        barrierReflection S2 H (mu2 / σ2 ^ 2) *
           bivariateNormalCDF (eta * d4) (phi * e4) (-eta * phi * ρ))
 
 /-- **Independent assets factor.** At `ρ = 0` every `N₂` in `A(η, φ)` factors
@@ -159,7 +160,7 @@ theorem heynenKatA_rho_zero (eta phi S1 S2 X H T r b1 b2 σ1 σ2 : ℝ) :
       (eta * S1 * Real.exp ((b1 - r) * T) * Phi (eta * hkD1 S1 X b1 σ1 T) -
           eta * X * Real.exp (-(r * T)) * Phi (eta * hkD2 S1 X b1 σ1 T)) *
         (Phi (phi * hkE1 H S2 b2 σ1 σ2 0 T) -
-          Real.exp (2 * hkMu b2 σ2 * Real.log (H / S2) / σ2 ^ 2) *
+          barrierReflection S2 H (hkMu b2 σ2 / σ2 ^ 2) *
             Phi (phi * hkE3 H S2 b2 σ1 σ2 0 T)) := by
   simp only [heynenKatA, hkD3, hkD4, hkE2, hkE3, hkE4, mul_zero, zero_mul, zero_div, add_zero,
     bivariateNormalCDF_zero]
@@ -179,11 +180,11 @@ theorem heynenKat_downOut_add_upOut (S1 S2 X H T r b1 b2 σ1 σ2 : ℝ) {eta ρ 
         heynenKatA eta 1 S1 S2 X H T r b1 b2 σ1 σ2 ρ =
       eta * S1 * Real.exp ((b1 - r) * T) *
           (Phi (eta * hkD1 S1 X b1 σ1 T) -
-            Real.exp (2 * (hkMu b2 σ2 + ρ * σ1 * σ2) * Real.log (H / S2) / σ2 ^ 2) *
+            barrierReflection S2 H ((hkMu b2 σ2 + ρ * σ1 * σ2) / σ2 ^ 2) *
               Phi (eta * hkD3 S1 X H S2 b1 σ1 σ2 ρ T)) -
         eta * X * Real.exp (-(r * T)) *
           (Phi (eta * hkD2 S1 X b1 σ1 T) -
-            Real.exp (2 * hkMu b2 σ2 * Real.log (H / S2) / σ2 ^ 2) *
+            barrierReflection S2 H (hkMu b2 σ2 / σ2 ^ 2) *
               Phi (eta * hkD4 S1 X H S2 b1 σ1 σ2 ρ T)) := by
   have heρ : (-(eta * ρ)) ^ 2 ≤ 1 := by
     rw [neg_sq, mul_pow, heta, one_mul]; exact hρ
@@ -210,9 +211,9 @@ theorem heynenKat_downOut_add_upOut (S1 S2 X H T r b1 b2 σ1 σ2 : ℝ) {eta ρ 
   linear_combination (eta * S1 * Real.exp ((b1 - r) * T)) * h1 +
     (-(eta * X * Real.exp (-(r * T)))) * h2 +
     (-(eta * S1 * Real.exp ((b1 - r) * T) *
-        Real.exp (2 * (b2 - σ2 ^ 2 / 2 + ρ * σ1 * σ2) * Real.log (H / S2) / σ2 ^ 2))) * h3 +
+        barrierReflection S2 H ((b2 - σ2 ^ 2 / 2 + ρ * σ1 * σ2) / σ2 ^ 2))) * h3 +
     (eta * X * Real.exp (-(r * T)) *
-        Real.exp (2 * (b2 - σ2 ^ 2 / 2) * Real.log (H / S2) / σ2 ^ 2)) * h4
+        barrierReflection S2 H ((b2 - σ2 ^ 2 / 2) / σ2 ^ 2)) * h4
 
 /-! ### The independent case through the library's Black–Scholes prices -/
 
@@ -235,7 +236,7 @@ theorem heynenKatA_call_rho_zero_eq_bsV (phi S1 S2 X H T r b2 σ1 σ2 : ℝ) :
     heynenKatA 1 phi S1 S2 X H T r r b2 σ1 σ2 0 =
       bsV X r σ1 S1 T *
         (Phi (phi * hkE1 H S2 b2 σ1 σ2 0 T) -
-          Real.exp (2 * hkMu b2 σ2 * Real.log (H / S2) / σ2 ^ 2) *
+          barrierReflection S2 H (hkMu b2 σ2 / σ2 ^ 2) *
             Phi (phi * hkE3 H S2 b2 σ1 σ2 0 T)) := by
   rw [heynenKatA_rho_zero, hkD1_eq_bsd1, hkD2_eq_bsd2, bsV, sub_self, zero_mul, Real.exp_zero]
   simp only [one_mul, mul_one]
@@ -248,7 +249,7 @@ theorem heynenKatA_put_rho_zero_eq_bsP (phi S1 S2 X H T r b2 σ1 σ2 : ℝ) :
     heynenKatA (-1) phi S1 S2 X H T r r b2 σ1 σ2 0 =
       bsP X r σ1 S1 T *
         (Phi (phi * hkE1 H S2 b2 σ1 σ2 0 T) -
-          Real.exp (2 * hkMu b2 σ2 * Real.log (H / S2) / σ2 ^ 2) *
+          barrierReflection S2 H (hkMu b2 σ2 / σ2 ^ 2) *
             Phi (phi * hkE3 H S2 b2 σ1 σ2 0 T)) := by
   rw [heynenKatA_rho_zero, hkD1_eq_bsd1, hkD2_eq_bsd2, bsP, sub_self, zero_mul, Real.exp_zero]
   simp only [neg_mul, one_mul, mul_one]
