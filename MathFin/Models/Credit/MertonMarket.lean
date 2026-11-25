@@ -86,12 +86,7 @@ theorem price_defaultableZCB_add_price_europeanCall {Ω : Type*} [mΩ : Measurab
   have := hQ.isProb
   rw [← hQ.price_pay_obs hN₀ () le_rfl]
   have hD (ω : Ω) : 0 ≤ M.deflator T ω := (M.deflator_pos T ω).le
-  have hSint : Integrable (fun ω ↦ M.deflator T ω * M.asset () T ω) Q := by
-    have h := (hQ.martingale ()).integrable T
-    simp only [min_self] at h
-    refine (h.const_mul n₀).congr (.of_forall fun ω ↦ ?_)
-    simp only [Market.deflator, Market.deflated, hN₀]
-    ring
+  have hSint := hQ.integrable_deflator_mul_asset hN₀ ()
   have hint (f : ℝ → ℝ) (hf : Measurable f) (h0 : ∀ x, 0 ≤ x → 0 ≤ f x)
       (h1 : ∀ x, 0 ≤ x → f x ≤ x) :
       Integrable (fun ω ↦ M.deflator T ω * f (M.asset () T ω)) Q :=

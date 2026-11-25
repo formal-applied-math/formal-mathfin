@@ -89,7 +89,8 @@ prices `q ω = (N 0 / N t)(ω) · Q {ω}` (`price_pay_eq_statePricePricing`), no
 * `Market.IsPricingMeasure.exists_isEquivProbMeasure`: a pricing measure agrees on `𝓕 T` with a
   pricing measure equivalent to `P` everywhere.
 * `Market.IsPricingMeasure.price_pay_obs`: a traded asset is priced at its initial price;
-  `Market.IsPricingMeasure.integrable_asset`: with unit numéraire the asset is `Q`-integrable.
+  `Market.IsPricingMeasure.integrable_deflator_mul_asset`: the deflated asset at `T` is
+  `Q`-integrable; `Market.IsPricingMeasure.integrable_asset`: with unit numéraire so is the asset.
 * `Market.price_eq_of_map_observation_eq`: law invariance of the price.
 * `Market.integral_deflator_mul_priceAt`: the deflated price at `t` averages to the price.
 * `Market.price_pay_withNumeraire`: the price is invariant under the change of numéraire.
@@ -294,12 +295,24 @@ theorem IsPricingMeasure.price_pay_obs {M : Market ι Ω} {T : ℝ≥0} {Q : Mea
         simp only [deflated, hN₀]
         field_simp
 
+/-- **A deflated asset is integrable under a pricing measure.** With a deterministic initial
+numéraire `N 0 = n₀`, the asset delivered at `T` has `Q`-integrable value `(N 0 / N T) · S i T`
+at `0`: it is `n₀` times the deflated asset, a `Q`-martingale. -/
+theorem IsPricingMeasure.integrable_deflator_mul_asset {M : Market ι Ω} {T : ℝ≥0} {Q : Measure Ω}
+    (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ} (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) (i : ι) :
+    Integrable (fun ω ↦ M.deflator T ω * M.asset i T ω) Q := by
+  have h := (hQ.martingale i).integrable T
+  simp only [min_self] at h
+  refine (h.const_mul n₀).congr (.of_forall fun ω ↦ ?_)
+  simp only [deflator, deflated, hN₀]
+  ring
+
 /-- With unit numéraire the asset at `T` is integrable under a pricing measure up to `T`: it is
 its own deflated value, a `Q`-martingale. -/
 theorem IsPricingMeasure.integrable_asset {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
     (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1) :
-    Integrable (M.asset () T) Q :=
-  ((hQ.martingale ()).integrable T).congr (.of_forall fun ω ↦ by simp [deflated, hN])
+    Integrable (M.asset () T) Q := by
+  simpa [deflator, hN] using hQ.integrable_deflator_mul_asset (n₀ := 1) (hN 0) ()
 
 /-- **Law invariance of the price.** A fixed-dated contract has the same price in two markets, on
 two sample spaces, if what it reads has one law: the assets at its observations and the deflator at
