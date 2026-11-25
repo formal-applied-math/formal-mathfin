@@ -10,8 +10,8 @@ public import Mathlib.Algebra.Order.Star.Real
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
 public import Mathlib.Probability.HasLaw
-public import Mathlib.Probability.Independence.Process.HasIndepIncrements.IsGaussianProcess
 public import Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic
+public import Mathlib.Probability.Independence.Process.HasIndepIncrements.IsGaussianProcess
 public import Mathlib.Probability.Process.Adapted
 
 /-!
@@ -362,7 +362,8 @@ theorem IsExpQMartingale.isGaussianProcess (h : IsExpQMartingale Q 𝓕 Y T) :
     (h.zero_start.mono fun ω hω ↦ by simpa using hω)
 
 /-- **`Y` has the finite-dimensional laws of a Brownian motion on `[0,T]` under `Q`**: zero start,
-`N(0,t−s)` increments, and independent increments (`HasIndepIncrements`). Path continuity is not part of it.
+`N(0,t−s)` increments, and independent increments (`HasIndepIncrements`). Path continuity is not
+part of it.
 
 This is `IsPreBrownianReal` restricted to a horizon, and it has to be a separate predicate:
 `IsPreBrownianReal Y Q` quantifies over all of `ℝ≥0`, while a Girsanov measure
