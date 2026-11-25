@@ -44,7 +44,8 @@ One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier no
   `Contracts/Instruments/Options.lean` — the first payoff in the language whose strike is an
   observation. What is not proved: the dividend-yield generalization (the market's asset pays no
   dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
-  `e^{−qt₁}` factor), and cliquets (a series of forward starts) are out of scope. The Risk
+  whole-formula dividend scaling `S₀ e^{−qT}` and the ratio leg's rate `r − q`), and cliquets (a
+  series of forward starts) are out of scope. The Risk
   column's page numbers could not be verified from this machine; the delivered closed form at
   `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
   computes.

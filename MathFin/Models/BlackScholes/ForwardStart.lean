@@ -25,8 +25,9 @@ discounted price at `t₁` freezes at its mean, and the payoff of the ratio keep
 unit-spot asset over the remaining time `τ = T − t₁`. The frozen leg contributes the martingale
 mean `e^{−rt₁} 𝔼[S_{t₁}] = S₀` (`discounted_terminal_eq_S0`), the ratio leg the Black–Scholes call
 price on a unit spot, `bsV α r σ 1 τ` (`integral_bsCall_payoff_eq_bsV`). The closed form
-`S₀ · bsV α r σ 1 (T − t₁)` is Rubinstein's at zero dividend yield: the general formula's factor
-`e^{−qt₁}` is absent because this market's asset pays no dividends.
+`S₀ · bsV α r σ 1 (T − t₁)` is Rubinstein's at zero dividend yield: the general formula's
+dividend scaling `S₀ e^{−qT}` and its rate `r − q` are absent because this market's asset pays
+no dividends.
 
 ## Main results
 
@@ -68,7 +69,8 @@ factorizes as the price at `t₁` against the ratio `S_T/S_{t₁}`, the incremen
 independent of `𝓕 t₁` (so the expectation of the product splits, `condExp_mul_of_indep`), the
 frozen leg has mean `e^{−rt₁}𝔼[S_{t₁}] = S₀` (`discounted_terminal_eq_S0`), and the ratio leg is
 `bsV` on a unit spot (`integral_bsCall_payoff_eq_bsV`). Rubinstein's formula at zero dividend
-yield; the general formula's `e^{−qt₁}` factor is absent because this asset pays no dividends. -/
+yield; the general formula's dividend scaling `S₀ e^{−qT}` and rate `r − q` are absent because
+this asset pays no dividends. -/
 theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ} (hB : IsFilteredPreBrownian B 𝓕 Q)
     {S_0 r α σ : ℝ} {t₁ T : ℝ≥0} (hS₀ : 0 < S_0) (hα : 0 < α) (hσ : 0 < σ)
