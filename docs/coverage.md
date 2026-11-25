@@ -41,8 +41,9 @@ before, 867 after).
   and the one-factor CAPM identification `factorPremium_eq_marketPremium` (over
   `CAPM_from_market_equilibrium`): the factor premium is the market excess return and the
   intercept is zero. What is not proved: the noisy and asymptotic APT with idiosyncratic
-  residuals, uniqueness of the premia, and the derivation of the tangency condition from
-  market clearing (assumed, as in CAPMEquilibrium).
+  residuals, uniqueness of the premia in general (the one-factor CAPM identification above is
+  the exception — there the premia are unique), and the derivation of the tangency condition
+  from market clearing (assumed, as in CAPMEquilibrium).
 
 ### Marchenko-Pastur support edges (2026-11-08)
 
