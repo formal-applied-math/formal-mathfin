@@ -37,6 +37,8 @@ lives inside every interval `ν` lives in.
   and put prices at every strike.
 * `ConvexOrder.ae_le_of_ae_le`, `ConvexOrder.ae_ge_of_ae_ge`: if `ν` lives below (above) `t`, so
   does every `μ ≤cx ν`.
+* `convexOn_call_payoff_spot`, `convexOn_call_payoff`: the call payoff `max(S − K, 0)` is convex
+  in the spot and in the strike; the second, read in the spot, is the put payoff.
 * `integrable_of_ae_mem_Icc`: a continuous function is integrable against a finite law on a
   compact interval, which supplies the integrability hypotheses for laws of bounded support.
 
@@ -70,6 +72,23 @@ lemma integrable_of_ae_mem_Icc {μ : Measure ℝ} [IsFiniteMeasure μ] {f : ℝ 
   have := hf.integrableOn_Icc (μ := μ) (a := a) (b := b)
   rwa [IntegrableOn, Measure.restrict_eq_self_of_ae_mem h] at this
 
+/-- **Call payoff is convex in the spot**: `S ↦ max(S − K, 0)` is the positive part of an affine
+function. -/
+lemma convexOn_call_payoff_spot (K : ℝ) : ConvexOn ℝ univ fun S : ℝ ↦ max (S - K) 0 :=
+  ((convexOn_id convex_univ).sub (concaveOn_const K convex_univ)).sup
+    (convexOn_const 0 convex_univ)
+
+/-- **Call payoff is convex in the strike**: `K ↦ max(S − K, 0)` is convex. Read in the spot, it
+is the put payoff `x ↦ (S − x)⁺`.
+
+This is the structural spine of static option-price no-arbitrage relations. Butterfly
+non-negativity and Breeden–Litzenberger PDF positivity are discrete and infinitesimal
+consequences (respectively) of this single fact, after passing through risk-neutral
+expectation. -/
+lemma convexOn_call_payoff (S : ℝ) : ConvexOn ℝ univ fun K : ℝ ↦ max (S - K) 0 :=
+  ((convexOn_const S convex_univ).sub (concaveOn_id convex_univ)).sup
+    (convexOn_const 0 convex_univ)
+
 variable {μ ν : Measure ℝ}
 
 namespace ConvexOrder
@@ -85,27 +104,17 @@ lemma integral_id_eq (h : ConvexOrder μ ν) (hμ : Integrable id μ) (hν : Int
   rw [integral_neg, integral_neg, neg_le_neg_iff] at this
   exact this
 
-/-- The call payoff `x ↦ (x − K)⁺` is convex. -/
-lemma convexOn_call (K : ℝ) : ConvexOn ℝ univ fun x : ℝ ↦ max (x - K) 0 :=
-  ((convexOn_id convex_univ).sub (concaveOn_const K convex_univ)).sup
-    (convexOn_const 0 convex_univ)
-
-/-- The put payoff `x ↦ (K − x)⁺` is convex. -/
-lemma convexOn_put (K : ℝ) : ConvexOn ℝ univ fun x : ℝ ↦ max (K - x) 0 :=
-  ((convexOn_const K convex_univ).sub (concaveOn_id convex_univ)).sup
-    (convexOn_const 0 convex_univ)
-
 /-- **Ordered laws have ordered call prices**: `∫ (x − K)⁺ dμ ≤ ∫ (x − K)⁺ dν`. -/
 lemma integral_call_le (h : ConvexOrder μ ν) (K : ℝ)
     (hμ : Integrable (fun x ↦ max (x - K) 0) μ) (hν : Integrable (fun x ↦ max (x - K) 0) ν) :
     ∫ x, max (x - K) 0 ∂μ ≤ ∫ x, max (x - K) 0 ∂ν :=
-  h (convexOn_call K) hμ hν
+  h (convexOn_call_payoff_spot K) hμ hν
 
 /-- **Ordered laws have ordered put prices**: `∫ (K − x)⁺ dμ ≤ ∫ (K − x)⁺ dν`. -/
 lemma integral_put_le (h : ConvexOrder μ ν) (K : ℝ)
     (hμ : Integrable (fun x ↦ max (K - x) 0) μ) (hν : Integrable (fun x ↦ max (K - x) 0) ν) :
     ∫ x, max (K - x) 0 ∂μ ≤ ∫ x, max (K - x) 0 ∂ν :=
-  h (convexOn_put K) hμ hν
+  h (convexOn_call_payoff K) hμ hν
 
 /-- **Convex order passes an upper bound of the support down.** If `ν` lives on `(-∞, t]`, the
 call struck at `t` is worth nothing under `ν`, hence under `μ ≤cx ν`, so `μ` lives there too. -/
