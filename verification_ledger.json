@@ -3835,9 +3835,9 @@
     "mf-kyle-equilibrium": {
       "benchmark_file": "market_microstructure.json",
       "date": "2026-11-25",
-      "elapsed_s": 4.3,
-      "input_hash": "2ef30f6f510d051e75010895f0cbe9cb993a6ba537c24f61c7911cc775a399d0",
-      "verified_at_commit": "8e3f192"
+      "elapsed_s": 3.5,
+      "input_hash": "d7d9fd45b9f26829f56dc2956d842fa933b903d176d31229db75dbc30b3e1c6d",
+      "verified_at_commit": "dda0cb1"
     },
     "mf-last-survivor-annuity-value": {
       "benchmark_file": "actuarial.json",
