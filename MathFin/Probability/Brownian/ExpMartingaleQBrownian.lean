@@ -361,6 +361,31 @@ theorem IsExpQMartingale.isGaussianProcess (h : IsExpQMartingale Q 𝓕 Y T) :
       HasLaw (Y t) (gaussianReal 0 t) Q).hasGaussianLaw)
     (h.zero_start.mono fun ω hω ↦ by simpa using hω)
 
+/-- **Mean.** `𝔼_Q[Y_t] = 0` for `t ≤ T`: the marginal law is the centred `N(0,t)`. -/
+theorem IsExpQMartingale.integral_eq_zero (h : IsExpQMartingale Q 𝓕 Y T) {t : ℝ≥0}
+    (htT : t ≤ T) : Q[Y t] = 0 := by
+  rw [(⟨(h.measurable t).aemeasurable, map_eq_gaussianReal_of_expMartingale h htT⟩ :
+    HasLaw (Y t) (gaussianReal 0 t) Q).integral_eq, integral_id_gaussianReal]
+
+/-- **Covariance.** `cov(Y_s, Y_t) = s` for `s ≤ t ≤ T`, that is `min s t`: write
+`Y_t = (Y_t − Y_s) + Y_s`; the increment is independent of `𝓕_s` and so of `Y_s`
+(`indep_increment_of_expMartingale`), and `Var(Y_s) = s`. -/
+theorem IsExpQMartingale.covariance_eq (h : IsExpQMartingale Q 𝓕 Y T) {s t : ℝ≥0}
+    (hst : s ≤ t) (htT : t ≤ T) : cov[Y s, Y t; Q] = s := by
+  have hs : HasLaw (Y s) (gaussianReal 0 s) Q :=
+    ⟨(h.measurable s).aemeasurable, map_eq_gaussianReal_of_expMartingale h (hst.trans htT)⟩
+  have hD : HasLaw (fun ω ↦ Y t ω - Y s ω) (gaussianReal 0 (t - s)) Q :=
+    ⟨((h.measurable t).sub (h.measurable s)).aemeasurable,
+      increment_map_eq_gaussianReal_of_expMartingale h hst htT⟩
+  have hind : IndepFun (fun ω ↦ Y t ω - Y s ω) (Y s) Q :=
+    (IndepFun_iff_Indep _ _ _).2 (indep_of_indep_of_le_right
+      (indep_increment_of_expMartingale h hst htT) (h.adapted s).measurable.comap_le)
+  have h2 : Y t = (fun ω ↦ Y t ω - Y s ω) + Y s := by ext; simp
+  have hs2 := hs.hasGaussianLaw.memLp_two
+  have hD2 := hD.hasGaussianLaw.memLp_two
+  rw [h2, covariance_add_right hs2 hD2 hs2, hind.symm.covariance_eq_zero hs2 hD2,
+    covariance_self hs.aemeasurable, hs.variance_eq, variance_id_gaussianReal, zero_add]
+
 /-- **`Y` has the finite-dimensional laws of a Brownian motion on `[0,T]` under `Q`**: zero start,
 `N(0,t−s)` increments, and independent increments (`HasIndepIncrements`). Path continuity is not
 part of it.
