@@ -535,8 +535,9 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
 
 /-- **The order flow of the witnessed model is Gaussian.** The standardized coordinates
 `σ_v⁻¹·(v − p₀), σ_u⁻¹·u` of the witnessed model are independent standard Gaussians
-(`kyleModel_prod` gives the independence, the Gaussian shift/scale lemmas the standard laws,
-independence gives zero covariance), and `hasLaw_linear_gaussianPair` gives the law of the
+(`kyleModel_prod` gives the two Gaussian laws; the independence of the standardized
+coordinates comes from the product-measure preimage computation, and independence gives the
+zero covariance), and `hasLaw_linear_gaussianPair` gives the law of the
 flow `β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)`. -/
 theorem kyleFlow_hasLaw_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) (β : ℝ) :
     HasLaw (kyleFlow β Prod.fst Prod.snd p₀)

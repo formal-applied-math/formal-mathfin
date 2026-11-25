@@ -118,7 +118,9 @@ theorem hasLaw_bivariateNormalLaw_of_gaussianPair {U V : Ω → ℝ} {ρ : ℝ}
     exact hcov
 
 /-- **A translate of a Gaussian random vector is Gaussian**: for `Z` with a Gaussian law
-under `P`, the translate `ω ↦ Z ω + c` also has a Gaussian law under `P`. -/
+under `P`, the translate `ω ↦ Z ω + c` also has a Gaussian law under `P`. The Gaussianity is
+the packaged-Mathlib instance `IsGaussian (Measure.map (fun x ↦ x + c) μ)`; the lemma adds the
+`HasGaussianLaw` measurability field and the pushforward rewrite. -/
 theorem hasGaussianLaw_fun_add_const {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [MeasurableSpace E] [BorelSpace E] {Z : Ω → E} (c : E) (hZ : HasGaussianLaw Z P) :
     HasGaussianLaw (fun ω ↦ Z ω + c) P := by
