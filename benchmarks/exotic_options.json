@@ -607,7 +607,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation of the closed form S0 * bsV(alpha, r, sigma, 1, T - t1) for the reified forwardStartCall contract in the library's Black-Scholes market, under the Girsanov pricing measure, with hypotheses 0 < S0, 0 < alpha, 0 < sigma, 0 < t1 < T and a Girsanov horizon covering the maturity. Rubinstein's general formula carries a dividend yield q through a factor e^{-q t1} and a strike-alpha adjustment; this market's single asset pays no dividends, so the delivered statement is the q = 0 case and the dividend extension is not formalized. Cliquets (series of forward starts) and employee stock options are out of scope."
+        "formalization_scope": "Full derivation of the closed form S0 * bsV(alpha, r, sigma, 1, T - t1) for the reified forwardStartCall contract in the library's Black-Scholes market, under the Girsanov pricing measure, with hypotheses 0 < S0, 0 < alpha, 0 < sigma, 0 < t1 < T and a Girsanov horizon covering the maturity. Rubinstein's general formula carries a dividend yield q through the multiplicative factor e^{-q t1} and the ratio leg's rate r - q; this market's single asset pays no dividends, so the delivered statement is the q = 0 case and the dividend extension is not formalized. Cliquets (series of forward starts) and employee stock options are out of scope."
       }
     }
   ]

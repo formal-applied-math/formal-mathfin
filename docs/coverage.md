@@ -41,12 +41,13 @@ One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier no
   (`condExp_mul_of_indep`); the frozen leg has the martingale mean `e^{−rt₁}𝔼[S_{t₁}] = S₀`
   (`discounted_terminal_eq_S0`) and the ratio leg is `bsV` on a unit spot
   (`integral_bsCall_payoff_eq_bsV`). The reified `forwardStartCall` contract is added to
-  `Contracts/Instruments/Options.lean` — the first payoff in the language reading two dates of one
-  underlying. What is not proved: the dividend-yield generalization (the market's asset pays no
+  `Contracts/Instruments/Options.lean` — the first payoff in the language whose strike is an
+  observation. What is not proved: the dividend-yield generalization (the market's asset pays no
   dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
   `e^{−qt₁}` factor), and cliquets (a series of forward starts) are out of scope. The Risk
-  column's page numbers could not be verified from this machine; the printed form was checked
-  against the reference implementation `ql/pricingengines/forward/forwardengine.hpp`.
+  column's page numbers could not be verified from this machine; the delivered closed form at
+  `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
+  computes.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 

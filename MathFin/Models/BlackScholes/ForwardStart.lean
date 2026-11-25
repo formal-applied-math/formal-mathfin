@@ -17,7 +17,7 @@ public import MathFin.Probability.Analysis.IndepFreezing
 
 A forward-start call sets its strike at a future reset date `t₁` as a fixed multiple `α` of the
 asset price then observed, and pays `max (S_T − α S_{t₁}) 0` at the maturity `T`
-(`forwardStartCall`, the first payoff in the language that reads two dates of one underlying).
+(`forwardStartCall`, the first payoff in the language whose strike is an observation).
 Under the risk-neutral
 dynamics the ratio `S_T / S_{t₁}` is a function of the Brownian increment `B_T − B_{t₁}`, which is
 independent of everything known at `t₁`, so the price factorizes (`condExp_mul_of_indep`): the
@@ -44,7 +44,7 @@ price on a unit spot, `bsV α r σ 1 τ` (`integral_bsCall_payoff_eq_bsV`). The 
 * [QuantLib, `ql/pricingengines/forward/forwardengine.hpp`][QuantLibForwardEngine] (the reference
   implementation; at zero dividend yield it reaches the closed form above)
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII],
-  2.3.4
+  3.3.2; 3.3.4
 
 ## Tags
 

@@ -35,7 +35,7 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
   maximum `Payoff.obsMax` and `indicatorLt`.
 * `chooser` — the chooser option as the static portfolio of a call and a put at the chooser date.
 * `forwardStartCall` — the call whose strike is set at a reset date as a multiple of the observed
-  price, the first payoff in the language that reads two dates of one underlying.
+  price, the first payoff in the language whose strike is an observation.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
 ## Main results
