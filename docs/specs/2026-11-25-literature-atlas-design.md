@@ -1,6 +1,6 @@
 # What the literature adds: the atlas first
 
-Status: proposed 2026-11-25.
+Status: adopted 2026-11-25 (decisions at the end).
 
 ## The two maps
 
@@ -54,10 +54,12 @@ For each cell:
 
 1. **Metadata.**
    - The OpenAlex corpus already has each work's topics.
-   - For the arXiv papers, OpenAlex indexes them under their arXiv DOIs (`10.48550/arXiv.<id>`).
-     So one batched listing gives the same record for both corpora: abstract, topics, keywords,
-     `referenced_works`, `cited_by_count`.
-   - Batches of 100 DOIs cost about one cent for all 11,872. OpenAlex data is CC0.
+   - For the arXiv papers, OpenAlex indexes them under their arXiv DOIs (`10.48550/arXiv.<id>`),
+     so both corpora get the same record: abstract, topics, keywords, `referenced_works`,
+     `cited_by_count`. An arXiv paper is looked up on its own, which is free. A batched lookup
+     cannot map the answer back to the paper when OpenAlex returns the published version under
+     another DOI. The OpenAlex corpus is fetched in batches of 100, about a cent in all.
+     OpenAlex data is CC0.
    - OpenAlex often maps an arXiv DOI to the published version, with that version's citations,
      but not always: in a three-paper test, one arXiv record stood alone with zero citations. An
      unmatched arXiv record is therefore matched to its journal version by title and authors
@@ -74,10 +76,19 @@ For each cell:
    TF-IDF similarity, and its OpenAlex topics break ties. The best cell is kept, with a second
    when its score is close. This is deterministic, runs on the CPU and is cheap. If it fails the
    validation in step 4, the next step is local sentence embeddings, once the GPU is free.
-4. **Validation.** A sample of 300 papers, stratified by cell, is labelled by agents that see
-   only the cell list and the abstract. The maintainer checks a third of those labels. The atlas
-   reports the classifier's agreement with the labels, per cell. A cell with agreement under 70%
-   is shown with that warning, not hidden.
+4. **Validation, with no hand labelling.**
+   - **Ground truth from the library's own citations.** Every `references.bib` entry is cited by a
+     module, and every module sits in a cell. When a cited paper is in the corpus, its cell is
+     known without anyone judging it.
+   - **Two independent agent labellers** cover the cells the citations do not reach. They get
+     different instructions, and neither sees the other's answer or the classifier's. A third
+     agent settles their disagreements. Their agreement with each other is reported: a low rate
+     means the cell is fuzzy, not only that the classifier is.
+   - The classifier must reach 70% against the citation labels. The atlas reports its agreement
+     per cell, against both kinds of label, and shows a cell under 70% with that warning, not
+     hidden.
+
+   This is enough because an atlas error misorders a roadmap and asserts no theorem.
 
 Papers no cell fits are counted and listed, not forced into one. A cluster of them in one area is
 the case for a new cell, which the taxonomy's own rules then judge.
@@ -107,8 +118,9 @@ No paper text is published. The founding-work lists are bibliographic metadata.
 
 1. **The corpus, ready for counting.**
    - The retry pass is done.
-   - Body and bibliography pages are split.
-   - OpenAlex metadata is fetched for the arXiv papers.
+   - Body and bibliography pages are split (done 2026-11-25; on a sample of 600 papers about 10%
+     show no reference list: short notes, chapters, scans without text).
+   - OpenAlex metadata is fetched for every paper (`mathfin_corpus.metadata`).
    - Exit: every one of the 24,147 papers has a metadata record or is listed as missing one.
 2. **The classifier.** Cell profiles, TF-IDF scoring and the validated sample.
    - Exit: agreement is reported per cell, and is at least 70% over the corpus.
@@ -117,8 +129,8 @@ No paper text is published. The founding-work lists are bibliographic metadata.
    - Exit: the layer renders on the docs site, and the roadmap note is written.
 4. **Literature trails** on the 180 proved nodes. For each: the source the node's docstring cites,
    matched to its OpenAlex record, the papers in the corpus that cite it, and its generalisations.
-   A generalisation is a citing paper whose abstract restates the result under weaker hypotheses;
-   an agent judges this, and the maintainer checks a sample.
+   A generalisation is a citing paper whose abstract restates the result under weaker hypotheses.
+   An agent judges this, and the trail marks it as that agent's reading.
    - Exit: every proved node shows its trail, or "no source in the corpus".
 5. **Candidates, issues, teaching and data.** These come after Marker has converted the papers of
    the cells the atlas ranks first, and get a spec of their own.
@@ -134,11 +146,15 @@ No paper text is published. The founding-work lists are bibliographic metadata.
 - The prose rule applies: a cell card says what the library proves there, read from the
   statements, not from the titles of the papers it sits beside.
 
-## Decisions for the maintainer
+## Decisions (2026-11-25)
 
-1. **Publishing:** the public `docs/atlas.json` and the Literature layer. Both are metadata only,
-   but they are outward-facing.
-2. **Validation:** whether 300 agent labels with a third checked by hand is enough, or whether the
-   maintainer checks all of them.
-3. **Order after the atlas:** literature trails (milestone 4) before or after the cátedra's
-   Phase 1 (MF-OP-017).
+1. **Publishing: yes, at milestone 3, once validation passes.** `docs/atlas.json` and the
+   Literature layer are bibliographic metadata, and OpenAlex's data is CC0. Each cell card shows its
+   measured agreement, and the page states the corpus's blind spots. Nothing is published before
+   the classifier is checked.
+2. **Validation: no hand labelling.** Citation-derived labels are the ground truth, and two
+   independent agent labellers with a third to settle cover the rest (above).
+3. **Order: the atlas (milestones 1–3) first, then the cátedra's Phase 0 and MF-OP-017, then the
+   literature trails.** The atlas is short and needs only the CPU. MF-OP-017 is the strongest
+   result on the table and needs neither the GPU nor the corpus. The trails improve the docs site,
+   nothing waits on them, and their generalisation claims read better from Marker's LaTeX.
