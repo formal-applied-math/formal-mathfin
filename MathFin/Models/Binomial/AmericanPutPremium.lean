@@ -194,29 +194,6 @@ theorem americanPutPrice_eq_intrinsic_of_deep_in_the_money
     rw [hcont, show max (K - S) 0 = K - S from max_eq_left (by linarith),
       max_eq_left (by nlinarith)]
 
-/-! ### The strict early-exercise premium -/
-
-/-- **Deep in the money the American put is strictly worth more than the European put.** With
-`r > 0` and at least one step remaining, a spot so low that the whole remaining subtree ends in
-the money (`0 < S`, `S * u ^ n ≤ K`) makes the European price `K * e^{-r*n} − S` strictly
-smaller than the American price `K − S`: the early-exercise premium `K * (1 - e^{-r*n})` is
-strictly positive. This is the witnessing-node form of the premium: the node can be the root
-itself, reached with probability one. -/
-theorem binomialPrice_lt_americanPrice_put_of_deep_in_the_money
-    {u d r K : ℝ} (h : BinomialNoArb u d r) (hr : 0 < r) {n : ℕ} (hn : 1 ≤ n)
-    (S : ℝ) (hS : 0 < S) (hSK : S * u ^ n ≤ K) :
-    binomialPrice u d r (fun S' ↦ max (K - S') 0) n S
-      < americanPrice u d r (fun S' ↦ max (K - S') 0) n S := by
-  have hA := americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) n S hS hSK
-  have hE := binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money h n S hS hSK
-  have hKpos : 0 < K := lt_of_lt_of_le (mul_pos hS (pow_pos h.u_pos _)) hSK
-  have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
-  have hexpn : Real.exp (-(r * n)) < 1 := by
-    rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
-    exact Real.exp_lt_exp.mpr (by nlinarith)
-  rw [hA, hE]
-  nlinarith
-
 /-! ### Propagation of the premium to the root -/
 
 /-- **The premium dominates its own discounted continuation.** For any payoff, the difference
@@ -429,6 +406,83 @@ theorem binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation
         - binomialPrice u d r (fun S' ↦ max (K - S') 0) (N - j - i) (S * u ^ j * d ^ i)) :=
     mul_pos hW hDnode
   linarith
+
+/-! ### The strict early-exercise premium -/
+
+/-- **Deep in the money, immediate exercise strictly beats continuation.** For `r > 0` and at
+least one step remaining, a spot so low that the whole remaining subtree ends in the money
+(`0 < S`, `S * u ^ N ≤ K`) satisfies the witnessing condition of
+`binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation` with the witness at
+the root (`j = i = 0`): the American one-period continuation is worth `K * e^{-r} − S`,
+strictly below the intrinsic `K − S`. -/
+theorem immediate_exercise_gt_continuation_of_deep_in_the_money
+    {u d r K S : ℝ} (h : BinomialNoArb u d r) (hr : 0 < r) {N : ℕ} (hN : 1 ≤ N)
+    (hS : 0 < S) (hSK : S * u ^ N ≤ K) :
+    ∃ j i : ℕ, j + i + 1 ≤ N ∧
+      binomialOptionPriceOnePeriod u d r
+        (americanPrice u d r (fun S' ↦ max (K - S') 0) (N - j - i - 1) (S * u ^ j * d ^ i * u))
+        (americanPrice u d r (fun S' ↦ max (K - S') 0) (N - j - i - 1) (S * u ^ j * d ^ i * d))
+      < max (K - S * u ^ j * d ^ i) 0 := by
+  refine ⟨0, 0, by omega, ?_⟩
+  simp only [pow_zero, mul_one]
+  have hKpos : 0 < K := lt_of_lt_of_le (mul_pos hS (pow_pos h.u_pos N)) hSK
+  have hexp : Real.exp (-r) < 1 := by
+    rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
+    exact Real.exp_lt_exp.mpr (by linarith)
+  have huN : S * u ^ ((N - 1) + 1) ≤ K := by
+    rw [show (N - 1) + 1 = N from by omega]; exact hSK
+  have hup : (S * u) * u ^ (N - 1) ≤ K := by
+    rw [mul_assoc, mul_comm u (u ^ (N - 1)), ← pow_succ]; exact huN
+  have hdp : (S * d) * u ^ (N - 1) ≤ K := by
+    have h1 : (S * d) * u ^ (N - 1) = d * (S * u ^ (N - 1)) := by ring
+    have h2 : u * (S * u ^ (N - 1)) = S * u ^ ((N - 1) + 1) := by
+      rw [show u * (S * u ^ (N - 1)) = S * (u ^ (N - 1) * u) from by ring, ← pow_succ]
+    have h3 : d * (S * u ^ (N - 1)) ≤ u * (S * u ^ (N - 1)) :=
+      mul_le_mul_of_nonneg_right h.d_lt_u.le
+        (mul_nonneg hS.le (pow_nonneg h.u_pos.le (N - 1)))
+    calc (S * d) * u ^ (N - 1) = d * (S * u ^ (N - 1)) := h1
+      _ ≤ u * (S * u ^ (N - 1)) := h3
+      _ = S * u ^ ((N - 1) + 1) := h2
+      _ ≤ K := huN
+  rw [show N - 0 - 0 - 1 = N - 1 from by omega,
+    americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) (N - 1) (S * u)
+      (mul_pos hS h.u_pos) hup,
+    americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) (N - 1) (S * d)
+      (mul_pos hS h.d_pos) hdp]
+  have hcont : binomialOptionPriceOnePeriod u d r (K - S * u) (K - S * d)
+      = K * Real.exp (-r) - S := by
+    unfold binomialOptionPriceOnePeriod
+    rw [show crrUpProb u d r * (K - S * u) + (1 - crrUpProb u d r) * (K - S * d)
+        = K - S * (crrUpProb u d r * u + (1 - crrUpProb u d r) * d) from by ring,
+      crrUpProb_mul_up_add u d r h]
+    rw [show Real.exp (-r) * (K - S * Real.exp r)
+        = K * Real.exp (-r) - S * (Real.exp (-r) * Real.exp r) from by ring,
+      ← Real.exp_add, neg_add_cancel, Real.exp_zero, mul_one]
+  have hu1 : (1 : ℝ) ≤ u := by
+    have h1 : (1 : ℝ) ≤ Real.exp r := by
+      rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
+      exact Real.exp_le_exp.mpr (by linarith)
+    exact le_trans h1 h.lt_u.le
+  have hSle : S ≤ K :=
+    le_trans (le_mul_of_one_le_right hS.le (one_le_pow₀ hu1)) hSK
+  rw [hcont, max_eq_left (by linarith)]
+  nlinarith
+
+/-- **Deep in the money the American put is strictly worth more than the European put.** With
+`r > 0` and at least one step remaining, a spot so low that the whole remaining subtree ends in
+the money (`0 < S`, `S * u ^ n ≤ K`) makes the European price `K * e^{-r*n} − S` strictly
+smaller than the American price `K − S`: the early-exercise premium `K * (1 - e^{-r*n})` is
+strictly positive. Derived from the frontier statement
+`binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation` with the witnessing
+node at the root (`immediate_exercise_gt_continuation_of_deep_in_the_money`): deep in the
+money the node is the root itself, reached with probability one. -/
+theorem binomialPrice_lt_americanPrice_put_of_deep_in_the_money
+    {u d r K : ℝ} (h : BinomialNoArb u d r) (hr : 0 < r) {n : ℕ} (hn : 1 ≤ n)
+    (S : ℝ) (hS : 0 < S) (hSK : S * u ^ n ≤ K) :
+    binomialPrice u d r (fun S' ↦ max (K - S') 0) n S
+      < americanPrice u d r (fun S' ↦ max (K - S') 0) n S :=
+  binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation h n
+    (immediate_exercise_gt_continuation_of_deep_in_the_money h hr hn hS hSK)
 
 end MathFin
 
