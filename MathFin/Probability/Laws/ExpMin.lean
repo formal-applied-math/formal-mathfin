@@ -62,7 +62,7 @@ lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
   ring
 
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
-lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
+lemma setOf_lt_inf'_eq_iInter_preimage (hn : 0 < n) (t : ℝ) :
     {ω : Ω | t < (Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
       (fun i : Fin n ↦ τ i ω))}
       = ⋂ i : Fin n, (τ i) ⁻¹' Set.Ioi t := by
@@ -87,7 +87,7 @@ theorem minimum_survival
     μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
       (fun i : Fin n ↦ τ i ω)} =
         ENNReal.ofReal (Real.exp (-((∑ i, rates i) * t))) := by
-  rw [min_gt_iInter hn t]
+  rw [setOf_lt_inf'_eq_iInter_preimage hn t]
   rw [hindep.meas_iInter (fun _ ↦ ⟨Set.Ioi t, measurableSet_Ioi, rfl⟩)]
   have step_each : ∀ i, μ ((τ i) ⁻¹' Set.Ioi t)
       = ENNReal.ofReal (Real.exp (-(rates i * t))) := fun i ↦ by

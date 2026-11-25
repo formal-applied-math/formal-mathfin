@@ -131,7 +131,7 @@ that is not the point mass at `0`, the jump part `−κ + ∑_{i<N} Jᵢ` is not
 whatever `κ`: with no jump (probability `e^{−Λ}`) it is `−κ`, and with one jump it is `J₀ − κ`. -/
 lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
     (hJ0 : ¬J 0 =ᵐ[Q] 0) (κ : ℝ) :
-    ¬(fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) =ᵐ[Q] 0 := by
+    ¬(fun ω ↦ -κ + compoundSum N J ω) =ᵐ[Q] 0 := by
   intro hY
   have hY' := ae_iff.1 hY
   have hN (n : ℕ) : Q (N ⁻¹' {n}) ≠ 0 := by
@@ -144,7 +144,7 @@ lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
     by_contra hκ
     refine hN 0 (measure_mono_null (fun ω hω ↦ ?_) hY')
     have hNω : N ω = 0 := hω
-    simp [hNω, hκ]
+    simp [compoundSum_apply, hNω, hκ]
   -- with one jump, it is `J₀`
   have hind : Q (N ⁻¹' {1} ∩ J 0 ⁻¹' {0}ᶜ) = Q (N ⁻¹' {1}) * Q (J 0 ⁻¹' {0}ᶜ) :=
     (h.N_indep_J.comp measurable_id (measurable_pi_apply 0)).measure_inter_preimage_eq_mul _ _
@@ -152,7 +152,7 @@ lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
   have hnull : Q (N ⁻¹' {1} ∩ J 0 ⁻¹' {0}ᶜ) = 0 := by
     refine measure_mono_null (fun ω hω ↦ ?_) hY'
     have hNω : N ω = 1 := hω.1
-    simpa [hNω, hκ] using hω.2
+    simpa [compoundSum_apply, hNω, hκ] using hω.2
   rw [hind, mul_eq_zero] at hnull
   refine hJ0 (ae_iff.2 (measure_mono_null (fun ω hω ↦ ?_) (hnull.resolve_left (hN 1))))
   simpa using hω
