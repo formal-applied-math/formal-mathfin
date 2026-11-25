@@ -62,6 +62,7 @@ lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
 `t ≥ 0`. -/
 lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
+  have := isProbabilityMeasure_expMeasure hr
   have h := expMeasure_real_Ioi hr t
   rw [max_eq_left ht] at h
   rw [← h, ofReal_measureReal (measure_ne_top _ _)]
