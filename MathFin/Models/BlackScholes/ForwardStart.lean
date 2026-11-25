@@ -16,8 +16,9 @@ public import MathFin.Probability.Analysis.IndepFreezing
 # The forward-start call in the Black–Scholes market
 
 A forward-start call sets its strike at a future reset date `t₁` as a fixed multiple `α` of the
-asset price then observed, and pays `max (S_T − α S_{t₁}) 0` at the maturity `T` (`forwardStartCall`,
-the first payoff in the language that reads two dates of one underlying). Under the risk-neutral
+asset price then observed, and pays `max (S_T − α S_{t₁}) 0` at the maturity `T`
+(`forwardStartCall`, the first payoff in the language that reads two dates of one underlying).
+Under the risk-neutral
 dynamics the ratio `S_T / S_{t₁}` is a function of the Brownian increment `B_T − B_{t₁}`, which is
 independent of everything known at `t₁`, so the price factorizes (`condExp_mul_of_indep`): the
 discounted price at `t₁` freezes at its mean, and the payoff of the ratio keeps the law of a

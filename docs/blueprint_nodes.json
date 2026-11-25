@@ -1181,6 +1181,24 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Utility/VonNeumannMorgenstern.lean"},
  {"uses":
   ["def:market",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "def:contract-value"],
+  "title": "Bachelier call price formula",
+  "text":
+  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
+  "name": "MathFin.Bachelier.price_europeanCall",
+  "module": "MathFin.Models.Bachelier.BachelierMarket",
+  "line": 144,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bachelier-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
+ {"uses":
+  ["def:market",
    "def:standard-normal-cdf",
    "def:contract",
    "def:pricing-functional",
@@ -1198,24 +1216,6 @@
   "label": "thm:jump-diffusion-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Jumps/Market.lean"},
- {"uses":
-  ["def:market",
-   "def:brownian-motion",
-   "def:standard-normal-cdf",
-   "def:contract",
-   "def:pricing-functional",
-   "def:contract-value"],
-  "title": "Bachelier call price formula",
-  "text":
-  "In the Bachelier market of a pre-Brownian motion $W$ (asset $S_0 + \\sigma W_t$,\n  numéraire $1$, the filtration $W$ generates) the reference measure is a pricing measure, and for\n  $K, \\sigma, T > 0$ the market price of the European call under it is $(S_0 - K)\\Phi(d) +\n  \\sigma\\sqrt{T}\\,\\varphi(d)$, with $d = (S_0 - K)/(\\sigma\\sqrt{T})$. Zero interest, no drift:\n  the pricing measure is the reference measure itself. `bachelier_call_formula` is the\n  hypothesis form $E_Q[(S_T - K)^+]$ it rests on.",
-  "name": "MathFin.Bachelier.price_europeanCall",
-  "module": "MathFin.Models.Bachelier.BachelierMarket",
-  "line": 144,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bachelier-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Bachelier/BachelierMarket.lean"},
  {"uses":
   ["def:market",
    "def:gbm",
@@ -1803,6 +1803,40 @@
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
  {"uses":
   ["def:market",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:physical-measure-pricing",
+   "thm:girsanov-brownian-characterisation",
+   "def:contract-value"],
+  "title": "The forward-start call in the Black–Scholes market",
+  "text":
+  "In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \\alpha,\n  \\sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the\n  multiple $\\alpha$ of the then-observed price, paying $(S_T - \\alpha S_{t_1})^+$ at $T$, is\n  worth $S_0 \\cdot bsV(\\alpha, r, \\sigma, 1, T - t_1)$ under the Girsanov pricing measure of the\n  market price of risk, whatever the physical drift $m$: Rubinstein's factorization, at zero\n  dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian increment $B_T - B_{t_1}$,\n  independent of $\\mathcal{F}_{t_1}$, so the expectation of the product splits\n  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is\n  the call price on a unit spot (`thm:bs-call`'s `bsV`).",
+  "name":
+  "MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure",
+  "module": "MathFin.Models.BlackScholes.ForwardStart",
+  "line": 244,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:forward-start-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ForwardStart.lean"},
+ {"uses": ["def:coin-flip-measure"],
+  "title": "Binomial barrier prices via reflection",
+  "text":
+  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
+  "name": "MathFin.binomial_upAndIn_reflection",
+  "module": "MathFin.Models.Binomial.BarrierReflection",
+  "line": 245,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:binomial-barrier-reflection",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
+ {"uses":
+  ["def:market",
    "def:contract",
    "def:pricing-functional",
    "thm:bond-immunization",
@@ -1818,18 +1852,6 @@
   "label": "thm:immunization-market-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
- {"uses": ["def:coin-flip-measure"],
-  "title": "Binomial barrier prices via reflection",
-  "text":
-  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
-  "name": "MathFin.binomial_upAndIn_reflection",
-  "module": "MathFin.Models.Binomial.BarrierReflection",
-  "line": 245,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:binomial-barrier-reflection",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility satisfies independence and continuity",
   "text":

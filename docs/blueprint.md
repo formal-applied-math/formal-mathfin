@@ -202,6 +202,7 @@ graph TD
   expectedShortfallCoherent["Expected shortfall is a law-invariant coherent risk measure"]:::proved
   expectedShortfallDual["Dual representation of expected shortfall"]:::proved
   expectedShortfallNotElicitable["Expected shortfall is not elicitable"]:::proved
+  forwardStartCall["The forward-start call in the Black–Scholes market"]:::proved
   glostenMilgromPricingMeasure["The Glosten–Milgrom quote sequence is a martingale for the dealer's measure"]:::proved
   hedgedPositionRisk["Risk of a hedged position"]:::proved
   hestonBsMarketLimit["As vol-of-vol vanishes the Heston transform is a Black–Scholes price"]:::proved
@@ -347,7 +348,6 @@ graph TD
   end
   subgraph frontier_valuationDiffusions["⏳ frontier · Valuation · Black–Scholes and Bachelier"]
     barrierLookbackClosedForms["Barrier and lookback closed forms"]:::frontier
-    forwardStartCall["Forward-start call"]:::frontier
     girsanovContinuousEmm["Girsanov EMM from the Itô tower"]:::frontier
     margrabeNumeraire["Margrabe and chooser via the S²-numéraire"]:::frontier
     twoAssetOptionFormulas["Stulz and Heynen–Kat two-asset formulas"]:::frontier
@@ -651,6 +651,15 @@ graph TD
   quantile --> expectedShortfallNotElicitable
   valueAtRisk --> expectedShortfallNotElicitable
   quantileTransform --> expectedShortfallNotElicitable
+  brownianMotion --> forwardStartCall
+  contract --> forwardStartCall
+  contractValue --> forwardStartCall
+  gbm --> forwardStartCall
+  market --> forwardStartCall
+  pricingFunctional --> forwardStartCall
+  standardNormalCdf --> forwardStartCall
+  girsanovBrownianCharacterisation --> forwardStartCall
+  physicalMeasurePricing --> forwardStartCall
   market --> glostenMilgromPricingMeasure
   pricingMeasure --> glostenMilgromPricingMeasure
   conditionalExpectationPricingMeasure --> glostenMilgromPricingMeasure
@@ -916,7 +925,6 @@ graph TD
   feynmanKacHeatEq --> feynmanKacVariableCoefficient
   sdeContinuousSolution --> feynmanKacVariableCoefficient
   itoFormulaC2 --> feynmanKacVariableCoefficient
-  bsCall --> forwardStartCall
   interestRateParity --> futuresBasisConvergence
   affineTermStructure --> futuresForwardConvexity
   continuousFtap --> girsanovContinuousEmm
@@ -1173,6 +1181,7 @@ graph TD
 | `thm:expected-shortfall-coherent` Expected shortfall is a law-invariant coherent risk measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-coherent%22%20in%3Abody) |
 | `thm:expected-shortfall-dual` Dual representation of expected shortfall | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-dual%22%20in%3Abody) |
 | `thm:expected-shortfall-not-elicitable` Expected shortfall is not elicitable | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-shortfall-not-elicitable%22%20in%3Abody) |
+| `thm:forward-start-call` The forward-start call in the Black–Scholes market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-start-call%22%20in%3Abody) |
 | `thm:glosten-milgrom-pricing-measure` The Glosten–Milgrom quote sequence is a martingale for the dealer's measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aglosten-milgrom-pricing-measure%22%20in%3Abody) |
 | `thm:hedged-position-risk` Risk of a hedged position | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahedged-position-risk%22%20in%3Abody) |
 | `thm:heston-bs-market-limit` As vol-of-vol vanishes the Heston transform is a Black–Scholes price | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aheston-bs-market-limit%22%20in%3Abody) |
@@ -1254,7 +1263,6 @@ graph TD
 | `thm:expected-signature-moment-problem` Expected signature of stopped Brownian motion | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-signature-moment-problem%22%20in%3Abody) |
 | `thm:expected-utility-risk-aversion` Expected utility and risk aversion | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aexpected-utility-risk-aversion%22%20in%3Abody) |
 | `thm:feynman-kac-variable-coefficient` Variable-coefficient Feynman–Kac | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afeynman-kac-variable-coefficient%22%20in%3Abody) |
-| `thm:forward-start-call` Forward-start call | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aforward-start-call%22%20in%3Abody) |
 | `thm:futures-basis-convergence` Contango, backwardation and basis convergence | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afutures-basis-convergence%22%20in%3Abody) |
 | `thm:futures-forward-convexity` Futures–forward convexity adjustment | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Afutures-forward-convexity%22%20in%3Abody) |
 | `thm:girsanov-continuous-emm` Girsanov EMM from the Itô tower | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-continuous-emm%22%20in%3Abody) |

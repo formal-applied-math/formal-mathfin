@@ -3029,6 +3029,10 @@ end MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Contracts.BlackScholes.price_europeanPut_constGirsanovMeasure
 
+/-- info: 'MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure
+
 /-- info: 'MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.DeFi.clHistoricalVaR_eq_valueAtRisk

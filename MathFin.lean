@@ -425,6 +425,7 @@ public import MathFin.Models.BlackScholes.DigitalGreeks
 public import MathFin.Models.BlackScholes.Dividends
 public import MathFin.Models.BlackScholes.DividendsGreeks
 public import MathFin.Models.BlackScholes.Forward
+public import MathFin.Models.BlackScholes.ForwardStart
 public import MathFin.Models.BlackScholes.HigherGreeks
 public import MathFin.Models.BlackScholes.StrikeGreeks
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two

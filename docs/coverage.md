@@ -26,6 +26,28 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Forward-start call: Rubinstein's factorization (2026-11-24)
+
+One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier node
+`thm:forward-start-call`. Corpus 906 → 907 on this branch.
+
+- **`mf-forward-start-call`** (MathFin/Models/BlackScholes/ForwardStart.lean): the forward-start
+  call — strike set at a reset date `t₁` as the multiple `α` of the observed price, payoff
+  `max (S_T − α S_{t₁}) 0` — has price `S₀ · bsV α r σ 1 (T − t₁)` in the library's Black–Scholes
+  market under the Girsanov pricing measure (`price_forwardStartCall_constGirsanovMeasure`),
+  whatever the physical drift. The theorem is a market price (a `Market.price` statement), derived
+  by Rubinstein's factorization: the payoff splits as the price at `t₁` against the ratio
+  `S_T/S_{t₁}`, a function of the Brownian increment `B_T − B_{t₁}` independent of `𝓕_{t₁}`
+  (`condExp_mul_of_indep`); the frozen leg has the martingale mean `e^{−rt₁}𝔼[S_{t₁}] = S₀`
+  (`discounted_terminal_eq_S0`) and the ratio leg is `bsV` on a unit spot
+  (`integral_bsCall_payoff_eq_bsV`). The reified `forwardStartCall` contract is added to
+  `Contracts/Instruments/Options.lean` — the first payoff in the language reading two dates of one
+  underlying. What is not proved: the dividend-yield generalization (the market's asset pays no
+  dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
+  `e^{−qt₁}` factor), and cliquets (a series of forward starts) are out of scope. The Risk
+  column's page numbers could not be verified from this machine; the printed form was checked
+  against the reference implementation `ql/pricingengines/forward/forwardengine.hpp`.
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

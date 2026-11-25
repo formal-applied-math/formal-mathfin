@@ -118,6 +118,7 @@ import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
 import MathFin.Models.BlackScholes.GaussianGirsanov
+import MathFin.Models.BlackScholes.ForwardStart
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
 import MathFin.Models.BlackScholes.PDE
@@ -897,6 +898,19 @@ attribute [blueprint "thm:bs-call"
   computation is the lognormal expectation $e^{-rT}E_Q[(S_T - K)^+]$ (`bs_call_formula`);
   the uniqueness of the pricing measure is `thm:bs-arbitrage-free-price`. -/)]
   MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+
+attribute [blueprint "thm:forward-start-call"
+  (title := "The forward-start call in the Black–Scholes market")
+  (statement := /-- In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \alpha,
+  \sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the
+  multiple $\alpha$ of the then-observed price, paying $(S_T - \alpha S_{t_1})^+$ at $T$, is
+  worth $S_0 \cdot bsV(\alpha, r, \sigma, 1, T - t_1)$ under the Girsanov pricing measure of the
+  market price of risk, whatever the physical drift $m$: Rubinstein's factorization, at zero
+  dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian increment $B_T - B_{t_1}$,
+  independent of $\mathcal{F}_{t_1}$, so the expectation of the product splits
+  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is
+  the call price on a unit spot (`thm:bs-call`'s `bsV`). -/)]
+  MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure
 
 attribute [blueprint "thm:bs-delta"
   (title := "Black–Scholes Greeks")
