@@ -141,13 +141,8 @@ theorem condExp_increment_eq_zero (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {u v : ℝ≥0} (huv : u ≤ v) :
     (μ[fun ω ↦ B v ω - B u ω | natFiltration hBmeas u]) =ᵐ[μ] fun _ ↦ (0 : ℝ) := by
   have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
-  have hint : ∫ ω, (B v ω - B u ω) ∂μ = 0 := by
-    have h_eq : (fun ω ↦ B v ω - B u ω) = (B v - B u : Ω → ℝ) := rfl
-    rw [h_eq, hL.integral_eq, integral_id_gaussianReal]
   have : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  exact IsFilteredPreBrownian.condExp_comp_increment_eq_const huv
-    ((hBmeas v).sub (hBmeas u)) measurable_id hint
+  exact IsFilteredPreBrownian.condExp_increment_eq_zero huv
 
 omit [IsProbabilityMeasure μ] in
 /-- **Kernel 2**: the squared increment conditions on the elapsed time —
@@ -157,16 +152,8 @@ theorem condExp_increment_sq (hB : IsPreBrownianReal B μ)
     (μ[fun ω ↦ (B v ω - B u ω) ^ 2 | natFiltration hBmeas u])
       =ᵐ[μ] fun _ ↦ (v : ℝ) - u := by
   have : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hL : HasLaw (B v - B u) (gaussianReal 0 (v - u)) μ := hasLaw_increment hB huv
-  have hint : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ = (v : ℝ) - u := by
-    have h_change : ∫ ω, (B v ω - B u ω) ^ 2 ∂μ
-        = ∫ x, x ^ 2 ∂(gaussianReal 0 (v - u)) := by
-      simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
-    rw [h_change, integral_sq_gaussianReal]
-    exact NNReal.coe_sub huv
   have : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  exact IsFilteredPreBrownian.condExp_comp_increment_eq_const huv
-    ((hBmeas v).sub (hBmeas u)) (measurable_id.pow_const 2) hint
+  exact IsFilteredPreBrownian.condExp_increment_sq huv
 
 omit [IsProbabilityMeasure μ] in
 /-- **Kernel 3 (adapted diagonal)**: an `𝓕_c`-measurable coefficient times a squared

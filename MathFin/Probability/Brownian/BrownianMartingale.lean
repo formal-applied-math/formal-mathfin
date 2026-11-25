@@ -140,6 +140,34 @@ lemma condExp_comp_increment_eq_const {s t : ℝ≥0} (hst : s ≤ t)
     hφ_comap.stronglyMeasurable h_indep
   rwa [h_int_eq] at this
 
+omit [IsFiniteMeasure P] in
+/-- The increment `X_t − X_s` is measurable. -/
+private lemma measurable_increment (s t : ℝ≥0) : Measurable (fun ω ↦ X t ω - X s ω) :=
+  (((hX.stronglyAdapted t).mono (𝓕.le t)).measurable).sub
+    ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
+
+/-- **Kernel 1**: the increment has zero conditional mean, `P[X_t − X_s | 𝓕_s] =ᵐ 0`. -/
+lemma condExp_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
+    P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) :=
+  condExp_comp_increment_eq_const hst (measurable_increment s t) measurable_id <| by
+    have hL : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
+      MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
+    rw [show (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) from rfl, hL.integral_eq,
+      integral_id_gaussianReal]
+
+/-- **Kernel 2**: the squared increment conditions on the elapsed time,
+`P[(X_t − X_s)² | 𝓕_s] =ᵐ t − s`. -/
+lemma condExp_increment_sq {s t : ℝ≥0} (hst : s ≤ t) :
+    P[fun ω ↦ (X t ω - X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)]
+      =ᵐ[P] fun _ ↦ (t : ℝ) - s :=
+  condExp_comp_increment_eq_const hst (measurable_increment s t) (measurable_id.pow_const 2) <| by
+    have hL : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
+      MathFin.hasLaw_increment hX.toIsPreBrownianReal hst
+    have h_change : ∫ ω, (X t ω - X s ω) ^ 2 ∂P = ∫ x, x ^ 2 ∂(gaussianReal 0 (t - s)) := by
+      simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
+    rw [h_change, MathFin.integral_sq_gaussianReal]
+    exact NNReal.coe_sub hst
+
 /-- For a filtered pre-Brownian motion `X`, the process `t ↦ (X t)² − t` is a martingale
 w.r.t. `𝓕`.
 
@@ -158,9 +186,6 @@ theorem squareSubTime_isMartingale :
   have h_int_s : Integrable (X s) P := hX.integrable_eval s
   have h_int_t : Integrable (X t) P := hX.integrable_eval t
   have h_int_diff : Integrable (fun ω ↦ X t ω - X s ω) P := h_int_t.sub h_int_s
-  have h_meas_t : Measurable (X t) := ((hX.stronglyAdapted t).mono (𝓕.le t)).measurable
-  have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
-  have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
   have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
   -- HasLaws from `IsPreBrownianReal`.
   have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (t - s)) P :=
@@ -176,16 +201,6 @@ theorem squareSubTime_isMartingale :
   have h_int_diff_sq : Integrable (fun ω ↦ (X t ω - X s ω) ^ 2) P := h_diff_memLp.integrable_sq
   have h_int_cross : Integrable (fun ω ↦ X s ω * (X t ω - X s ω)) P :=
     h_Bs_memLp.integrable_mul h_diff_memLp
-  -- Mean of increment is 0.
-  have h_int_diff_zero : ∫ ω, (X t ω - X s ω) ∂P = 0 := by
-    rw [h_eq_diff, hL_diff.integral_eq, integral_id_gaussianReal]
-  -- Variance of increment integral: ∫ (X_t − X_s)² ∂P = t − s.
-  have h_int_diff_sq_zero : ∫ ω, (X t ω - X s ω) ^ 2 ∂P = (t : ℝ) - (s : ℝ) := by
-    have h_change : ∫ ω, (X t ω - X s ω) ^ 2 ∂P
-        = ∫ x, x ^ 2 ∂(gaussianReal 0 (t - s)) := by
-      simpa [Function.comp] using hL_diff.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
-    rw [h_change, MathFin.integral_sq_gaussianReal]
-    exact NNReal.coe_sub hst
   -- `𝓕_s`-measurability of `X_s` and `(X_s)²`.
   have h_smeas_s : StronglyMeasurable[𝓕 s] (X s) := hX.stronglyAdapted s
   have h_smeas_s_sq : StronglyMeasurable[𝓕 s] (fun ω ↦ (X s ω) ^ 2) := by
@@ -196,14 +211,8 @@ theorem squareSubTime_isMartingale :
     condExp_of_stronglyMeasurable (𝓕.le s) h_smeas_s_sq h_int_Bs_sq
   -- `E[X_t − X_s | 𝓕_s] =ᵐ 0` and `E[(X_t − X_s)² | 𝓕_s] =ᵐ (t − s)`
   -- (the increment is independent of `𝓕 s`).
-  have h_condDiff :
-      P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) :=
-    condExp_comp_increment_eq_const hst h_meas_diff measurable_id h_int_diff_zero
-  have h_condDiffSq :
-      P[fun ω ↦ (X t ω - X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)]
-        =ᵐ[P] fun _ ↦ ((t : ℝ) - (s : ℝ)) :=
-    condExp_comp_increment_eq_const hst h_meas_diff (measurable_id.pow_const 2)
-      h_int_diff_sq_zero
+  have h_condDiff := condExp_increment_eq_zero (X := X) (𝓕 := 𝓕) (P := P) hst
+  have h_condDiffSq := condExp_increment_sq (X := X) (𝓕 := 𝓕) (P := P) hst
   -- Pull-out for the cross term.
   have h_cross_eq :
       (fun ω ↦ X s ω * (X t ω - X s ω)) = (X s) * (fun ω ↦ X t ω - X s ω) := rfl
