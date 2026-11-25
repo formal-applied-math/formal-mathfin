@@ -157,10 +157,9 @@ lemma ae_trimMeasure_of_ae_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (hC : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] C)
     (h : ∀ᵐ z ∂((timeMeasureHorizon T).prod μ), z ∈ C) :
     ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), z ∈ C := by
-  rw [ae_iff, trimMeasure,
-    trim_measurableSet_eq (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
-      hC.compl]
-  exact h
+  rw [ae_iff, trimMeasure]
+  exact (trim_measurableSet_eq (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+    hC.compl).trans (ae_iff.mp h)
 
 omit [IsProbabilityMeasure μ] in
 /-- **The time origin is trim-null.** For any s-finite time measure `ν` that charges no point at
