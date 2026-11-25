@@ -3192,3 +3192,19 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.chainPrediction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.chainPrediction
+
+/-! ## The Ho–Lee bond price, continued — the zero-drift identification and the bridge
+
+`HoLeeBondPrice.lean`: at zero drift the Ho–Lee price is the driftless price of
+`VasicekZeroMeanReversionLimit.lean`; and the Vasicek closed form at long-run level `θ/κ`
+tends to the constant-drift Ho–Lee price as `κ → 0⁺` (the drift survives vanishing mean
+reversion; substituting `κ = 0` in the level-rescaled form gives the junk value `1`, not the
+limit). -/
+
+/-- info: 'MathFin.HoLee.bondPrice_zero_drift' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.HoLee.bondPrice_zero_drift
+
+/-- info: 'MathFin.HoLee.tendsto_vasicekBondPrice_hoLee' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.HoLee.tendsto_vasicekBondPrice_hoLee
