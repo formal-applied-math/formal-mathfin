@@ -15,10 +15,12 @@ public import Mathlib.Data.Fin.VecNotation
 /-!
 # The constant-mean liquidity position, priced
 
-A two-token constant-mean pool with weights `w` on X and `1 − w` on Y and invariant
-`V = x^w y^(1-w)`, marked at a price `P` of X in Y, is worth in token Y
+The two-token constant-mean position of invariant `V = x^w y^(1-w)` (weights `w` on X and
+`1 − w` on Y), marked at a price `P` of X in Y, is worth in token Y
 
   `V * P^w / (w^w * (1-w)^(1-w))`,
+
+the pool re-balanced onto its invariant curve at that price,
 
 the weighted generalization of the constant-product mark `2 √k √P`: at `w = 1/2` the value is
 `2 V √P`, the constant-product position of invariant `V²` (`constantProductPayoff`), and at
