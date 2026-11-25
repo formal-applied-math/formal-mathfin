@@ -83,9 +83,6 @@ function layer the upstream CLT is itself built on: `charFun`, `charFun_conv`,
   `S · eˣ` against `convPow (crrStepMeasure …) k`.
 * `binomialPrice_put_tendsto_bs`: for `σ, T, S₀ > 0` and no-arbitrage at every step, the `n`-step
   CRR put price tends to `e^{−rT} · E[(K − S₀eˣ)₊]`, the expectation under `N((r − σ²/2)T, σ²T)`.
-* `binomialPrice_digital_tendsto_bs`: for `σ, T, S₀, K > 0` and no-arbitrage at every step, the
-  `n`-step CRR price of the cash-or-nothing call tends to `e^{−rT} · P(S₀eˣ > K)` under
-  `N((r − σ²/2)T, σ²T)`, by the portmanteau theorem (`tendsto_integral_digital`).
 * `binomialPrice_call_tendsto_bs`: for `σ, T, S₀ > 0` and no-arbitrage at every step, the `n`-step
   CRR call price tends to `e^{−rT} · E[(K − S₀eˣ)₊] + (S₀ − K e^{−rT})`, the expectation under
   `N((r − σ²/2)T, σ²T)`.
@@ -545,90 +542,31 @@ private lemma natCast_mul_crrPerStepRate {r T : ℝ} {n : ℕ} (hn : 1 ≤ n) :
   have hn0 : (n : ℝ) ≠ 0 := by positivity
   unfold crrPerStepRate crrStep; field_simp
 
-/-- **The CRR digital expectation converges weakly to the BS digital expectation.** The payoff
-`x ↦ 1_{S₀eˣ > K}` is discontinuous, but its jump set is the single point `log (K/S₀)`, which the
-Gaussian limit does not charge; the portmanteau theorem
-(`ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto`) applied to
-`crr_tendsto_gaussian_inDistribution` gives the convergence. -/
-lemma tendsto_integral_digital {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
-    (hK : 0 < K)
-    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
-    Tendsto (fun n : ℕ ↦ ∫ x, (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (S₀ * Real.exp x)
-        ∂(convPow (crrStepMeasure r σ T n) n)) atTop
-      (𝓝 (∫ x, (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (S₀ * Real.exp x)
-        ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
-  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
-  have hmem (x : ℝ) : S₀ * Real.exp x ∈ Set.Ioi K ↔ x ∈ Set.Ioi (Real.log (K / S₀)) := by
-    rw [Set.mem_Ioi, Set.mem_Ioi, Real.log_lt_iff_lt_exp (div_pos hK hS₀), div_lt_iff₀ hS₀,
-      mul_comm]
-  have hind (x : ℝ) : (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (S₀ * Real.exp x)
-      = (Set.Ioi (Real.log (K / S₀))).indicator (fun _ ↦ (1 : ℝ)) x := by
-    simp only [Set.indicator_apply, hmem]
-  have hnull : bsLimitProbMeasure r σ T (frontier (Set.Ioi (Real.log (K / S₀)))) = 0 := by
-    rw [frontier_Ioi]
-    refine ENNReal.coe_eq_zero.mp ?_
-    rw [ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure]
-    exact gaussianReal_absolutelyContinuous _
-      (Real.toNNReal_pos.mpr (by positivity)).ne' Real.volume_singleton
-  have h := ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto
-    (crr_tendsto_gaussian_inDistribution hσ hT hp) hnull
-  have h' := (NNReal.continuous_coe.tendsto _).comp h
-  simp only [hind, integral_indicator measurableSet_Ioi, setIntegral_const, smul_eq_mul, mul_one]
-  simpa only [Function.comp_def, crrRowProbMeasure, bsLimitProbMeasure,
-    ← ProbabilityMeasure.measureReal_eq_coe_coeFn, ProbabilityMeasure.coe_mk] using h'
-
-/-- **The discounted binomial price converges once the integral does.** For a measurable payoff
-bounded on `(0, ∞)`, if the payoff's integrals at `S₀eˣ` against the `n`-step CRR laws converge to
-`L`, the `n`-step binomial price converges to `e^{−rT}·L`: `binomialPrice_eq_integral_convPow`
-and `n · crrPerStepRate = rT`. -/
-lemma binomialPrice_tendsto_of_integral {r σ T S₀ C L : ℝ} {g : ℝ → ℝ} (hS₀ : 0 < S₀)
-    (hg : Measurable g) (hC : ∀ y : ℝ, 0 < y → |g y| ≤ C)
-    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n))
-    (hlim : Tendsto (fun n : ℕ ↦ ∫ x, g (S₀ * Real.exp x)
-        ∂(convPow (crrStepMeasure r σ T n) n)) atTop (𝓝 L)) :
-    Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        g n S₀) atTop (𝓝 (Real.exp (-(r * T)) * L)) := by
-  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
-  refine (hlim.const_mul (Real.exp (-(r * T)))).congr'
-    (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
-  beta_reduce
-  rw [binomialPrice_eq_integral_convPow (hp n).1 (hp n).2 hg hC n S₀ hS₀,
-    neg_mul, mul_comm (crrPerStepRate r T n) (n : ℝ), natCast_mul_crrPerStepRate hn]
-
 /-- **Cox–Ross–Rubinstein → Black–Scholes, the put-price convergence.** Under no-arbitrage at
 every step with `n ≥ 1`, the `n`-step CRR binomial price of a European put converges to the
 discounted put expectation `e^{−rT}·E[(K − S₀eˣ)₊]`, `X ∼ N((r − σ²/2)T, σ²T)`.
 
-The put payoff is bounded and continuous, so the integrals converge weakly
-(`tendsto_integral_put`). -/
+The put payoff is bounded and continuous, so the binomial price is a discounted expectation
+(`binomialPrice_eq_integral_convPow`) that converges weakly (`tendsto_integral_put`). -/
 theorem binomialPrice_put_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
     (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
     Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
         (fun x ↦ max (K - x) 0) n S₀) atTop
       (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
-        ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) :=
-  binomialPrice_tendsto_of_integral hS₀ (by fun_prop)
-    (fun y hy ↦ by
-      rw [abs_of_nonneg (le_max_right _ _)]
-      exact (max_le_max (by linarith) le_rfl).trans (max_le (le_abs_self K) (abs_nonneg K)))
-    hna (tendsto_integral_put hσ hT hS₀ hna)
-
-/-- **Cox–Ross–Rubinstein → Black–Scholes, the cash-or-nothing price convergence.** Under
-no-arbitrage at every step with `n ≥ 1` and `K > 0`, the `n`-step CRR binomial price of the
-digital call paying `1` iff `S_T > K` converges to `e^{−rT}·P(S₀eˣ > K)`,
-`X ∼ N((r − σ²/2)T, σ²T)`, the discounted expectation of the payoff. The payoff is
-discontinuous: the convergence is the portmanteau argument of `tendsto_integral_digital`. -/
-theorem binomialPrice_digital_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T)
-    (hS₀ : 0 < S₀) (hK : 0 < K)
-    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
-    Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        ((Set.Ioi K).indicator fun _ ↦ (1 : ℝ)) n S₀) atTop
-      (𝓝 (Real.exp (-(r * T)) * ∫ x, (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (S₀ * Real.exp x)
-        ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) :=
-  binomialPrice_tendsto_of_integral (C := 1) hS₀ (measurable_const.indicator measurableSet_Ioi)
-    (fun y _ ↦ by
-      rw [Set.indicator_apply]; split_ifs <;> simp)
-    hna (tendsto_integral_digital hσ hT hS₀ hK hna)
+        ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
+  have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
+  have hmeas : Measurable (fun y : ℝ ↦ max (K - y) 0) := by fun_prop
+  have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy ↦ by
+    rw [abs_of_nonneg (le_max_right _ _)]
+    exact (max_le_max (by linarith) le_rfl).trans (max_le (le_abs_self K) (abs_nonneg K))
+  refine ((tendsto_integral_put hσ hT hS₀ hna).const_mul (Real.exp (-(r * T)))).congr'
+    (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
+  change Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
+        ∂(convPow (crrStepMeasure r σ T n) n))
+      = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x ↦ max (K - x) 0) n S₀
+  rw [binomialPrice_eq_integral_convPow (hp n).1 (hp n).2 hmeas hbd n S₀ hS₀,
+      neg_mul, mul_comm (crrPerStepRate r T n) (n : ℝ), natCast_mul_crrPerStepRate hn]
 
 /-- **Cox–Ross–Rubinstein → Black–Scholes, the call-price convergence.** Under
 no-arbitrage at every step with `n ≥ 1` — a hypothesis `binomialNoArb_crr`
