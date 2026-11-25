@@ -15,7 +15,7 @@ public import MathFin.Probability.Brownian.Ito.DriftProcessModification
 /-! # Bounded **predictable**-θ Girsanov — the increments of `B^θ` under `Q` (Rung 1)
 
 Generalizes the continuous-adapted Girsanov theorem
-(`Btheta_isQBrownianMotion_adapted`, which `GirsanovAdaptedTheta` now derives from this file) to a
+(`Btheta_isBrownianOn_adapted`, which `GirsanovAdaptedTheta` now derives from this file) to a
 bounded **predictable** market price of risk `θ` — the honest domain of the Itô `L²` integral, with
 no continuity assumed. The route (Route B) is the density-approximation front half over the
 spine-free architecture:
@@ -27,7 +27,7 @@ spine-free architecture:
   `∑cᵢΔB → ∫θdB` (`SimpleProcessPartition`, Itô isometry), the drift `∑cᵢΔτ_u → ∫₀ᵘθds`, and the
   quadratic variation `∑cᵢ²Δτ_T → ∫₀ᵀθ²ds` (both here, via the drift-modification tower);
 * the uniform `L⁴`/`L²` moment bounds (`GirsanovSimpleDoleansMoments`) feed the a.e.-subsequence
-  set-integral engine, exactly as in the continuous case, and `isQBrownianMotion_of_expMartingale`
+  set-integral engine, exactly as in the continuous case, and `isBrownianOn_of_expMartingale`
   reads off zero start, `N(0,t−s)` increments, and independent increments (`HasIndepIncrements`)
   on `[0,T]`, which together fix every finite-dimensional law of `B^θ` under `Q` on `[0,T]` to that
   of a standard Brownian motion; path continuity is not stated.
@@ -46,9 +46,9 @@ integral `∫₀ᵘθds`), so no fresh predictable-progressive-measurability lem
 
 ## Main results
 
-* `Btheta_isQBrownianMotion_predictable_of_bdd`: for a bounded predictable `θ` and `T`, `B^θ`
+* `Btheta_isBrownianOn_predictable_of_bdd`: for a bounded predictable `θ` and `T`, `B^θ`
   is `IsBrownianOn` `[0, T]` under `Q = μ.withDensity Z_T`; path continuity is not stated.
-* `Btheta_isQBrownianMotion_predictable`: the same conclusion with the approximating sequence
+* `Btheta_isBrownianOn_predictable`: the same conclusion with the approximating sequence
   of simple processes supplied as a hypothesis.
 * `isExpQMartingale_BthetaPredictable`: the exponential-martingale data for `B^θ` under `Q`,
   given such an approximating sequence.
@@ -1067,10 +1067,10 @@ continuity), under `Q = μ.withDensity(Z_T)` with the Doléans density
 has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and independent increments
 (`HasIndepIncrements`), which fix its finite-dimensional laws on `[0,T]`; path continuity is not
 stated. One application of the exponential
-characterization `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaPredictable` — the
+characterization `isBrownianOn_of_expMartingale` to `isExpQMartingale_BthetaPredictable` — the
 bounded-predictable case (Rung 1), strengthening the bounded-adapted-continuous
-`Btheta_isQBrownianMotion_adapted` to the full honest Itô-integrand domain. -/
-theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+`Btheta_isBrownianOn_adapted` to the full honest Itô-integrand domain. -/
+theorem Btheta_isBrownianOn_predictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
     (hV : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop
@@ -1080,7 +1080,7 @@ theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) 
   have : IsProbabilityMeasure (μ.withDensity fun ω ↦
       ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) :=
     isProbabilityMeasure_predGirsanov hB hBmeas T hpred hbdd V hV
-  exact isQBrownianMotion_of_expMartingale
+  exact isBrownianOn_of_expMartingale
     (isExpQMartingale_BthetaPredictable hB hBmeas hpred hbdd T V hV)
 
 include hB in
@@ -1090,14 +1090,14 @@ include hB in
 `Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds))` the drift-corrected process
 `B^θ_u = B_u + driftContinuousMod θ̂ u` starts at `0`, has `𝒩(0,t−s)` increments, and has
 independent increments, on `[0,T]`. The benchmark-facing form of
-`Btheta_isQBrownianMotion_predictable`. -/
-theorem Btheta_isQBrownianMotion_predictable_of_bdd (hBmeas : ∀ t, Measurable (B t))
+`Btheta_isBrownianOn_predictable`. -/
+theorem Btheta_isBrownianOn_predictable_of_bdd (hBmeas : ∀ t, Measurable (B t))
     {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ}
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
     IsBrownianOn (μ.withDensity fun ω ↦ ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) T
       (BthetaPred (μ := μ) T hBmeas hpred hbdd) := by
   obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hBmeas T hpred hbdd
-  exact Btheta_isQBrownianMotion_predictable hB hBmeas hpred hbdd T V hV
+  exact Btheta_isBrownianOn_predictable hB hBmeas hpred hbdd T V hV
 
 end Assembly
 

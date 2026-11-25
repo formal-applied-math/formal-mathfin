@@ -242,7 +242,7 @@ public import MathFin.Probability.Brownian.Ito.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 public import MathFin.Probability.Brownian.Ito.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
--- Btheta_isQBrownianMotion_adapted
+-- Btheta_isBrownianOn_adapted
 public import MathFin.Probability.Brownian.Girsanov.GirsanovAdaptedTheta
 -- Rung 1 (bounded predictable θ Girsanov, Route B): marshal a SimpleProcess into single-partition
 -- (s,c) form; generic simple-Doléans moment bounds; the predictable distributional Girsanov

@@ -156,6 +156,18 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.BrownianQuadraticVariation.qv_equals_t
 
+/-- info: 'MathFin.Btheta_isBrownianOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Btheta_isBrownianOn
+
+/-- info: 'MathFin.Btheta_isBrownianOn_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Btheta_isBrownianOn_adapted
+
+/-- info: 'MathFin.Btheta_isBrownianOn_predictable_of_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Btheta_isBrownianOn_predictable_of_bdd
+
 /-- info: 'MathFin.Btheta_isBrownianReal_predictable_of_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Btheta_isBrownianReal_predictable_of_bdd
@@ -164,25 +176,13 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd
 
-/-- info: 'MathFin.Btheta_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_isQBrownianMotion
-
-/-- info: 'MathFin.Btheta_isQBrownianMotion_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_isQBrownianMotion_adapted
-
-/-- info: 'MathFin.Btheta_isQBrownianMotion_predictable_of_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_isQBrownianMotion_predictable_of_bdd
-
 /-- info: 'MathFin.Btheta_map_eq_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.Btheta_map_eq_gaussianReal
 
-/-- info: 'MathFin.Btheta_simple_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Btheta_simple_isBrownianOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_simple_isQBrownianMotion
+#print axioms MathFin.Btheta_simple_isBrownianOn
 
 /-- info: 'MathFin.CIRSquaredOU.cirVariance_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
