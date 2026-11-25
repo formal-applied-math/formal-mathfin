@@ -46,8 +46,9 @@ before, 867 after; 18 library wrappers and 22 reduced cores unchanged).
   (`americanPutPrice_eq_intrinsic_of_deep_in_the_money`: `K − S`, with `r ≥ 0` in the
   hypothesis;
   `binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`: `K e^{−rn} − S`;
-  `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: the premium `K (1 − e^{−rn}) > 0`
-  for `r > 0`, `n ≥ 1`, which exhibits witnesses). Not proved: the continuous-time strict
+  `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: the strict inequality, which with
+  the two closed forms gives the premium `K (1 − e^{−rn}) > 0` for `r > 0`, `n ≥ 1`, exhibiting
+  witnesses). Not proved: the continuous-time strict
   premium (the Black–Scholes modules carry only the weak bound), any exercise-boundary
   statement, the superhedging characterization, and a CRR limit of the premium; the market-level
   statement takes the physical law to be i.i.d. flips with `0 < p < 1` and prices at time 0

@@ -26,8 +26,9 @@ strictly less for `r > 0`; `americanPutPrice_eq_intrinsic_of_deep_in_the_money`)
 European price is the discounted
 strike minus the spot `K * e^{-r*n} − S`
 (`binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`).
-With `r > 0` and `n ≥ 1` the two differ by `K * (1 - e^{-r*n}) > 0`
-(`binomialPrice_lt_americanPrice_put_of_deep_in_the_money`).
+With `r > 0` and `n ≥ 1` the European price is strictly below the American price
+(`binomialPrice_lt_americanPrice_put_of_deep_in_the_money`), which with the two closed forms
+gives the early-exercise premium `K * (1 - e^{-r*n}) > 0`.
 
 For the propagation to the root, the American minus the European price (the premium) is a
 supermartingale of the tree: it dominates its own one-period discounted continuation
@@ -56,7 +57,8 @@ composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
   with the witness at the root.
 * `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: with `r > 0` and `n ≥ 1` the
   European price is strictly below the American price at every deep-in-the-money node —
-  derived from the frontier statement through the witness above.
+  derived from the frontier statement through the witness above; with the two closed forms
+  this gives the premium `K * (1 - e^{-r*n}) > 0`.
 * `americanPrice_premium_supermartingale`: for any payoff, the American minus the European
   price dominates the one-period discounted continuation of the same difference.
 * `americanPrice_premium_mul_weight_le`: along any `k`-step path with `j` up-moves, the root
@@ -475,8 +477,8 @@ theorem immediate_exercise_gt_continuation_of_deep_in_the_money
 /-- **Deep in the money the American put is strictly worth more than the European put.** With
 `r > 0` and at least one step remaining, a spot so low that the whole remaining subtree ends in
 the money (`0 < S`, `S * u ^ n ≤ K`) makes the European price `K * e^{-r*n} − S` strictly
-smaller than the American price `K − S`: the early-exercise premium `K * (1 - e^{-r*n})` is
-strictly positive. Derived from the frontier statement
+smaller than the American price `K − S` — which with the two closed forms gives the
+early-exercise premium `K * (1 - e^{-r*n}) > 0`. Derived from the frontier statement
 `binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation` with the witnessing
 node at the root (`immediate_exercise_gt_continuation_of_deep_in_the_money`): deep in the
 money the node is the root itself, reached with probability one. -/
