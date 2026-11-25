@@ -1773,28 +1773,6 @@
   "label": "thm:margrabe",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/MargrabeGrounding.lean"},
- {"uses":
-  ["def:market",
-   "def:gbm",
-   "def:brownian-motion",
-   "def:standard-normal-cdf",
-   "def:contract",
-   "def:pricing-functional",
-   "thm:physical-measure-pricing",
-   "thm:girsanov-brownian-characterisation",
-   "def:contract-value"],
-  "title": "The forward-start call in the Black–Scholes market",
-  "text":
-  "In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \\alpha,\n  \\sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the\n  multiple $\\alpha$ of the then-observed price, paying $(S_T - \\alpha S_{t_1})^+$ at $T$, is\n  worth $S_0 \\cdot bsV(\\alpha, r, \\sigma, 1, T - t_1)$ under the Girsanov pricing measure of the\n  market price of risk, whatever the physical drift $m$, at any horizon $H \\ge T$: Rubinstein's\n  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian\n  increment $B_T - B_{t_1}$, independent of $\\mathcal{F}_{t_1}$, so the expectation of the product\n  splits\n  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is\n  the call price on a unit spot (`bsV`, via `integral_bsCall_payoff_eq_bsV`).",
-  "name":
-  "MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure",
-  "module": "MathFin.Models.BlackScholes.ForwardStart",
-  "line": 233,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:forward-start-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ForwardStart.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Quadratic variation of Brownian motion",
   "text":
@@ -1807,6 +1785,28 @@
   "label": "thm:quadratic-variation",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/QuadraticVariationL2.lean"},
+ {"uses":
+  ["def:market",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:physical-measure-pricing",
+   "thm:girsanov-brownian-characterisation",
+   "def:contract-value"],
+  "title": "The forward-start call in the Black–Scholes market",
+  "text":
+  "In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \\alpha,\n  \\sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the\n  multiple $\\alpha$ of the then-observed price, paying $(S_T - \\alpha S_{t_1})^+$ at $T$, is\n  worth $S_0 \\cdot bsV(\\alpha, r, \\sigma, 1, T - t_1)$ under the Girsanov pricing measure of the\n  market price of risk $\\theta = (m - r)/\\sigma$, whatever the physical drift $m$, at any\n  horizon $H \\ge T$: Rubinstein's\n  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian\n  increment $B_T - B_{t_1}$, independent of $\\mathcal{F}_{t_1}$, so the expectation of the product\n  splits\n  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is\n  the call price on a unit spot (`bsV`, via `integral_bsCall_payoff_eq_bsV`).",
+  "name":
+  "MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure",
+  "module": "MathFin.Models.BlackScholes.ForwardStart",
+  "line": 237,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:forward-start-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ForwardStart.lean"},
  {"uses":
   ["def:standard-normal-cdf",
    "def:contract",

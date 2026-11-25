@@ -45,8 +45,8 @@ One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier no
   observation of the same underlying at an earlier date. What is not proved: the dividend-yield generalization (the market's asset pays no
   dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
   whole-formula dividend scaling `S₀ e^{−qT}` and the ratio leg's rate `r − q`), and cliquets (a
-  series of forward starts) are out of scope. The Risk
-  column's page numbers could not be verified from this machine; the delivered closed form at
+  series of forward starts) are out of scope. The Risk column is 4(2), February 1991, pp. 44–47
+  (per Hull's bibliography); the delivered closed form at
   `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
   computes.
 

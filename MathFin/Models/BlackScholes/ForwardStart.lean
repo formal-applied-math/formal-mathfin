@@ -17,7 +17,9 @@ public import MathFin.Probability.Analysis.IndepFreezing
 
 A forward-start call sets its strike at a future reset date `t₁` as a fixed multiple `α` of the
 asset price then observed, and pays `max (S_T − α S_{t₁}) 0` at the maturity `T`
-(`forwardStartCall`, the first payoff in the language whose strike is an observation).
+(`forwardStartCall`, the first payoff in the language whose strike is an observation of the same
+underlying at an earlier date; Margrabe's exchange option observes a strike leg too, but of the
+other underlying at maturity).
 Under the risk-neutral
 dynamics the ratio `S_T / S_{t₁}` is a function of the Brownian increment `B_T − B_{t₁}`, which is
 independent of everything known at `t₁`, so the price factorizes (`condExp_mul_of_indep`): the
@@ -39,8 +41,8 @@ no dividends.
 
 ## References
 
-* [M. Rubinstein, *Pay now, choose later*][Rubinstein1991PayNow] (the Risk column's volume and
-  issue follow the issue trail; its page numbers could not be verified from this machine)
+* [M. Rubinstein, *Pay now, choose later*][Rubinstein1991PayNow], *Risk* 4(2), February 1991,
+  pp. 44–47
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 26 §5 (11th ed.)
 * [QuantLib, `ql/pricingengines/forward/forwardengine.hpp`][QuantLibForwardEngine] (the reference
   implementation; at zero dividend yield it reaches the closed form above)
@@ -70,7 +72,9 @@ independent of `𝓕 t₁` (so the expectation of the product splits, `condExp_m
 frozen leg has mean `e^{−rt₁}𝔼[S_{t₁}] = S₀` (`discounted_terminal_eq_S0`), and the ratio leg is
 `bsV` on a unit spot (`integral_bsCall_payoff_eq_bsV`). Rubinstein's formula at zero dividend
 yield; the general formula's dividend scaling `S₀ e^{−qT}` and rate `r − q` are absent because
-this asset pays no dividends. -/
+this asset pays no dividends. The case `t₁ = 0` is the vanilla call by degree-one homogeneity;
+the hypothesis `0 < t₁` excludes it for the proof route (the `√t₁` standardization), not because
+the identity fails there. -/
 theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
     {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ} (hB : IsFilteredPreBrownian B 𝓕 Q)
     {S_0 r α σ : ℝ} {t₁ T : ℝ≥0} (hS₀ : 0 < S_0) (hα : 0 < α) (hσ : 0 < σ)
