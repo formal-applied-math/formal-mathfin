@@ -165,7 +165,9 @@ theorem esscherPremium_strictMonoOn [IsProbabilityMeasure P]
         simp only [pow_zero, one_mul, pow_one] at h0 h1
         exact ((h2.sub (h1.const_mul (2 * m))).add (h0.const_mul (m ^ 2))).congr
           (ae_of_all _ fun ω ↦ by simp only [Pi.add_apply, Pi.sub_apply]; ring)
-      rw [integral_pos_iff_support_of_nonneg_ae (ae_of_all _ fun ω ↦ by simp only [Pi.zero_apply]; positivity) hf]
+      have hnn : 0 ≤ᵐ[P] fun ω ↦ (X ω - m) ^ 2 * Real.exp (v * X ω) :=
+        ae_of_all _ fun ω ↦ by simp only [Pi.zero_apply]; positivity
+      rw [integral_pos_iff_support_of_nonneg_ae hnn hf]
       have hsupp : Function.support (fun ω ↦ (X ω - m) ^ 2 * Real.exp (v * X ω))
           = {ω | ¬ X ω = m} := by
         ext ω

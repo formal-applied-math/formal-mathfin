@@ -36,7 +36,8 @@ Applied recursively, starting from a single-period bond (where `sprev = ∅` and
 from coupon-bond market data. For a strip of annual par bonds the recursion is closed-form
 (`parBootstrap`): it reprices every bond and is the only curve that does, and a repeated coupon
 makes the next factor the previous one over `1 + c` (`parBootstrap_succ_of_coupon_eq`). The
-search-based recursion over general instruments is `boot` of `Models/Rates/Bootstrapping.lean`, where
+search-based recursion over general instruments is `boot` of
+`Models/Rates/Bootstrapping.lean`, where
 `swapBootstrap_recovers_couponBondFactor` shows that bisection on a zero-value swap
 recovers the factor named by `bootstrap_solve`.
 
@@ -44,7 +45,6 @@ recovers the factor named by `bootstrap_solve`.
 
 * `couponBondPricingEq`: the proposition `P = (∑ i ∈ sprev, c i * B i) + (c_last + F) * B_last`,
   the price of a coupon bond with previously known maturities `sprev` and one new maturity.
-
 * `parAnnuity`, `parBootstrap`: for annual par bonds with coupons `c n` maturing in year `n + 1`,
   the sum of the solved factors and the factor to year `n + 1` solved from the bond maturing then.
 * `parBondPricingEq`: the bond with index `n` is priced at par on a curve `B`.
