@@ -124,6 +124,89 @@ check "beautiful"; it can check "nobody refreshed the backlog."
   that finds nothing to improve.
 
 ## Review log
+## 2026-11-25 — corpus 916, modules 793 — the Jarrow–Yildirim and average-strike companions, brought onto the library's objects before they land
+
+Scope: the branch `integration-comb-20261123`, the combined tree of the two queued topic
+branches (`ecodev-jarrow-yildirim` final head `cbf9fe15`; `asian-arith-avgstrike-bound`
+`dde23748`). It adds five corpus entries and two modules —
+`MathFin/Models/Rates/JarrowYildirim.lean` (the ZC inflation caplet on the curve forward, the
+year-on-year forward and its convexity factor) and
+`MathFin/Models/BlackScholes/AsianArithmeticAverageStrike.lean` (the discrete arithmetic
+average-strike conditioning lower bound) — both `reduced_core`, with the regenerated
+artifacts (README counts 911/866/18/27, coverage, benchmarks, bib, the four
+`formalization.yaml` files, `AxiomAuditGen`, ledger). No existing entry changed
+(`mf-jarrow-yildirim-zc-inflation-caplet`, `mf-jarrow-yildirim-yoy-forward-convexity`,
+`mf-asian-avgstrike-conditioning-lower-bound`, `mf-asian-avgstrike-expsum-gaussian-positive-part`,
+`mf-asian-avgstrike-one-fixing-market-price` added; 0 removed or re-keyed).
+
+### The standing first pass: prose against statement
+
+- JY's module docstring states its results as conditional on the four hypotheses (index-linked
+  bond priced on the real curve, lognormal index, forward-index martingale, Hull–White bond
+  ratio) and denies in Scope the SDE-level derivation of the `−ρ_{rI}σ_rσ_I` drift and of
+  `V(0,T)`; the benchmark `description`s carry the same disclosure. The quadratic-form lemmas
+  state their validity region exactly — pairwise `|ρ| ≤ 1` is *not* enough for three factors,
+  `jyCorrDet ≥ 0` is required — rather than writing "correlation matrix" and letting the
+  reader assume positive semidefiniteness.
+- Asian's docstring denies by name what it does not deliver: the bound's closeness ("a
+  numerical question this file does not address"), the identification of the conditional mean
+  with the Brownian model (`hcond`, a hypothesis of the general statements), and the monotone
+  sign pattern for general fixings. The junk-valued helpers say "junk" in their own docstrings
+  (`condRate` at zero variance, `condShift` at `Fₖ ≤ 0`).
+- Both scope paragraphs disclose the unread primary source by name (Jarrow–Yildirim 2003;
+  Rogers–Shi 1995) and name the restatement actually followed (Brigo–Mercurio /
+  Dam–Macrina–Skovmand / Bagaria; Thompson wp0209 §3).
+
+### Upgrades executed
+
+- The two modules themselves (theorem inventory in the PR text).
+- Tree-level fixes from the integration rounds: the README contributor bullet's inflation
+  credit now names the JY caplet/YoY forward and the Asian bound instead of crediting only
+  Inflation.lean's earlier work (`a0d63768`); coverage.md's per-step corpus deltas restated on
+  the merged tree — the branch-local 882 was not the tree's delivery-ready figure
+  (`dd9891cf`, `f6a05713`); generated artifacts regenerated in one commit (`d3206c10`).
+
+### Lens gradients
+
+- **Inspired math.** Exemplar: `quad2_nonneg`/`quad3_nonneg` — the 3×3 validity region stated
+  exactly, with the pairwise-is-not-enough fact as its own takeaway. Next: deriving `hcond`
+  (the conditional-mean identification) from the Brownian model for general fixing dates.
+- **Coherence.** Exemplar: `jyZcCaplet_price` routes through the library's own
+  `value_caplet_black76` and `forwardMeasure_price` instead of private Black-76 copies; the
+  Asian one-fixing case is stated as `S` times the market's price of the forward-start call.
+  Next: the YoY convexity factor phrased in the library's existing adjustment vocabulary
+  where one exists.
+- **Zero slop.** Exemplar: `expSum_pos_iff_of_root` proves the single crossing without
+  claiming monotonicity `expSum` does not have — the tilted sum is the monotone object, and
+  the docstring says so.
+- **Junk values.** The Asian helpers carry their junk conventions at definition; the JY
+  statements keep `T ≥ 0`, `√V` (so `V > 0`), `K > 0` where the term needs them.
+
+### Ranked backlog
+
+1. The JY SDE step: the real-rate drift shift and `V(0,T)` derived from the three-SDE form,
+   retiring the martingale/bond-ratio hypotheses (L).
+2. The exact YoY caplet; calibration and seasonality (S–M).
+3. `hcond` from the Brownian model for discrete fixings (S–M).
+4. Bound tightness as mathematics — a gap statement, not numerics — for the conditioning
+   bound (S).
+
+### Evidence
+
+This entry reuses the two topics' own review records rather than re-reviewing: JY ~41 rounds
+to three consecutive clean at `cbf9fe15` (findings: imprecise prose, citation shape, dedup;
+no math defect); Asian 13 rounds plus two independent Fable passes — the first found four
+real issues the three clean rounds had missed (silent junk above the volatility cap and below
+the stored data), the second a duplicate of an existing library lemma and two wording errors.
+The rule-10 tree gate then ran on the combined tree: merge resolutions checked, targeted and
+full `lake build` green, generated-file freshness, bib/coverage sanity, README counts
+recounted independently, the two modules' docstrings checked bijectively against their ledger
+rows, tree-wide name-collision grep, 100-char rule, rule-22 sweep; the one low finding (the
+README credit) fixed at `a0d63768` and a confirming round run clean. Hosted on the fork
+branch: `ledger sweep` green (bot re-stamp `bd96f874`; ledger fresh 911, stale 0, missing 0)
+and `build` green (Python gates incl. pytest, full `lake build` with the Mathlib cache,
+declaration-index and ratchet/index checks). Axioms are the standard three.
+
 ## 2026-11-19 — corpus 903, modules 790 — one concept, one object: the seven duplicates of the trunk table tied or removed
 
 Scope: the branch `claude/inspiring-curie-fpg212`. It clears the `concept_duplicates` count of
