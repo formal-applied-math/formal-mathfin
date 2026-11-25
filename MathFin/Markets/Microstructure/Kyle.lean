@@ -8,6 +8,8 @@ module
 public import MathFin.Init
 public import MathFin.Probability.Gaussian.BivariateGaussian
 public import MathFin.Probability.Gaussian.GaussianPairLinearLaw
+public import MathFin.Pricing.DiscreteMarket
+public import MathFin.Markets.Microstructure.GlostenMilgromMarket
 public import Mathlib.Probability.ConditionalExpectation
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
@@ -63,7 +65,7 @@ equilibrium among all demands is a separate open problem and is not claimed here
 ## Tags
 
 Kyle model, price impact, market microstructure, informed trading, adverse selection, linear
-equilibrium, conditional expectation, MSC 91B26, MSC 91G14, JEL D82, JEL G14
+equilibrium, conditional expectation, MSC 91B26, JEL D82, JEL G14
 -/
 
 @[expose] public section
@@ -71,6 +73,7 @@ equilibrium, conditional expectation, MSC 91B26, MSC 91G14, JEL D82, JEL G14
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
+open scoped NNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
   {v u : Ω → ℝ} {p₀ σ_v σ_u : ℝ}
@@ -98,8 +101,15 @@ def kyleFlow (β : ℝ) (v u : Ω → ℝ) (p₀ : ℝ) : Ω → ℝ :=
     kyleFlow β v u p₀ ω = β * (v ω - p₀) + u ω :=
   rfl
 
-/-- A translate of a Gaussian random vector is Gaussian. -/
-private lemma hasGaussianLaw_fun_add_const {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+omit [IsProbabilityMeasure P] in
+/-- The order flow is measurable. -/
+theorem measurable_kyleFlow (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
+    Measurable (kyleFlow β v u p₀) :=
+  ((h.v_meas.sub measurable_const).const_mul β).add h.u_meas
+
+/-- **A translate of a Gaussian random vector is Gaussian**: for `Z` with a Gaussian law
+under `P`, the translate `Z + c` has the Gaussian law shifted by `c`. -/
+theorem hasGaussianLaw_fun_add_const {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [MeasurableSpace E] [BorelSpace E] (P : Measure Ω) {Z : Ω → E} (c : E)
     (hZ : HasGaussianLaw Z P) :
     HasGaussianLaw (fun ω ↦ Z ω + c) P := by
@@ -245,20 +255,11 @@ theorem kyleMarketEfficiency (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
 
 section BestResponse
 
-/-- The completed-square bound on the trader's expected profit: the quadratic
-`c·t − λ·t²` never exceeds `c²/(4λ)` for `lam > 0`. -/
-private lemma kyleProfit_le_max {lam : ℝ} (hlam : 0 < lam) (c t : ℝ) :
-    c * t - lam * t ^ 2 ≤ c ^ 2 / (4 * lam) := by
-  have h1 : 4 * lam * (c * t - lam * t ^ 2) ≤ c ^ 2 := by
-    have h2 : (c - 2 * lam * t) ^ 2 ≥ 0 := sq_nonneg _
-    nlinarith
-  rw [le_div_iff₀ (by linarith)]
-  linarith
 
-/-- The best-response condition pins the coefficients: a demand slope whose linear demand is an
-unrestricted maximizer of the expected profit at every signal has positive price impact and
-satisfies `β = 1/(2λ)`. -/
-private lemma kyleMaxCoefficients {β lam : ℝ}
+/-- **The best-response condition pins the coefficients.** A demand slope whose linear demand
+is an unrestricted maximizer of the expected profit at every signal has positive price impact
+and satisfies `β = 1/(2λ)`. -/
+theorem kyleMaxCoefficients {β lam : ℝ}
     (h : ∀ c t : ℝ, c * (β * c) - lam * (β * c) ^ 2 ≥ c * t - lam * t ^ 2) :
     0 < lam ∧ β = 1 / (2 * lam) := by
   have h1 : ∀ t : ℝ, β - lam * β ^ 2 ≥ t - lam * t ^ 2 := by
@@ -437,7 +438,14 @@ theorem existsKyleEquilibrium (h : KyleModel P v u p₀ σ_v σ_u) :
     div_pos h.σ_v_pos (by linarith [h.σ_u_pos])
   refine ⟨σ_u / σ_v, σ_v / (2 * σ_u), ?_, ?_⟩
   · intro c t
-    have hmax := kyleProfit_le_max hlampos c t
+    have hmax : c * t - (σ_v / (2 * σ_u)) * t ^ 2
+        ≤ c ^ 2 / (4 * (σ_v / (2 * σ_u))) := by
+      have h1 : 4 * (σ_v / (2 * σ_u)) * (c * t - (σ_v / (2 * σ_u)) * t ^ 2)
+          ≤ c ^ 2 := by
+        have h2 : (c - 2 * (σ_v / (2 * σ_u)) * t) ^ 2 ≥ 0 := sq_nonneg _
+        nlinarith
+      rw [le_div_iff₀ (by linarith [h.σ_v_pos, h.σ_u_pos])]
+      linarith
     have hid : c * ((σ_u / σ_v) * c) - (σ_v / (2 * σ_u)) * ((σ_u / σ_v) * c) ^ 2
         = c ^ 2 / (4 * (σ_v / (2 * σ_u))) := by
       field_simp
@@ -528,30 +536,33 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
     rw [← variance_map (X := id) (Y := Prod.snd) (by fun_prop) (by fun_prop), hmap]
     simp [hcoeu, variance_id_gaussianReal]
 
-/-- The NNReal coefficient bookkeeping: the variance parameter of `σ⁻¹ · (x − μ)` over
-`N(μ, σ²)` is `1`. -/
-private lemma kyleNNRealInvSq {σ : ℝ} (hσ : σ ≠ 0) :
-    NNReal.mk (σ⁻¹ ^ 2) (sq_nonneg _) * (σ ^ 2).toNNReal = 1 := by
-  have hc : ((NNReal.mk (σ⁻¹ ^ 2) (sq_nonneg _) : ℝ) * ((σ ^ 2).toNNReal : ℝ)) = 1 := by
-    rw [NNReal.coe_mk, Real.coe_toNNReal _ (sq_nonneg _)]
-    field_simp
-  exact_mod_cast hc
-
-/-- The standardized coordinates of the witnessed model: `σ_v⁻¹·(v − p₀)` and `σ_u⁻¹·u` are
-independent standard Gaussians. -/
-theorem kyleStandardPair_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) :
-    HasLaw (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) (gaussianReal 0 1)
-        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
-      ∧ HasLaw (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) (gaussianReal 0 1)
-        ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
-      ∧ (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) ⟂ᵢ[(
-        (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))]
-        (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) := by
+/-- **The order flow of the witnessed model is Gaussian.** The standardized coordinates
+`σ_v⁻¹·(v − p₀), σ_u⁻¹·u` of the witnessed model are independent standard Gaussians
+(`kyleModel_prod` gives the independence, the Gaussian shift/scale lemmas the standard laws,
+independence gives zero covariance), and `hasLaw_linear_gaussianPair` gives the law of the
+flow `β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)`. -/
+theorem kyleFlow_hasLaw_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) (β : ℝ) :
+    HasLaw (kyleFlow β Prod.fst Prod.snd p₀)
+      (gaussianReal 0 (β ^ 2 * σ_v ^ 2 + σ_u ^ 2).toNNReal)
+      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) := by
   have hmodel := kyleModel_prod p₀ hσv hσu
-  have hnnv := kyleNNRealInvSq hσv.ne'
-  have hnnu := kyleNNRealInvSq hσu.ne'
-  refine ⟨?_, ?_, ?_⟩
-  · have hv0 : HasLaw (fun ω : ℝ × ℝ ↦ Prod.fst ω)
+  have hcoev : ((σ_v ^ 2).toNNReal : ℝ) = σ_v ^ 2 := Real.coe_toNNReal _ (sq_nonneg _)
+  have hcoeu : ((σ_u ^ 2).toNNReal : ℝ) = σ_u ^ 2 := Real.coe_toNNReal _ (sq_nonneg _)
+  have hvs : (σ_v⁻¹ : ℝ) ≠ 0 := inv_ne_zero (ne_of_gt hσv)
+  have hus : (σ_u⁻¹ : ℝ) ≠ 0 := inv_ne_zero (ne_of_gt hσu)
+  have hnnv : NNReal.mk (σ_v⁻¹ ^ 2) (sq_nonneg _) * (σ_v ^ 2).toNNReal = 1 := by
+    have hc : ((NNReal.mk (σ_v⁻¹ ^ 2) (sq_nonneg _) : ℝ) * ((σ_v ^ 2).toNNReal : ℝ)) = 1 := by
+      rw [NNReal.coe_mk, Real.coe_toNNReal _ (sq_nonneg _)]
+      field_simp
+    exact_mod_cast hc
+  have hnnu : NNReal.mk (σ_u⁻¹ ^ 2) (sq_nonneg _) * (σ_u ^ 2).toNNReal = 1 := by
+    have hc : ((NNReal.mk (σ_u⁻¹ ^ 2) (sq_nonneg _) : ℝ) * ((σ_u ^ 2).toNNReal : ℝ)) = 1 := by
+      rw [NNReal.coe_mk, Real.coe_toNNReal _ (sq_nonneg _)]
+      field_simp
+    exact_mod_cast hc
+  have hU : HasLaw (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) (gaussianReal 0 1)
+      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) := by
+    have hv0 : HasLaw (fun ω : ℝ × ℝ ↦ Prod.fst ω)
         (gaussianReal p₀ (σ_v ^ 2).toNNReal) _ :=
       ⟨hmodel.v_gaussian.aemeasurable, by
         rw [hmodel.v_gaussian.map_eq_gaussianReal, hmodel.mean_v, hmodel.var_v]⟩
@@ -560,17 +571,24 @@ theorem kyleStandardPair_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (
     have h2 := gaussianReal_const_mul h1 σ_v⁻¹
     rw [mul_zero, hnnv] at h2
     exact h2
-  · have hu0 : HasLaw (fun ω : ℝ × ℝ ↦ Prod.snd ω)
+  have hV : HasLaw (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) (gaussianReal 0 1)
+      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) := by
+    have hu0 : HasLaw (fun ω : ℝ × ℝ ↦ Prod.snd ω)
         (gaussianReal 0 (σ_u ^ 2).toNNReal) _ :=
       ⟨hmodel.u_gaussian.aemeasurable, by
         rw [hmodel.u_gaussian.map_eq_gaussianReal, hmodel.mean_u, hmodel.var_u]⟩
     have h2 := gaussianReal_const_mul hu0 σ_u⁻¹
     rw [mul_zero, hnnu] at h2
     exact h2
-  · rw [indepFun_iff_measure_inter_preimage_eq_mul]
+  have hUVindep : (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) ⟂ᵢ[(
+      (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))]
+      (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) := by
+    rw [indepFun_iff_measure_inter_preimage_eq_mul]
     intro s t hs ht
-    have hgm : Measurable (fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) := by fun_prop
-    have hgn : Measurable (fun x : ℝ ↦ σ_u⁻¹ * x) := by fun_prop
+    have hgm : Measurable (fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) := by
+      fun_prop
+    have hgn : Measurable (fun x : ℝ ↦ σ_u⁻¹ * x) := by
+      fun_prop
     have hT : MeasurableSet ((fun x : ℝ ↦ σ_v⁻¹ * (x - p₀)) ⁻¹' s) :=
       MeasurableSet.preimage hs hgm
     have hS : MeasurableSet ((fun x : ℝ ↦ σ_u⁻¹ * x) ⁻¹' t) :=
@@ -587,22 +605,15 @@ theorem kyleStandardPair_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (
         = Prod.snd ⁻¹' ((fun x : ℝ ↦ σ_u⁻¹ * x) ⁻¹' t) from rfl,
       ← Measure.map_apply measurable_fst hT, Measure.map_fst_prod, measure_univ, one_smul,
       ← Measure.map_apply measurable_snd hS, Measure.map_snd_prod, measure_univ, one_smul]
-
-/-- The order flow of the witnessed model is Gaussian: the standardized pair
-`σ_v⁻¹·(v − p₀), σ_u⁻¹·u` is standard Gaussian with zero covariance, and
-`hasLaw_linear_gaussianPair` gives the law of the flow
-`β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)`. -/
-theorem kyleFlow_hasLaw_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 0 < σ_u) (β : ℝ) :
-    HasLaw (kyleFlow β Prod.fst Prod.snd p₀)
-      (gaussianReal 0 (β ^ 2 * σ_v ^ 2 + σ_u ^ 2).toNNReal)
-      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) := by
-  obtain ⟨hU, hV, hUVindep⟩ := kyleStandardPair_prod p₀ hσv hσu
   have hUV : HasGaussianLaw (fun ω : ℝ × ℝ ↦ (σ_v⁻¹ * (Prod.fst ω - p₀),
-      σ_u⁻¹ * Prod.snd ω)) _ :=
+      σ_u⁻¹ * Prod.snd ω)) ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+      (gaussianReal 0 (σ_u ^ 2).toNNReal)) :=
     hUVindep.hasGaussianLaw hU.hasGaussianLaw hV.hasGaussianLaw
-  have hintU : AEStronglyMeasurable (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)) _ :=
+  have hintU : AEStronglyMeasurable (fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀))
+      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) :=
     hU.hasGaussianLaw.integrable.aestronglyMeasurable
-  have hintV : AEStronglyMeasurable (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω) _ :=
+  have hintV : AEStronglyMeasurable (fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω)
+      ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal)) :=
     hV.hasGaussianLaw.integrable.aestronglyMeasurable
   have hcov : cov[(fun ω : ℝ × ℝ ↦ σ_v⁻¹ * (Prod.fst ω - p₀)),
       fun ω : ℝ × ℝ ↦ σ_u⁻¹ * Prod.snd ω;
@@ -622,5 +633,39 @@ theorem kyleFlow_hasLaw_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (h
   refine Filter.Eventually.of_forall fun ω => ?_
   field_simp [kyleFlow, hσv.ne', hσu.ne']
   rfl
+
+/-- The flow filtration: `⊥` before the order flow is observed, `σ(flow)` after. -/
+noncomputable def kyleFiltration (f : Ω → ℝ) (hf : Measurable f) : Filtration ℕ mΩ where
+  seq n := if n = 0 then ⊥ else MeasurableSpace.comap f inferInstance
+  mono' := by
+    intro i j hij
+    by_cases hi : i = 0
+    · have hi' : (fun n : ℕ ↦ if n = 0 then (⊥ : MeasurableSpace Ω) else
+        MeasurableSpace.comap f inferInstance) i = ⊥ := by simp [hi]
+      rw [hi']
+      exact bot_le
+    · have hj : j ≠ 0 := fun h0 => hi (Nat.le_zero.mp (h0 ▸ hij))
+      simp [hi, hj]
+  le' n := by
+    split
+    · exact bot_le
+    · exact hf.comap_le
+
+/-- **The Kyle market is priced.** `P` prices the one-date Kyle market — the discrete market
+whose asset is the value observed along the flow filtration `σ(order flow)` — and the market
+maker's rule with the projection slope `lam = β·σ_v²/(β²·σ_v² + σ_u²)` is exactly the
+conditional expectation of the value given the order flow: the market maker is a pricer, the
+one-date counterpart of the Glosten–Milgrom market statement. -/
+theorem kyleMarket_isPricingMeasure (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
+    (Contracts.DiscreteMarket.toMarket P
+        (kyleFiltration (kyleFlow β v u p₀) (measurable_kyleFlow h β))
+        (fun n ↦ P[v |
+            kyleFiltration (kyleFlow β v u p₀) (measurable_kyleFlow h β) n]) 1
+        fun _ _ ↦ stronglyMeasurable_condExp).IsPricingMeasure ((1 : ℕ) : ℝ≥0) P
+      ∧ P[v | MeasurableSpace.comap (kyleFlow β v u p₀) inferInstance]
+          =ᵐ[P] fun ω ↦ p₀ + (β * σ_v ^ 2 / (β ^ 2 * σ_v ^ 2 + σ_u ^ 2)) * kyleFlow β v u p₀ ω :=
+  ⟨MathFin.Execution.isPricingMeasure_toMarket_condExp P
+      (kyleFiltration (kyleFlow β v u p₀) (measurable_kyleFlow h β)) v 1,
+    kyleMarketEfficiency h β⟩
 
 end MathFin
