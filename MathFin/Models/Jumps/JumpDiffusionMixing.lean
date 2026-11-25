@@ -98,18 +98,6 @@ lemma mul_exp_add_eq_bsTerminal (S_0 r σ T z y : ℝ) :
   rw [Real.exp_add _ y, bsTerminal]
   ring
 
-/-- The Black–Scholes call price is measurable in the spot. -/
-lemma measurable_bsV_spot (K r σ T : ℝ) : Measurable fun S ↦ bsV K r σ S T := by
-  have := continuous_Phi.measurable
-  unfold bsV bsd2 bsd1
-  fun_prop
-
-/-- The Black–Scholes call price is nonnegative: it is a discounted expected call payoff
-(`bsV_nonneg` on the standard Gaussian space). -/
-lemma bsV_nonneg_of_pos {S K r σ T : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
-    0 ≤ bsV K r σ S T :=
-  bsV_nonneg (Q := gaussianReal 0 1) (Z := id) ⟨hS, hK, hσ, hT, HasLaw.id⟩
-
 /-- The terminal price of a jump-diffusion with an independent jump part `Y` is integrable when
 `𝔼[e^Y] < ∞`: it is a constant times `e^{σ√T·Z}·e^Y`, a product of independent integrable
 factors. -/

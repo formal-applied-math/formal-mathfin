@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.Call
 public import MathFin.Probability.Gaussian.GaussianCDFDeriv
+public import MathFin.Probability.Gaussian.NormalQuantile
 public import MathFin.Probability.Analysis.DerivOfDeriv
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
 
@@ -324,6 +325,12 @@ lemma integral_bsCall_payoff_eq_bsV {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q :
     [IsProbabilityMeasure Q] {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :
     ∫ ω, rexp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0 ∂Q = bsV K r σ S_0 T := by
   rw [bs_call_formula h, bsV, neg_mul]
+
+/-- The Black–Scholes call price is measurable in the spot. -/
+lemma measurable_bsV_spot (K r σ T : ℝ) : Measurable fun S ↦ bsV K r σ S T := by
+  have := continuous_Phi.measurable
+  unfold bsV bsd2 bsd1
+  fun_prop
 
 /-- **Delta**: `∂_S V = Φ(d₁)` — the magic identity makes everything else cancel. -/
 lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
