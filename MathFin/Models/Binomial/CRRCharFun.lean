@@ -564,9 +564,10 @@ lemma tendsto_integral_digital {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T)
   have hind (x : ℝ) : (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (S₀ * Real.exp x)
       = (Set.Ioi (Real.log (K / S₀))).indicator (fun _ ↦ (1 : ℝ)) x := by
     simp only [Set.indicator_apply, hmem]
-  have hnull : (bsLimitProbMeasure r σ T : Measure ℝ)
-      (frontier (Set.Ioi (Real.log (K / S₀)))) = 0 := by
+  have hnull : bsLimitProbMeasure r σ T (frontier (Set.Ioi (Real.log (K / S₀)))) = 0 := by
     rw [frontier_Ioi]
+    refine ENNReal.coe_eq_zero.mp ?_
+    rw [ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure]
     exact gaussianReal_absolutelyContinuous _
       (Real.toNNReal_pos.mpr (by positivity)).ne' Real.volume_singleton
   have h := ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto
@@ -592,6 +593,7 @@ lemma binomialPrice_tendsto_of_integral {r σ T S₀ C L : ℝ} {g : ℝ → ℝ
   have hp (n : ℕ) : 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := crrProb_mem_Icc hna n
   refine (hlim.const_mul (Real.exp (-(r * T)))).congr'
     (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
+  beta_reduce
   rw [binomialPrice_eq_integral_convPow (hp n).1 (hp n).2 hg hC n S₀ hS₀,
     neg_mul, mul_comm (crrPerStepRate r T n) (n : ℝ), natCast_mul_crrPerStepRate hn]
 
