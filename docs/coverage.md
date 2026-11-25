@@ -53,7 +53,6 @@ Frontier node thm:kyle-equilibrium stays open with the entry id in its core list
 carries no blueprint tag (its proof stands on the Gaussian projection substrate, which has no
 node), so the node is advanced, not delivered.
 
-
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

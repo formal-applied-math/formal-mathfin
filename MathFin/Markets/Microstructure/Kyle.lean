@@ -20,7 +20,8 @@ public import Mathlib.Probability.Independence.Integration
 /-!
 # The Kyle single-period equilibrium
 
-Kyle's one-period model (the first section of his 1985 paper) derives price impact from strategic
+Kyle's one-period model (Section 2, the single-auction equilibrium, of his 1985 paper) derives
+price impact from strategic
 informed trading. A fundamental value `v ∼ N(p₀, σ_v²)` is observed by one informed trader; noise
 traders submit `u ∼ N(0, σ_u²)`, independent of `v`; a competitive market maker clears the batch
 `x + u` at a linear price `p = p₀ + λ·(x + u)`. The informed trader of signal `c = v − p₀` submits
@@ -69,7 +70,7 @@ equilibrium among all demands is a separate open problem and is not claimed here
 
 ## References
 
-* [A. S. Kyle, *Continuous Auctions and Insider Trading*][Kyle1985], §1
+* [A. S. Kyle, *Continuous Auctions and Insider Trading*][Kyle1985], §2
 
 ## Tags
 

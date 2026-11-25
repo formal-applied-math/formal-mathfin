@@ -8,7 +8,7 @@ module
 public import MathFin.Probability.Gaussian.BivariateNormalCDF
 
 /-!
-# Linear combinations of a correlated standard Gaussian pair
+# Linear laws and translates of a correlated standard Gaussian pair
 
 Let `(U, V)` be jointly Gaussian, each standard normal, with covariance `ρ`. Then `ρ² ≤ 1`
 (`sq_le_one_of_covariance_unit`, from `Var[U − ρV] = 1 − ρ² ≥ 0`), and the pair has the
@@ -32,6 +32,7 @@ such as the cross-moment of a basket (`Models/BlackScholes/BasketMomentMatching.
 * `hasLaw_bivariateNormalLaw_of_gaussianPair` — `(U, V) ~ bivariateNormalLaw ρ`.
 * `hasLaw_linear_gaussianPair` — `aU + bV ~ N(0, a² + 2abρ + b²)`.
 * `integral_exp_linear_gaussianPair` — `𝔼[e^{aU + bV}] = e^{(a² + 2abρ + b²)/2}`.
+* `hasGaussianLaw_fun_add_const`: a translate of a Gaussian random vector is Gaussian.
 
 ## Tags
 
