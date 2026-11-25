@@ -910,7 +910,7 @@ attribute [blueprint "thm:forward-start-call"
   increment $B_T - B_{t_1}$, independent of $\mathcal{F}_{t_1}$, so the expectation of the product
   splits
   (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is
-  the call price on a unit spot (`thm:bs-call`'s `bsV`). -/)]
+  the call price on a unit spot (`bsV`, via `integral_bsCall_payoff_eq_bsV`). -/)]
   MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure
 
 attribute [blueprint "thm:bs-delta"

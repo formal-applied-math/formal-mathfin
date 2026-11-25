@@ -1761,28 +1761,6 @@
   "label": "thm:bs-arbitrage-free-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/PricingMeasureUnique.lean"},
- {"uses":
-  ["def:market",
-   "def:gbm",
-   "def:brownian-motion",
-   "def:standard-normal-cdf",
-   "def:contract",
-   "def:pricing-functional",
-   "thm:physical-measure-pricing",
-   "thm:girsanov-brownian-characterisation",
-   "def:contract-value"],
-  "title": "The forward-start call in the Black–Scholes market",
-  "text":
-  "In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \\alpha,\n  \\sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the\n  multiple $\\alpha$ of the then-observed price, paying $(S_T - \\alpha S_{t_1})^+$ at $T$, is\n  worth $S_0 \\cdot bsV(\\alpha, r, \\sigma, 1, T - t_1)$ under the Girsanov pricing measure of the\n  market price of risk, whatever the physical drift $m$, at any horizon $H \\ge T$: Rubinstein's\n  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian\n  increment $B_T - B_{t_1}$, independent of $\\mathcal{F}_{t_1}$, so the expectation of the product\n  splits\n  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is\n  the call price on a unit spot (`thm:bs-call`'s `bsV`).",
-  "name":
-  "MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure",
-  "module": "MathFin.Models.BlackScholes.ForwardStart",
-  "line": 231,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:forward-start-call",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ForwardStart.lean"},
  {"uses": ["def:standard-normal-cdf", "thm:esscher-tilt"],
   "title": "Margrabe's exchange option formula",
   "text":
@@ -1795,6 +1773,28 @@
   "label": "thm:margrabe",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/MargrabeGrounding.lean"},
+ {"uses":
+  ["def:market",
+   "def:gbm",
+   "def:brownian-motion",
+   "def:standard-normal-cdf",
+   "def:contract",
+   "def:pricing-functional",
+   "thm:physical-measure-pricing",
+   "thm:girsanov-brownian-characterisation",
+   "def:contract-value"],
+  "title": "The forward-start call in the Black–Scholes market",
+  "text":
+  "In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \\alpha,\n  \\sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the\n  multiple $\\alpha$ of the then-observed price, paying $(S_T - \\alpha S_{t_1})^+$ at $T$, is\n  worth $S_0 \\cdot bsV(\\alpha, r, \\sigma, 1, T - t_1)$ under the Girsanov pricing measure of the\n  market price of risk, whatever the physical drift $m$, at any horizon $H \\ge T$: Rubinstein's\n  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian\n  increment $B_T - B_{t_1}$, independent of $\\mathcal{F}_{t_1}$, so the expectation of the product\n  splits\n  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is\n  the call price on a unit spot (`bsV`, via `integral_bsCall_payoff_eq_bsV`).",
+  "name":
+  "MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure",
+  "module": "MathFin.Models.BlackScholes.ForwardStart",
+  "line": 233,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:forward-start-call",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ForwardStart.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Quadratic variation of Brownian motion",
   "text":
@@ -1823,6 +1823,18 @@
   "label": "thm:black76-caplet",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/Caplet.lean"},
+ {"uses": ["def:coin-flip-measure"],
+  "title": "Binomial barrier prices via reflection",
+  "text":
+  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
+  "name": "MathFin.binomial_upAndIn_reflection",
+  "module": "MathFin.Models.Binomial.BarrierReflection",
+  "line": 245,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:binomial-barrier-reflection",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -1840,18 +1852,6 @@
   "label": "thm:immunization-market-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
- {"uses": ["def:coin-flip-measure"],
-  "title": "Binomial barrier prices via reflection",
-  "text":
-  "On the symmetric binomial walk (every path of weight $2^{-n}$, the law\n  `coinFlipMeasure (1/2)` of the flips), for a barrier $a > 0$ and any payoff $g$ of the terminal\n  position $S_n$, the up-and-in price is\n  $E[g(S_n);\\max \\ge a] = E[g(S_n); S_n \\ge a] + E[g(2a - S_n); S_n > a]$: the paths that end\n  at or above $a$ touch it (discrete intermediate value), and those that touch it and end below\n  are reflected at the first hit onto the paths ending above (André's reflection). The up-and-out\n  price is the vanilla price less this, and the running maximum has\n  $P(\\max \\ge a) = 2P(S_n > a) + P(S_n = a)$. The prices are expectations under the symmetric\n  flip law of a payoff of the walk's position; `thm:binomial-knock-in-market` reads them as the\n  binomial market's price of the knock-in contract.",
-  "name": "MathFin.binomial_upAndIn_reflection",
-  "module": "MathFin.Models.Binomial.BarrierReflection",
-  "line": 245,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:binomial-barrier-reflection",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Binomial/BarrierReflection.lean"},
  {"uses": ["def:expected-utility"],
   "title": "Expected utility satisfies independence and continuity",
   "text":
