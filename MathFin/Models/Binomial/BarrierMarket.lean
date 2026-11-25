@@ -145,7 +145,7 @@ theorem price_upAndIn_market (hu : 1 < u) (hS : 0 < S₀) (hh : 0 < h)
   have hdefl (ω : ℕ → Bool) :
       (market (coinFlipMeasure p hp.le) S₀ u u⁻¹ ρ hh.le).deflator
         ((n : ℝ≥0) * h.toNNReal) ω = Real.exp (-(ρ * n)) := by
-    simp only [Market.deflator, market]
+    simp only [Market.deflator, market, DiscreteMarket.ofTimeChange]
     rw [floor_gridDate_div hh, NNReal.coe_zero, zero_div, Nat.floor_zero, Nat.cast_zero, mul_zero,
       Real.exp_zero, one_div, Real.exp_neg]
   have hrefl := binomial_upAndIn_reflection (n := n) hq a ha

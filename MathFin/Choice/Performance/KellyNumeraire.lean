@@ -174,6 +174,12 @@ lemma kellyPayoff_lose (θ : Fin 2 → ℝ) :
 lemma kellyCost (θ : Fin 2 → ℝ) : portfolioCost kellyPrice θ = θ 0 := by
   simp [portfolioCost, kellyPrice, Fin.sum_univ_two]
 
+/-- The win and lose probabilities `![p, 1 - p]` are positive for `0 < p < 1`. -/
+lemma kellyWeights_pos (hp : 0 < p) (hp1 : p < 1) (ω : Fin 2) : 0 < ![p, 1 - p] ω := by
+  fin_cases ω
+  · simpa using hp
+  · simpa using sub_pos.mpr hp1
+
 /-- The Kelly winning wealth `1 + f*·b` is positive. -/
 lemma kellyWealth_win_pos (hp : 0 < p) (hb : 0 < b) : 0 < 1 + kellyFraction p b * b := by
   rw [kellyGOPWealth_win hb.ne']
@@ -252,21 +258,13 @@ theorem kelly_statePrices (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) (k : Fin 2) :
   have hW : portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] =
       ![1 + kellyFraction p b * b, 1 - kellyFraction p b] := by
     funext ω
-    fin_cases ω
-    · simp [kellyPayoff_win]
-    · simp [kellyPayoff_lose]
+    fin_cases ω <;> simp [kellyPayoff_win, kellyPayoff_lose]
   have hq : (fun ω : Fin 2 ↦ 1 * ![p, 1 - p] ω /
       portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω) =
       ![p / (1 + kellyFraction p b * b), (1 - p) / (1 - kellyFraction p b)] := by
     funext ω
-    fin_cases ω
-    · simp [hW]
-    · simp [hW]
-  have hpos : ∀ ω, 0 < ![p, 1 - p] ω := by
-    intro ω
-    fin_cases ω
-    · simpa using hp
-    · simpa using hp1
+    fin_cases ω <;> simp [hW]
+  have hpos := kellyWeights_pos hp hp1
   have hWpos : ∀ ω, 0 < portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω := by
     intro ω
     rw [hW]
@@ -388,10 +386,7 @@ theorem kelly_isLocalMaxOn (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
 bet martingales up to the date `1`. -/
 theorem kellyFairLaw_isPricingMeasure (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
     (kellyMarket p b).IsPricingMeasure 1 (kellyFairLaw b) := by
-  have hpos : ∀ i, 0 < ![p, 1 - p] i := fun i ↦ by
-    fin_cases i
-    · simpa using hp
-    · simpa using sub_pos.mpr hp1
+  have hpos := kellyWeights_pos hp hp1
   have hqpos : ∀ i, 0 < ![1 / (b + 1), b / (b + 1)] i := fun i ↦ by
     fin_cases i
     · simpa using by positivity
@@ -440,9 +435,7 @@ theorem kellyMarket_numeraire_portfolio (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) 
     funext fun j ↦ funext (kellyMarket_asset_one j)
   have hPr : ∀ ω, 0 < (kellyMarket p b).P.real {ω} := fun ω ↦ by
     rw [show (kellyMarket p b).P = kellyLaw p from rfl, kellyLaw_real_singleton ω hp.le hp1.le]
-    fin_cases ω
-    · simpa using hp
-    · simpa using sub_pos.mpr hp1
+    exact kellyWeights_pos hp hp1 ω
   have hQ := kellyFairLaw_isPricingMeasure hp hp1 hb
   have hθ : portfolioCost kellyPrice ![1, kellyFraction p b] = 1 := by
     rw [kellyCost]; simp

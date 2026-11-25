@@ -527,7 +527,7 @@ theorem price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
   have hQ : (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).IsPricingMeasure (N : ℝ≥0)
       (coinFlipMeasure q hq) :=
     isPricingMeasure_coinFlipMeasure hq hna hqcrr S₀ zero_le_one hp0 hp N
-  have hE := price_pay_eq_binomialPrice_of_isPricingMeasure (h := 1) hS₀ hna hqcrr one_pos
+  have hE := price_pay_eq_binomialPrice_of_isPricingMeasure (h := 1) hS₀ hna one_pos
     (T := (N : ℝ≥0)) (N := N) (hTN := by push_cast; simp)
     (a := europeanPutPayoff K (N : ℝ≥0)) (g := fun S' ↦ max (K - S') 0) (hg := fun _ ↦ rfl) hQ
   have hA := americanPrice_market_europeanPutPayoff (h := 1) one_pos hq hqcrr
