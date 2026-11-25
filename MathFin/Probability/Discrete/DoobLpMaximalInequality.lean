@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import BrownianMotion.Auxiliary.Martingale
 public import Mathlib.Probability.Martingale.OptionalStopping
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.CondJensen
 public import Mathlib.Analysis.SpecialFunctions.Pow.Integral
@@ -1001,22 +1002,6 @@ theorem maximal_ineq_Lp
   rw [h_split, ENNReal.div_le_iff hApm1_ne_zero hApm1_ne_top]
   exact hbound
 
-/-- The norm process of a Banach-valued martingale is a non-negative submartingale.
-Internal lemma used to derive the Banach version of Doob's L^p inequality from the
-real-valued case via Jensen (`MeasureTheory.norm_condExp_le`). -/
-lemma martingale_norm_submartingale
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    {𝒢 : Filtration ℕ m0} {f : ℕ → Ω → E} (hf : Martingale f 𝒢 μ) :
-    Submartingale (fun n ω ↦ ‖f n ω‖) 𝒢 μ := by
-  refine ⟨fun n ↦ continuous_norm.comp_stronglyMeasurable (hf.stronglyAdapted n),
-          fun i j hij ↦ ?_, fun n ↦ (hf.integrable n).norm⟩
-  have hcondExp : f i =ᵐ[μ] μ[f j | (𝒢 i : MeasurableSpace Ω)] := (hf.condExp_ae_eq hij).symm
-  filter_upwards [hcondExp,
-    norm_condExp_le (f := f j) (m := (𝒢 i : MeasurableSpace Ω)) (μ := μ)]
-    with ω hω hjensen
-  calc ‖f i ω‖ = ‖(μ[f j | (𝒢 i : MeasurableSpace Ω)]) ω‖ := by rw [hω]
-    _ ≤ _ := hjensen
-
 /-- Doob's L^p maximal inequality, Banach-valued martingale form.
 
 For a Banach-valued martingale `f : ℕ → Ω → E` and `1 < p`,
@@ -1031,7 +1016,7 @@ theorem Martingale.eLpNorm_norm_runMax_le
     eLpNorm (fun ω ↦ (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
         (fun k ↦ ‖f k ω‖)) (ENNReal.ofReal p) μ
       ≤ ENNReal.ofReal (p / (p - 1)) * eLpNorm (f n) (ENNReal.ofReal p) μ := by
-  have hsub := martingale_norm_submartingale hf
+  have hsub := hf.submartingale_norm
   have hbound := maximal_ineq_Lp hsub (fun _ _ ↦ norm_nonneg _) hp n
   rwa [eLpNorm_norm (f n)
     ((hf.stronglyMeasurable n).mono (𝒢.le n)).aestronglyMeasurable] at hbound
