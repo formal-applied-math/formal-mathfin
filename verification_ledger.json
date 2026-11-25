@@ -692,9 +692,9 @@
     "mf-apt-pricing": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-25",
-      "elapsed_s": 3.3,
-      "input_hash": "98b8ce5707d4bfa873676e66bb6e2f6294117f12cd1cd7258d9101c025a7e1cb",
-      "verified_at_commit": "2b58898"
+      "elapsed_s": 4.2,
+      "input_hash": "8f92bf0d7356249fac8e184a7cdd77edce00063f0d4d3432f156d5d287df1400",
+      "verified_at_commit": "aea67bd"
     },
     "mf-ar1-ou-one-step-residual": {
       "benchmark_file": "commodities.json",
