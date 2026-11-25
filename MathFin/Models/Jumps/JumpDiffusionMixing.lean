@@ -317,13 +317,13 @@ lemma Z_indep_jumps (h : JumpDiffusionHyp Q Λ Z N J) :
 
 /-- The jump part `−κ + ∑_{i<N} Jᵢ` is measurable. -/
 lemma aemeasurable_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
-    AEMeasurable (fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+    AEMeasurable (fun ω ↦ -κ + compoundSum N J ω) Q :=
   (measurable_neg_add_sum_range κ).comp_aemeasurable
     (h.N_law.aemeasurable.prodMk h.aemeasurable_jumps)
 
 /-- The jump part `−κ + ∑_{i<N} Jᵢ` is independent of the diffusion sample. -/
 lemma indepFun_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
-    IndepFun (fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) Z Q :=
+    IndepFun (fun ω ↦ -κ + compoundSum N J ω) Z Q :=
   h.Z_indep_jumps.symm.comp (measurable_neg_add_sum_range κ) measurable_id
 
 /-- **The exponential moment of the jump part**,
@@ -331,7 +331,7 @@ lemma indepFun_jumpPart (h : JumpDiffusionHyp Q Λ Z N J) (κ : ℝ) :
 generating function at `1`. -/
 lemma integral_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) :
-    ∫ ω, rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q
+    ∫ ω, rexp (-κ + compoundSum N J ω) ∂Q
       = rexp (-κ + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
   have h1 := compoundPoisson_mgf_of_indepFun Λ 1 J h.N_law h.J_indep h.J_ident
     h.N_indep_J (by simpa only [one_mul] using hJ)
@@ -342,7 +342,7 @@ lemma integral_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
 /-- The exponential of the jump part is integrable: its integral is positive. -/
 lemma integrable_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (κ : ℝ) :
-    Integrable (fun ω ↦ rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω)) Q :=
+    Integrable (fun ω ↦ rexp (-κ + compoundSum N J ω)) Q :=
   Integrable.of_integral_ne_zero <| by
     rw [h.integral_exp_jumpPart hJ κ]
     exact (Real.exp_pos _).ne'
@@ -350,7 +350,7 @@ lemma integrable_exp_jumpPart (h : JumpDiffusionHyp Q Λ Z N J)
 /-- At the compensator `κ = Λ(𝔼[e^J] − 1)` the jump part has `𝔼[e^{−κ + ∑_{i<N} Jᵢ}] = 1`. -/
 lemma integral_exp_compensatedJumpPart (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) :
-    ∫ ω, rexp (-(Λ * (∫ x, rexp (J 0 x) ∂Q - 1)) + ∑ i ∈ Finset.range (N ω), J i ω) ∂Q = 1 := by
+    ∫ ω, rexp (-(Λ * (∫ x, rexp (J 0 x) ∂Q - 1)) + compoundSum N J ω) ∂Q = 1 := by
   rw [h.integral_exp_jumpPart hJ, neg_add_cancel, Real.exp_zero]
 
 /-- **The mixing formula for the jump-diffusion.** The discounted expected call payoff is the
@@ -360,7 +360,7 @@ theorem call_eq_integral_bsV (h : JumpDiffusionHyp Q Λ Z N J)
     (hσ : 0 < σ) (hT : 0 < T) (κ : ℝ) :
     ∫ ω, rexp (-r * T)
         * max (jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) - K) 0 ∂Q
-      = ∫ ω, bsV K r σ (S_0 * rexp (-κ + ∑ i ∈ Finset.range (N ω), J i ω)) T ∂Q := by
+      = ∫ ω, bsV K r σ (S_0 * rexp (-κ + compoundSum N J ω)) T ∂Q := by
   simp_rw [jumpDiffusionTerminal_eq]
   exact jumpDiffusion_call_eq_integral_bsV h.Z_law (h.aemeasurable_jumpPart κ)
     (h.indepFun_jumpPart κ) (h.integrable_exp_jumpPart hJ κ) hS_0 hK hσ hT

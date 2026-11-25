@@ -92,7 +92,7 @@ include hN hNX
 `N ∼ Poisson(λ)` independent of identically distributed integrable claims, `∑_{i<N} Xᵢ` is
 integrable. -/
 theorem integrable_compoundPoisson :
-    Integrable (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ := by
+    Integrable (compoundSum N X) μ := by
   have hgm (n : ℕ) : Measurable fun x : ℕ → ℝ ↦ ∑ i ∈ Finset.range n, x i := by fun_prop
   have hY : AEMeasurable (fun ω i ↦ X i ω) μ := .of_eval fun i ↦ (hident i).aemeasurable_fst
   have hS (n : ℕ) : Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
@@ -115,7 +115,7 @@ theorem integrable_compoundPoisson :
 `N ∼ Poisson(λ)` independent of identically distributed integrable claims, `𝔼[(L − c)⁺]` is
 the Poisson(λ) average of the `n`-claim expectations `𝔼[(∑_{i<n} Xᵢ − c)⁺]`. -/
 theorem integral_max_sub_compoundPoisson (c : ℝ) :
-    ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - c) 0 ∂μ
+    ∫ ω, max (compoundSum N X ω - c) 0 ∂μ
       = ∫ n, ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ ∂(poissonMeasure lam) := by
   have hS (n : ℕ) : Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
     integrable_finsetSum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
@@ -155,7 +155,7 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
 /-- The Poisson-mixture expansion as a series over the claim count:
 `𝔼[(L − c)⁺] = ∑ₙ P(N = n)·𝔼[(∑_{i<n} Xᵢ − c)⁺]`, with `P(N = n) = e^{−λ} λⁿ / n!`. -/
 theorem integral_max_sub_compoundPoisson_eq_tsum (c : ℝ) :
-    ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω - c) 0 ∂μ
+    ∫ ω, max (compoundSum N X ω - c) 0 ∂μ
       = ∑' n : ℕ, Real.exp (-(lam : ℝ)) * (lam : ℝ) ^ n / n.factorial *
           ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ := by
   rw [integral_max_sub_compoundPoisson hident hX hN hNX, integral_poissonMeasure]
@@ -164,17 +164,17 @@ theorem integral_max_sub_compoundPoisson_eq_tsum (c : ℝ) :
 /-- **The Rockafellar–Uryasev theorem for the compound-Poisson loss**: for `α ∈ (0, 1)`,
 `ES_α(L)` is the least value of `c ↦ c + (1 − α)⁻¹ 𝔼[(L − c)⁺]`. -/
 theorem isLeast_rockafellarUryasev_compoundPoisson {α : ℝ} (hα : α ∈ Ioo 0 1) :
-    IsLeast (range (rockafellarUryasev (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α))
-      (expectedShortfall (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α) :=
+    IsLeast (range (rockafellarUryasev (compoundSum N X) μ α))
+      (expectedShortfall (compoundSum N X) μ α) :=
   isLeast_rockafellarUryasev (integrable_compoundPoisson hident hX hN hNX) hα
 
 /-- **The minimizer is the value-at-risk**: for `α ∈ (0, 1)`,
 `ES_α(L) = VaR_α(L) + (1 − α)⁻¹ 𝔼[(L − VaR_α(L))⁺]`. -/
 theorem expectedShortfall_compoundPoisson_eq {α : ℝ} (hα : α ∈ Ioo 0 1) :
-    expectedShortfall (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α
-      = valueAtRisk (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α
-        + (1 - α)⁻¹ * ∫ ω, max (∑ i ∈ Finset.range (N ω), X i ω
-            - valueAtRisk (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ α) 0 ∂μ :=
+    expectedShortfall (compoundSum N X) μ α
+      = valueAtRisk (compoundSum N X) μ α
+        + (1 - α)⁻¹ * ∫ ω, max (compoundSum N X ω
+            - valueAtRisk (compoundSum N X) μ α) 0 ∂μ :=
   (rockafellarUryasev_valueAtRisk (integrable_compoundPoisson hident hX hN hNX) hα).symm
 
 end Wald

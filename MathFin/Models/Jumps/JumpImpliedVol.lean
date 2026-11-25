@@ -131,7 +131,7 @@ that is not the point mass at `0`, the jump part `−κ + ∑_{i<N} Jᵢ` is not
 whatever `κ`: with no jump (probability `e^{−Λ}`) it is `−κ`, and with one jump it is `J₀ − κ`. -/
 lemma not_jumpPart_ae_eq_zero (h : JumpDiffusionHyp Q Λ Z N J) (hΛ : 0 < Λ)
     (hJ0 : ¬J 0 =ᵐ[Q] 0) (κ : ℝ) :
-    ¬(fun ω ↦ -κ + ∑ i ∈ Finset.range (N ω), J i ω) =ᵐ[Q] 0 := by
+    ¬(fun ω ↦ -κ + compoundSum N J ω) =ᵐ[Q] 0 := by
   intro hY
   have hY' := ae_iff.1 hY
   have hN (n : ℕ) : Q (N ⁻¹' {n}) ≠ 0 := by

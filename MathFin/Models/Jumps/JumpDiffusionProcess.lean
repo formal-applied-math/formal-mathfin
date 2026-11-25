@@ -95,17 +95,16 @@ its moment-generating function `e^{Λ(𝔼[e^{θJ}] − 1)}` (`compoundPoisson_m
 aggregate-loss MGF of `Probability/Jumps/CompoundPoissonMGF.lean`). -/
 lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     (hJ : Integrable (fun ω ↦ rexp (θ * J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
-    mgf (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) Q θ
+    mgf (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + compoundSum N J ω) Q θ
       = rexp ((b * θ + σ ^ 2 * θ ^ 2 / 2) * T + Λ * (mgf (J 0) Q θ - 1)) := by
   have hind : IndepFun (fun ω ↦ σ * Real.sqrt T * Z ω)
-      (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+      (compoundSum N J) Q :=
     h.Z_indep_jumps.comp (measurable_const_mul (σ * Real.sqrt T)) measurable_sum_range_prod
-  have hS : AEMeasurable (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+  have hS : AEMeasurable (compoundSum N J) Q :=
     measurable_sum_range_prod.comp_aemeasurable
       (h.N_law.aemeasurable.prodMk h.aemeasurable_jumps)
-  have hsplit : (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)
-      = fun ω ↦ b * T + ((fun ω ↦ σ * Real.sqrt T * Z ω)
-          + fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) ω := by
+  have hsplit : (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + compoundSum N J ω)
+      = fun ω ↦ b * T + ((fun ω ↦ σ * Real.sqrt T * Z ω) + compoundSum N J) ω := by
     funext ω
     simp only [Pi.add_apply]
     ring
@@ -120,7 +119,7 @@ lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
 /-- `JumpDiffusionHyp.mgf_logReturn` as an integral. -/
 lemma integral_exp_mul_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     (hJ : Integrable (fun ω ↦ rexp (θ * J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
-    ∫ ω, rexp (θ * (b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) ∂Q
+    ∫ ω, rexp (θ * (b * T + σ * Real.sqrt T * Z ω + compoundSum N J ω)) ∂Q
       = rexp ((b * θ + σ ^ 2 * θ ^ 2 / 2) * T + Λ * (∫ ω, rexp (θ * J 0 ω) ∂Q - 1)) :=
   h.mgf_logReturn hJ b σ hT
 
