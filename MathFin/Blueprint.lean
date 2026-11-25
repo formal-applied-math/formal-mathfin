@@ -88,6 +88,7 @@ import MathFin.Choice.Portfolio.TangentPortfolio
 import MathFin.Choice.Performance.Kelly
 import MathFin.Choice.Performance.Ratios
 import MathFin.Choice.Portfolio.CAPMEquilibrium
+import MathFin.Choice.Portfolio.ArbitragePricingTheory
 import MathFin.Choice.Portfolio.ConvexQPKKT
 import MathFin.Choice.Portfolio.MarkowitzLagrangian
 import MathFin.Choice.Portfolio.MarkowitzNAsset
@@ -1696,6 +1697,22 @@ attribute [blueprint "thm:capm-equilibrium"
   The tangency condition is the hypothesis: that it follows from market clearing of optimising
   investors is not proved. -/)]
   MathFin.CAPM_from_market_equilibrium
+
+attribute [blueprint "thm:apt-pricing"
+  (title := "APT exact-factor pricing")
+  (statement := /-- In a market with $K$ factors whose assets $i$ pay $a_i + \sum_k
+  \beta_{ik} F_k$ at $T$ under a pricing measure with a deterministic numéraire, the payoffs
+  are affine in the loadings at the asset prices: there are $\lambda_0$ and $\lambda_k$ with
+  $a_i = p_i \lambda_0 + \sum_k \beta_{ik} \lambda_k$ on the asset set, where $p_i$ is the
+  price of the claim paying asset $i$ at $T$. The pricing measure delivers the exact-factor
+  no-arbitrage condition (`exactFactorNoArbitrage_of_pricingMeasure`), and the condition
+  yields the decomposition by finite-dimensional duality. At unit prices the decomposition is
+  `exists_premia_of_exactFactorNoArbitrage`, with $\lambda_0$ the payoff of a zero-loading
+  asset (`lam0_eq_of_zeroLoadingAsset`); with the market portfolio as the single factor, the
+  CAPM beta as the loading and the tangency first-order condition, the factor premium is the
+  market's expected excess return and the intercept is zero
+  (`factorPremium_eq_marketPremium`). -/)]
+  MathFin.exists_premia_of_isPricingMeasure
 
 -- ===== choice/dynamic: Dynamic choice =====
 

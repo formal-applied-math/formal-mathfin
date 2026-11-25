@@ -26,6 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### APT exact-factor pricing (2026-11-25)
+
+One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 906 → 907 (866 full
+before, 867 after).
+
+- **`mf-apt-pricing`** (MathFin/Choice/Portfolio/ArbitragePricingTheory.lean): the exact-factor
+  no-arbitrage condition `ExactFactorNoArbitrage` and Ross's premia decomposition
+  `exists_premia_of_exactFactorNoArbitrage` (`a i = lam₀ + ∑ k ∈ t, lam k * β i k` on a finite
+  asset set from finite-dimensional duality), the pricing-measure bridge
+  `exactFactorNoArbitrage_of_pricingMeasure` (a `Market.IsPricingMeasure` with a deterministic
+  numéraire delivers the condition at the prices of the claims paying each asset), the packaged
+  `exists_premia_of_isPricingMeasure`, the intercept corollary `lam0_eq_of_zeroLoadingAsset`,
+  and the one-factor CAPM identification `factorPremium_eq_marketPremium` (over
+  `CAPM_from_market_equilibrium`): the factor premium is the market excess return and the
+  intercept is zero. What is not proved: the noisy and asymptotic APT with idiosyncratic
+  residuals, uniqueness of the premia, and the derivation of the tangency condition from
+  market clearing (assumed, as in CAPMEquilibrium).
+
 ### Marchenko-Pastur support edges (2026-11-08)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 805 → 806 on the merged

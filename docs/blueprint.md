@@ -192,6 +192,7 @@ graph TD
   vasicekMarket["The Vasicek bond market"]:::proved
   americanPutBoundaryConvex["Convexity of the American put exercise boundary"]:::proved
   americanPutDominatesEuropean["The American put value dominates the Black–Scholes European price"]:::proved
+  aptPricing["APT exact-factor pricing"]:::proved
   bachelierCall["Bachelier call price formula"]:::proved
   binomialKnockInMarket["The binomial market prices the knock-in by reflection"]:::proved
   bsAmericanMarket["The Black–Scholes market's American put is the canonical American put"]:::proved
@@ -244,9 +245,6 @@ graph TD
     logOptimalNumeraire["Log-optimal portfolio is the numéraire"]:::frontier
     mertonPortfolioFraction["Merton myopic risky fraction"]:::frontier
     timeInconsistentEquilibrium["Relaxed equilibria under time inconsistency"]:::frontier
-  end
-  subgraph frontier_choiceEquilibrium["⏳ frontier · Choice · Equilibrium"]
-    aptPricing["APT exact-factor pricing"]:::frontier
   end
   subgraph frontier_choicePortfolio["⏳ frontier · Choice · Portfolio choice"]
     markowitzKktNecessity["Markowitz first-order conditions are necessary"]:::frontier
@@ -592,6 +590,11 @@ graph TD
   gbm --> americanPutDominatesEuropean
   market --> americanPutDominatesEuropean
   pricingFunctional --> americanPutDominatesEuropean
+  contract --> aptPricing
+  contractValue --> aptPricing
+  market --> aptPricing
+  pricingFunctional --> aptPricing
+  pricingMeasure --> aptPricing
   brownianMotion --> bachelierCall
   contract --> bachelierCall
   contractValue --> bachelierCall
@@ -874,8 +877,6 @@ graph TD
   snellEnvelope --> americanPutPremium
   americanPutDominatesEuropean --> americanPutSuperhedgingPrice
   marketCompleteness --> americanPutSuperhedgingPrice
-  emm --> aptPricing
-  capmEquilibrium --> aptPricing
   impermanentLoss --> balancerInvariant
   reflectionPrinciple --> barrierLookbackClosedForms
   bsCall --> barrierLookbackClosedForms
@@ -1163,6 +1164,7 @@ graph TD
 | `thm:vasicek-market` The Vasicek bond market | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Avasicek-market%22%20in%3Abody) |
 | `thm:american-put-boundary-convex` Convexity of the American put exercise boundary | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-boundary-convex%22%20in%3Abody) |
 | `thm:american-put-dominates-european` The American put value dominates the Black–Scholes European price | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-dominates-european%22%20in%3Abody) |
+| `thm:apt-pricing` APT exact-factor pricing | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aapt-pricing%22%20in%3Abody) |
 | `thm:bachelier-call` Bachelier call price formula | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abachelier-call%22%20in%3Abody) |
 | `thm:binomial-knock-in-market` The binomial market prices the knock-in by reflection | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abinomial-knock-in-market%22%20in%3Abody) |
 | `thm:bs-american-market` The Black–Scholes market's American put is the canonical American put | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abs-american-market%22%20in%3Abody) |
@@ -1227,7 +1229,6 @@ graph TD
 | `thm:affine-term-structure` Affine term structure | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aaffine-term-structure%22%20in%3Abody) |
 | `thm:american-put-premium` American put early-exercise premium | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-premium%22%20in%3Abody) |
 | `thm:american-put-superhedging-price` The American put value is the superhedging price | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aamerican-put-superhedging-price%22%20in%3Abody) |
-| `thm:apt-pricing` APT exact-factor pricing | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aapt-pricing%22%20in%3Abody) |
 | `thm:balancer-invariant` Balancer constant-mean AMM | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abalancer-invariant%22%20in%3Abody) |
 | `thm:barrier-lookback-closed-forms` Barrier and lookback closed forms | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abarrier-lookback-closed-forms%22%20in%3Abody) |
 | `thm:bates-cf` Bates characteristic function | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abates-cf%22%20in%3Abody) |
