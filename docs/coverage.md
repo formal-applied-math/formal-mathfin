@@ -48,7 +48,8 @@ One `full` entry in `benchmarks/interest_rates.json`. Corpus 906 → 907 on the 
 
   Follow-up additions in the same module: the constant-drift coefficient
   `A(T) = exp(−θ·T²/2 + σ²T³/6)` (`bondA_const`, with the drift loading
-  `∫₀ᵀ θ·(T−s) ds = θ·T²/2` by the reflection substitution `integral_const_driftLoading`); the
+  `∫₀ᵀ θ·(T−s) ds = θ·T²/2`, by the reflection substitution
+  (`integral_const_driftLoading`)); the
   zero-drift identification `bondPrice_zero_drift` (at `θ ≡ 0` the Ho–Lee price is the driftless
   price `brownianBondPrice_eq` of `VasicekZeroMeanReversionLimit.lean`); and the bridge
   `tendsto_vasicekBondPrice_hoLee`: the Vasicek closed form at long-run level `θ/κ` — the level
