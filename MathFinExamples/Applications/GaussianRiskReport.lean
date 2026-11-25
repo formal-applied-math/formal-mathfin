@@ -17,8 +17,8 @@ the two are correlated. This file
 1. records the book as data (means, volatilities, a correlation in `(−1, 1)`), with where the
    numbers come from and what the report leaves out;
 2. reports, for a single Gaussian loss, its value-at-risk and expected shortfall in closed form at
-   `z = Φ⁻¹(α)`, and its expected shortfall as the mean of the loss over its `α`-tail, a tail of
-   mass exactly `1 − α` (`gaussian_loss_report`);
+   `z = Φ⁻¹(α)`, and its expected shortfall as the average of the loss over its `α`-tail, a tail of
+   mass exactly `1 − α` (`riskReport_of_hasLaw_gaussianReal`);
 3. reads off the law of the combined loss from the joint Gaussian law of the book
    (`IsRealization.hasLaw_add`), so the same report applies to the whole book, and exhibits a
    realization of every book on the Cholesky pair (`Book.isRealization_gaussianPair`);
@@ -70,28 +70,6 @@ namespace MathFin.Examples.GaussianRiskReport
 open MeasureTheory ProbabilityTheory Set
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
-
-/-! ### The report for one loss -/
-
-/-- **The risk report for one Gaussian loss** `L ~ N(m, s²)` with `s > 0`, at a level `α ∈ (0, 1)`:
-- `VaR_α(L) = m + s z` and `ES_α(L) = m + s ϕ(z)/(1 − α)`, at `z = Φ⁻¹(α)`;
-- the tail `{L > VaR_α(L)}` has mass `1 − α`;
-- `ES_α(L)` is the integral of `L` over that tail divided by `1 − α`. -/
-theorem gaussian_loss_report {L : Ω → ℝ} {m s α : ℝ}
-    (hL : HasLaw L (gaussianReal m (s ^ 2).toNNReal) P) (hs : 0 < s) (hα : α ∈ Ioo 0 1) :
-    valueAtRisk L P α = gaussianVaR m s (PhiInv α) ∧
-      expectedShortfall L P α = gaussianCVaR m s (PhiInv α) α ∧
-      P.real {ω | valueAtRisk L P α < L ω} = 1 - α ∧
-      expectedShortfall L P α = (1 - α)⁻¹ * ∫ ω in {ω | valueAtRisk L P α < L ω}, L ω ∂P := by
-  have hv : (s ^ 2).toNNReal ≠ 0 := (Real.toNNReal_pos.2 (by positivity)).ne'
-  have hσ : √((s ^ 2).toNNReal : ℝ) = s := by
-    rw [Real.coe_toNNReal _ (sq_nonneg s), Real.sqrt_sq hs.le]
-  have := nullSingletonClass_gaussianReal (μ := m) hv
-  have hF : Continuous (cdf (P.map L)) := hL.map_eq ▸ continuous_cdf
-  refine ⟨?_, ?_, measureReal_valueAtRisk_lt hL.aemeasurable hF hα,
-    expectedShortfall_eq_setIntegral_tail hL.hasGaussianLaw.integrable hF hα⟩
-  · rw [valueAtRisk_of_hasLaw_gaussianReal hL hα, hσ]
-  · rw [expectedShortfall_of_hasLaw_gaussianReal hv hL hα, hσ]
 
 /-! ### The book, as data -/
 
@@ -167,9 +145,9 @@ theorem IsRealization.valueAtRisk_add_le (h : b.IsRealization P X) {α : ℝ}
     (hα : α ∈ Ico (1 / 2) 1) :
     valueAtRisk (fun ω ↦ X 0 ω + X 1 ω) P α ≤ valueAtRisk (X 0) P α + valueAtRisk (X 1) P α := by
   have hα' : α ∈ Ioo 0 1 := ⟨by linarith [hα.1], hα.2⟩
-  rw [(gaussian_loss_report h.hasLaw_add b.jointVol_pos hα').1,
-    (gaussian_loss_report (h.hasLaw 0) (b.vol_pos 0) hα').1,
-    (gaussian_loss_report (h.hasLaw 1) (b.vol_pos 1) hα').1, jointVol]
+  rw [(riskReport_of_hasLaw_gaussianReal h.hasLaw_add b.jointVol_pos hα').1,
+    (riskReport_of_hasLaw_gaussianReal (h.hasLaw 0) (b.vol_pos 0) hα').1,
+    (riskReport_of_hasLaw_gaussianReal (h.hasLaw 1) (b.vol_pos 1) hα').1, jointVol]
   exact gaussianVaR_subadditive (b.vol_pos 0).le (b.vol_pos 1).le b.corr_mem.2.le
     ((PhiInv_nonneg_iff hα').2 hα.1)
 
@@ -224,8 +202,8 @@ normal density:
   diversification saves `2z ≥ 0`;
 - the standalone ESs are `−1 + 5ϕ(z)/(1 − α)` and `−1/2 + 5ϕ(z)/(1 − α)`, and the combined ES is
   `−3/2 + 8ϕ(z)/(1 − α)`, so diversification saves `2ϕ(z)/(1 − α) > 0`;
-- the combined loss exceeds its VaR with probability exactly `1 − α`, and its ES is the integral
-  of the combined loss over that event divided by `1 − α`. -/
+- the combined loss exceeds its VaR with probability exactly `1 − α`, and its ES is the average
+  of the combined loss over that event. -/
 theorem sample_checked :
     sample.IsRealization (bivariateNormalLaw sample.corr) (gaussianPair sample.mean sample.vol) ∧
     ∀ {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsProbabilityMeasure P]
@@ -242,13 +220,14 @@ theorem sample_checked :
         0 < expectedShortfall (X 0) P α + expectedShortfall (X 1) P α
           - expectedShortfall (fun ω ↦ X 0 ω + X 1 ω) P α) ∧
       P.real {ω | valueAtRisk (fun ω ↦ X 0 ω + X 1 ω) P α < X 0 ω + X 1 ω} = 1 - α ∧
-      expectedShortfall (fun ω ↦ X 0 ω + X 1 ω) P α = (1 - α)⁻¹ *
-        ∫ ω in {ω | valueAtRisk (fun ω ↦ X 0 ω + X 1 ω) P α < X 0 ω + X 1 ω}, X 0 ω + X 1 ω ∂P := by
+      expectedShortfall (fun ω ↦ X 0 ω + X 1 ω) P α =
+        ⨍ ω in {ω | valueAtRisk (fun ω ↦ X 0 ω + X 1 ω) P α < X 0 ω + X 1 ω}, X 0 ω + X 1 ω ∂P := by
   refine ⟨sample.isRealization_gaussianPair, fun {Ω} _ P _ X h α hα ↦ ?_⟩
   have hα' : α ∈ Ioo 0 1 := ⟨by linarith [hα.1], hα.2⟩
-  obtain ⟨hV, hE, htail, hmean⟩ := gaussian_loss_report h.hasLaw_add sample.jointVol_pos hα'
-  obtain ⟨hV₀, hE₀, -⟩ := gaussian_loss_report (h.hasLaw 0) (sample.vol_pos 0) hα'
-  obtain ⟨hV₁, hE₁, -⟩ := gaussian_loss_report (h.hasLaw 1) (sample.vol_pos 1) hα'
+  obtain ⟨hV, hE, htail, hmean⟩ :=
+    riskReport_of_hasLaw_gaussianReal h.hasLaw_add sample.jointVol_pos hα'
+  obtain ⟨hV₀, hE₀, -⟩ := riskReport_of_hasLaw_gaussianReal (h.hasLaw 0) (sample.vol_pos 0) hα'
+  obtain ⟨hV₁, hE₁, -⟩ := riskReport_of_hasLaw_gaussianReal (h.hasLaw 1) (sample.vol_pos 1) hα'
   have hϕ : 0 < gaussianPDFReal 0 1 (PhiInv α) / (1 - α) :=
     div_pos (gaussianPDFReal_pos _ _ _ one_ne_zero) (sub_pos.2 hα.2)
   rw [sample_jointVol] at hV hE
