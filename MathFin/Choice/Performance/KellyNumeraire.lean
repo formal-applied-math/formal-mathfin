@@ -392,10 +392,12 @@ theorem kellyMarket_numeraire_portfolio (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) 
     · simpa [hx0] using h0
   have hN₀ : ∀ ω, (kellyMarket p b).numeraire 0 ω = 1 := fun ω ↦ by
     simp [kellyMarket, kellyBetMarket, Market.oneDate]
-  have h1 := hQ.sdf_eq_div_of_logOptimal (w₀ := 1) (θ := ![1, kellyFraction p b]) hPr hN₀
-    kellyMarket_asset_zero hcomplete hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
-  have h2 := hQ.integral_div_logOptimal_mul (w₀ := 1) (θ := ![1, kellyFraction p b]) hPr hN₀
-    kellyMarket_asset_zero hcomplete hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
+  have hS : (kellyMarket p b).IsFiniteComplete 1 1 kellyPrice :=
+    ⟨hPr, hN₀, kellyMarket_asset_zero, hcomplete⟩
+  have h1 := hQ.sdf_eq_div_of_logOptimal hS (w₀ := 1) (θ := ![1, kellyFraction p b])
+    hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
+  have h2 := hQ.integral_div_logOptimal_mul hS (w₀ := 1) (θ := ![1, kellyFraction p b])
+    hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
   rw [hA] at h1 h2
   refine ⟨fun ω ↦ h1 ω, fun k ↦ ?_⟩
   have h3 := h2 k
