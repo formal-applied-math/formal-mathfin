@@ -65,14 +65,6 @@ area = "valuation/insurance"
 family = "insurance"
 
 [[node]]
-label = "thm:american-put-premium"
-title = "American put early-exercise premium"
-statement = "In the binomial model with a positive interest rate, the American put is worth strictly more than the European put with the same strike and expiry whenever immediate exercise is worth more than continuation at some node reached with positive probability."
-uses = ["thm:snell-envelope"]
-area = "valuation/american"
-family = "trees"
-
-[[node]]
 label = "thm:barrier-lookback-closed-forms"
 title = "Barrier and lookback closed forms"
 statement = "In the Black–Scholes model the down-and-out call and the floating-strike lookback call have closed-form prices, obtained from the reflection principle for Brownian motion with drift."
@@ -87,14 +79,6 @@ statement = "If the moments E[S_T^p] of the terminal price are finite exactly up
 uses = ["thm:bs-call"]
 area = "valuation/smile"
 family = "volatility"
-
-[[node]]
-label = "thm:forward-start-call"
-title = "Forward-start call"
-statement = "In the Black–Scholes model, a call struck at a fixed multiple of the asset price at a future date T₁ and expiring at T₂ has the Rubinstein closed-form price, a multiple of a Black–Scholes call price at time T₁."
-uses = ["thm:bs-call"]
-area = "valuation/diffusions"
-family = "diffusions"
 
 [[node]]
 label = "thm:implied-vol-existence"
@@ -203,14 +187,6 @@ area = "risk/credit"
 family = "mechanisms"
 
 [[node]]
-label = "thm:balancer-invariant"
-title = "Balancer constant-mean AMM"
-statement = "In Balancer's constant-mean automated market maker, trades preserve the weighted product ∏ Bᵢ^{wᵢ} of the reserves Bᵢ with weights wᵢ summing to one, and the spot price of one asset in terms of another is the ratio of their reserve-to-weight ratios."
-uses = ["thm:impermanent-loss"]
-area = "valuation/model-free"
-family = "mechanisms"
-
-[[node]]
 label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"
 statement = "Compound's cToken exchange rate equals the deposit index of a money-market account accruing at the borrow index, which ties Markets/DeFi/Compound to the library's lending indices, or the statement records exactly where the two differ."
@@ -240,7 +216,7 @@ label = "thm:affine-term-structure"
 title = "Affine term structure"
 statement = "A short-rate model whose bond prices have the form P(t,T) = exp(A(T−t) − B(T−t)r_t) is an affine term structure, a single abstraction of which the Vasicek, Ho–Lee and Hull–White models are instances."
 uses = ["thm:vasicek-bond-pde"]
-core = ["mf-affine-bond-pde-from-riccati"]
+core = ["mf-affine-bond-pde-from-riccati", "mf-holee-bond-price"]
 area = "valuation/term"
 family = "term"
 
@@ -496,14 +472,6 @@ title = "Stochastic Fubini for Itô–Lévy integrals"
 statement = "For the compensated-Poisson (Itô–Lévy) integral and a jointly measurable integrand satisfying the integrability conditions, integrating over a parameter and taking the stochastic integral commute almost surely."
 uses = ["thm:stochastic-fubini"]
 area = "probability/jumps"
-
-[[node]]
-label = "thm:futures-basis-convergence"
-title = "Contango, backwardation and basis convergence"
-statement = "For a forward price F = S e^{(r−δ)T}, the curve is in contango when r > δ and in backwardation when r < δ, and the basis F − S converges to zero as T tends to zero."
-uses = ["thm:interest-rate-parity"]
-area = "valuation/forwards"
-family = "term"
 
 [[node]]
 label = "thm:siegel-paradox"

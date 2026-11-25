@@ -23,6 +23,7 @@ library's own vocabulary; the [README](../README.md) gives the main results and 
 | [`design.md`](design.md) | Principles for definitions and statements: minimal definitions, no financial meaning for junk values, interfaces, applied headline results. |
 | [`architecture.md`](architecture.md) | The layers of the source tree, the direction of imports, and how the library is kept one graph. |
 | [`patterns.md`](patterns.md) | Lean and Mathlib proof patterns, idioms and anti-patterns met in this library. |
+| [`pin-bumps.md`](pin-bumps.md) | When the Lean, Mathlib and BrownianMotion pins move, and what must be true before a bump merges. |
 | [`troubleshooting.md`](troubleshooting.md) | Symptom, cause and fix for build, environment and gate failures. |
 | [`issue-labels.md`](issue-labels.md) | What each issue label means. |
 | [`upstreaming.md`](upstreaming.md) | How results move upstream to BrownianMotion and Mathlib, and the record of what has. |
