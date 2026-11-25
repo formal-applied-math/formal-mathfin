@@ -1079,7 +1079,7 @@ attribute [blueprint "thm:american-put-premium"
   prices, and the premium at the root bounds every path-weighted premium below it. Deep in the
   money the closed forms hold: the American price $K - S$ (for $r \ge 0$), the European price
   $K e^{-rN} - S$, the premium $K (1 - e^{-rN}) > 0$ (for $r > 0$ and $N \ge 1$). -/)]
-MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
+ MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
 
 -- ===== valuation/volatility: Volatility =====
 
