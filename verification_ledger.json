@@ -3310,9 +3310,9 @@
     "mf-implied-correlation-dispersion": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-25",
-      "elapsed_s": 2.9,
-      "input_hash": "02bef0c9fbb996f5d8b008d47e08c30123a922af8f544dffd5ffcba373ecde72",
-      "verified_at_commit": "2cc2780"
+      "elapsed_s": 4.6,
+      "input_hash": "2201141ad8e5d6cd4d0894a2c14d450b776bd5cffc0696b3b5c2d44a38c5382f",
+      "verified_at_commit": "627010b"
     },
     "mf-implied-vol-exists-above-reference": {
       "benchmark_file": "black_scholes.json",
