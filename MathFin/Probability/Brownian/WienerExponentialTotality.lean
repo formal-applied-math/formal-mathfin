@@ -7,6 +7,7 @@ module
 
 public import MathFin.Probability.Brownian.BrownianCylinderGeneration
 public import MathFin.Probability.Brownian.Ito.DoleansStepRepresentation
+public import MathFin.Probability.Laws.Esscher
 
 /-!
 # Totality of the Wiener exponentials in `L²(𝓕ᴮ_T)`
@@ -267,10 +268,10 @@ The mechanism is Laplace-transform uniqueness. Split `f·μ` into its Jordan pie
 measures, since `L² ⊆ L¹` on a probability space — and push both forward along the coordinate
 vector `X = (B_{τᵢ})ᵢ` into `ℝ^ι`. Orthogonality says the two moment-generating functions of
 `⟨λ, X⟩` agree, for every `λ` and at every scale. The Brownian marginals are Gaussian, so
-`exp(r⟨λ,X⟩) ∈ L²(μ)` for *every* `r` and `integrableExpSet` is the whole line — the open strip
-that licenses analytic continuation (`eqOn_complexMGF_of_mgf'`). Evaluated at `z = i` that gives
-equal characteristic functions along every continuous linear form, and
-`Measure.ext_of_charFunDual` turns it into equality of the two pushforwards. -/
+`exp(r⟨λ,X⟩) ∈ L²(μ)` for *every* `r`: along each continuous linear form `L` the two pushforwards
+are finite measures on `ℝ` with every exponential moment and equal moment-generating function, so
+they agree (`measure_eq_of_mgf_id_eq`). Their characteristic functions along `L` then agree, and
+`Measure.ext_of_charFunDual` turns that into equality of the two pushforwards to `ℝ^ι`. -/
 lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) {ι : Type*} [Fintype ι] (τ : ι → ℝ≥0)
     {f : Ω → ℝ} (hfL2 : MemLp f 2 μ)
@@ -278,7 +279,6 @@ lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
     {A : Set Ω} (hA : MeasurableSet[⨆ i : ι, MeasurableSpace.comap (B (τ i)) inferInstance] A) :
     ∫ ω in A, f ω ∂μ = 0 := by
   classical
-  have hf0 : ∫ ω, f ω ∂μ = 0 := by simpa using hperp 0
   have hfae : AEMeasurable f μ := hfL2.aestronglyMeasurable.aemeasurable
   have hfaeneg : AEMeasurable (fun ω ↦ -f ω) μ := hfae.neg
   have hfint : Integrable f μ := memLp_one_iff_integrable.mp (hfL2.mono_exponent one_le_two)
@@ -307,20 +307,6 @@ lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
   set nuNeg : Measure Ω := μ.withDensity (fun ω ↦ ENNReal.ofReal (-f ω)) with hnuNeg
   have : IsFiniteMeasure nuPos := isFiniteMeasure_withDensity_ofReal hfint.2
   have : IsFiniteMeasure nuNeg := isFiniteMeasure_withDensity_ofReal hfint.neg.2
-  -- The total masses agree, because `f` is centered.
-  have huniv : nuPos Set.univ = nuNeg Set.univ := by
-    have hp : nuPos Set.univ = ∫⁻ ω, ENNReal.ofReal (f ω) ∂μ := by
-      rw [hnuPos, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
-    have hm : nuNeg Set.univ = ∫⁻ ω, ENNReal.ofReal (-f ω) ∂μ := by
-      rw [hnuNeg, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
-    have hsub : (∫⁻ ω, ENNReal.ofReal (f ω) ∂μ).toReal
-        = (∫⁻ ω, ENNReal.ofReal (-f ω) ∂μ).toReal := by
-      have hsplit := integral_eq_lintegral_pos_part_sub_lintegral_neg_part hfint
-      rw [hf0] at hsplit
-      linarith
-    rw [hp, hm]
-    exact (ENNReal.toReal_eq_toReal_iff' (hp ▸ measure_ne_top nuPos Set.univ)
-      (hm ▸ measure_ne_top nuNeg Set.univ)).mp hsub
   -- Equality of the two laws of the coordinate vector.
   have hmap : nuPos.map (fun (ω : Ω) (i : ι) ↦ B (τ i) ω)
       = nuNeg.map (fun (ω : Ω) (i : ι) ↦ B (τ i) ω) := by
@@ -365,30 +351,27 @@ lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
         rw [← sub_mul, max_zero_sub_max_neg_zero_eq_self]
       simp only [hpt]
       exact hz
-    have hIES : integrableExpSet (fun ω ↦ ∑ i, lam i * B (τ i) ω) nuPos = Set.univ := by
-      refine Set.eq_univ_of_forall fun r ↦ ?_
-      change Integrable (fun ω ↦ Real.exp (r * ∑ i, lam i * B (τ i) ω)) nuPos
+    -- along `L`, both pushforwards are finite measures with every exponential moment and equal mgf
+    have hY : Measurable fun ω ↦ ∑ i, lam i * B (τ i) ω :=
+      Finset.measurable_sum _ fun i _ ↦ (hBmeas (τ i)).const_mul _
+    have hcomp (ν : Measure Ω) : (ν.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω).map L
+        = ν.map fun ω ↦ ∑ i, lam i * B (τ i) ω := by
+      rw [Measure.map_map L.continuous.measurable hXmeas]
+      exact congrArg ν.map (funext hLX)
+    have hint (u : ℝ) :
+        Integrable (fun x ↦ rexp (u * x)) (nuPos.map fun ω ↦ ∑ i, lam i * B (τ i) ω) := by
+      rw [integrable_map_measure
+        (measurable_exp.comp (measurable_const.mul measurable_id)).aestronglyMeasurable
+        hY.aemeasurable]
+      change Integrable (fun ω ↦ Real.exp (u * ∑ i, lam i * B (τ i) ω)) nuPos
       rw [hnuPos, integrable_withDensity_ofReal_iff hfae]
-      exact hposL2.integrable_mul (hexpL2 r)
-    have hnull : nuPos = 0 ↔ nuNeg = 0 := by
-      rw [← Measure.measure_univ_eq_zero, ← Measure.measure_univ_eq_zero, huniv]
-    have hcx := eqOn_complexMGF_of_mgf' hmgf hnull
-      (show Complex.I ∈ {z : ℂ | z.re ∈ interior
-        (integrableExpSet (fun ω ↦ ∑ i, lam i * B (τ i) ω) nuPos)} by
-        rw [Set.mem_ofPred_eq, hIES, interior_univ]; trivial)
-    have hcfd (ν : Measure Ω) :
-        charFunDual (ν.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω) L
-          = complexMGF (fun ω ↦ ∑ i, lam i * B (τ i) ω) ν Complex.I := by
-      have hcont : Continuous fun v : ι → ℝ ↦ Complex.exp ((L v : ℂ) * Complex.I) :=
-        Complex.continuous_exp.comp
-          ((Complex.continuous_ofReal.comp L.continuous).mul continuous_const)
-      rw [charFunDual_apply, integral_map hXmeas.aemeasurable hcont.aestronglyMeasurable,
-        show complexMGF (fun ω ↦ ∑ i, lam i * B (τ i) ω) ν Complex.I
-          = ∫ ω, Complex.exp (Complex.I * ((∑ i, lam i * B (τ i) ω : ℝ) : ℂ)) ∂ν from rfl]
-      exact integral_congr_ae (Eventually.of_forall fun ω ↦ by
-        simp only [hLX ω]; rw [mul_comm])
-    rw [hcfd nuPos, hcfd nuNeg]
-    exact hcx
+      exact hposL2.integrable_mul (hexpL2 u)
+    have hlaw : nuPos.map (fun ω ↦ ∑ i, lam i * B (τ i) ω)
+        = nuNeg.map (fun ω ↦ ∑ i, lam i * B (τ i) ω) :=
+      measure_eq_of_mgf_id_eq hint (by
+        rw [mgf_id_map hY.aemeasurable, mgf_id_map hY.aemeasurable]
+        exact hmgf)
+    rw [charFunDual_eq_charFun_map_one, charFunDual_eq_charFun_map_one, hcomp, hcomp, hlaw]
   -- A coordinate cylinder is measured equally by the two pieces.
   have hnuA : nuPos A = nuNeg A := by
     rw [← hGA, ← Measure.map_apply hXmeas hGmeas, ← Measure.map_apply hXmeas hGmeas, hmap]
