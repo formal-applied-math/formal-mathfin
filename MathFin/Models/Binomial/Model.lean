@@ -100,6 +100,10 @@ lemma BinomialNoArb.d_lt_u {u d r : ℝ} (h : BinomialNoArb u d r) : d < u :=
 lemma BinomialNoArb.u_pos {u d r : ℝ} (h : BinomialNoArb u d r) : 0 < u :=
   lt_trans h.d_pos h.d_lt_u
 
+/-- Under no-arbitrage at a nonnegative rate, `u ≥ 1`: the up-factor exceeds `e^r ≥ 1`. -/
+lemma BinomialNoArb.one_le_u {u d r : ℝ} (h : BinomialNoArb u d r) (hr : 0 ≤ r) : 1 ≤ u :=
+  (Real.one_le_exp hr).trans h.lt_u.le
+
 /-- Under no-arbitrage, the risk-neutral up-probability is in `(0, 1)`. -/
 lemma crrUpProb_mem_Ioo {u d r : ℝ} (h : BinomialNoArb u d r) :
     crrUpProb u d r ∈ Set.Ioo 0 1 := by

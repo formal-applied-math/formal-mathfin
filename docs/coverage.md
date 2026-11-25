@@ -31,7 +31,9 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
 917 entries: 871 full (from 866), 18 library wrappers, 28 reduced cores (from 22); 889 are
 delivery-ready (`full` + `library_wrapper`). The dated sections below record what each pull
-request added.
+request added. The backlog pass then split `mf-bgk-discrete-barrier-shift` into the image form and
+scaling of `ptDownOutCall` (`mf-barrier-down-out-image-form`) and the BGK shift and limit (918
+entries, 29 reduced cores).
 
 ### The Ho–Lee bond price (2026-11-24)
 
@@ -205,7 +207,7 @@ One `full` entry in `benchmarks/defi.json`. It adds one entry to the corpus.
   constant-product payoff of invariant `V²`
   (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
   the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
-  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
+  tagged on `price_constantMeanPayoff_eq_hodl` (the position priced as its reserves at the pool's spot price, through `Contract.value_pay`) and the frontier entry is deleted; the node joins the
   trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
   (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
   Axioms-clean, `full`.

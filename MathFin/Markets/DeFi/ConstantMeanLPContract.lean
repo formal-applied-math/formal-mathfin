@@ -55,6 +55,8 @@ single-token holdings `V` and `V P`, outside the hypotheses).
 * `eval_constantMeanPayoff_eq_reserves`: at the pool's spot price the payoff is worth the
   reserves `x P + y`.
 * `price_constantMeanPayoff`: the discounted-expectation price.
+* `price_constantMeanPayoff_eq_hodl`: at the pool's spot price, the position is priced as its
+  reserves.
 * `constantMeanPayoff_one_half_eq_constantProductPayoff`: the `w = 1/2` reduction to
   `constantProductPayoff`.
 
@@ -142,6 +144,24 @@ theorem price_constantMeanPayoff {Ω : Type*} [MeasurableSpace Ω] (M : Market U
     M.price Q (.pay T (constantMeanPayoff V w T)) =
       ∫ ω, M.deflator T ω * (constantMeanPayoff V w T).eval (scenarioAt M.asset ω) ∂Q := by
   rw [Market.price, Contract.value_pay]
+
+/-- **The constant-mean position is priced as its reserves at the pool's own spot price.** In a
+market whose price of X in Y at `T` equals the pool's spot price `y / (1-w) / (x / w)` of a
+pool with reserves `x, y > 0` and weight `w`, `Q`-almost surely, paying the position of the
+pool's own invariant at `T` is worth paying its reserves: the price of the position equals
+the price of the deposit claim `x P_T + y` (`hodlPayoff`). It is the marking identity
+`eval_constantMeanPayoff_eq_reserves` integrated against the deflator, through
+`Contract.value_pay`. -/
+theorem price_constantMeanPayoff_eq_hodl {Ω : Type*} [MeasurableSpace Ω] (M : Market Unit Ω)
+    (Q : Measure Ω) (T : ℝ≥0) {x y : ℝ} {w : ℝ≥0} (hx : 0 < x) (hy : 0 < y) (hw : 0 < w)
+    (hw1 : (w : ℝ) < 1)
+    (hspot : ∀ᵐ ω ∂Q, M.asset () T ω = spotPrice (![x, y] : Fin 2 → ℝ) ![↑w, 1 - ↑w] 0 1) :
+    M.price Q (.pay T (constantMeanPayoff (constantMeanInvariant ![x, y] ![↑w, 1 - ↑w]) w T)) =
+      M.price Q (.pay T (hodlPayoff x y T)) := by
+  simp only [Market.price, Contract.value_pay]
+  refine integral_congr_ae (hspot.mono fun ω h ↦ ?_)
+  simp only [eval_hodlPayoff]
+  exact congrArg _ (eval_constantMeanPayoff_eq_reserves x y w hx hy hw hw1 T _ h)
 
 /-- **The equal-weight constant-mean position is the constant-product position**: the payoff
 of invariant `V` at weight `1/2` is the payoff of invariant `V²`, the constant-product

@@ -47,6 +47,11 @@ price of the put
 composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
 `americanPrice_market_europeanPutPayoff` with the tree-level gap.
 
+## Main definitions
+
+* `wordWeight`: the risk-neutral discounted weight of a path word of the tree.
+* `wordSpot`: the spot reached from a given spot along a path word.
+
 ## Main results
 
 * `americanPutPrice_eq_intrinsic_of_deep_in_the_money`: for `0 < S` with `S * u ^ n ≤ K` and
@@ -62,6 +67,10 @@ composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
   this gives the premium `K * (1 - e^{-r*n}) > 0`.
 * `americanPrice_premium_supermartingale`: for any payoff, the American minus the European
   price dominates the one-period discounted continuation of the same difference.
+* `americanPrice_premium_up_step`, `americanPrice_premium_down_step`: the one-step form, with
+  the up- or down-weight and the premium at the matching successor.
+* `americanPrice_premium_wordWeight_le`: along any path word, the root premium bounds the
+  `wordWeight` of the path times the premium at the node `wordSpot` it reaches.
 * `americanPrice_premium_mul_weight_le`: along any `k`-step path with `j` up-moves, the root
   premium bounds `e^{-r*k} * q ^ j * (1 - q) ^ (k - j)` times the node premium.
 * `binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation`: if some node of
@@ -70,6 +79,8 @@ composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
 * `Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation`:
   the same statement for the binomial market's European put price and American put price under
   the risk-neutral coin flips.
+* `Contracts.Binomial.price_europeanPut_lt_americanPrice_of_deep_in_the_money`: deep in the
+  money the market's American put is strictly worth more than its European put.
 
 ## References
 
@@ -175,11 +186,7 @@ theorem americanPutPrice_eq_intrinsic_of_deep_in_the_money
     have hexp : Real.exp (-r) ≤ 1 := by
       rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
       exact Real.exp_le_exp.mpr (by linarith)
-    have hu1 : (1 : ℝ) ≤ u ^ (n + 1) := by
-      have h1 : (1 : ℝ) ≤ Real.exp r := by
-        rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
-        exact Real.exp_le_exp.mpr (by linarith)
-      exact one_le_pow₀ (le_trans h1 h.lt_u.le)
+    have hu1 : (1 : ℝ) ≤ u ^ (n + 1) := one_le_pow₀ (h.one_le_u hr)
     have hSle : S ≤ K := le_trans (le_mul_of_one_le_right hS.le hu1) hSK
     have hcont := binomialOptionPriceOnePeriod_intrinsic h K S
     rw [hcont, show max (K - S) 0 = K - S from max_eq_left (by linarith),
@@ -212,15 +219,135 @@ theorem americanPrice_premium_supermartingale (u d r : ℝ) (g : ℝ → ℝ) (n
       (americanPrice u d r g n (S * d)))
   linarith
 
+/-- **The premium is nonnegative**: the American price dominates the European price
+(`bermudanPrice_mono`). -/
+theorem americanPrice_premium_nonneg {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ)
+    (m : ℕ) (x : ℝ) : 0 ≤ americanPrice u d r g m x - binomialPrice u d r g m x :=
+  sub_nonneg_of_le (bermudanPrice_mono h g (Set.empty_subset Set.univ) m x)
+
+/-- **One up-step of the premium**: the premium one step earlier dominates the discounted
+risk-neutral up-weight times the premium at the up-successor. The supermartingale inequality
+with the down-successor's term dropped, being nonnegative. -/
+theorem americanPrice_premium_up_step {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ)
+    (m : ℕ) (S : ℝ) :
+    Real.exp (-r) * (crrUpProb u d r *
+      (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u)))
+    ≤ americanPrice u d r g (m + 1) S - binomialPrice u d r g (m + 1) S := by
+  have hstep := americanPrice_premium_supermartingale u d r g m S
+  unfold binomialOptionPriceOnePeriod at hstep
+  have hsib : 0 ≤ Real.exp (-r) * ((1 - crrUpProb u d r) *
+      (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d))) :=
+    mul_nonneg (Real.exp_pos _).le
+      (mul_nonneg (by linarith [(crrUpProb_mem_Ioo h).2]) (americanPrice_premium_nonneg h g m _))
+  linarith
+
+/-- **One down-step of the premium**: the premium one step earlier dominates the discounted
+risk-neutral down-weight times the premium at the down-successor. -/
+theorem americanPrice_premium_down_step {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ)
+    (m : ℕ) (S : ℝ) :
+    Real.exp (-r) * ((1 - crrUpProb u d r) *
+      (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d)))
+    ≤ americanPrice u d r g (m + 1) S - binomialPrice u d r g (m + 1) S := by
+  have hstep := americanPrice_premium_supermartingale u d r g m S
+  unfold binomialOptionPriceOnePeriod at hstep
+  have hsib : 0 ≤ Real.exp (-r) * (crrUpProb u d r *
+      (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u))) :=
+    mul_nonneg (Real.exp_pos _).le
+      (mul_nonneg (crrUpProb_mem_Ioo h).1.le (americanPrice_premium_nonneg h g m _))
+  linarith
+
+/-- The risk-neutral discounted weight of a path word of the tree (`true` an up-move, `false` a
+down-move): each step contributes `e^{-r}` times the up- or down-probability. -/
+noncomputable def wordWeight (u d r : ℝ) : List Bool → ℝ
+  | [] => 1
+  | b :: w => Real.exp (-r) * (if b then crrUpProb u d r else 1 - crrUpProb u d r) *
+      wordWeight u d r w
+
+/-- The spot reached from `S` along a path word of the tree. -/
+noncomputable def wordSpot (u d : ℝ) : ℝ → List Bool → ℝ
+  | S, [] => S
+  | S, b :: w => wordSpot u d (S * if b then u else d) w
+
+/-- Path words compose: the spot after `l₁ ++ l₂` is the spot after `l₂` from the spot after
+`l₁`. -/
+theorem wordSpot_append (u d : ℝ) (l₁ l₂ : List Bool) (S : ℝ) :
+    wordSpot u d S (l₁ ++ l₂) = wordSpot u d (wordSpot u d S l₁) l₂ := by
+  induction l₁ generalizing S with
+  | nil => rfl
+  | cons b w ih => exact ih _
+
+/-- The weight of a concatenated path is the product of the weights. -/
+theorem wordWeight_append (u d r : ℝ) (l₁ l₂ : List Bool) :
+    wordWeight u d r (l₁ ++ l₂) = wordWeight u d r l₁ * wordWeight u d r l₂ := by
+  induction l₁ with
+  | nil => simp [wordWeight]
+  | cons b w ih => simp only [List.cons_append, wordWeight, ih]; ring
+
+/-- A run of `n` equal moves multiplies the spot by the move factor `n` times. -/
+theorem wordSpot_replicate (u d : ℝ) (b : Bool) (n : ℕ) (S : ℝ) :
+    wordSpot u d S (List.replicate n b) = S * (if b then u else d) ^ n := by
+  induction n generalizing S with
+  | zero => simp [wordSpot]
+  | succ n ih => rw [List.replicate_succ, wordSpot, ih, pow_succ']; ring
+
+/-- A run of `n` equal moves has the `n`-th power of the one-step weight. -/
+theorem wordWeight_replicate (u d r : ℝ) (b : Bool) (n : ℕ) :
+    wordWeight u d r (List.replicate n b) =
+      (Real.exp (-r) * (if b then crrUpProb u d r else 1 - crrUpProb u d r)) ^ n := by
+  induction n with
+  | zero => simp [wordWeight]
+  | succ n ih => rw [List.replicate_succ, wordWeight, ih, pow_succ']
+
+/-- **The premium at the root bounds every path-weighted premium below it, along a path word.**
+For any payoff and any path word `w` of at most `N` steps, the premium at the root dominates the
+premium at the node `wordSpot S w` times the weight `wordWeight w` of the path. It is
+`americanPrice_premium_up_step` or `americanPrice_premium_down_step` at each letter, composed by
+induction on the word. -/
+theorem americanPrice_premium_wordWeight_le {u d r : ℝ} (h : BinomialNoArb u d r) (g : ℝ → ℝ)
+    (w : List Bool) :
+    ∀ (N : ℕ), w.length ≤ N → ∀ S : ℝ,
+    wordWeight u d r w * (americanPrice u d r g (N - w.length) (wordSpot u d S w)
+        - binomialPrice u d r g (N - w.length) (wordSpot u d S w))
+      ≤ americanPrice u d r g N S - binomialPrice u d r g N S := by
+  induction w with
+  | nil => intro N _ S; simp [wordWeight, wordSpot]
+  | cons b w ih =>
+    intro N hN S
+    obtain ⟨m, rfl⟩ : ∃ m, N = m + 1 := ⟨N - 1, by simp at hN; omega⟩
+    have hle := ih m (by simpa using hN) (S * if b then u else d)
+    have hw : 0 ≤ Real.exp (-r) * (if b then crrUpProb u d r else 1 - crrUpProb u d r) := by
+      have hq := crrUpProb_mem_Ioo h
+      cases b
+      · exact mul_nonneg (Real.exp_pos _).le (sub_nonneg.2 hq.2.le)
+      · exact mul_nonneg (Real.exp_pos _).le hq.1.le
+    have hstep : Real.exp (-r) * ((if b then crrUpProb u d r else 1 - crrUpProb u d r) *
+        (americanPrice u d r g m (S * if b then u else d)
+          - binomialPrice u d r g m (S * if b then u else d)))
+        ≤ americanPrice u d r g (m + 1) S - binomialPrice u d r g (m + 1) S := by
+      cases b
+      · exact americanPrice_premium_down_step h g m S
+      · exact americanPrice_premium_up_step h g m S
+    calc wordWeight u d r (b :: w) * (americanPrice u d r g (m + 1 - (b :: w).length)
+          (wordSpot u d S (b :: w))
+          - binomialPrice u d r g (m + 1 - (b :: w).length) (wordSpot u d S (b :: w)))
+        = (Real.exp (-r) * (if b then crrUpProb u d r else 1 - crrUpProb u d r)) *
+          (wordWeight u d r w * (americanPrice u d r g (m - w.length)
+            (wordSpot u d (S * if b then u else d) w)
+          - binomialPrice u d r g (m - w.length) (wordSpot u d (S * if b then u else d) w))) := by
+          simp only [wordWeight, wordSpot, List.length_cons, Nat.add_sub_add_right]; ring
+      _ ≤ (Real.exp (-r) * (if b then crrUpProb u d r else 1 - crrUpProb u d r)) *
+          (americanPrice u d r g m (S * if b then u else d)
+            - binomialPrice u d r g m (S * if b then u else d)) :=
+          mul_le_mul_of_nonneg_left hle hw
+      _ ≤ _ := by rw [← mul_assoc] at hstep; exact hstep
+
 /-- **The premium at the root bounds every path-weighted premium below it.** For any payoff,
 `j + i` steps down from the root with `j` up-moves and `i` down-moves, the premium at the root
 dominates the premium at that node times the discount `e^{-r*(j+i)}` and the risk-neutral path
-weight `q ^ j * (1 - q) ^ i`. Iterating `americanPrice_premium_supermartingale` along a single
-path: the up-step uses the risk-neutral weight of an up-move, the down-step that of a
-down-move, and the sibling term is dropped, being nonnegative by
-`bermudanPrice_mono`. Under no-arbitrage the weight is strictly positive (`q ∈ (0, 1)`), and
-every node of the tree is of this form, so a strictly positive premium at any node propagates
-to the root. -/
+weight `q ^ j * (1 - q) ^ i`: `americanPrice_premium_wordWeight_le` at the word of `j` up-moves
+followed by `i` down-moves. Under no-arbitrage the weight is strictly positive (`q ∈ (0, 1)`),
+and every node of the tree is of this form, so a strictly positive premium at any node
+propagates to the root. -/
 theorem americanPrice_premium_mul_weight_le {u d r : ℝ} (h : BinomialNoArb u d r)
     (g : ℝ → ℝ) :
     ∀ (j i N : ℕ) (_hN : j + i ≤ N) (S : ℝ),
@@ -228,112 +355,27 @@ theorem americanPrice_premium_mul_weight_le {u d r : ℝ} (h : BinomialNoArb u d
       (americanPrice u d r g (N - j - i) (S * u ^ j * d ^ i)
         - binomialPrice u d r g (N - j - i) (S * u ^ j * d ^ i))
     ≤ americanPrice u d r g N S - binomialPrice u d r g N S := by
-  have hq := crrUpProb_mem_Ioo h
-  have hq0 : 0 < crrUpProb u d r := hq.1
-  have hq1 : crrUpProb u d r < 1 := hq.2
-  have hExpPos : 0 < Real.exp (-r) := Real.exp_pos _
-  have hDnn : ∀ (m : ℕ) (x : ℝ),
-      0 ≤ americanPrice u d r g m x - binomialPrice u d r g m x := by
-    intro m x
-    unfold americanPrice binomialPrice
-    exact sub_nonneg_of_le (bermudanPrice_mono h g (Set.empty_subset Set.univ) m x)
-  intro j
-  induction j with
-  | zero =>
-    intro i
-    induction i with
-    | zero =>
-      intro N _hN S
-      simp only [Nat.sub_zero, pow_zero, mul_one, add_zero, Real.exp_zero,
-        Nat.cast_zero, mul_zero, neg_zero]
-      simp
-    | succ i ih =>
-      intro N hN S
-      obtain ⟨m, hm⟩ : ∃ m, N = m + 1 := ⟨N - 1, by omega⟩
-      subst hm
-      have hstep := americanPrice_premium_supermartingale u d r g m S
-      have hle := ih m (by omega) (S * d)
-      have hsib : 0 ≤ crrUpProb u d r *
-          (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u)) :=
-        mul_nonneg hq0.le (hDnn m (S * u))
-      have hexp : Real.exp (-(r * (0 + (i + 1) : ℕ)))
-          = Real.exp (-r) * Real.exp (-(r * (0 + i : ℕ))) := by
-        rw [← Real.exp_add]; congr 1; push_cast; ring
-      have hidx : m + 1 - 0 - (i + 1) = m - 0 - i := by omega
-      have hspot : S * u ^ 0 * d ^ (i + 1) = (S * d) * u ^ 0 * d ^ i := by
-        rw [pow_succ]; ring
-      have hpow : (1 - crrUpProb u d r) ^ (i + 1)
-          = (1 - crrUpProb u d r) ^ i * (1 - crrUpProb u d r) := pow_succ _ _
-      calc Real.exp (-(r * (0 + (i + 1) : ℕ))) * crrUpProb u d r ^ (0 : ℕ)
-            * (1 - crrUpProb u d r) ^ (i + 1)
-            * (americanPrice u d r g (m + 1 - 0 - (i + 1)) (S * u ^ 0 * d ^ (i + 1))
-              - binomialPrice u d r g (m + 1 - 0 - (i + 1)) (S * u ^ 0 * d ^ (i + 1)))
-          = Real.exp (-r) * ((1 - crrUpProb u d r)
-              * (Real.exp (-(r * (0 + i : ℕ))) * crrUpProb u d r ^ (0 : ℕ)
-                * (1 - crrUpProb u d r) ^ i
-                * (americanPrice u d r g (m - 0 - i) ((S * d) * u ^ 0 * d ^ i)
-                  - binomialPrice u d r g (m - 0 - i) ((S * d) * u ^ 0 * d ^ i)))) := by
-            rw [hidx, hspot, hexp, hpow]
-            simp only [pow_zero, mul_one]
-            push_cast
-            ring
-        _ ≤ Real.exp (-r) * ((1 - crrUpProb u d r)
-            * (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d))) := by
-            apply mul_le_mul_of_nonneg_left _ (by positivity)
-            exact mul_le_mul_of_nonneg_left hle (by linarith)
-        _ ≤ Real.exp (-r) * (crrUpProb u d r
-            * (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u))
-            + (1 - crrUpProb u d r)
-            * (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d))) := by
-            apply mul_le_mul_of_nonneg_left _ hExpPos.le
-            linarith
-        _ = binomialOptionPriceOnePeriod u d r
-            (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u))
-            (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d)) := rfl
-        _ ≤ americanPrice u d r g (m + 1) S - binomialPrice u d r g (m + 1) S := hstep
-  | succ j ih =>
-    intro i N hN S
-    obtain ⟨m, hm⟩ : ∃ m, N = m + 1 := ⟨N - 1, by omega⟩
-    subst hm
-    have hstep := americanPrice_premium_supermartingale u d r g m S
-    have hle := ih i m (by omega) (S * u)
-    have hsib : 0 ≤ (1 - crrUpProb u d r) *
-        (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d)) :=
-      mul_nonneg (by linarith) (hDnn m (S * d))
-    have hexp : Real.exp (-(r * (j + 1 + i : ℕ)))
-        = Real.exp (-r) * Real.exp (-(r * (j + i))) := by
-      rw [← Real.exp_add]; congr 1; push_cast; ring
-    have hidx : m + 1 - (j + 1) - i = m - j - i := by omega
-    have hspot : S * u ^ (j + 1) * d ^ i = (S * u) * u ^ j * d ^ i := by
-      rw [pow_succ]; ring
-    have hqp : crrUpProb u d r ^ (j + 1)
-        = crrUpProb u d r ^ j * crrUpProb u d r := pow_succ _ _
-    calc Real.exp (-(r * (j + 1 + i : ℕ))) * crrUpProb u d r ^ (j + 1)
-          * (1 - crrUpProb u d r) ^ i
-          * (americanPrice u d r g (m + 1 - (j + 1) - i) (S * u ^ (j + 1) * d ^ i)
-            - binomialPrice u d r g (m + 1 - (j + 1) - i) (S * u ^ (j + 1) * d ^ i))
-        = Real.exp (-r) * (crrUpProb u d r
-            * (Real.exp (-(r * (j + i : ℕ))) * crrUpProb u d r ^ j
-              * (1 - crrUpProb u d r) ^ i
-              * (americanPrice u d r g (m - j - i) ((S * u) * u ^ j * d ^ i)
-                - binomialPrice u d r g (m - j - i) ((S * u) * u ^ j * d ^ i)))) := by
-          rw [hidx, hspot, hexp, hqp]
-          push_cast
-          ring
-      _ ≤ Real.exp (-r) * (crrUpProb u d r
-          * (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u))) := by
-          apply mul_le_mul_of_nonneg_left _ hExpPos.le
-          exact mul_le_mul_of_nonneg_left hle hq0.le
-      _ ≤ Real.exp (-r) * (crrUpProb u d r
-          * (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u))
-          + (1 - crrUpProb u d r)
-          * (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d))) := by
-          apply mul_le_mul_of_nonneg_left _ hExpPos.le
-          linarith
-      _ = binomialOptionPriceOnePeriod u d r
-          (americanPrice u d r g m (S * u) - binomialPrice u d r g m (S * u))
-          (americanPrice u d r g m (S * d) - binomialPrice u d r g m (S * d)) := rfl
-      _ ≤ americanPrice u d r g (m + 1) S - binomialPrice u d r g (m + 1) S := hstep
+  intro j i N hN S
+  have hlen : (List.replicate j true ++ List.replicate i false).length = j + i := by simp
+  have key := americanPrice_premium_wordWeight_le h g (List.replicate j true ++
+    List.replicate i false) N (by omega) S
+  have hspot : wordSpot u d S (List.replicate j true ++ List.replicate i false)
+      = S * u ^ j * d ^ i := by
+    rw [wordSpot_append, wordSpot_replicate, wordSpot_replicate]
+    first | rfl | simp
+  have hwt : wordWeight u d r (List.replicate j true ++ List.replicate i false)
+      = Real.exp (-(r * (j + i : ℕ))) * crrUpProb u d r ^ j * (1 - crrUpProb u d r) ^ i := by
+    have hE : Real.exp (-r) ^ j * Real.exp (-r) ^ i = Real.exp (-(r * (j + i : ℕ))) := by
+      rw [← pow_add, ← Real.exp_nat_mul]; congr 1; push_cast; ring
+    rw [wordWeight_append, wordWeight_replicate, wordWeight_replicate, mul_pow, mul_pow, ← hE]
+    have e1 : (if (true : Bool) then crrUpProb u d r else 1 - crrUpProb u d r)
+        = crrUpProb u d r := rfl
+    have e2 : (if (false : Bool) then crrUpProb u d r else 1 - crrUpProb u d r)
+        = 1 - crrUpProb u d r := rfl
+    rw [e1, e2]
+    ring
+  rw [hlen, hspot, hwt, ← Nat.sub_sub] at key
+  exact key
 
 /-- **A node where immediate exercise strictly beats continuation makes the premium at the root
 strictly positive.** For the put payoff `max (K − S) 0` with `N` steps remaining, if some node
@@ -429,13 +471,8 @@ theorem immediate_exercise_gt_continuation_of_deep_in_the_money
     americanPutPrice_eq_intrinsic_of_deep_in_the_money h (le_of_lt hr) (N - 1) (S * d)
       (mul_pos hS h.d_pos) hdp]
   have hcont := binomialOptionPriceOnePeriod_intrinsic h K S
-  have hu1 : (1 : ℝ) ≤ u := by
-    have h1 : (1 : ℝ) ≤ Real.exp r := by
-      rw [show (1 : ℝ) = Real.exp 0 from Real.exp_zero.symm]
-      exact Real.exp_le_exp.mpr (by linarith)
-    exact le_trans h1 h.lt_u.le
   have hSle : S ≤ K :=
-    le_trans (le_mul_of_one_le_right hS.le (one_le_pow₀ hu1)) hSK
+    le_trans (le_mul_of_one_le_right hS.le (one_le_pow₀ (h.one_le_u hr.le))) hSK
   rw [hcont, max_eq_left (by linarith)]
   nlinarith
 
@@ -500,6 +537,22 @@ theorem price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
   rw [hE, hA]
   exact MathFin.binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation
     hna N hw
+
+/-- **In the binomial market, the European put is strictly worth less than the American put
+deep in the money.** For a positive rate and at least one step, a spot so low that the whole
+remaining tree ends in the money (`S₀ * u ^ N ≤ K`) has its immediate-exercise node at the root
+(`immediate_exercise_gt_continuation_of_deep_in_the_money`), so the market prices differ
+strictly: the early-exercise premium of the put, read in the market, is positive. -/
+theorem price_europeanPut_lt_americanPrice_of_deep_in_the_money
+    {S₀ u d ρ K : ℝ} {q p : ℝ≥0} (hq : q ≤ 1) (hp0 : 0 < p) (hp : p < 1) (hS₀ : 0 < S₀)
+    (hna : MathFin.BinomialNoArb u d ρ) (hqcrr : MathFin.crrUpProb u d ρ = q) (hρ : 0 < ρ)
+    {N : ℕ} (hN : 1 ≤ N) (hSK : S₀ * u ^ N ≤ K) :
+    (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).price (coinFlipMeasure q hq)
+        (europeanPut K (N : ℝ≥0))
+    < (market (coinFlipMeasure p hp.le) S₀ u d ρ zero_le_one).americanPrice
+        (coinFlipMeasure q hq) (europeanPutPayoff K) (N : ℝ≥0) :=
+  price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation hq hp0 hp hS₀ hna
+    hqcrr N (MathFin.immediate_exercise_gt_continuation_of_deep_in_the_money hna hρ hN hS₀ hSK)
 
 end MathFin.Contracts.Binomial
 
