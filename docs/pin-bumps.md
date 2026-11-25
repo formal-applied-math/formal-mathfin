@@ -41,8 +41,8 @@ The order is the one described in the header of
    `Classical.choice` and `Quot.sound`.
 3. **The whole corpus is re-verified.** A pin bump changes the pin part of every entry's input
    hash, so every row of `verification_ledger.json` goes stale. The `ledger sweep` workflow does
-   this on a runner for pull requests that change a pin file: twelve shards bring about 340 entries
-   to roughly half an hour of wall clock, where one machine would take four to six hours. It
+   this on a runner for pull requests that change a pin file, in up to twelve parallel shards, where
+   one machine would take many hours. It
    commits the refreshed ledger to the branch. Do not use `ledger rebase-pins` instead: it is not a
    shortcut after a substantive bump. `python3 -m tools.verify.ledger status` must exit 0.
 4. **The repository checks pass.** `python3 -m pytest tests/ -q`, then the `build` workflow, which

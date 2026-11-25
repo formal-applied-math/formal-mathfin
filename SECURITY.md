@@ -48,6 +48,12 @@ Do not rely on a result if you cannot rebuild it at the pinned revisions.
   is public.
 - `hammer-retest.yml` can log in to GHCR with an optional `GHCR_TOKEN`. Without it the job pulls
   the public image anonymously. It runs only by manual dispatch.
+- `ledger-sweep.yml`, `import-shake.yml` and `release.yml` push to the repository with the
+  workflow's `GITHUB_TOKEN` (`contents: write`). The ledger sweep also runs on pull requests that
+  change a pin file; on a pull request from a fork GitHub gives that token read access only, so it
+  cannot push there. The other two run only by manual dispatch.
+- No workflow runs on `pull_request_target`, so code from a fork never runs with the repository's
+  secrets. A first-time contributor's workflow runs wait for the maintainer's approval.
 
 Never commit a token or key. If you find one in the history or in a workflow log, report it as
 described above and do not use it.
