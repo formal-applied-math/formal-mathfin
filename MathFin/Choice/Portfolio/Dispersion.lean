@@ -29,15 +29,19 @@ identity and what it lets one solve for.
   common correlation by exactly `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` (`bossuProxy_eq_add_gap`), the
   idiosyncratic share, so it sits between the correlation and one (`bossuProxy_between`). The
   variance-denominated variant of the proxy that the source prints for the realised correlation
-  is a lower bound for it, by Jensen's inequality (`jensenProxy_le_bossuProxy`).
-* A **correlation swap** pays the pairwise correlations averaged over the squared weights. Under
-  equicorrelation that average, read off the dispersion identity as the off-diagonal share of the
-  portfolio variance, is the common correlation (`realisedCorrelation_equicorrelation`).
+  is a lower bound for it at nonnegative weights summing to one, by Jensen's inequality
+(`jensenProxy_le_bossuProxy`).
+* A **correlation swap** pays the pairwise correlations averaged over the pairwise weight
+  products `wᵢwⱼ`. Under equicorrelation that average, read off the dispersion identity as the
+  off-diagonal share of the portfolio variance, is the common correlation
+  (`realisedCorrelation_equicorrelation`).
 * The **dispersion P&L** of holding the components' variance at weight `wᵢ²` against the index
-  variance is `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`): negative when the common
-  correlation is positive. At the flat weights `wᵢ = 1/d` the index variance is the diversification
-  form `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²` (`indexVar_equicorrelation_flat_weights`), the
-  heterogeneous-volatility generalisation of `portfolioVarN_equicorrelation_equal_weights`.
+  variance is `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`): at nonnegative weights and
+  volatilities it is nonpositive, and strictly negative when the common correlation is positive
+  and two or more components contribute. At the flat weights `wᵢ = 1/d` the index variance is
+  the diversification form `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²`
+  (`indexVar_equicorrelation_flat_weights`), the heterogeneous-volatility generalisation of
+  `portfolioVarN_equicorrelation_equal_weights`.
 
 ## Main definitions
 
@@ -86,7 +90,8 @@ noncomputable def impliedCorrelation (w σ : n → ℝ) (V : ℝ) : ℝ :=
 
 /-- The **Bossu proxy** for the implied correlation: the observed index variance `V` divided by
 the squared weighted sum of volatilities. For the equicorrelated index it exceeds the common
-correlation by the idiosyncratic share (`bossuProxy_eq_add_gap`). -/
+correlation by the idiosyncratic share (`bossuProxy_eq_add_gap`). It is junk when the squared
+weighted sum `∑ wᵢσᵢ` vanishes: there the division returns `0`, which is not a correlation. -/
 noncomputable def bossuProxy (w σ : n → ℝ) (V : ℝ) : ℝ :=
   V / (∑ i, w i * σ i) ^ 2
 
@@ -160,9 +165,9 @@ theorem bossuProxy_eq_add_gap (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * 
   field_simp [hne]
   ring
 
-/-- **The proxy sits between the correlation and one**: at nonnegative weights and volatilities
-with a nonzero weighted-volatility sum, the Bossu proxy of the equicorrelated index variance is
-at least the common correlation and at most one. -/
+/-- **The proxy sits between the correlation and one**: at nonnegative weights and volatilities,
+a nonzero weighted-volatility sum, and a common correlation `ρ ≤ 1`, the Bossu proxy of the
+equicorrelated index variance is at least the common correlation and at most one. -/
 theorem bossuProxy_between (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ i) ^ 2 ≠ 0)
     (hρ : ρ ≤ 1) (hw : ∀ i, 0 ≤ w i) (hσ : ∀ i, 0 ≤ σ i) :
     ρ ≤ bossuProxy w σ (portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j))
@@ -202,10 +207,10 @@ theorem bossuProxy_between (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ 
   rw [hrw, div_le_one hSpos]
   exact key
 
-/-- **The variance-denominated proxy is a lower bound**: at flat nonnegative weights, the
-observed variance divided by the weighted variance sum `∑ wᵢσᵢ²` understates the Bossu proxy,
-which divides by the squared weighted-volatility sum instead. The source prints this variant for
-the realised correlation and notes the bound is Jensen's. -/
+/-- **The variance-denominated proxy is a lower bound**: at nonnegative weights summing to one,
+the observed variance divided by the weighted variance sum `∑ wᵢσᵢ²` understates the Bossu
+proxy, which divides by the squared weighted-volatility sum instead. The source prints this
+variant for the realised correlation and notes the bound is Jensen's. -/
 theorem jensenProxy_le_bossuProxy (w σ : n → ℝ) (ρ : ℝ) (hflat : ∑ i, w i = 1)
     (hw : ∀ i, 0 ≤ w i) (hσ : ∀ i, 0 ≤ σ i)
     (hV : 0 ≤ portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j)) :
@@ -235,8 +240,9 @@ theorem jensenProxy_le_bossuProxy (w σ : n → ℝ) (ρ : ℝ) (hflat : ∑ i, 
     exact hJ
 
 /-- **The dispersion P&L**: holding the components' variance at weights `wᵢ²` against the index
-variance realises `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` — negative whenever the common correlation is
-positive. -/
+variance realises `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` — at nonnegative weights and volatilities it is
+nonpositive, and strictly negative when the common correlation is positive and two or more
+components contribute. -/
 theorem dispersionPnL_eq (w σ : n → ℝ) (ρ : ℝ) :
     ∑ i, w i ^ 2 * σ i ^ 2
         - portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j)
@@ -271,9 +277,9 @@ theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
   rw [hinv, div_mul_eq_mul_div, one_mul]
 
 /-- **The correlation swap's floating leg under equicorrelation**: the pairwise correlations
-averaged over the squared weights, read off the dispersion identity as the off-diagonal share of
-the equicorrelated portfolio variance, realise the common correlation. A swap struck at the
-common correlation therefore pays nothing. -/
+averaged over the pairwise weight products `wᵢwⱼ`, read off the dispersion identity as the
+off-diagonal share of the equicorrelated portfolio variance, realise the common correlation. A
+swap struck at the common correlation therefore pays nothing. -/
 theorem realisedCorrelation_equicorrelation (w : n → ℝ) (ρ : ℝ)
     (hW : (∑ i, w i) ^ 2 ≠ ∑ i, w i ^ 2) :
     (portfolioVarN univ w (equicorrelationMatrix n ρ) - ∑ i, w i ^ 2)

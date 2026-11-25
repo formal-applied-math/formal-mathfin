@@ -29,7 +29,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ### Implied correlation and dispersion (2026-11-26)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 906 → 907 on the branch
-(866 full before, 867 after; 885 → 886 delivery-ready).
+(866 full before, 867 after; 884 → 885 delivery-ready).
 
 - **`mf-implied-correlation-dispersion`** (MathFin/Choice/Portfolio/Dispersion.lean): the
   dispersion identities of an index over its components, read off the equicorrelation quadratic

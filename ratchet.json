@@ -12,14 +12,14 @@
     "modules_without_main_definitions": 0,
     "modules_with_uncited_sources": 0,
     "long_lines": 0,
-    "corpus_off_blueprint": 291,
+    "corpus_off_blueprint": 290,
     "blueprint_islands": 0,
     "prices_off_trunk": 41,
     "price_entries_off_trunk": 171,
     "pricing_devices_unbridged": 0,
     "concept_duplicates": 0,
     "layer_violations": 0,
-    "chain_beyond_r3_permille": 286,
+    "chain_beyond_r3_permille": 285,
     "families_without_socket": 0
   }
 }
