@@ -228,7 +228,6 @@ theorem isPredictableVersion_self : IsPredictableVersion T hBmeas φ w w :=
   ⟨hw_pred.measurable, memLp_uncurry_bracketMeasure T hBmeas φ hw_pred hw_bdd,
     Filter.Eventually.of_forall fun _ _ ↦ rfl⟩
 
-omit [IsProbabilityMeasure μ] in
 /-- **The two constructors agree**: the class of a bounded predictable weight in `L²(⟨M⟩)` is
 the class `integrandLp` reads off its predictable version (`integrandLp_eq`). -/
 theorem weightLp_eq_integrandLp :

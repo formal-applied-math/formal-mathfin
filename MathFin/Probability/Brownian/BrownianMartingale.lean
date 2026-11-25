@@ -155,7 +155,7 @@ lemma condExp_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
   have h : ∫ ω, (X t ω - X s ω) ∂P = 0 := by
     rw [show (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) from rfl, hL.integral_eq,
       integral_id_gaussianReal]
-  exact condExp_comp_increment_eq_const hst (measurable_increment s t) measurable_id h
+  exact condExp_comp_increment_eq_const hst (measurable_increment (𝓕 := 𝓕) (P := P) s t) measurable_id h
 
 /-- **Kernel 2**: the squared increment conditions on the elapsed time,
 `P[(X_t − X_s)² | 𝓕_s] =ᵐ t − s`. -/
@@ -169,7 +169,7 @@ lemma condExp_increment_sq {s t : ℝ≥0} (hst : s ≤ t) :
       simpa [Function.comp] using hL.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, MathFin.integral_sq_gaussianReal]
     exact NNReal.coe_sub hst
-  exact condExp_comp_increment_eq_const hst (measurable_increment s t)
+  exact condExp_comp_increment_eq_const hst (measurable_increment (𝓕 := 𝓕) (P := P) s t)
     (measurable_id.pow_const 2) h
 
 /-- For a filtered pre-Brownian motion `X`, the process `t ↦ (X t)² − t` is a martingale
