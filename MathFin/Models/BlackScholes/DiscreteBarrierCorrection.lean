@@ -122,8 +122,8 @@ open Filter Topology
 [HowisonSteinberg2005], §2: `V(S) − (S/H)^{1−2(r−q)/σ²} · V(H²/S)` with `V = bsVDiv`, the
 Black–Scholes call price at dividend yield `q`; the closed form `ptDownOutCall` carries the cost
 of carry `b = r − q`. The case `q = 0`, with the base reciprocated, is `ptDownOutCall_eq_image`. As
-there, an identity between two closed forms, with `K` and `σ` taken positive (the library's usual
-guard), and a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. -/
+there, an identity between two closed forms, with `S`, `K`, `H` and `σ` taken positive, and
+a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. -/
 theorem ptDownOutCall_eq_image_printed {K H r q σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
     (hH : 0 < H) (hσ : 0 < σ) :
     ptDownOutCall S K H (r - q) r σ T
@@ -170,8 +170,8 @@ down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
 `V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
 §2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
 `2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is `S · ptHSmu1`, and `d₁, d₂` at `H²/S` are
-`ptF1, ptF2`. The case `q = 0` of `ptDownOutCall_eq_image_printed`, with `K` and `σ` taken
-positive, the library's usual guard. An identity between two closed forms; neither is proved here
+`ptF1, ptF2`. The case `q = 0` of `ptDownOutCall_eq_image_printed`, with `S`, `K`, `H` and
+`σ` taken positive. An identity between two closed forms; neither is proved here
 to be a price. The right-hand side is a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`,
 `H ≤ K` and `S > H`; the identity itself holds at every maturity `T`. -/
 theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
