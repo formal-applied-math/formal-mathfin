@@ -202,7 +202,6 @@ uses = ["thm:aave-liquidation-kmv"]
 area = "risk/credit"
 family = "mechanisms"
 
-
 [[node]]
 label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"

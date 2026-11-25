@@ -36,9 +36,9 @@ constant-product pool: the invariant squared is `x * y`, the spot price is `inte
 the out-amount is `swapOutput` (`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
 `swapOut_two_eq_swapOutput`).
 
-The whitepaper's weights are normalized (`∑ k, w k = 1`), which is what makes `V` the value of
-the weighted portfolio; the trades-preserve, out-amount and spot-price statements here hold for
-arbitrary positive weights and are proved at that generality. Fees are not modelled (the fee
+The whitepaper's weights are normalized (`∑ k, w k = 1`), which makes `V` the invariant of a
+constant-value-share (weighted) portfolio; the trades-preserve, out-amount and spot-price
+statements here hold for arbitrary positive weights and are proved at that generality. Fees are not modelled (the fee
 factor is one), as in `ConstantProductAMM.lean`.
 
 ## Main definitions
