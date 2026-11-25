@@ -153,8 +153,11 @@ integrable underlying `f`, the discounted call payoff minus the discounted put p
 theorem integral_call_sub_put {μ : Measure Ω} [IsProbabilityMeasure μ] {f : Ω → ℝ}
     (hf : Integrable f μ) (c K : ℝ) :
     ∫ ω, c * max (f ω - K) 0 ∂μ - ∫ ω, c * max (K - f ω) 0 ∂μ = c * (∫ ω, f ω ∂μ - K) := by
-  rw [← integral_sub (((hf.sub (integrable_const K)).pos_part).const_mul c)
-    (((((integrable_const K).sub hf)).pos_part).const_mul c)]
+  have hc : Integrable (fun ω ↦ c * max (f ω - K) 0) μ :=
+    (hf.sub (integrable_const K)).pos_part.const_mul c
+  have hp : Integrable (fun ω ↦ c * max (K - f ω) 0) μ :=
+    ((integrable_const K).sub hf).pos_part.const_mul c
+  rw [← integral_sub hc hp]
   have h (ω : Ω) : c * max (f ω - K) 0 - c * max (K - f ω) 0 = c * (f ω - K) := by
     have hx := max_zero_sub_max_neg_zero_eq_self (f ω - K)
     rw [neg_sub] at hx

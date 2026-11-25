@@ -359,7 +359,7 @@ lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
       rw [Measure.map_map L.continuous.measurable hXmeas]
       exact congrArg ν.map (funext hLX)
     have hint (u : ℝ) :
-        Integrable (fun x ↦ rexp (u * x)) (nuPos.map fun ω ↦ ∑ i, lam i * B (τ i) ω) := by
+        Integrable (fun x ↦ Real.exp (u * x)) (nuPos.map fun ω ↦ ∑ i, lam i * B (τ i) ω) := by
       rw [integrable_map_measure
         (measurable_exp.comp (measurable_const.mul measurable_id)).aestronglyMeasurable
         hY.aemeasurable]
