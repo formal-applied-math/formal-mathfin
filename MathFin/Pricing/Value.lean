@@ -46,8 +46,8 @@ is load-bearing.
   Mathlib's Bochner integral (it returns `0` off the integrable set on both sides), while
   `value_both` genuinely needs both summands integrable — `integral_add` is false without
   them. That asymmetry, not a uniform "linearity", is the honest content of this pair.
-* `Contract.value_payFlows_add`, `Contract.value_payFlows_sub`, `Contract.value_payFlows_add_sub` —
-  a schedule whose payoffs are a signed sum of the payoffs of other schedules (in the model, outcome by outcome) is worth the
+* `Contract.value_payFlows_add`, `Contract.value_payFlows_sub`,
+  `Contract.value_payFlows_add_sub` — a schedule whose payoffs are a signed sum of the payoffs of other schedules (in the model, outcome by outcome) is worth the
   same signed sum of their values.
 * `Contract.value_deliverAsset` — a contract that simply delivers the asset `S` at time `T`
   is worth `∫ ω, S 0 ω ∂Q` today, given `S` is a `Q`-martingale and `Q` a probability

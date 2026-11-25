@@ -62,9 +62,9 @@ lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
 `t ≥ 0`. -/
 lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
-  rw [← expMeasure_real_Ioi hr, max_eq_left ht, ofReal_measureReal (measure_ne_top _ _)]
-  congr 1
-  ring
+  have h := expMeasure_real_Ioi hr t
+  rw [max_eq_left ht] at h
+  rw [← h, ofReal_measureReal (measure_ne_top _ _)]
 
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
 lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :

@@ -152,7 +152,10 @@ theorem esscherPremium_strictMonoOn [IsProbabilityMeasure P]
   have key : StrictMonoOn (deriv (cgf X P)) (interior (integrableExpSet X P)) := by
     refine strictMonoOn_of_deriv_pos (convex_integrableExpSet.interior) ?_ fun v hv ↦ ?_
     · exact fun v hv ↦ ((analyticAt_cgf hv).deriv.continuousAt).continuousWithinAt
-    · rw [← iteratedDeriv_one, ← iteratedDeriv_succ, iteratedDeriv_two_cgf_eq_integral hv]
+    · rw [interior_interior] at hv
+      have h2 : deriv (deriv (cgf X P)) v = iteratedDeriv 2 (cgf X P) v := by
+        rw [iteratedDeriv_succ, iteratedDeriv_one]
+      rw [h2, iteratedDeriv_two_cgf_eq_integral hv]
       refine div_pos ?_ (mgf_pos' (IsProbabilityMeasure.ne_zero P) (interior_subset hv))
       set m := deriv (cgf X P) v
       have hf : Integrable (fun ω ↦ (X ω - m) ^ 2 * Real.exp (v * X ω)) P := by
