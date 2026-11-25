@@ -372,7 +372,7 @@ theorem discounted_terminal (h : JumpDiffusionHyp Q Λ Z N J)
     (hJ : Integrable (fun ω ↦ rexp (J 0 ω)) Q) (S_0 r σ : ℝ) {T : ℝ} (hT : 0 ≤ T) (κ : ℝ) :
     ∫ ω, rexp (-r * T) * jumpDiffusionTerminal S_0 r σ T κ (Z ω) (N ω) (fun i ↦ J i ω) ∂Q
       = S_0 * rexp (-κ + Λ * (∫ ω, rexp (J 0 ω) ∂Q - 1)) := by
-  simp_rw [jumpDiffusionTerminal_eq]
+  simp_rw [jumpDiffusionTerminal_eq, ← compoundSum_apply]
   rw [jumpDiffusion_discounted_terminal h.Z_law (h.aemeasurable_jumpPart κ)
     (h.indepFun_jumpPart κ) hT, h.integral_exp_jumpPart hJ κ]
 
