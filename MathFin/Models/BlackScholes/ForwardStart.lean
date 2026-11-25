@@ -43,7 +43,7 @@ no dividends.
 
 * [M. Rubinstein, *Pay now, choose later*][Rubinstein1991PayNow], *Risk* 4(2), February 1991,
   pp. 44–47
-* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 26 §5 (11th ed.)
+* [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], ch. 26 §5
 * [QuantLib, `ql/pricingengines/forward/forwardengine.hpp`][QuantLibForwardEngine] (the reference
   implementation; at zero dividend yield it reaches the closed form above)
 * [S. E. Shreve, *Stochastic Calculus for Finance II: Continuous-Time Models*][ShreveSCFII],
