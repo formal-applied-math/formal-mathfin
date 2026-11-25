@@ -81,14 +81,8 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
       = S_0 * bsV α r σ 1 ((T : ℝ) - (t₁ : ℝ)) := by
   have hT : 0 < (T : ℝ) := lt_trans ht₁ hτ
   have ht₁T : t₁ ≤ T := by exact_mod_cast hτ.le
-  have hposT : ∀ ω, 0 ≤ pathAssets S_0 r σ B () T ω := by
-    intro ω
-    unfold pathAssets
-    exact mul_nonneg hS₀.le (Real.exp_pos _).le
-  have hpos₁ : ∀ ω, 0 ≤ pathAssets S_0 r σ B () t₁ ω := by
-    intro ω
-    unfold pathAssets
-    exact mul_nonneg hS₀.le (Real.exp_pos _).le
+  have hposT := pathAssets_nonneg B hS₀.le r σ T
+  have hpos₁ := pathAssets_nonneg B hS₀.le r σ t₁
   have hZlaw : HasLaw (fun ω ↦ (B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
       (gaussianReal 0 1) Q :=
     scaled_increment_law hB.toIsPreBrownianReal (by exact_mod_cast hτ)
@@ -136,21 +130,7 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
         max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
           ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0 := by
     intro ω
-    have hratio : pathAssets S_0 r σ B () T ω = pathAssets S_0 r σ B () t₁ ω *
-        Real.exp ((r - σ ^ 2 / 2) * ((T : ℝ) - (t₁ : ℝ)) + σ * (B T ω - B t₁ ω)) := by
-      unfold pathAssets
-      rw [mul_assoc, ← Real.exp_add]
-      congr 2
-      ring
-    have hbs : Real.exp ((r - σ ^ 2 / 2) * ((T : ℝ) - (t₁ : ℝ)) + σ * (B T ω - B t₁ ω))
-        = bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
-          ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) := by
-      unfold bsTerminal
-      rw [one_mul]
-      congr 1
-      have hne : Real.sqrt ((T : ℝ) - (t₁ : ℝ)) ≠ 0 := (Real.sqrt_pos.mpr (sub_pos.2 hτ)).ne'
-      field_simp
-    rw [hratio, hbs, mul_comm α (pathAssets S_0 r σ B () t₁ ω), ← mul_sub]
+    rw [pathAssets_eq_mul_bsTerminal B hτ S_0 r σ ω, mul_comm α (pathAssets S_0 r σ B () t₁ ω), ← mul_sub]
     by_cases hle : bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) ≤ α
     · have hle' : bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
