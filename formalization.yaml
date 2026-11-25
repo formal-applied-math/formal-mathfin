@@ -182,9 +182,9 @@ alignment:
       status: full 1 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 10 statements
+      lean: 11 statements
       module: benchmarks/defi.json
-      status: full 10 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 11 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: measure_theory (Saporito, Stochastic Processes)
       lean: 6 statements

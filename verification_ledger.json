@@ -773,6 +773,13 @@
       "input_hash": "387e01f837c951ebaf5ebbce1f0ec3261b68517aff2add4f805f43c8cb1af604",
       "verified_at_commit": "b0d5578"
     },
+    "mf-balancer-invariant": {
+      "benchmark_file": "defi.json",
+      "date": "2026-11-25",
+      "elapsed_s": 3.5,
+      "input_hash": "3af139a6c7bd6d4e89d5de4f91121df6f3caeb6a34c33572f32fd411b830195c",
+      "verified_at_commit": "b71033c"
+    },
     "mf-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
       "date": "2026-11-19",

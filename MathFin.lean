@@ -966,6 +966,10 @@ public import MathFin.Markets.Microstructure.MarketMakingRiccati
 public import MathFin.Markets.Microstructure.MatrixMarketMakingRiccati
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 public import MathFin.Markets.DeFi.ConstantProductAMM
+-- Constant-mean (Balancer) AMM: the weighted-product invariant generalizing the pool above
+public import MathFin.Markets.DeFi.ConstantMeanAMM
+-- the constant-mean LP position as a payoff, priced (the bridge into the payoff language)
+public import MathFin.Markets.DeFi.ConstantMeanLPContract
 -- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 real reserves)
 public import MathFin.Markets.DeFi.UniswapMechanics
 -- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate

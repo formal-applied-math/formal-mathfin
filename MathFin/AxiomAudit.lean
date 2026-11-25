@@ -3290,3 +3290,50 @@ and `uncovered_interest_parity` from the risk-neutral expectation. -/
 /-- info: 'MathFin.fxForward_basis_tendsto_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.fxForward_basis_tendsto_zero
+/-! ### Constant-mean AMM: the Balancer invariant and spot price (2026-11-23) -/
+
+/-- info: 'MathFin.DeFi.swap_preserves_constantMean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swap_preserves_constantMean
+
+/-- info: 'MathFin.DeFi.hasDerivAt_swapOut_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.hasDerivAt_swapOut_zero
+
+/-- info: 'MathFin.DeFi.constantMeanInvariant_two_sq_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantMeanInvariant_two_sq_eq
+
+/-- info: 'MathFin.DeFi.spotPrice_two_eq_internalPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.spotPrice_two_eq_internalPrice
+
+/-- info: 'MathFin.DeFi.swapOut_two_eq_swapOutput' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_two_eq_swapOutput
+
+/-- info: 'MathFin.DeFi.swapOut_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_pos
+
+/-- info: 'MathFin.DeFi.swapOut_lt_reserve' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.swapOut_lt_reserve
+
+/-! ### Constant-mean LP position, priced (2026-11-25) -/
+
+/-- info: 'MathFin.DeFi.eval_constantMeanPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.eval_constantMeanPayoff
+
+/-- info: 'MathFin.DeFi.eval_constantMeanPayoff_eq_reserves' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.eval_constantMeanPayoff_eq_reserves
+
+/-- info: 'MathFin.DeFi.price_constantMeanPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_constantMeanPayoff
+
+/-- info: 'MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff

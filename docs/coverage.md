@@ -156,6 +156,53 @@ One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier no
   (per Hull's bibliography); the delivered closed form at
   `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
   computes.
+### Balancer constant-mean invariant and spot price (2026-11-23)
+
+One `full` entry in `benchmarks/defi.json`. Corpus 906 → 907 on the branch (866 → 867 full).
+
+- **`mf-balancer-invariant`** (MathFin/Markets/DeFi/ConstantMeanAMM.lean): the constant-mean
+  (weighted-product) invariant `V = ∏ k, B k ^ w k` of a Balancer pool with reserves
+  `B k > 0` and weights `w k > 0`. Proved: a trade of `Δ` of token `i` in for the whitepaper's
+  Out-Given-In out-amount of token `j` out preserves the weighted product of the reserves
+  (`swap_preserves_constantMean`, on the post-trade reserve vector `swapReserves`), the
+  out-amount is positive and bounded by the output reserve (`swapOut_pos`,
+  `swapOut_lt_reserve`), and the spot price `(B j / w j) / (B i / w i)` is derived as the
+  marginal rate — the derivative at zero trade of the out-amount in the in-amount
+  (`hasDerivAt_swapOut_zero`). The equal-weight two-token instance is proved equal to the
+  library's constant-product pool: the invariant squared is `x * y`
+  (`constantMeanInvariant_two_sq_eq`), the spot price is `internalPrice x y`
+  (`spotPrice_two_eq_internalPrice`), and the out-amount is `swapOutput x y Δ`
+  (`swapOut_two_eq_swapOutput`) — the three reduction theorems in
+  `Markets/DeFi/ConstantMeanAMM.lean`, proved equal to the constant-product side's
+  `internalPrice` and `swapOutput` in `Markets/DeFi/ConstantProductAMM.lean`.
+  Cited: Martinelli & Mushegian, *Balancer* whitepaper, v2019-09-19 ("Theory": Value
+  Function, Spot Price, Out-Given-In; the spot price there is printed with in/out exchanged,
+  `SP^o_i = (Bᵢ/Wᵢ)/(Bₒ/Wₒ)`, the price of `o` in units of `i`, the same ratio
+  reciprocated). Disclosed out of scope: fees
+  (the fee factor is one); the weights need only be positive — the sum-to-one normalization
+  that makes `V` the invariant of a constant-value-share portfolio; the
+  constant-value-share theorem, In-Given-Out, In-Given-Price and liquidity provision are
+  not formalized. Axioms-clean, `full`.
+
+  **Delivered 2026-11-25 (bridge; the node closes)**: `MathFin/Markets/DeFi/ConstantMeanLPContract.lean`
+  reprices the two-token position through the payoff language, the way `LPContract.lean`
+  reprices the constant-product and concentrated-liquidity positions. Proved: the position of
+  invariant `V` and weight `w` on X, marked at the price `P` of X in Y, is worth
+  `V P^w/(w^w(1-w)^(1-w))` in Y (`constantMeanPayoff`, `eval_constantMeanPayoff`); the
+  marking identity — at the pool's own spot price the mark is the reserves `xP + y`, the
+  whitepaper's constant value distribution `B_Y/W_Y`
+  (`eval_constantMeanPayoff_eq_reserves`, stated via the library's `spotPrice` and
+  `constantMeanInvariant`); paying it at `T` is worth the discounted expectation of the mark
+  in any market (`price_constantMeanPayoff`); and at `w = 1/2` the position *is* the
+  constant-product payoff of invariant `V²`
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
+  the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
+  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
+  trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
+  (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
+  The value function was checked numerically against four independent routes (independent
+  invariant-curve solving, spot marking, swap-consistency via the module's own out-amount,
+  and the w = 1/2 reduction) before formalization. Axioms-clean, `full`.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 

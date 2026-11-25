@@ -100,6 +100,8 @@ import MathFin.Insurance.EsscherPremium
 import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
+import MathFin.Markets.DeFi.ConstantMeanAMM
+import MathFin.Markets.DeFi.ConstantMeanLPContract
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
@@ -1485,6 +1487,26 @@ attribute [blueprint "thm:impermanent-loss"
   hold value $D_T(x_0P_T + y_0)$ is integrable, the constant-product position of invariant
   $x_0y_0$ paid at $T$ is worth at most the claim paying the deposit $x_0P_T + y_0$. -/)]
   MathFin.DeFi.price_constantProductPayoff_le_hodl
+
+attribute [blueprint "thm:balancer-invariant"
+  (title := "Balancer constant-mean AMM")
+  (statement := /-- In a constant-mean pool with reserves $B_k > 0$ and weights $w_k > 0$, a
+  swap of $\Delta$ of token $i$ in for the out-amount of token $j$ out preserves the weighted
+  product $\prod_k B_k^{w_k}$ of the reserves (`swap_preserves_constantMean`), and the spot
+  price of token $i$ in terms of token $j$ is the ratio of reserve-to-weight ratios
+  $(B_j/w_j)/(B_i/w_i)$, derived as the marginal rate of the out-amount at zero trade
+  (`hasDerivAt_swapOut_zero`). At two tokens with equal weights the invariant squared is the
+  constant product $x \cdot y$, the spot price is the reserve ratio $y/x$ and the out-amount
+  is $y\Delta/(x+\Delta)$ (`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
+  `swapOut_two_eq_swapOutput`). Priced: the two-token position of invariant $V$ and weight $w$
+  on $X$, marked at the price $P$ of $X$ in $Y$, is worth $V P^w/(w^w (1-w)^{1-w})$ in $Y$
+  (`constantMeanPayoff`, `eval_constantMeanPayoff`); at the pool's own spot price the mark is
+  the reserves $xP + y$, the constant value distribution $B_Y/W_Y$
+  (`eval_constantMeanPayoff_eq_reserves`); in any market paying it at $T$ is worth the
+  discounted expectation of the mark (`price_constantMeanPayoff`); and at $w = 1/2$ the
+  position is the constant-product payoff of invariant $V^2$
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
+  MathFin.DeFi.price_constantMeanPayoff
 
 attribute [blueprint "def:v3-position-value"
   (title := "Value of a concentrated-liquidity position")
