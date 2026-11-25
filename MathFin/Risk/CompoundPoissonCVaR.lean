@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Probability.Analysis.IdentDistribSum
 public import MathFin.Probability.Jumps.CompoundPoissonMGF
 public import MathFin.Risk.ExpectedShortfall
 
@@ -17,10 +18,11 @@ independence between the claims is assumed: Wald's bound does not need it. Its r
 by the Rockafellar–Uryasev theorem, once `L` is known to be integrable:
 
 * `integrable_compoundPoisson` is the Wald-type bound. Each `n`-claim sum obeys
-  `𝔼|∑_{i<n} Xᵢ| ≤ n·𝔼|X₀|` (`integral_abs_sum_le_of_identDistrib`, for any finite index set);
+  `𝔼|∑_{i<n} Xᵢ| ≤ n·𝔼|X₀|` (`integral_abs_sum_le_of_identDistrib`, for any finite index set;
+  `Probability/Analysis/IdentDistribSum.lean`);
   the count is integrated out with the freezing lemma for a countable variable
-  (`Probability/Analysis/IndepFreezing.lean`), against the domination `n·𝔼|X₀| ≤ 2ⁿ·𝔼|X₀|`,
-  integrable under the Poisson law (`Probability/Jumps/PoissonPgf.lean`).
+  (`Probability/Analysis/IndepFreezing.lean`), against the domination `n·𝔼|X₀|`, integrable
+  under the Poisson law because its mean exists (`Probability/Jumps/PoissonPgf.lean`).
 * `isLeast_rockafellarUryasev_compoundPoisson` and `expectedShortfall_compoundPoisson_eq` are the
   library's Rockafellar–Uryasev theorem (`Risk/ExpectedShortfall.lean`) for `L`: `ES_α(L)`
   is the least value of `c ↦ c + (1 − α)⁻¹ 𝔼[(L − c)⁺]`, attained at `c = VaR_α(L)`.
@@ -30,8 +32,6 @@ by the Rockafellar–Uryasev theorem, once `L` is known to be integrable:
 
 ## Main results
 
-* `ProbabilityTheory.integral_abs_sum_le_of_identDistrib` — `𝔼|∑_{i∈s} Xᵢ| ≤ #s·𝔼|Y|` for
-  summands with the law of `Y`, independence not assumed.
 * `integrable_compoundPoisson` — the aggregate loss is integrable.
 * `isLeast_rockafellarUryasev_compoundPoisson` — `ES_α(L)` is the least value of the objective.
 * `expectedShortfall_compoundPoisson_eq` — `ES_α(L) = VaR_α(L) + (1 − α)⁻¹ 𝔼[(L − VaR_α(L))⁺]`.
@@ -62,24 +62,6 @@ open scoped NNReal
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {lam : ℝ≥0} {N : Ω → ℕ} {X : ℕ → Ω → ℝ}
 
-omit [IsProbabilityMeasure μ] in
-/-- **Wald's bound for a fixed number of summands**: if every `Xᵢ`, `i ∈ s`, has the law of an
-integrable `Y`, then `𝔼|∑_{i∈s} Xᵢ| ≤ #s·𝔼|Y|`. No independence is assumed. -/
-theorem _root_.ProbabilityTheory.integral_abs_sum_le_of_identDistrib {ι : Type*} {s : Finset ι}
-    {X : ι → Ω → ℝ} {Y : Ω → ℝ} (hident : ∀ i ∈ s, IdentDistrib (X i) Y μ μ)
-    (hY : Integrable Y μ) :
-    ∫ ω, |∑ i ∈ s, X i ω| ∂μ ≤ s.card * ∫ ω, |Y ω| ∂μ := by
-  have habs (i : ι) (hi : i ∈ s) : Integrable (fun ω ↦ |X i ω|) μ :=
-    ((hident i hi).integrable_iff.mpr hY).abs
-  calc ∫ ω, |∑ i ∈ s, X i ω| ∂μ
-      ≤ ∫ ω, ∑ i ∈ s, |X i ω| ∂μ :=
-        integral_mono (integrable_finsetSum _ fun i hi ↦ (hident i hi).integrable_iff.mpr hY).abs
-          (integrable_finsetSum _ habs) fun ω ↦ Finset.abs_sum_le_sum_abs _ _
-    _ = ∑ i ∈ s, ∫ ω, |X i ω| ∂μ := integral_finset_sum _ habs
-    _ = ∑ i ∈ s, ∫ ω, |Y ω| ∂μ :=
-        Finset.sum_congr rfl fun i hi ↦ ((hident i hi).comp continuous_abs.measurable).integral_eq
-    _ = s.card * ∫ ω, |Y ω| ∂μ := by simp
-
 section Wald
 
 variable (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (hX : Integrable (X 0) μ)
@@ -102,14 +84,13 @@ theorem integrable_compoundPoisson :
     (measurable_from_prod_countable_right hgm).aestronglyMeasurable).mpr
     (integrable_prod_map_of_countable hY hgm hS ?_)
   rw [hN.map_eq]
-  have hC : 0 ≤ ∫ ω, |X 0 ω| ∂μ := integral_nonneg fun _ ↦ abs_nonneg _
-  refine ((PoissonPgf.integrable_pow_poissonMeasure lam 2).const_mul (∫ ω, |X 0 ω| ∂μ)).mono'
-    Measurable.of_discrete.aestronglyMeasurable (ae_of_all _ fun n ↦ ?_)
+  refine ((PoissonPgf.integrable_natCast_poissonMeasure lam).mul_const
+    (∫ ω, |X 0 ω| ∂μ)).mono' Measurable.of_discrete.aestronglyMeasurable
+    (ae_of_all _ fun n ↦ ?_)
   rw [Real.norm_of_nonneg (integral_nonneg fun _ ↦ norm_nonneg _)]
   simp only [Real.norm_eq_abs]
-  refine (integral_abs_sum_le_of_identDistrib (fun i _ ↦ hident i) hX).trans ?_
-  rw [Finset.card_range, mul_comm]
-  exact mul_le_mul_of_nonneg_left (by exact_mod_cast Nat.lt_two_pow_self.le) hC
+  have hW := integral_abs_sum_le_of_identDistrib (s := Finset.range n) (fun i _ ↦ hident i) hX
+  rwa [Finset.card_range] at hW
 
 /-- **The Poisson-mixture expansion of the Rockafellar–Uryasev expectation.** For a claim count
 `N ∼ Poisson(λ)` independent of identically distributed integrable claims, `𝔼[(L − c)⁺]` is
@@ -119,7 +100,6 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
       = ∫ n, ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ ∂(poissonMeasure lam) := by
   have hS (n : ℕ) : Integrable (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ :=
     integrable_finsetSum _ fun i _ ↦ (hident i).integrable_iff.mpr hX
-  have hC : 0 ≤ ∫ ω, |X 0 ω| ∂μ := integral_nonneg fun _ ↦ abs_nonneg _
   refine integral_comp_of_hasLaw_of_countable
     (F := fun n x ↦ max (∑ i ∈ Finset.range n, x i - c) 0) (c := fun n ↦ ∫ ω,
       max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ) hN
@@ -127,11 +107,9 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
     (fun n ↦ by fun_prop) (fun _ _ ↦ le_max_right _ _)
     (fun n ↦ ((hS n).sub (integrable_const c)).pos_part)
     (fun _ ↦ rfl) ?_
-  refine ((PoissonPgf.integrable_pow_poissonMeasure lam 2).const_mul
-    (∫ ω, |X 0 ω| ∂μ + |c|)).mono' Measurable.of_discrete.aestronglyMeasurable
-    (ae_of_all _ fun n ↦ ?_)
-  have hn : (n : ℝ) ≤ 2 ^ n := by exact_mod_cast Nat.lt_two_pow_self.le
-  have h1 : (1 : ℝ) ≤ 2 ^ n := one_le_pow₀ one_le_two
+  refine (((PoissonPgf.integrable_natCast_poissonMeasure lam).mul_const
+    (∫ ω, |X 0 ω| ∂μ)).add (integrable_const |c|)).mono'
+    Measurable.of_discrete.aestronglyMeasurable (ae_of_all _ fun n ↦ ?_)
   have h0 : 0 ≤ ∫ ω, max (∑ i ∈ Finset.range n, X i ω - c) 0 ∂μ :=
     integral_nonneg fun _ ↦ le_max_right _ _
   rw [Real.norm_of_nonneg h0]
@@ -148,9 +126,7 @@ theorem integral_max_sub_compoundPoisson (c : ℝ) :
           (fun i _ ↦ hident i) hX
         rw [Finset.card_range] at hW
         exact add_le_add_left hW _
-    _ ≤ _ := by
-        nlinarith [mul_le_mul_of_nonneg_right hn hC,
-          mul_le_mul_of_nonneg_left h1 (abs_nonneg c)]
+    _ ≤ _ := le_rfl
 
 /-- The Poisson-mixture expansion as a series over the claim count:
 `𝔼[(L − c)⁺] = ∑ₙ P(N = n)·𝔼[(∑_{i<n} Xᵢ − c)⁺]`, with `P(N = n) = e^{−λ} λⁿ / n!`. -/
