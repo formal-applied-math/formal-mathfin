@@ -39,6 +39,8 @@ needs no path regularity.
 * `tendsto_itoIntegralAgainst_stepσ` — the same convergence, as `L²(μ)` classes of step integrals.
 * `itoIntegralAgainst_stepσ` — the `n`-th step integral is the Riemann–Stieltjes sum, almost
   surely.
+* `weightLp_eq_integrandLp`, `coe_itoIntegralAgainstCLM_weightLp` — `weightLp` is the
+  characterisation's `integrandLp`, so the limit is `sIntegral` of the weight.
 * `coeFn_mulLI_weightLp`, `itoIntegralAgainst_weightLp` — the limit is `∫ χ dB`, where `χ` is the
   class of `φ·w`; and any predictable `L²` class equal to `φ·w` almost everywhere will do.
 
@@ -218,6 +220,27 @@ theorem itoIntegralAgainst_weightLp (χ : Lp ℝ 2 (trimMeasure (μ := μ) T hBm
   rw [itoIntegralAgainstCLM_apply]
   congr 1
   exact Lp.ext ((coeFn_mulLI_weightLp T hBmeas φ hw_pred hw_bdd).trans hχ.symm)
+
+omit [IsProbabilityMeasure μ] in
+include hw_pred hw_bdd in
+/-- A bounded predictable weight is its own predictable square-integrable version. -/
+theorem isPredictableVersion_self : IsPredictableVersion T hBmeas φ w w :=
+  ⟨hw_pred.measurable, memLp_uncurry_bracketMeasure T hBmeas φ hw_pred hw_bdd,
+    Filter.Eventually.of_forall fun _ _ ↦ rfl⟩
+
+omit [IsProbabilityMeasure μ] in
+/-- **The two constructors agree**: the class of a bounded predictable weight in `L²(⟨M⟩)` is
+the class `integrandLp` reads off its predictable version (`integrandLp_eq`). -/
+theorem weightLp_eq_integrandLp :
+    weightLp T hBmeas φ hw_pred hw_bdd = integrandLp T hBmeas φ w :=
+  (integrandLp_eq (isPredictableVersion_self T hBmeas φ hw_pred hw_bdd)).symm
+
+/-- **The limit is the characterised integral**: `∫ w dM`, the limit of the Riemann–Stieltjes
+sums, is `sIntegral` of the weight. -/
+theorem coe_itoIntegralAgainstCLM_weightLp :
+    ⇑(itoIntegralAgainstCLM hB T hBmeas φ (weightLp T hBmeas φ hw_pred hw_bdd))
+      = sIntegral T hBmeas φ hB w := by
+  rw [sIntegral, weightLp_eq_integrandLp T hBmeas φ hw_pred hw_bdd]
 
 end AdaptedRiemannStieltjes
 
