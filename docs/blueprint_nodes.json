@@ -2554,4 +2554,33 @@
   "latexEnv": "theorem",
   "label": "thm:feynman-kac-heat-eq",
   "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"}]
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Gaussian/FeynmanKacHeatEquation.lean"},
+ {"uses": [],
+  "title": "Convex order",
+  "text":
+  "$\\mu \\le_{cx} \\nu$ when $\\int \\varphi\\,d\\mu \\le \\int \\varphi\\,d\\nu$ for every\n  convex $\\varphi$ integrable under both laws. Ordered laws have equal means and ordered call and\n  put prices, and, when the call or put at $t$ is integrable under both laws, $\\mu$ lives in\n  every half-line bounded by $t$ that $\\nu$ lives in (`ConvexOrder.ae_le_of_ae_le`).",
+  "name": "MathFin.ConvexOrder",
+  "module": "MathFin.Probability.Laws.ConvexOrder",
+  "line": 63,
+  "leanOk": true,
+  "latexEnv": "definition",
+  "label": "def:convex-order",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Laws/ConvexOrder.lean"},
+ {"uses":
+  ["def:expected-shortfall",
+   "def:convex-order",
+   "def:value-at-risk",
+   "thm:quantile-transform",
+   "def:quantile"],
+  "title": "Expected shortfall respects convex order",
+  "text":
+  "If the law of $X$ is below the law of $Y$ in convex order, then\n  $\\mathrm{ES}_\\alpha(X) \\le \\mathrm{ES}_\\alpha(Y)$ for every $\\alpha \\in (0,1)$: the\n  Rockafellar–Uryasev objective of $X$ at $c = \\mathrm{VaR}_\\alpha(Y)$ is below that of $Y$.",
+  "name": "MathFin.expectedShortfall_le_of_convexOrder",
+  "module": "MathFin.Risk.ConvexOrderSums",
+  "line": 63,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:es-convex-order",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/ConvexOrderSums.lean"}]

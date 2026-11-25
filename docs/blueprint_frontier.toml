@@ -788,14 +788,6 @@ uses = ["def:emm"]
 area = "valuation/model-free"
 
 [[node]]
-label = "def:convex-order"
-title = "Convex order"
-statement = "μ ≤_cx ν when ∫ φ dμ ≤ ∫ φ dν for every convex φ; for laws on ℝ with equal means, the ordering of call prices at every strike. Peacocks, martingale couplings and minimal-variance aggregation are stated in it."
-uses = ["thm:market-carr-madan"]
-ground = "Mathlib: ConvexOn, integral"
-area = "valuation/model-free"
-
-[[node]]
 label = "def:markov-martingale"
 title = "Markov martingales"
 statement = "A martingale that is a Markov process with respect to a given filtration, raw or satisfying the usual conditions, and the mimicking problem: a Markov martingale with prescribed one-dimensional marginals."
@@ -897,6 +889,7 @@ label = "thm:convex-order-minimal-sum"
 title = "Convex-order minimal sums"
 statement = "Open (MF-OP-018, Wang 2015): which conditions on marginals F₁,…,Fₙ are necessary and sufficient for the sums with these marginals to have a smallest element in convex order."
 uses = ["def:convex-order", "thm:frechet-hoeffding"]
+core = ["mf-convex-order-no-minimal-sum"]
 area = "risk/aggregation"
 
 [[node]]
@@ -967,3 +960,29 @@ title = "A constant-coefficient weak forward flow is the initial law convolved w
 statement = "A flow of probability measures solving the integrated weak forward equation with constant drift b and constant variance v ≥ 0, on [0, T] and tested against functions with bounded first three derivatives, is the initial law convolved with N(bs, vs) at every time s, so that two such flows with the same initial law coincide."
 ground = "Mathlib: Gronwall's inequality for linear ODEs, uniqueness of a measure from its characteristic function, and Gaussian convolution"
 area = "probability/gaussian"
+
+
+[[node]]
+label = "thm:monte-carlo-pricing"
+title = "Monte Carlo pricing of a European payoff"
+statement = "For a European payoff of the terminal value of a model with a known simulation scheme, the Monte Carlo sample mean of the discounted payoff along independent copies of the scheme converges almost surely to the arbitrage price under the pricing measure, and √n times its error converges in distribution to a centred normal law whose variance is that of the discounted payoff, so that the estimator and its confidence interval are justified for payoffs beyond the Black–Scholes put and call."
+uses = ["thm:bs-call", "thm:bs-arbitrage-free-price"]
+core = ["mf-monte-carlo-put-call-consistency"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:finite-difference-scheme"
+title = "Finite-difference schemes for the Black–Scholes equation"
+statement = "The implicit and Crank–Nicolson finite-difference schemes for the Black–Scholes equation on a grid are stable and consistent, and so converge to the closed-form price at the order of the scheme as the grid is refined."
+uses = ["thm:bs-pde", "thm:bs-call"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:longstaff-schwartz"
+title = "Longstaff–Schwartz regression for American options"
+statement = "For a Bermudan option on a Markov state, the Longstaff–Schwartz algorithm, which estimates the continuation value at each exercise date by least-squares regression on a basis of the state along simulated paths and exercises when the payoff exceeds it, converges to the Snell envelope value as the number of paths and the size of the basis grow."
+uses = ["thm:snell-envelope", "thm:american-put-optimal-exercise", "thm:monte-carlo-pricing"]
+area = "valuation/american"
+family = "diffusions"
