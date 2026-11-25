@@ -44,6 +44,8 @@ Brownian motion:
   Black–Scholes formulas `bsV K r σ S τ` and `K e^{−rτ} Φ(−d₂) − S Φ(−d₁)`.
 * `IsFilteredPreBrownian.jumpDiffusionProcess`: for a filtered pre-Brownian motion `B`, the
   log-price `b t + σ B_t` is a `JumpDiffusionProcess` with rate `0`, for any jump law.
+* `JumpDiffusionProcess.isFilteredPreBrownian`: the converse, a jump-diffusion with drift `0`,
+  volatility `1` and rate `0` is a filtered pre-Brownian motion.
 * `IsFilteredPreBrownian.martingale_discounted_iff`: for `S₀ ≠ 0`, the discounted price
   `e^{−rt} S₀ e^{bt + σB_t}` is a martingale iff `b = r − σ²/2`.
 * `IsFilteredPreBrownian.condExp_call_eq_bsV`, `IsFilteredPreBrownian.condExp_put_eq_bsPut`:

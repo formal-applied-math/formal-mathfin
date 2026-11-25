@@ -48,6 +48,8 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 
 ## Main results
 
+* `JumpDiffusionProcess.hasIndepIncrements`: a jump-diffusion has independent increments in
+  Mathlib's sense (`HasIndepIncrements`), through `iIndepFun_of_indep_past`.
 * `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
   `cgf_id_jumpDiffusionIncrementLaw`: for `θ` with `∫ e^{θx} dν < ∞`, its moment-generating
   function is `e^{κ(θ)τ}`.
