@@ -243,6 +243,7 @@ public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 public import MathFin.Probability.Brownian.Ito.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 public import MathFin.Probability.Brownian.Ito.DriftRiemannConvergence
+public import MathFin.Probability.Brownian.Ito.DriftPath
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
 -- Btheta_isBrownianOn_adapted
 public import MathFin.Probability.Brownian.Girsanov.GirsanovAdaptedTheta

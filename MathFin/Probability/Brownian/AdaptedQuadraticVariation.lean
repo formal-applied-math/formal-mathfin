@@ -8,6 +8,7 @@ module
 public import MathFin.Probability.Brownian.Ito.AdaptedStochasticIntegralFreezing
 public import MathFin.Probability.Analysis.FiniteMeasureCauchySchwarz
 public import MathFin.Probability.Brownian.WeightedQuadraticVariation
+public import MathFin.Probability.Martingales.LocalisationInMeasure
 
 /-! # Quadratic variation of an Itô process with adapted coefficients
 
@@ -200,7 +201,7 @@ variable {X A : ℝ≥0 → Ω → ℝ} {X₀ : Ω → ℝ} {Ca : ℝ}
 
 section Weighted
 
-variable {w : ℝ≥0 → Ω → ℝ}
+variable (hX_meas : ∀ t, AEStronglyMeasurable (X t) μ) {w : ℝ≥0 → Ω → ℝ}
   (hw_adap : ∀ s, StronglyMeasurable[(natFiltration hBmeas s : MeasurableSpace Ω)] (w s))
   (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) {Cw : ℝ}
   (hw_bdd : ∀ s ω, |w s ω| ≤ Cw)
@@ -384,6 +385,48 @@ theorem tendsto_weighted_qv_adapted :
   refine squeeze_zero' (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ abs_nonneg _) ?_ hlim
   filter_upwards [eventually_ne_atTop 0] with n hn
   exact integral_abs_weighted_qv_sub_le hB T hBmeas hadap hcont hbdd hA hX hw_adap hw_cont hw_bdd hn
+
+include hA hX hX_meas hw_adap hw_cont hw_bdd in
+/-- **The weighted quadratic variation of an Itô process converges in measure.** The `L¹`
+convergence `tendsto_weighted_qv_adapted`, for a process whose time sections are measurable. -/
+theorem tendstoInMeasure_weighted_qv_adapted :
+    TendstoInMeasure μ (fun n ω ↦ ∑ k ∈ Finset.range n, w (unifPart T n k) ω
+        * (X (unifPart T n (k + 1)) ω - X (unifPart T n k) ω) ^ 2) atTop
+      fun ω ↦ ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure := by
+  obtain ⟨ω₀⟩ := nonempty_of_isProbabilityMeasure μ
+  have hw_meas (s : ℝ≥0) : Measurable (w s) :=
+    ((hw_adap s).mono ((natFiltration hBmeas).le s)).measurable
+  have hσ_meas (s : ℝ≥0) : Measurable (σ s) :=
+    ((hadap s).mono ((natFiltration hBmeas).le s)).measurable
+  have hW : Integrable
+      (fun ω ↦ ∫ s in Set.Ioc 0 T, w s ω * σ s ω ^ 2 ∂ItoIntegralL2.timeMeasure) μ :=
+    (memLp_pathIntegral_process_of_ae_continuous (w := fun s ω ↦ w s ω * σ s ω ^ 2)
+      (fun s ↦ (hw_meas s).mul ((hσ_meas s).pow_const 2))
+      ((abs_nonneg _).trans (abs_mul_sq_le hbdd hw_bdd 0 ω₀)) (abs_mul_sq_le hbdd hw_bdd) T
+      (hw_cont.mono fun ω h ↦ h.mul ((hcont ω).pow 2).continuousOn)).integrable one_le_two
+  -- each increment of `X` is in `L²`: a bounded drift increment plus an `L²` class
+  have hΔ {s t : ℝ≥0} (hst : s ≤ t) (ht : t ≤ T) : MemLp (fun ω ↦ X t ω - X s ω) 2 μ := by
+    set φ := processToLp (μ := μ) T hBmeas hadap hcont hbdd
+    have hI := (Lp.memLp (itoProcessCLM hB T t hBmeas φ)).sub
+      (Lp.memLp (itoProcessCLM hB T s hBmeas φ))
+    have hAm : MemLp (fun ω ↦ A t ω - A s ω) 2 μ :=
+      MemLp.of_bound ((((hX_meas t).sub (hX_meas s)).sub hI.aestronglyMeasurable).congr (by
+        filter_upwards [hX t ht, hX s (hst.trans ht)] with ω h1 h2
+        simp only [Pi.sub_apply, h1, h2]
+        ring)) (Ca * ((t : ℝ) - s)) (ae_of_all _ fun ω ↦ hA hst ω)
+    refine (hAm.add hI).ae_eq ?_
+    filter_upwards [hX t ht, hX s (hst.trans ht)] with ω h1 h2
+    simp only [Pi.add_apply, Pi.sub_apply, h1, h2]
+    ring
+  refine LocalisationInMeasure.tendstoInMeasure_of_tendsto_integral_abs (fun n ↦ Integrable.sub
+    (integrable_finsetSum _ fun k hk ↦ ?_) hW)
+    (tendsto_weighted_qv_adapted hB T hBmeas hadap hcont hbdd hA hX hw_adap hw_cont hw_bdd)
+  have hk' := Finset.mem_range.mp hk
+  have hd := hΔ (unifPart_mono T n (Nat.le_succ k)) (unifPart_le_T hk')
+  refine (hd.integrable_sq.const_mul Cw).mono'
+    ((hw_meas _).aestronglyMeasurable.mul (hd.aestronglyMeasurable.pow 2)) (ae_of_all _ fun ω ↦ ?_)
+  rw [Real.norm_eq_abs, abs_mul, abs_pow, sq_abs]
+  exact mul_le_mul_of_nonneg_right (hw_bdd _ ω) (sq_nonneg _)
 
 end Weighted
 

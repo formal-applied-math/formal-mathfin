@@ -438,8 +438,6 @@ noncomputable def itoLevyIntegralL2 (N : PoissonRandomMeasure P ν) :
   refine LinearMap.extendOfNorm (E := ↥(levySimpleModule N)) (F := Lp ℝ 2 P) (intAssembly N) ?_
   exact embCorestrict N
 
-set_option maxHeartbeats 1000000 in
--- the `extendOfNorm` instance diamond, explained in the proof
 /-- **The Itô–Lévy `L²` isometry, in full generality** — LevyStochCalc's cited axiom #6: on the
 whole `L²` closure `levyClosure`, `‖itoLevyIntegralL2 H‖ = ‖H‖`. The compensated-Poisson stochastic
 integral is an `L²` isometry — proven on marked simple integrands (`assembly_isometry`, summing the

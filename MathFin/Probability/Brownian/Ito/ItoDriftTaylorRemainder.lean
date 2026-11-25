@@ -49,8 +49,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 
 include hD
 
-set_option maxHeartbeats 1600000 in
--- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The Taylor remainder dies**: the summed discrete Taylor remainders along the uniform
 partition have expectation tending to `0` (the statement; the rate below is the proof's) —
 each `|Rₖ| ≤ C₃·|ΔXₖ|³`
@@ -430,8 +428,6 @@ theorem taylorRemainderSum_tendsto (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
   exact (tendsto_zero_iff_abs_tendsto_zero _).mpr hboundtendsto
 
 
-set_option maxHeartbeats 1600000 in
--- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **Per-cell Taylor-remainder integrability** (assembly input): along the adapted process
 `X` with the decomposition `X t = c + AdaptedDrift.driftPath β t + M t`, the `k`-th cell's
 discrete Taylor remainder is integrable — `|Rₖ| ≤ C₃·|ΔXₖ|³` (`abs_discreteTaylorRemainder_le`)

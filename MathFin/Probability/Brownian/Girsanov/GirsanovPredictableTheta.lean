@@ -9,6 +9,7 @@ public import MathFin.Probability.Brownian.SimpleProcessPartition
 public import MathFin.Probability.Brownian.Girsanov.GirsanovSimpleDoleansMoments
 public import MathFin.Probability.Brownian.Girsanov.GirsanovSimpleTheta
 public import MathFin.Probability.Martingales.UnifIntegrableL2
+public import MathFin.Probability.Martingales.LocalisationInMeasure
 public import MathFin.Probability.Brownian.Ito.DriftProcessPredictable
 public import MathFin.Probability.Brownian.Ito.DriftProcessModification
 
@@ -231,20 +232,12 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
     (hD0 : Tendsto (fun n ↦ ∫ ω, D n ω ∂μ) atTop (𝓝 0))
     (hdom : ∀ n, ∀ᵐ ω ∂μ, dist (f n ω) (g ω) ≤ K * Real.sqrt (D n ω)) :
     TendstoInMeasure μ f atTop g := by
-  have hDmeasure : TendstoInMeasure μ D atTop (fun _ ↦ (0 : ℝ)) := by
-    have hDeLp : Tendsto (fun n ↦ eLpNorm (D n - fun _ ↦ (0 : ℝ)) 1 μ) atTop (𝓝 0) := by
-      have hrw : ∀ n, eLpNorm (D n - fun _ ↦ (0 : ℝ)) 1 μ = ENNReal.ofReal (∫ ω, D n ω ∂μ) := by
-        intro n
-        have hsub : (D n - fun _ ↦ (0 : ℝ)) = D n := by funext ω; simp
-        have hlint : (∫⁻ ω, ‖D n ω‖ₑ ∂μ) = ∫⁻ ω, ENNReal.ofReal (D n ω) ∂μ := by
-          refine lintegral_congr_ae ?_
-          filter_upwards [hDnn n] with ω hω
-          rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hω]
-        rw [hsub, eLpNorm_one_eq_lintegral_enorm (hDint n).aestronglyMeasurable, hlint,
-          ← ofReal_integral_eq_lintegral_ofReal (hDint n) (hDnn n)]
-      rw [tendsto_congr hrw, ← ENNReal.ofReal_zero]
-      exact (ENNReal.continuous_ofReal.tendsto 0).comp hD0
-    exact tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero hDeLp
+  have hDmeasure : TendstoInMeasure μ D atTop (fun _ ↦ (0 : ℝ)) :=
+    LocalisationInMeasure.tendstoInMeasure_of_tendsto_integral_abs
+      (fun n ↦ by simpa using hDint n) <|
+      hD0.congr fun n ↦ integral_congr_ae <| by
+        filter_upwards [hDnn n] with ω hω
+        simp [abs_of_nonneg hω]
   intro ε hε
   rcases eq_or_ne ε ⊤ with hεtop | hεtop
   · -- `ε = ⊤`: the difference has finite `edist`, so every level set is empty
@@ -316,23 +309,16 @@ lemma tendstoInMeasure_of_ae_dist_le_of_tendsto_integral {f : ℕ → Ω → ℝ
     (hdom : ∀ n, ∀ᵐ ω ∂μ, dist (f n ω) (g ω) ≤ h n ω)
     (hh0 : Tendsto (fun n ↦ ∫ ω, h n ω ∂μ) atTop (𝓝 0)) :
     TendstoInMeasure μ f atTop g := by
-  refine tendstoInMeasure_of_tendsto_eLpNorm one_ne_zero ?_
-  have hbnd : ∀ n, eLpNorm (f n - g) 1 μ ≤ ENNReal.ofReal (∫ ω, h n ω ∂μ) := by
-    intro n
-    have hnn : 0 ≤ᵐ[μ] h n := by filter_upwards [hdom n] with ω hω; exact dist_nonneg.trans hω
-    rw [eLpNorm_one_eq_lintegral_enorm ((hf n).sub hg)]
-    calc ∫⁻ ω, ‖(f n - g) ω‖ₑ ∂μ
-        = ∫⁻ ω, ENNReal.ofReal (dist (f n ω) (g ω)) ∂μ := by
-          refine lintegral_congr fun ω ↦ ?_
-          rw [Pi.sub_apply, Real.enorm_eq_ofReal_abs, Real.dist_eq]
-      _ ≤ ∫⁻ ω, ENNReal.ofReal (h n ω) ∂μ :=
-          lintegral_mono_ae
-              (by filter_upwards [hdom n] with ω hω; exact ENNReal.ofReal_le_ofReal hω)
-      _ = ENNReal.ofReal (∫ ω, h n ω ∂μ) :=
-          (ofReal_integral_eq_lintegral_ofReal (hhint n) hnn).symm
-  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds ?_ (fun _ ↦ zero_le) hbnd
-  rw [← ENNReal.ofReal_zero]
-  exact (ENNReal.continuous_ofReal.tendsto 0).comp hh0
+  have hint n : Integrable (fun ω ↦ f n ω - g ω) μ :=
+    (hhint n).mono' ((hf n).sub hg) (by
+      filter_upwards [hdom n] with ω hω
+      rwa [Real.norm_eq_abs, ← Real.dist_eq])
+  refine LocalisationInMeasure.tendstoInMeasure_of_tendsto_integral_abs hint ?_
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hh0
+    (fun n ↦ integral_nonneg fun ω ↦ abs_nonneg _) fun n ↦
+      integral_mono_ae (hint n).abs (hhint n) ?_
+  filter_upwards [hdom n] with ω hω
+  rwa [Real.dist_eq] at hω
 
 /-- A uniform bound `|θ t ω| ≤ C` on a probability space (which is nonempty) forces `0 ≤ C`. -/
 lemma nonneg_of_bdd (μ : Measure Ω) [IsProbabilityMeasure μ] {θ : ℝ≥0 → Ω → ℝ} {C : ℝ}
@@ -608,10 +594,9 @@ lemma exists_subseq_tendsto_ae₂ {f g : ℕ → Ω → ℝ} {F G : Ω → ℝ}
     ∃ ms : ℕ → ℕ, StrictMono ms ∧
       (∀ᵐ ω ∂μ, Tendsto (fun k ↦ f (ns (ms k)) ω) atTop (𝓝 (F ω)))
       ∧ (∀ᵐ ω ∂μ, Tendsto (fun k ↦ g (ns (ms k)) ω) atTop (𝓝 (G ω))) := by
-  obtain ⟨a, ha, hfa⟩ := (show TendstoInMeasure μ (fun k ↦ f (ns k)) atTop F from
-    fun ε hε ↦ (hf ε hε).comp hns).exists_seq_tendsto_ae
-  obtain ⟨b, hb, hgb⟩ := (show TendstoInMeasure μ (fun k ↦ g (ns (a k))) atTop G from
-    fun ε hε ↦ (hg ε hε).comp (hns.comp ha.tendsto_atTop)).exists_seq_tendsto_ae
+  obtain ⟨a, ha, hfa⟩ := LocalisationInMeasure.exists_seq_tendsto_ae_comp hf hns
+  obtain ⟨b, hb, hgb⟩ :=
+    LocalisationInMeasure.exists_seq_tendsto_ae_comp hg (hns.comp ha.tendsto_atTop)
   refine ⟨a ∘ b, ha.comp hb, ?_, hgb⟩
   filter_upwards [hfa] with ω hω
   exact hω.comp hb.tendsto_atTop
@@ -824,12 +809,8 @@ lemma tendsto_fnPred_ae_subseq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       (tendstoInMeasure_marshalDrift T hBmeas hpred hC hbdd V hV huT)
     exact ae_of_all _ fun ω ↦ (simpleDrift_marshalStepSP_eq hBmeas T (V n).val (V n).property hC
       ((marshalEndpoints hBmeas T (V n).val).card - 1) u ω).symm
-  obtain ⟨b, hb, hDae⟩ := (show TendstoInMeasure μ (fun k ↦
-      simpleDrift (marshalPart hBmeas T (V (ns (ms' k))).val)
-        (fun i ω ↦ clampM C (marshalMult hBmeas T (V (ns (ms' k))).val i ω))
-        ((marshalEndpoints hBmeas T (V (ns (ms' k))).val).card - 1) u) atTop
-      (driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u) from
-    fun ε hε ↦ (hdrift ε hε).comp (hns.comp hms'.tendsto_atTop)).exists_seq_tendsto_ae
+  obtain ⟨b, hb, hDae⟩ :=
+    LocalisationInMeasure.exists_seq_tendsto_ae_comp hdrift (hns.comp hms'.tendsto_atTop)
   refine ⟨fun k ↦ ms' (b k), ?_⟩
   filter_upwards [hZae, hDae] with ω hZω hDω
   have hZ := hZω.comp hb.tendsto_atTop

@@ -125,4 +125,17 @@ theorem one_div_sqrt_le_two {n : ℕ} (hn : 0 < n) :
   rw [div_le_div_iff₀ hpos1 hpos2]
   simpa using hsq
 
+/-- **The increments of a continuous path over the uniform partition are uniformly small**, for
+a fine enough partition: uniform continuity on the compact `[0, T]`. -/
+theorem eventually_abs_sub_unifPart_lt (T : ℝ≥0) {x : ℝ≥0 → ℝ} (hx : ContinuousOn x (Set.Icc 0 T))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ n : ℕ in atTop, ∀ k < n, |x (unifPart T n (k + 1)) - x (unifPart T n k)| < ε := by
+  obtain ⟨δ, hδ, h⟩ := Metric.uniformContinuousOn_iff.1
+    (isCompact_Icc.uniformContinuousOn_of_continuous hx) ε hε
+  filter_upwards [(tendsto_const_div_atTop_nhds_zero_nat (T : ℝ)).eventually_lt_const hδ]
+    with n hn k hk
+  rw [← Real.dist_eq]
+  refine h _ ⟨zero_le, unifPart_le_T hk⟩ _ ⟨zero_le, unifPart_le_T hk.le⟩ ?_
+  rwa [NNReal.dist_eq, unifPart_succ_sub, abs_of_nonneg (by positivity)]
+
 end MathFin

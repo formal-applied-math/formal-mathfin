@@ -100,12 +100,6 @@ lemma inner_eq_integral_mul (f g : Lp ℝ 2 μ) :
   rw [L2.inner_def]
   simp [RCLike.inner_apply, mul_comm]
 
-/-- A constant `Lp` element is a.e. that constant. -/
-lemma coeFn_smul_lpConst_one (c : ℝ) :
-    (⇑(c • Lp.const 2 μ (1 : ℝ)) : Ω → ℝ) =ᵐ[μ] fun _ ↦ c := by
-  filter_upwards [Lp.coeFn_smul c (Lp.const 2 μ (1 : ℝ))] with ω h1
-  simp [h1]
-
 /-- Pairing against the constant `1` is the mean. -/
 lemma inner_lpConst_one_left (F : Lp ℝ 2 μ) :
     ⟪Lp.const 2 μ (1 : ℝ), F⟫_ℝ = ∫ ω, F ω ∂μ := by
@@ -116,22 +110,29 @@ lemma inner_lpConst_one_left (F : Lp ℝ 2 μ) :
   simp
 
 /-- Constants are measurable for every σ-algebra, so they sit in every `lpMeas`. -/
-private lemma const_mem_lpMeas (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
-    Lp.const 2 μ (1 : ℝ) ∈ lpMeas ℝ ℝ (ItoIntegralL2.natFiltration hBmeas T) 2 μ :=
-  ⟨Function.const Ω (1 : ℝ), stronglyMeasurable_const, Lp.coeFn_const 2 μ (1 : ℝ)⟩
+private lemma const_mem_lpMeas (c : ℝ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    Lp.const 2 μ c ∈ lpMeas ℝ ℝ (ItoIntegralL2.natFiltration hBmeas T) 2 μ :=
+  ⟨Function.const Ω c, stronglyMeasurable_const, Lp.coeFn_const 2 μ c⟩
+
+/-- The constant `c` is `c` times the constant `1`. -/
+private lemma lpConst_eq_smul_one (c : ℝ) : Lp.const 2 μ c = c • Lp.const 2 μ (1 : ℝ) :=
+  Lp.ext (by
+    filter_upwards [Lp.coeFn_const 2 μ c, Lp.coeFn_smul c (Lp.const 2 μ (1 : ℝ)),
+      Lp.coeFn_const 2 μ (1 : ℝ)] with ω h1 h2 h3
+    rw [h1, h2, Pi.smul_apply, h3]
+    simp)
 
 /-- Subtracting the mean, pointwise. -/
-lemma coeFn_sub_integral_smul_lpConst_one (F : Lp ℝ 2 μ) :
-    (⇑(F - (∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ)) : Ω → ℝ)
-      =ᵐ[μ] fun ω ↦ F ω - ∫ x, F x ∂μ := by
-  filter_upwards [Lp.coeFn_sub F ((∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ)),
-    coeFn_smul_lpConst_one (μ := μ) (∫ x, F x ∂μ)] with ω h1 h2
-  rw [h1, Pi.sub_apply, h2]
+lemma coeFn_sub_lpConst_integral (F : Lp ℝ 2 μ) :
+    (⇑(F - Lp.const 2 μ (∫ x, F x ∂μ)) : Ω → ℝ) =ᵐ[μ] fun ω ↦ F ω - ∫ x, F x ∂μ := by
+  filter_upwards [Lp.coeFn_sub F (Lp.const 2 μ (∫ x, F x ∂μ)),
+    Lp.coeFn_const 2 μ (∫ x, F x ∂μ)] with ω h1 h2
+  rw [h1, Pi.sub_apply, h2, Function.const_apply]
 
 /-- Subtracting the mean centers. -/
-lemma integral_sub_integral_smul_lpConst_one (F : Lp ℝ 2 μ) :
-    ∫ ω, (F - (∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ)) ω ∂μ = 0 := by
-  rw [integral_congr_ae (coeFn_sub_integral_smul_lpConst_one F),
+lemma integral_sub_lpConst_integral (F : Lp ℝ 2 μ) :
+    ∫ ω, (F - Lp.const 2 μ (∫ x, F x ∂μ)) ω ∂μ = 0 := by
+  rw [integral_congr_ae (coeFn_sub_lpConst_integral F),
     integral_sub ((Lp.memLp F).integrable one_le_two) (integrable_const _),
     integral_const, probReal_univ, one_smul, sub_self]
 
@@ -217,16 +218,15 @@ theorem exists_itoIntegral_representation (hBmeas : ∀ t, Measurable (B t))
     ∃! φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas),
       (⇑F) =ᵐ[μ] fun ω ↦ (∫ x, F x ∂μ) + itoIntegralCLM hB T hBmeas φ ω := by
   obtain ⟨φ, hφ⟩ := mem_range_itoIntegralCLM_of_centered hB hBmeas hBcont T
-    (F - (∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ))
-    (sub_mem hFmeas (Submodule.smul_mem _ _ (const_mem_lpMeas T hBmeas)))
-    (integral_sub_integral_smul_lpConst_one F)
+    (F - Lp.const 2 μ (∫ x, F x ∂μ))
+    (sub_mem hFmeas (const_mem_lpMeas _ T hBmeas)) (integral_sub_lpConst_integral F)
   have hval : (⇑F : Ω → ℝ)
       =ᵐ[μ] fun ω ↦ (∫ x, F x ∂μ) + itoIntegralCLM hB T hBmeas φ ω := by
     have h1 : (⇑(itoIntegralCLM hB T hBmeas φ) : Ω → ℝ)
         =ᵐ[μ] fun ω ↦ F ω - ∫ x, F x ∂μ := by
       rw [show itoIntegralCLM hB T hBmeas φ
-        = F - (∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ) from hφ]
-      exact coeFn_sub_integral_smul_lpConst_one F
+        = F - Lp.const 2 μ (∫ x, F x ∂μ) from hφ]
+      exact coeFn_sub_lpConst_integral F
     filter_upwards [h1] with ω hω
     rw [hω]
     ring
@@ -248,16 +248,15 @@ theorem itoIntegralCLM_surjective_onto_centered (hBmeas : ∀ t, Measurable (B t
   · rintro _ ⟨φ, rfl⟩
     exact itoIntegralCLM_mem_lpMeas hB T hBmeas φ
   · rw [Submodule.span_le, Set.singleton_subset_iff]
-    exact const_mem_lpMeas T hBmeas
+    exact const_mem_lpMeas 1 T hBmeas
   · obtain ⟨φ, hφ, -⟩ := exists_itoIntegral_representation hB hBmeas hBcont T F hF
-    rw [show F = itoIntegralCLM hB T hBmeas φ + (∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ) from
+    rw [show F = itoIntegralCLM hB T hBmeas φ + Lp.const 2 μ (∫ x, F x ∂μ) from
       Lp.ext (by
         filter_upwards [hφ, Lp.coeFn_add (itoIntegralCLM hB T hBmeas φ)
-          ((∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ)), coeFn_smul_lpConst_one (μ := μ) (∫ x, F x ∂μ)]
-          with ω h1 h2 h3
-        rw [h1, h2, Pi.add_apply, h3, add_comm])]
+          (Lp.const 2 μ (∫ x, F x ∂μ)), Lp.coeFn_const 2 μ (∫ x, F x ∂μ)] with ω h1 h2 h3
+        rw [h1, h2, Pi.add_apply, h3, Function.const_apply, add_comm])]
     exact Submodule.add_mem_sup (LinearMap.mem_range_self _ φ)
-      (Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _))
+      (Submodule.mem_span_singleton.mpr ⟨_, (lpConst_eq_smul_one _).symm⟩)
 
 /-! ### The isometry onto the centered subspace -/
 

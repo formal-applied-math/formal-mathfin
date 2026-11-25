@@ -53,7 +53,7 @@ replaced by martingale ones.
   bounded by `A_t − A_s ≤ t − s`. No
   Cauchy–Schwarz and no a-priori bound on `E[(∑(ΔMₖ)²)²]` is needed.
 * **Uniform continuity.** The largest increment `maxIncr` is bounded by `2K` and tends to `0`
-  pathwise (`ItoFormulaAdapted.eventually_abs_sub_unifPart_lt`, Heine–Cantor on `[s, t]`), so
+  pathwise (`eventually_abs_sub_unifPart_lt`, Heine–Cantor on `[s, t]`), so
   `E[δⁿ] → 0` by dominated convergence (`tendsto_integral_maxIncr_pow`).
 
 ## Main definitions
@@ -423,12 +423,12 @@ theorem measurable_maxIncr (hM : ∀ t, Measurable (M t)) (s t : ℝ≥0) (n : �
     exact (((hM _).sub (hM _)).nnnorm).sup ih
 
 /-- **The largest increment tends to `0` along every path**: uniform continuity of the
-continuous path on the compact `[s, t]` (`ItoFormulaAdapted.eventually_abs_sub_unifPart_lt`). -/
+continuous path on the compact `[s, t]` (`eventually_abs_sub_unifPart_lt`). -/
 theorem tendsto_maxIncr (hcont : ∀ ω, Continuous fun t ↦ M t ω) (s t : ℝ≥0) (ω : Ω) :
     Tendsto (fun n ↦ maxIncr M s t n ω) atTop (𝓝 0) := by
   refine tendsto_order.2 ⟨fun a ha ↦ .of_forall fun n ↦ ha.trans_le (maxIncr_nonneg s t n ω),
     fun ε hε ↦ ?_⟩
-  filter_upwards [ItoFormulaAdapted.eventually_abs_sub_unifPart_lt (t - s)
+  filter_upwards [eventually_abs_sub_unifPart_lt (t - s)
     ((hcont ω).comp (continuous_const.add continuous_id :
       Continuous fun r : ℝ≥0 ↦ s + r)).continuousOn (half_pos hε)]
     with n hn
