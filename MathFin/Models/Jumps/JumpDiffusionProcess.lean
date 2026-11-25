@@ -313,10 +313,12 @@ lemma iIndepFun_of_indep_past {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measu
     iIndepFun Y P := by
   rw [iIndepFun_iff_iIndep, iIndep_iff]
   intro S
-  refine Finset.induction_on_max S ?_ ?_
-  · intro f _
+  induction S using Finset.induction_on_max with
+  | empty =>
+    intro f _
     simp
-  · intro a S hlt ih f hf
+  | insert a S hlt ih =>
+    intro f hf
     have ha : a ∉ S := fun h ↦ lt_irrefl _ (hlt a h)
     have hS : MeasurableSet[𝒢 a] (⋂ i ∈ S, f i) := by
       letI : MeasurableSpace Ω := 𝒢 a
@@ -326,6 +328,26 @@ lemma iIndepFun_of_indep_past {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measu
     rw [Finset.set_biInter_insert, Finset.prod_insert ha,
       ← ih (f := f) fun i hi ↦ hf i (Finset.mem_insert_of_mem hi)]
     exact (Indep_iff _ _ P).1 (hind a) _ _ (hf a (Finset.mem_insert_self _ _)) hS
+
+namespace JumpDiffusionProcess
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
+  {X : ℝ≥0 → Ω → ℝ} {b σ : ℝ} {Λ : ℝ≥0} {ν : Measure ℝ}
+
+/-- A jump-diffusion lives on a probability space: the law of each increment is a probability
+measure. -/
+lemma isProbabilityMeasure (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν] :
+    IsProbabilityMeasure P :=
+  (h.law 0 0 le_rfl).isProbabilityMeasure
+
+/-- The increment over `[s, t]` has exponential moment
+`e^{(b + σ²/2 + Λ(𝔼[e^J] − 1))(t − s)}`. -/
+lemma integral_exp_increment (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν]
+    (hν : Integrable rexp ν) {s t : ℝ≥0} (hst : s ≤ t) :
+    ∫ ω, rexp (X t ω - X s ω) ∂P
+      = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * (t - s : ℝ≥0)) := by
+  rw [← integral_exp_jumpDiffusionIncrementLaw b σ Λ hν (t - s)]
+  exact (h.law s t hst).integral_comp measurable_exp.aestronglyMeasurable
 
 /-- **A jump-diffusion has independent increments**, in Mathlib's sense (`HasIndepIncrements`):
 each increment is independent of the past `𝓕_s` (`indep`), and the earlier increments of a
