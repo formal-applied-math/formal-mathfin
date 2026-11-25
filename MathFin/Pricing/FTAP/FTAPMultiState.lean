@@ -70,7 +70,8 @@ the EMM. Together with the forward direction this is the biconditional
   is an `ℝᴹ`-valued random vector `multiStateReturn z`. An arbitrage in the matrix sense is
   exactly a failure of `OnePeriodVector.NoArbitrage`
   (`hasArbitrageMultiState_iff_not_noArbitrage`), and an EMM vector `q` exists iff there
-  is a measure `Q ~ P` with `OnePeriodVector.IsCentringMeasure` (`hasEMMMultiState_iff_exists_isEMM`).
+  is a measure `Q ~ P` with `OnePeriodVector.IsCentringMeasure`
+  (`hasEMMMultiState_iff_exists_isEMM`).
   The latter is derived from the two FTAPs (this file's separation proof and the
   general-Ω softplus proof), so the two independent proofs are shown to agree.
 * **Martingale probability vectors.** The EMMs are the strictly positive members of
@@ -121,7 +122,8 @@ open Finset MeasureTheory
 /-- **EMM existence in a multi-state market** (`N` states, `M` assets):
 there exists a strictly positive probability `q : Fin N → ℝ` with `Σ q
 = 1` and `q`-weighted excess return zero for every asset. Equivalently, an
-`OnePeriodVector.IsCentringMeasure` measure exists on `Fin N` (`hasEMMMultiState_iff_exists_isEMM`). -/
+`OnePeriodVector.IsCentringMeasure` measure exists on `Fin N`
+(`hasEMMMultiState_iff_exists_isEMM`). -/
 def HasEMMMultiState {N M : ℕ} (z : Fin M → Fin N → ℝ) : Prop :=
   ∃ q : Fin N → ℝ,
     (∀ i, 0 < q i) ∧

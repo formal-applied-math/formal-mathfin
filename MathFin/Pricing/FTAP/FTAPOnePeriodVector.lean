@@ -53,8 +53,8 @@ gains-cone closedness).
 ## The one-period EMM of the library
 
 `IsCentringMeasure` here is the library's one notion of an equivalent martingale measure for a
-single trading period (named apart from the multi-period `MathFin.IsEMM`). The other one-period encodings are proved equivalent to it, and the
-continuous-time notion restricts to it:
+single trading period (named apart from the multi-period `MathFin.IsEMM`). The other one-period
+encodings are proved equivalent to it, and the continuous-time notion restricts to it:
 
 * the scalar `OnePeriod.IsEMM` (`Pricing/FTAP/FTAPOnePeriod.lean`) is defined as this notion
   at `F = ℝ`, and its no-arbitrage condition is this one at `F = ℝ`

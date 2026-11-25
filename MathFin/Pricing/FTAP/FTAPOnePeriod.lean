@@ -19,8 +19,8 @@ equivalent martingale measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`.
 
 ## Relation to the vector and discrete-time theorems
 
-`IsEMM` is the vector notion `OnePeriodVector.IsCentringMeasure` at `F = ℝ`, and `NoArbitrage` is the
-vector no-arbitrage condition at `F = ℝ` (`noArbitrage_iff_vector`: on `ℝ` the inner
+`IsEMM` is the vector notion `OnePeriodVector.IsCentringMeasure` at `F = ℝ`, and `NoArbitrage` is
+the vector no-arbitrage condition at `F = ℝ` (`noArbitrage_iff_vector`: on `ℝ` the inner
 product `⟪θ, y⟫` is `θ · y`). So `ftap_one_period` is a corollary of
 `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`, and carries no proof of its own: the
 backward direction (the L¹ tempering and the logistic tilt) and the forward direction
@@ -82,8 +82,8 @@ abbrev IsEMM (Q : Measure Ω) : Prop :=
 omit [IsProbabilityMeasure P] in
 /-- **The scalar no-arbitrage condition is the vector one at `F = ℝ`.** On `ℝ` the inner
 product `⟪θ, y⟫` is the product `θ · y`, so a scalar position `θ` with gain `θ · Y` is the
-vector portfolio `θ ∈ ℝ`. With `IsEMM` defined as `OnePeriodVector.IsCentringMeasure` at `F = ℝ`, this
-identifies `ftap_one_period` with `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`. -/
+vector portfolio `θ ∈ ℝ`. With `IsEMM` defined as `OnePeriodVector.IsCentringMeasure` at
+`F = ℝ`, this identifies `ftap_one_period` with `OnePeriodVector.ftap_one_period_vector` at `F = ℝ`. -/
 theorem noArbitrage_iff_vector : NoArbitrage P Y ↔ OnePeriodVector.NoArbitrage P Y := by
   simp only [NoArbitrage, OnePeriodVector.NoArbitrage, Real.inner_apply]
 

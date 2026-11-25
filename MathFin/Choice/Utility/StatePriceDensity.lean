@@ -58,7 +58,8 @@ Differentiability of `u` at the optimal wealths is implied by `deriv u (W ω) > 
 * `exists_statePrices_of_isLocalMaxOn`: marginal utility, normalised, is a strictly positive
   state-price vector.
 * `exists_hasEMMMultiState_of_isLocalMaxOn`: the optimum defines a pricing measure.
-* `exists_isEMM_of_isLocalMaxOn`: the same as a measure `Q` with `OnePeriodVector.IsCentringMeasure`.
+* `exists_isEMM_of_isLocalMaxOn`: the same as a measure `Q` with
+  `OnePeriodVector.IsCentringMeasure`.
 * `hasEMMMultiState_of_statePrices`: strictly positive state prices give `HasEMMMultiState`.
 * `logUtility_statePrices_of_stationary`: for `u = log`, the density is `w₀ * p / W`.
 
