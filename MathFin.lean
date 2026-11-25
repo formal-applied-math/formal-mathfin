@@ -814,6 +814,8 @@ public import MathFin.Models.Rates.CleanPriceAccrued
 public import MathFin.Models.Rates.BondForward
 -- Covered and uncovered interest parity, from no-arbitrage and the Garman–Kohlhagen measure
 public import MathFin.Models.Forwards.FxForwardParity
+-- Contango, backwardation and basis convergence for the cost-of-carry forward
+public import MathFin.Models.Forwards.ContangoBackwardation
 -- Loan amortization: bullet, equal-principal, and level-payment against annuityValue
 public import MathFin.Models.Rates.LoanAmortization
 -- Key-rate partials sum to the parallel-shift derivative; on a flat curve, to dP/dy

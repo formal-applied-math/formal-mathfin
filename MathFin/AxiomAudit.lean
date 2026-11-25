@@ -3225,3 +3225,49 @@ limit). -/
 /-- info: 'MathFin.HoLee.tendsto_vasicekBondPrice_hoLee' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.HoLee.tendsto_vasicekBondPrice_hoLee
+/-! ### Contango, backwardation and basis convergence (2026-11-23)
+
+The commodity reading of the covered-parity forward `fxForward S r δ T = S·e^{(r−δ)T}`
+(convenience yield in the foreign-rate slot) for spot `S > 0` and maturity `T > 0`: the sign
+structure of the carry differential — contango iff `δ < r`, backwardation iff `r < δ`, the
+forward meets the spot iff `r = δ` — the term-structure trichotomy (strictly increasing iff
+`δ < r`, strictly decreasing iff `r < δ`, flat iff `r = δ`), and the spot-minus-forward basis
+`S − F(T)` vanishing at `T = 0` and converging to `0` as `T → 0⁺`. Pure `Real.exp`
+monotonicity on the forward curve that `covered_interest_parity` derives from no-arbitrage
+and `uncovered_interest_parity` from the risk-neutral expectation. -/
+
+/-- info: 'MathFin.fxForward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward
+
+/-- info: 'MathFin.fxForward_eq_spot_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_eq_spot_iff
+
+/-- info: 'MathFin.fxForward_contango_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_contango_iff
+
+/-- info: 'MathFin.fxForward_backwardation_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_backwardation_iff
+
+/-- info: 'MathFin.fxForward_strictMono_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_strictMono_iff
+
+/-- info: 'MathFin.fxForward_strictAnti_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_strictAnti_iff
+
+/-- info: 'MathFin.fxForward_const_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_const_iff
+
+/-- info: 'MathFin.fxForward_basis_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_basis_zero
+
+/-- info: 'MathFin.fxForward_basis_tendsto_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.fxForward_basis_tendsto_zero

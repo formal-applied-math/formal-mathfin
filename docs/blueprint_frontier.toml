@@ -498,14 +498,6 @@ uses = ["thm:stochastic-fubini"]
 area = "probability/jumps"
 
 [[node]]
-label = "thm:futures-basis-convergence"
-title = "Contango, backwardation and basis convergence"
-statement = "For a forward price F = S e^{(r−δ)T}, the curve is in contango when r > δ and in backwardation when r < δ, and the basis F − S converges to zero as T tends to zero."
-uses = ["thm:interest-rate-parity"]
-area = "valuation/forwards"
-family = "term"
-
-[[node]]
 label = "thm:siegel-paradox"
 title = "Siegel's paradox"
 statement = "If S_T is lognormal with log-variance σ²T, then E[S_T]·E[1/S_T] = e^{σ²T} > 1."
