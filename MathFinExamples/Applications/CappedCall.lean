@@ -194,7 +194,9 @@ payoff, and no property of `Φ` is used. -/
 theorem BSMarket.call_sub_mem_Icc [IsProbabilityMeasure Q] (m : BSMarket Q) {K₁ K₂ : ℝ}
     (hK₁ : 0 < K₁) (hK : K₁ ≤ K₂) {T : ℝ≥0} (hT : 0 < T) :
     m.call K₁ T - m.call K₂ T ∈ Set.Icc 0 (Real.exp (-m.rate * T) * (K₂ - K₁)) := by
-  let c : CappedCallSheet := ⟨K₁, K₂, T, hK₁, hK, hT, [], []⟩
+  let c : CappedCallSheet :=
+    { strike := K₁, cap := K₂, maturity := T, strike_pos := hK₁, strike_le_cap := hK,
+      maturity_pos := hT, sources := [], unmodelled := [] }
   have h := c.value_mem_Icc m
   rwa [c.value_contract m] at h
 
