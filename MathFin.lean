@@ -797,6 +797,7 @@ public import MathFin.Models.ModelFree.SVI.TraceForm
 public import MathFin.Models.ModelFree.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 public import MathFin.Models.ModelFree.SVI.TailCondition
+public import MathFin.Models.ModelFree.SVI.SSVI
 -- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
 public import MathFin.Models.ModelFree.CalendarArbitrage
 -- Fisher/Sraffa own rate: Sraffa's implied own rate from spot, forward and financing rate

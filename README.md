@@ -17,8 +17,8 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 917 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 871 are proved in
+The [corpus](docs/glossary.md#corpus) records 918 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 872 are proved in
 full, 18 restate a lemma from Mathlib or BrownianMotion, and 28 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
