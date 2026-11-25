@@ -836,6 +836,13 @@
       "input_hash": "dc9e95c4e52550ae67008ff3bdd6cbd0e1748edca568655f03888af9aea7db45",
       "verified_at_commit": "c047ee3"
     },
+    "mf-bgk-discrete-barrier-shift": {
+      "benchmark_file": "exotic_options.json",
+      "date": "2026-11-25",
+      "elapsed_s": 4.3,
+      "input_hash": "5ad95123d2bc360b30ae2a2eadf66d990c888294ac17d28992690255de5fb4fe",
+      "verified_at_commit": "2262053"
+    },
     "mf-binomial-european-replication": {
       "benchmark_file": "binomial.json",
       "date": "2026-11-16",
