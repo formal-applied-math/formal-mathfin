@@ -219,7 +219,8 @@ theorem sample_checked :
           0 < (P.real (sample.Default F ε i ∩ sample.Default F ε j) - 0.02 ^ 2) /
             (0.02 - 0.02 ^ 2) ∧
           (P.real (sample.Default F ε i ∩ sample.Default F ε j) - 0.02 ^ 2) / (0.02 - 0.02 ^ 2) =
-            (bivariateNormalCDF (PhiInv 0.02) (PhiInv 0.02) 0.2 - 0.02 ^ 2) / (0.02 - 0.02 ^ 2) := by
+            (bivariateNormalCDF (PhiInv 0.02) (PhiInv 0.02) 0.2 - 0.02 ^ 2) /
+              (0.02 - 0.02 ^ 2) := by
   refine ⟨sample.isModel_stdNormalFactors, ?_⟩
   intro Ω _ P _ F ε h
   exact ⟨h.measureReal_default, h.measureReal_iInter_default,

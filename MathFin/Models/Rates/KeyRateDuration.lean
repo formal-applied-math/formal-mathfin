@@ -225,8 +225,8 @@ theorem hasDerivAt_price_update (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ
   exact hc.congr_deriv (by ring)
 
 /-- **The parallel-shift derivative on a grid.** On the grid curve with node rates `k`, the price
-along `ε ↦ P(k + ε·1)` has derivative `-∑ᵢ tᵢ cᵢ / (1 + rᵢ)^{tᵢ+1}` at `0`, since a parallel shift of
-the nodes shifts every interpolated rate by `ε` (`rate_add_const`). -/
+along `ε ↦ P(k + ε·1)` has derivative `-∑ᵢ tᵢ cᵢ / (1 + rᵢ)^{tᵢ+1}` at `0`, since a parallel shift
+of the nodes shifts every interpolated rate by `ε` (`rate_add_const`). -/
 theorem hasDerivAt_price_parallel (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (k : κ → ℝ)
     (hk : ∀ i ∈ s, 1 + G.rate k (t i) ≠ 0) :
     HasDerivAt (fun ε ↦ G.price s t c fun j ↦ k j + ε)
