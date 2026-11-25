@@ -40,6 +40,7 @@ equilibrium among all demands is a separate open problem and is not claimed here
 * `KyleModel`: the model bundle — Gaussian value and noise, their means and variances, and their
   independence.
 * `kyleFlow`: the order flow `β · (v − p₀) + u` of the linear demand against the noise.
+* `kyleFiltration`: the flow filtration — `⊥` before the order flow is observed, `σ(flow)` after.
 
 ## Main results
 
@@ -55,6 +56,14 @@ equilibrium among all demands is a separate open problem and is not claimed here
 * `kyleFlow_hasLaw_prod`: in the witnessed model the order flow is Gaussian,
   `β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)` — the law the market maker's projection rule
   presupposes.
+* `kyleMarket_isPricingMeasure`: `P` prices the one-date Kyle market — the discrete market whose
+  asset is the value observed along the flow filtration — and the market maker's rule with the
+  projection slope is the conditional expectation of the value: the one-date counterpart of the
+  Glosten–Milgrom market statement.
+* `kyleMaxCoefficients`: the best-response condition alone pins the coefficients: a demand slope
+  whose linear demand is an unrestricted maximizer at every signal has `λ > 0` and `β = 1/(2λ)`.
+* `hasGaussianLaw_fun_add_const`: a translate of a Gaussian random vector is Gaussian.
+* `measurable_kyleFlow`: the order flow is measurable.
 * `kyleModel_prod`: the model hypotheses are satisfiable, witnessed by independent Gaussian
   coordinates.
 
