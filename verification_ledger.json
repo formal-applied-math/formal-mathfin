@@ -2463,9 +2463,9 @@
     "mf-contract-value-order": {
       "benchmark_file": "contracts.json",
       "date": "2026-11-25",
-      "elapsed_s": 4.3,
-      "input_hash": "3fc5794f1462892da0e7d17d181ca130d626c76a53b2b5e0c804ef11c8d633da",
-      "verified_at_commit": "33b3c43"
+      "elapsed_s": 4.2,
+      "input_hash": "fe9226fabfeff7e429d65e3c19dc50db3e76c017354ecd8f7b8060a1444cadb1",
+      "verified_at_commit": "a0915d9"
     },
     "mf-convex-duality-root": {
       "benchmark_file": "no_arbitrage.json",
