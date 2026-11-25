@@ -2467,6 +2467,13 @@
       "input_hash": "fbfc2bcc04c07717fce4f6475102db663582574e1bd48fe1438338430d486bb4",
       "verified_at_commit": "c047ee3"
     },
+    "mf-convex-order-no-minimal-sum": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-25",
+      "elapsed_s": 3.6,
+      "input_hash": "bd17d6b8391e7b1f05fc2921d83efafdd3d93c21ac2641044da98d61d9f1a1c9",
+      "verified_at_commit": "2207b5b"
+    },
     "mf-coupon-bond-strict-anti": {
       "benchmark_file": "interest_rates.json",
       "date": "2026-11-19",
@@ -2732,6 +2739,13 @@
       "elapsed_s": 2.0,
       "input_hash": "54cf1531a66777208591453bf44ccd5a964fcef879ff0e25374079ec15c6b9c6",
       "verified_at_commit": "c047ee3"
+    },
+    "mf-es-convex-order-consistent": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-25",
+      "elapsed_s": 2.5,
+      "input_hash": "ea21fb8819398869f4c06317dc6cbcc49b79dcc377f13028715c95c0af8c021a",
+      "verified_at_commit": "2207b5b"
     },
     "mf-esscher-premium-is-price": {
       "benchmark_file": "actuarial.json",
