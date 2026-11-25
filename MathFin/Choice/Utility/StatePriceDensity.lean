@@ -99,7 +99,8 @@ def portfolioUtility (p : Fin N → ℝ) (u : ℝ → ℝ) (A : Fin M → Fin N 
 
 lemma portfolioPayoff_add_smul (A : Fin M → Fin N → ℝ) (θ d : Fin M → ℝ) (t : ℝ) (ω : Fin N) :
     portfolioPayoff A (θ + t • d) ω = portfolioPayoff A θ ω + t * portfolioPayoff A d ω := by
-  simp [portfolioPayoff, Matrix.add_vecMul, Matrix.smul_vecMul]
+  simp only [portfolioPayoff, Matrix.vecMul, dotProduct, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+    add_mul, Finset.sum_add_distrib, Finset.mul_sum, mul_assoc]
 
 lemma portfolioCost_add_smul (pr θ d : Fin M → ℝ) (t : ℝ) :
     portfolioCost pr (θ + t • d) = portfolioCost pr θ + t * portfolioCost pr d := by
@@ -164,7 +165,7 @@ lemma exists_eq_smul_of_forall_cost_eq_zero {A : Fin M → Fin N → ℝ} {pr : 
   refine ⟨(∑ ω, l ω * A k₀ ω) / pr k₀, fun k ↦ ?_⟩
   have hcost : portfolioCost pr
       (fun j ↦ (if j = k then pr k₀ else 0) - (if j = k₀ then pr k else 0)) = 0 := by
-    simp [portfolioCost, sub_mul, Finset.sum_sub_distrib, ite_mul] <;> ring
+    simp [portfolioCost, dotProduct, sub_mul, Finset.sum_sub_distrib, ite_mul] <;> ring
   have key : pr k₀ * ∑ ω, l ω * A k ω - pr k * ∑ ω, l ω * A k₀ ω = 0 := by
     have := h _ hcost
     rw [sum_mul_portfolioPayoff] at this
@@ -194,7 +195,7 @@ theorem exists_pos_smul_eq_of_stationary [NeZero N] {p : Fin N → ℝ} {u : ℝ
     (fun ω ↦ p ω * deriv u (portfolioPayoff A θ ω)) hfoc (right_ne_zero_of_mul hk₀)
   have hmw : ∑ ω, p ω * deriv u (portfolioPayoff A θ ω) * portfolioPayoff A θ ω = μ * w₀ := by
     rw [sum_mul_portfolioPayoff (fun ω ↦ p ω * deriv u (portfolioPayoff A θ ω)), ← hθ,
-      portfolioCost, Finset.mul_sum]
+      portfolioCost, dotProduct, Finset.mul_sum]
     exact Finset.sum_congr rfl fun k _ ↦ by rw [hμ k]; ring
   have hpos : 0 < μ * w₀ := by
     rw [← hmw]
