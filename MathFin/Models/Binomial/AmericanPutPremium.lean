@@ -51,8 +51,12 @@ composing the two bridges `price_pay_eq_binomialPrice_of_isPricingMeasure` and
   `0 ≤ r`, the American put price with `n` steps remaining is `K − S`.
 * `binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`: under the same
   condition the European put price is `K * e^{-r*n} − S`.
+* `immediate_exercise_gt_continuation_of_deep_in_the_money`: for `r > 0` and `n ≥ 1`, a
+  whole-subtree-in-the-money spot satisfies the witnessing condition of the frontier theorem
+  with the witness at the root.
 * `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: with `r > 0` and `n ≥ 1` the
-  European price is strictly below the American price at every deep-in-the-money node.
+  European price is strictly below the American price at every deep-in-the-money node —
+  derived from the frontier statement through the witness above.
 * `americanPrice_premium_supermartingale`: for any payoff, the American minus the European
   price dominates the one-period discounted continuation of the same difference.
 * `americanPrice_premium_mul_weight_le`: along any `k`-step path with `j` up-moves, the root
