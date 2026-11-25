@@ -839,9 +839,9 @@
     "mf-balancer-invariant": {
       "benchmark_file": "defi.json",
       "date": "2026-11-25",
-      "elapsed_s": 4.1,
-      "input_hash": "74701cb2fc628caa06a86b4754ee5c39b198d709aa9af993d96512e22637c65e",
-      "verified_at_commit": "c7fb016"
+      "elapsed_s": 3.6,
+      "input_hash": "e7b556deee783fdadcc13042066ad4658452c445e9760f9647b0c8a220e7cc1a",
+      "verified_at_commit": "d655bfd"
     },
     "mf-barrier-inout-parity": {
       "benchmark_file": "exotic_options.json",
