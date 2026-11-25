@@ -140,6 +140,12 @@ theorem bsV_nonneg
   exact integral_nonneg fun _ ↦
     mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
 
+/-- The Black–Scholes call price is nonnegative for positive spot, strike, volatility and
+maturity: `bsV_nonneg` on the standard Gaussian space. -/
+lemma bsV_nonneg_of_pos {S K r σ T : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    0 ≤ bsV K r σ S T :=
+  bsV_nonneg (Q := gaussianReal 0 1) (Z := id) ⟨hS, hK, hσ, hT, HasLaw.id⟩
+
 /-- **Put price non-negativity**: `0 ≤ bsP`. Same argument with `(K − S_T)⁺`. -/
 theorem bsP_nonneg
     {Ω : Type*} {mΩ : MeasurableSpace Ω}

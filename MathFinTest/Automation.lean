@@ -32,6 +32,17 @@ example (K r σ S τ : ℝ) :
     bsV K r σ S τ - bsP K r σ S τ + K * Real.exp (-(r * τ)) = S := by
   grind [pricing]
 
+/-- Merton's conditional put and call differ by the conditional forward value. -/
+example (S_0 K r σ T k δ : ℝ) (Λ : NNReal) (n : ℕ) :
+    mertonCallTerm S_0 K r σ T k δ Λ n - mertonPutTerm S_0 K r σ T k δ Λ n =
+      mertonSpot S_0 k Λ n - K * Real.exp (-r * T) := by
+  grind [pricing]
+
+/-- Exchange-option parity: the two exchange options differ by the spread forward. -/
+example (S1 S2 σ T : ℝ) (hS1 : 0 < S1) (hS2 : 0 < S2) (hσ : σ ≠ 0) (hT : 0 < T) :
+    margrabePrice S1 S2 σ T - margrabePrice S2 S1 σ T = S1 - S2 := by
+  grind [pricing]
+
 /-- The binomial up-probability makes the discounted stock fair, in either form. -/
 example {u d r : ℝ} (h : BinomialNoArb u d r) :
     crrUpProb u d r * u + (1 - crrUpProb u d r) * d = Real.exp r := by
