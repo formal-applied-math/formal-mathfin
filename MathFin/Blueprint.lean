@@ -906,8 +906,9 @@ attribute [blueprint "thm:forward-start-call"
   multiple $\alpha$ of the then-observed price, paying $(S_T - \alpha S_{t_1})^+$ at $T$, is
   worth $S_0 \cdot bsV(\alpha, r, \sigma, 1, T - t_1)$ under the Girsanov pricing measure of the
   market price of risk, whatever the physical drift $m$, at any horizon $H \ge T$: Rubinstein's
-  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian increment $B_T - B_{t_1}$,
-  independent of $\mathcal{F}_{t_1}$, so the expectation of the product splits
+  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian
+  increment $B_T - B_{t_1}$, independent of $\mathcal{F}_{t_1}$, so the expectation of the product
+  splits
   (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is
   the call price on a unit spot (`thm:bs-call`'s `bsV`). -/)]
   MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure
