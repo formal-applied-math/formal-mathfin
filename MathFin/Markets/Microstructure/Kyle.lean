@@ -59,9 +59,9 @@ equilibrium among all demands is a separate open problem and is not claimed here
   `β·(v − p₀) + u ~ N(0, β²·σ_v² + σ_u²)` — the law the market maker's projection rule
   presupposes.
 * `kyleMarket_isPricingMeasure`: `P` prices the one-date Kyle market — the discrete market whose
-  asset is the value observed along the flow filtration — and the market maker's rule with the
-  projection slope is the conditional expectation of the value: the one-date counterpart of the
-  Glosten–Milgrom market statement.
+  asset is the conditional-expectation process `n ↦ P[v | 𝓖 n]` along the flow filtration —
+  and the market maker's rule with the projection slope is the conditional expectation of the
+  value: the one-date counterpart of the Glosten–Milgrom market statement.
 * `kyleMaxCoefficients`: the best-response condition alone pins the coefficients: a demand slope
   whose linear demand is an unrestricted maximizer at every signal has `λ > 0` and `β = 1/(2λ)`.
 * `measurable_kyleFlow`: the order flow is measurable.
@@ -244,7 +244,7 @@ theorem kyleMarketEfficiency (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
   }
   refine (BivariateGaussianHyp.conditional_expectation_formula hbundle).trans ?_
   refine Filter.Eventually.of_forall fun ω => ?_
-  show p₀ + (β * σ_v / σ_y * σ_v / σ_y) * (kyleFlow β v u p₀ ω - 0)
+  change p₀ + (β * σ_v / σ_y * σ_v / σ_y) * (kyleFlow β v u p₀ ω - 0)
       = p₀ + (β * σ_v ^ 2 / (β ^ 2 * σ_v ^ 2 + σ_u ^ 2)) * kyleFlow β v u p₀ ω
   rw [sub_zero]
   have hcoef : β * σ_v / σ_y * σ_v / σ_y = β * σ_v ^ 2 / σ_y ^ 2 := by
@@ -252,7 +252,6 @@ theorem kyleMarketEfficiency (h : KyleModel P v u p₀ σ_v σ_u) (β : ℝ) :
   rw [hcoef, hσy_sq]
 
 section BestResponse
-
 
 /-- **The best-response condition pins the coefficients.** A demand slope whose linear demand
 is an unrestricted maximizer of the expected profit at every signal has positive price impact
@@ -340,7 +339,7 @@ theorem kyleConditionalProfit (h : KyleModel P v u p₀ σ_v σ_u) (lam : ℝ) {
     simp only [Pi.mul_apply]
     rw [hw]
     simp [h.mean_u]
-  show P[(((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
+  change P[(((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
       - (fun ω ↦ lam * x ω * u ω)) | MeasurableSpace.comap v inferInstance]
     =ᵐ[P] ((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
   have hp12 : P[((fun ω ↦ (v ω - p₀) * x ω) - (fun ω ↦ lam * x ω ^ 2))
@@ -505,7 +504,7 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
         ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
         = gaussianReal p₀ (σ_v ^ 2).toNNReal := by
       rw [Measure.map_fst_prod, measure_univ, one_smul]
-    show ∫ (x : ℝ × ℝ), id x.1 ∂(gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+    change ∫ (x : ℝ × ℝ), id x.1 ∂(gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
         (gaussianReal 0 (σ_u ^ 2).toNNReal) = p₀
     rw [← integral_map (φ := Prod.fst) (f := id) (by fun_prop) (by fun_prop), hmap]
     simp
@@ -513,7 +512,7 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
         ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
         = gaussianReal p₀ (σ_v ^ 2).toNNReal := by
       rw [Measure.map_fst_prod, measure_univ, one_smul]
-    show Var[id ∘ Prod.fst; (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+    change Var[id ∘ Prod.fst; (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
         (gaussianReal 0 (σ_u ^ 2).toNNReal)] = σ_v ^ 2
     rw [← variance_map (X := id) (Y := Prod.fst) (by fun_prop) (by fun_prop), hmap]
     simp [hcoev, variance_id_gaussianReal]
@@ -521,7 +520,7 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
         ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
         = gaussianReal 0 (σ_u ^ 2).toNNReal := by
       rw [Measure.map_snd_prod, measure_univ, one_smul]
-    show ∫ (x : ℝ × ℝ), id x.2 ∂(gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+    change ∫ (x : ℝ × ℝ), id x.2 ∂(gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
         (gaussianReal 0 (σ_u ^ 2).toNNReal) = 0
     rw [← integral_map (φ := Prod.snd) (f := id) (by fun_prop) (by fun_prop), hmap]
     simp
@@ -529,7 +528,7 @@ theorem kyleModel_prod (p₀ : ℝ) {σ_v σ_u : ℝ} (hσv : 0 < σ_v) (hσu : 
         ((gaussianReal p₀ (σ_v ^ 2).toNNReal).prod (gaussianReal 0 (σ_u ^ 2).toNNReal))
         = gaussianReal 0 (σ_u ^ 2).toNNReal := by
       rw [Measure.map_snd_prod, measure_univ, one_smul]
-    show Var[id ∘ Prod.snd; (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
+    change Var[id ∘ Prod.snd; (gaussianReal p₀ (σ_v ^ 2).toNNReal).prod
         (gaussianReal 0 (σ_u ^ 2).toNNReal)] = σ_u ^ 2
     rw [← variance_map (X := id) (Y := Prod.snd) (by fun_prop) (by fun_prop), hmap]
     simp [hcoeu, variance_id_gaussianReal]
@@ -650,7 +649,8 @@ noncomputable def kyleFiltration (f : Ω → ℝ) (hf : Measurable f) : Filtrati
     · exact hf.comap_le
 
 /-- **The Kyle market is priced.** `P` prices the one-date Kyle market — the discrete market
-whose asset is the value observed along the flow filtration `σ(order flow)` — and the market
+whose asset is the conditional-expectation process `n ↦ P[v | 𝓖 n]` along the flow filtration
+`σ(order flow)` — and the market
 maker's rule with the projection slope `lam = β·σ_v²/(β²·σ_v² + σ_u²)` is exactly the
 conditional expectation of the value given the order flow: the market maker is a pricer, the
 one-date counterpart of the Glosten–Milgrom market statement. -/
