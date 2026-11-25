@@ -150,26 +150,6 @@ theorem indexVar_const_of_sq_sum_eq (w σ : n → ℝ) (ρ : ℝ)
   rw [indexVar_eq_add_mul_sub, h]
   ring
 
-omit [DecidableEq n] in
-/-- The weighted variance sum never exceeds the squared weighted-volatility sum at nonnegative
-weights and volatilities. -/
-private theorem sq_weightedSum_ge (w σ : n → ℝ) (hw : ∀ i, 0 ≤ w i) (hσ : ∀ i, 0 ≤ σ i) :
-    ∑ i, w i ^ 2 * σ i ^ 2 ≤ (∑ i, w i * σ i) ^ 2 := by
-  have hle : ∀ i, w i * σ i ≤ ∑ j, w j * σ j :=
-    fun i ↦ Finset.single_le_sum (f := fun j ↦ w j * σ j)
-      (fun j _ ↦ mul_nonneg (hw j) (hσ j)) (Finset.mem_univ i)
-  have hstep : ∑ i, w i ^ 2 * σ i ^ 2 ≤ ∑ i, (w i * σ i) * ∑ j, w j * σ j := by
-    refine Finset.sum_le_sum fun i _ ↦ ?_
-    have h2 : w i ^ 2 * σ i ^ 2 = (w i * σ i) * (w i * σ i) := by ring
-    rw [h2]
-    exact mul_le_mul_of_nonneg_left (hle i) (mul_nonneg (hw i) (hσ i))
-  have hfin : ∑ i, (w i * σ i) * ∑ j, w j * σ j
-      = (∑ j, w j * σ j) * ∑ i, w i * σ i := by
-    rw [Finset.mul_sum]
-    exact sum_congr rfl fun i _ ↦ mul_comm _ _
-  calc ∑ i, w i ^ 2 * σ i ^ 2 ≤ ∑ i, (w i * σ i) * ∑ j, w j * σ j := hstep
-    _ = (∑ i, w i * σ i) ^ 2 := by rw [hfin, sq, mul_comm]
-
 /-- **The Bossu proxy and its exact gap**: for the equicorrelated index, the proxy equals the
 common correlation plus `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` — the idiosyncratic share. -/
 theorem bossuProxy_eq_add_gap (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ i) ^ 2 ≠ 0) :
@@ -194,7 +174,21 @@ theorem bossuProxy_between (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ 
   rw [bossuProxy_eq_add_gap w σ ρ hS]
   refine ⟨le_add_of_nonneg_right
     (div_nonneg (mul_nonneg (by linarith) hWpos) hSpos.le), ?_⟩
-  have hWS := sq_weightedSum_ge w σ hw hσ
+  have hWS : ∑ i, w i ^ 2 * σ i ^ 2 ≤ (∑ i, w i * σ i) ^ 2 := by
+    have hle : ∀ i, w i * σ i ≤ ∑ j, w j * σ j :=
+      fun i ↦ Finset.single_le_sum (f := fun j ↦ w j * σ j)
+        (fun j _ ↦ mul_nonneg (hw j) (hσ j)) (Finset.mem_univ i)
+    have hstep : ∑ i, w i ^ 2 * σ i ^ 2 ≤ ∑ i, (w i * σ i) * ∑ j, w j * σ j := by
+      refine Finset.sum_le_sum fun i _ ↦ ?_
+      have h2 : w i ^ 2 * σ i ^ 2 = (w i * σ i) * (w i * σ i) := by ring
+      rw [h2]
+      exact mul_le_mul_of_nonneg_left (hle i) (mul_nonneg (hw i) (hσ i))
+    have hfin : ∑ i, (w i * σ i) * ∑ j, w j * σ j
+        = (∑ j, w j * σ j) * ∑ i, w i * σ i := by
+      rw [Finset.mul_sum]
+      exact sum_congr rfl fun i _ ↦ mul_comm _ _
+    calc ∑ i, w i ^ 2 * σ i ^ 2 ≤ ∑ i, (w i * σ i) * ∑ j, w j * σ j := hstep
+      _ = (∑ i, w i * σ i) ^ 2 := by rw [hfin, sq, mul_comm]
   have hgap : 0 ≤ (1 - ρ) * ((∑ i, w i * σ i) ^ 2 - ∑ i, w i ^ 2 * σ i ^ 2) :=
     mul_nonneg (by linarith) (sub_nonneg.2 hWS)
   have key : ρ * (∑ i, w i * σ i) ^ 2 + (1 - ρ) * ∑ i, w i ^ 2 * σ i ^ 2

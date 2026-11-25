@@ -409,6 +409,24 @@ namespace MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
 
+/-! ## Implied correlation and dispersion -/
+
+/-- info: 'MathFin.indexVar_equicorrelation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.indexVar_equicorrelation
+
+/-- info: 'MathFin.indexVar_impliedCorrelation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.indexVar_impliedCorrelation
+
+/-- info: 'MathFin.bossuProxy_eq_add_gap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.bossuProxy_eq_add_gap
+
+/-- info: 'MathFin.realisedCorrelation_equicorrelation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.realisedCorrelation_equicorrelation
+
 /-! ## Certified cross-domain bridges -/
 
 /-- info: 'MathFin.portfolioVarN_diag_eq_herfindahl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
