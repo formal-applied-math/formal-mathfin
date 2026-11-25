@@ -38,8 +38,9 @@ One `full` entry in `benchmarks/contracts.json`. Corpus 906 → 907 (866 full be
   function is `0`, and `0 ≤ 0`); almost-everywhere dominance gives the order on values, with the
   lower present value non-negative almost everywhere and the upper one integrable
   (`Contract.value_le_value_of_pathPV_le_ae`, the `integral_mono_of_nonneg` hypotheses — without
-  integrability the non-integrable side integrates to the junk value `0`, which can exceed the
-  upper value); the two-integrable companion (`Contract.value_le_value`, `integral_mono_ae`); and
+  integrability of the upper contract its value is the junk `0`, while the lower's honest integral
+  can be positive, and the order fails); the two-integrable companion (`Contract.value_le_value`,
+  `integral_mono_ae`); and
   a family of contracts whose present value is convex in a real parameter almost everywhere, on
   a convex parameter set, with each member integrable, has a `ConvexOn` value function
   (`Contract.value_convexOn`, the `Contract.value` counterpart of `statePricePricing_convexOn`,

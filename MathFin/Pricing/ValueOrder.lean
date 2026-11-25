@@ -17,9 +17,9 @@ every outcome is worth at least `0`; a contract whose present value dominates an
 along almost every outcome is worth at least as much; and a family of contracts whose
 present value is convex in a real parameter prices to a convex function of that parameter.
 These are what let a spread, a floor or a dominance relation proved on `pathPV` lift to
-`Contract.value` — the continuous counterpart of the finite-state order results of
-`ConvexPricingFunctional.lean` (`statePricePricing_nonneg`, `statePricePricing_convexOn`),
-which price by summing non-negative state prices.
+`Contract.value` — the continuous counterpart of the finite-state order results
+(`statePricePricing_nonneg` in `StatePrices.lean`, `statePricePricing_convexOn` in
+`ConvexPricingFunctional.lean`), which price by summing non-negative state prices.
 
 The proofs add no machinery: each statement is the corresponding order property of the
 Bochner integral (`integral_nonneg`, `integral_mono_of_nonneg`, `integral_mono_ae`,
@@ -35,8 +35,8 @@ of `pathPV` against `Q`.
 * `Contract.value_le_value_of_pathPV_le_ae` — almost-everywhere dominance gives the order
   on values, with the lower contract's present value non-negative almost everywhere and
   the upper contract's integrable. The integrability hypothesis is `integral_mono_of_nonneg`'s:
-  without it the non-integrable side integrates to `0`, and `0` can exceed the upper
-  value (take the upper contract's present value constant `-1`).
+  without it the upper contract's value is the junk `0`, while the lower's honest integral
+  can be positive (present value `1` on a set of finite positive measure), and `1 ≤ 0` fails.
 * `Contract.value_le_value` — the two-integrable companion: when both contracts are
   integrable, dominance alone orders the values (`integral_mono_ae`).
 * `Contract.value_convexOn` — a family of contracts whose present value is convex in a
@@ -78,8 +78,8 @@ theorem Contract.value_nonneg (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
 /-- **A contract that dominates another almost everywhere is worth at least as much**, given
 the lower contract's present value is non-negative almost everywhere and the upper
 contract's is integrable. The integrability hypothesis is load-bearing: `integral_mono_of_nonneg`
-needs it, because a non-integrable side integrates to the junk value `0`, and `0` can
-exceed the upper contract's value. -/
+needs it, because without it the upper contract's value is the junk `0`, while the lower's
+honest integral can be positive, and `1 ≤ 0` fails. -/
 theorem Contract.value_le_value_of_pathPV_le_ae (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)
     (hnn : 0 ≤ᵐ[Q] fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω))
@@ -92,7 +92,9 @@ theorem Contract.value_le_value_of_pathPV_le_ae (Q : Measure Ω) (D : ℝ≥0 �
 
 /-- **The two-integrable companion of `value_le_value_of_pathPV_le_ae`**: when both contracts
 are integrable, dominance alone orders the values, by `integral_mono_ae` applied to
-`Contract.value`. -/
+`Contract.value`. The lower contract's integrability is load-bearing here: without it its
+value is the junk `0`, which can exceed the upper contract's honest value (present value
+constant `-1` integrates to `-1`, and `0 ≤ -1` fails). -/
 theorem Contract.value_le_value (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)
     (ha : Integrable (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)
