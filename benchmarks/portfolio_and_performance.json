@@ -1607,8 +1607,7 @@
         "reference": "Ross arbitrage pricing theory, exact factor model (Ross 1976)",
         "citations": [
           {
-            "key": "Ross1976",
-            "locator": "13(3), 341-360"
+            "key": "Ross1976"
           }
         ],
         "difficulty": "intermediate",

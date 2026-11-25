@@ -17,7 +17,8 @@ public import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 
 The exact-factor arbitrage pricing theory of Ross: in a market whose assets follow the exact
 factor model, the expected payoffs are an affine function of the factor loadings. The content
-is one hypothesis and two theorems.
+is one hypothesis and its consequence, the premia decomposition, in two
+forms with two corollaries.
 
 The hypothesis `ExactFactorNoArbitrage s t p a β` is the exact-factor no-arbitrage condition:
 every portfolio `w` on the assets `s` that costs nothing (`∑ i ∈ s, w i * p i = 0`) and
@@ -152,7 +153,7 @@ private lemma exists_coeffs_of_exactFactorNoArbitrage {ι κ : Type*}
 /-- **The arbitrage pricing theory decomposition** (Ross 1976, exact factor model). If every
 portfolio on the assets `s` that costs nothing (the assets are priced at one) and carries no
 factor exposure has zero expected payoff, the expected payoffs are affine in the loadings:
-there are a premium `lam₀` and factor premia `lam k` with `a i = lam₀ + ∑ k ∈ t, lam k * β i k`
+there is an intercept `lam₀` and factor premia `lam k` with `a i = lam₀ + ∑ k ∈ t, lam k * β i k`
 for every asset `i ∈ s`. The hypothesis is the exact-factor no-arbitrage condition
 (`ExactFactorNoArbitrage`) at unit prices: a portfolio orthogonal to the price vector and to
 every loading column is orthogonal to the payoffs. The premia are not unique unless the
@@ -258,7 +259,7 @@ theorem exactFactorNoArbitrage_of_pricingMeasure
 
 /-- **The arbitrage pricing theory decomposition from a pricing measure** (Ross 1976, exact
 factor model): if a market with deterministic numéraire `f` and a pricing measure `Q` up to `T`
-has assets `i ∈ s` paying `a i + ∑ k ∈ t, β i k * F k` at `T`, then there are a premium `lam₀`
+has assets `i ∈ s` paying `a i + ∑ k ∈ t, β i k * F k` at `T`, then there is an intercept `lam₀`
 and factor premia `lam k` with, for every asset `i ∈ s`,
 
 `a i = p i * lam₀ + ∑ k ∈ t, lam k * β i k`, where `p i` is the price of the claim paying
