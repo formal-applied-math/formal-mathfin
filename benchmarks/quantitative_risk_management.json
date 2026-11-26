@@ -1702,7 +1702,7 @@
       "domain": "mathematical_finance",
       "description": "The Student-t law studentT ν (built in MathFin as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2)) has, for ν > 0, the textbook density g_ν(x) = Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2): the normalizing integral ∫k_ν equals √(νπ)Γ(ν/2)/Γ((ν+1)/2).",
       "code": {
-        "lean": "import MathFin.Probability.Laws.StudentT\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentTPDFReal_eq_thm {ν : ℝ} (hν : 0 < ν) (x : ℝ) :\n    studentTPDFReal ν x = Real.Gamma ((ν + 1) / 2) / (√(ν * Real.pi) * Real.Gamma (ν / 2)) *\n      (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2) :=\n  ProbabilityTheory.studentTPDFReal_eq hν x\n"
+        "lean": "import MathFin.Probability.Laws.StudentT\n\nopen MeasureTheory ProbabilityTheory Set\n\ntheorem studentTPDFReal_eq_thm {ν : ℝ} (hν : 0 < ν) (x : ℝ) :\n    studentTPDFReal ν x = Real.Gamma ((ν + 1) / 2) / (√(ν * Real.pi) * Real.Gamma (ν / 2)) *\n      (1 + x ^ 2 / ν) ^ (-(ν + 1) / 2) :=\n  ProbabilityTheory.studentTPDFReal_eq hν x\n"
       },
       "metadata": {
         "chapter": 2,
@@ -1789,7 +1789,7 @@
       "domain": "mathematical_finance",
       "description": "The Student-t law with ν = 1 degree of freedom equals Mathlib's standard Cauchy law: studentT 1 = cauchyMeasure 0 1.",
       "code": {
-        "lean": "import MathFin.Probability.Laws.StudentT\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem studentT_one_thm : studentT 1 = cauchyMeasure 0 1 :=\n  ProbabilityTheory.studentT_one\n"
+        "lean": "import MathFin.Probability.Laws.StudentT\n\nopen MeasureTheory ProbabilityTheory Set\n\ntheorem studentT_one_thm : studentT 1 = cauchyMeasure 0 1 :=\n  ProbabilityTheory.studentT_one\n"
       },
       "metadata": {
         "chapter": 2,
