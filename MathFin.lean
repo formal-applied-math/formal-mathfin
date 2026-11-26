@@ -846,6 +846,7 @@ public import MathFin.Risk.UtilityDerivation
 -- The one coherence structure: the four ADEH axioms for losses, ρ(0) = 0, convexity, and (finite
 -- state) pointwise monotonicity and continuity
 public import MathFin.Risk.Coherent
+public import MathFin.Risk.CompleteMixability
 public import MathFin.Risk.ConvexOrderSums
 -- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
 public import MathFin.Risk.PositionsConvention

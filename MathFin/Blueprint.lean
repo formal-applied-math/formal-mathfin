@@ -221,6 +221,7 @@ import MathFin.Models.Binomial.AmericanPutPremium
 import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Choice.Performance.KellyNumeraire
 import MathFin.Risk.JointElicitability
+import MathFin.Risk.CompleteMixability
 import MathFin.Risk.ConvexOrderSums
 import MathFin.Models.Binomial.PathMeasure
 import MathFin.Probability.Brownian.BrownianDoobMaximal
@@ -1973,6 +1974,23 @@ attribute [blueprint "thm:es-convex-order"
   $\mathrm{ES}_\alpha(X) \le \mathrm{ES}_\alpha(Y)$ for every $\alpha \in (0,1)$: the
   Rockafellar–Uryasev objective of $X$ at $c = \mathrm{VaR}_\alpha(Y)$ is below that of $Y$. -/)]
   MathFin.expectedShortfall_le_of_convexOrder
+
+attribute [blueprint "def:complete-mixability"
+  (title := "Complete mixability")
+  (statement := /-- A law $\mu$ is $n$-completely mixable when some coupling of $n$ copies of
+  $\mu$ has an almost surely constant sum. Measure-preserving maps whose values add up to a
+  constant give such a coupling, and mixes concatenate. The uniform law on a simplex with $n$
+  vertices is $n$-completely mixable through the cyclic shifts of its vertices, and the uniform
+  law on a centrally symmetric set is $2k$-completely mixable for every $k \ge 1$. -/)]
+  MathFin.CompletelyMixable
+
+attribute [blueprint "thm:complete-mix-convex-order-minimum"
+  (title := "A complete mix is the convex-order minimum of the sum")
+  (statement := /-- If a coupling of $n$ copies of an integrable law $\mu$ on $\mathbb R$ has an
+  almost surely constant sum, the law of that sum is below, in convex order, the law of the sum
+  under every coupling of $n$ copies of $\mu$: the constant is the common mean, and Jensen's
+  inequality (`ConvexOrder.dirac_integral_le`) compares it with any law of that mean. -/)]
+  MathFin.convexOrder_sum_of_completelyMixable
 
 attribute [blueprint "thm:expected-shortfall-coherent"
   (title := "Expected shortfall is a law-invariant coherent risk measure")
