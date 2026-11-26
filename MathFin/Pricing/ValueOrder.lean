@@ -77,9 +77,11 @@ theorem Contract.value_nonneg (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
 
 /-- **A contract that dominates another almost everywhere is worth at least as much**, given
 the lower contract's present value is non-negative almost everywhere and the upper
-contract's is integrable. The integrability hypothesis is load-bearing: `integral_mono_of_nonneg`
-needs it, because without it the upper contract's value is the junk `0`, while the lower's
-honest integral can be positive, and `1 ≤ 0` fails. -/
+contract's is integrable. Both hypotheses are load-bearing: `integral_mono_of_nonneg`
+consumes the lower's non-negativity in its non-integrable branch and the upper's
+integrability in its integrable branch — without either, that side's value is the junk
+`0` while the other can hold an honest value of the opposite sign (`1 ≤ 0` fails without
+the integrability; `0 ≤ -1` fails without the non-negativity). -/
 theorem Contract.value_le_value_of_pathPV_le_ae (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)
     (hnn : 0 ≤ᵐ[Q] fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω))
@@ -92,9 +94,10 @@ theorem Contract.value_le_value_of_pathPV_le_ae (Q : Measure Ω) (D : ℝ≥0 �
 
 /-- **The two-integrable companion of `value_le_value_of_pathPV_le_ae`**: when both contracts
 are integrable, dominance alone orders the values, by `integral_mono_ae` applied to
-`Contract.value`. The lower contract's integrability is load-bearing here: without it its
-value is the junk `0`, which can exceed the upper contract's honest value (present value
-constant `-1` integrates to `-1`, and `0 ≤ -1` fails). -/
+`Contract.value`. Both integrability hypotheses are load-bearing: `integral_mono_ae` forms
+the difference of the two integrals, which needs both sides — without one, that side's
+value is the junk `0`, which can exceed the other's honest value (`0 ≤ -1` fails against
+a present value of constant `-1`, and `1 ≤ 0` fails against an honest positive `1`). -/
 theorem Contract.value_le_value (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (a b : Contract ι)
     (ha : Integrable (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)
