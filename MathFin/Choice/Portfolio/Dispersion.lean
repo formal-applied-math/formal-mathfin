@@ -25,9 +25,11 @@ identity and what it lets one solve for.
   every common correlation reproduces the same variance and the observation identifies none
   (`indexVar_const_of_sq_sum_eq`); there the solved value carries no meaning.
 * The **Bossu proxy** `bossuProxy` divides the observed variance by the squared weighted sum of
-  volatilities. It is not the implied correlation: for the equicorrelated index it exceeds the
-  common correlation by exactly `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` (`bossuProxy_eq_add_gap`), the
-  idiosyncratic share, so it sits between the correlation and one (`bossuProxy_between`). The
+  volatilities. It is not the implied correlation: for the equicorrelated index at a nonzero
+  squared weighted-volatility sum it exceeds the common correlation by exactly
+  `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` (`bossuProxy_eq_add_gap`), the idiosyncratic share, and at
+  nonnegative weights and volatilities with `ρ ≤ 1` it sits between the correlation and one
+  (`bossuProxy_between`). The
   variance-denominated variant of the proxy that the source prints for the realised correlation
   is a lower bound for it at nonnegative weights summing to one, nonnegative volatilities and a
   nonnegative observed variance, by Jensen's inequality (`jensenProxy_le_bossuProxy`).
@@ -157,8 +159,9 @@ theorem indexVar_const_of_sq_sum_eq (w σ : n → ℝ) (ρ : ℝ)
   rw [indexVar_eq_add_mul_sub, h]
   ring
 
-/-- **The Bossu proxy and its exact gap**: for the equicorrelated index, the proxy equals the
-common correlation plus `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` — the idiosyncratic share. -/
+/-- **The Bossu proxy and its exact gap**: for the equicorrelated index at a nonzero squared
+weighted-volatility sum, the proxy equals the common correlation plus
+`(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` — the idiosyncratic share. -/
 theorem bossuProxy_eq_add_gap (w σ : n → ℝ) (ρ : ℝ) (hS : (∑ i, w i * σ i) ^ 2 ≠ 0) :
     bossuProxy w σ (portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j))
       = ρ + (1 - ρ) * (∑ i, w i ^ 2 * σ i ^ 2) / (∑ i, w i * σ i) ^ 2 := by
