@@ -1986,11 +1986,11 @@ attribute [blueprint "def:complete-mixability"
 
 attribute [blueprint "thm:complete-mix-convex-order-minimum"
   (title := "A complete mix is the convex-order minimum of the sum")
-  (statement := /-- If a coupling of $n$ copies of an integrable law $\mu$ on $\mathbb R$ has an
-  almost surely constant sum, the law of that sum is below, in convex order, the law of the sum
-  under every coupling of $n$ copies of $\mu$: the constant is the common mean, and Jensen's
+  (statement := /-- If an integrable law $\mu$ on $\mathbb R$ is $n$-completely mixable, the
+  complete mix's sum is below, in convex order, the sum under every coupling of $n$ copies of
+  $\mu$ (`convexOrder_sum_of_completelyMixable`): the constant is the common mean, and Jensen's
   inequality (`ConvexOrder.dirac_integral_le`) compares it with any law of that mean. -/)]
-  MathFin.convexOrder_sum_of_completelyMixable
+  MathFin.CompletelyMixable.exists_convexOrder_min
 
 attribute [blueprint "thm:expected-shortfall-coherent"
   (title := "Expected shortfall is a law-invariant coherent risk measure")
