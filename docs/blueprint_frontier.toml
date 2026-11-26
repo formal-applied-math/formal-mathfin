@@ -81,14 +81,6 @@ area = "valuation/smile"
 family = "volatility"
 
 [[node]]
-label = "thm:implied-vol-existence"
-title = "Implied volatility for every arbitrage-free price"
-statement = "For every call price in the open interval allowed by no arbitrage, there is exactly one Black–Scholes volatility that reproduces it, and bisection and a safeguarded Newton iteration converge to it."
-uses = ["thm:bs-call", "thm:bs-delta"]
-area = "valuation/smile"
-family = "diffusions"
-
-[[node]]
 label = "thm:kou-jump-diffusion"
 title = "Kou double-exponential jump-diffusion"
 statement = "For a jump-diffusion with i.i.d. double-exponential jump sizes (Kou), the moment generating function of the log-price, the compensator that makes the discounted price a martingale, and the European call price are given in closed form."

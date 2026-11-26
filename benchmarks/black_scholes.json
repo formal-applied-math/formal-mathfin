@@ -378,6 +378,83 @@
       }
     },
     {
+      "id": "mf-bsV-sigma-zero-limit",
+      "name": "The Black-Scholes Price at Vanishing Volatility",
+      "description": "For S, K > 0 and T > 0, the Black-Scholes call price tends to the positive part of the discounted intrinsic value, max(S - K e^{-rT}, 0), as sigma -> 0+. The spot may sit above, at, or below the discounted strike: above it both Phi(d1) and Phi(d2) tend to 1, below it both tend to 0, and at equality both tend to 1/2 so the two terms cancel against the vanishing forward.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ImpliedVolExistence\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology\n\n/-- **The Black-Scholes price at vanishing volatility**: as `sigma -> 0+` the price tends to\n`max(S - K e^{-rT}, 0)`, the positive part of the discounted intrinsic value. -/\ntheorem bsV_sigma_zero_limit_thm {S K r : ℝ} (hS : 0 < S) (hK : 0 < K) {T : ℝ} (hT : 0 < T) :\n    Tendsto (fun σ ↦ MathFin.bsV K r σ S T) (𝒝[>] 0)\n      (𝒝 (max (S - K * Real.exp (-(r * T))) 0)) :=\n  MathFin.tendsto_bsV_sigma_zero hS hK hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility and the no-arbitrage range); Shreve, Stochastic Calculus for Finance II",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "19.10"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The three cases are handled separately: the forward offset log(S/K) + rT positive, negative, and zero, with d1 = (log(S/K) + (r + sigma^2/2)T)/(sigma sqrt T) and d2 = d1 - sigma sqrt T driven by its 1/sigma term. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-implied-vol-existence",
+      "name": "Implied Volatility for Every Arbitrage-Free Price",
+      "description": "For S, K, T > 0, every call price C in the open no-arbitrage range (S - K e^{-rT})^+ < C < S has an implied volatility: a unique sigma > 0 with bsV K r sigma S T = C. The function impliedVol K r S T C realizes it, positive and pricing under the range hypothesis; where no positive volatility prices to C it returns the junk 0 (impliedVol_eq_zero_iff). The sigma -> 0+ limit (mf-bsV-sigma-zero-limit) supplies a volatility pricing below C, and existence above it is the sigma -> infinity route, so no reference volatility is assumed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ImpliedVolExistence\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology Set\n\n/-- **Implied volatility for every arbitrage-free price**: a price in the no-arbitrage range\nhas a unique positive implied volatility, realized by `MathFin.impliedVol`. -/\ntheorem implied_vol_every_price_thm {K r T S C : ℝ} (hK : 0 < K) (hT : 0 < T) (hS : 0 < S)\n    (hC : C ∈ Ioo (max (S - K * Real.exp (-(r * T))) 0) S) :\n    0 < MathFin.impliedVol K r S T C ∧\n      MathFin.bsV K r (MathFin.impliedVol K r S T C) S T = C ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S T = C → σ' = MathFin.impliedVol K r S T C :=\n  MathFin.impliedVol_defining_eq hK hT hS hC\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility); Gatheral, The Volatility Surface",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "19.10"
+          },
+          {
+            "key": "Gatheral2006"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The price C is assumed in the open no-arbitrage range; non-attainment at the range endpoints is not formalized (the strict lower bound bsV > (S - K e^{-rT})^+ at positive sigma is not proved here; the strict upper bound bsV < S is bsV_lt_S). The function returns the junk 0 outside the range, characterized by impliedVol_eq_zero_iff. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bisection-straddle",
+      "name": "The Straddle Form of Bisection, at a Black-Scholes Threshold",
+      "description": "The textbook bisection theorem: a bracket (a, b) with f a < C <= f b keeps straddling under a bisection step, and with f continuous on [a, b] the nested endpoints and the midpoint estimates converge to a root r with f r = C, the midpoints within (b - a)/2^(n+1) after n steps, no monotonicity of f assumed (bisect_tendsto_root). Specialized to the Black-Scholes price: at a threshold volatility sigma with sigma_lo < sigma <= sigma_hi (bsV x < C iff x < sigma on the bracket), the estimates converge to sigma and sigma prices the option (bsV_bisect_threshold_root).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ImpliedVolExistence\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology Set\n\n/-- **Bisection at a Black-Scholes threshold**: at an interior threshold volatility the\nestimates converge to it and it prices the option. -/\ntheorem bsV_bisect_threshold_thm {K r T S σ_lo σ_hi σ C : ℝ} (hK : 0 < K) (hT : 0 < T)\n    (hS : 0 < S) (hσlo : 0 < σ_lo) (hloσ : σ_lo < σ) (hσhi : σ ≤ σ_hi)\n    (hC : ∀ x ∈ Icc σ_lo σ_hi, MathFin.bsV K r x S T < C ↔ x < σ) :\n    MathFin.bsV K r σ S T = C ∧\n      Tendsto (MathFin.bisectMid (fun v ↦ MathFin.bsV K r v S T) C σ_lo σ_hi) atTop (𝒝 σ) :=\n  MathFin.bsV_bisect_threshold_root hK hT hS hσlo hloσ hσhi hC\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Burden and Faires, Numerical Analysis (the bisection method); Hull, Options, Futures, and Other Derivatives (implied volatility)",
+        "citations": [
+          {
+            "key": "BurdenFaires2011",
+            "locator": "2.1"
+          },
+          {
+            "key": "Hull",
+            "locator": "19.10"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The threshold hypothesis (the biconditional on the bracket) is assumed, and the bracket must lie inside the positive-volatility region (0 < sigma_lo). The generic engine is the straddle-form theorem bisect_tendsto_root of MathFin/Probability/Analysis/BisectionStraddle.lean (continuity plus an initial straddle; the threshold case bisect_threshold_root derives f sigma = C); this entry is its Black-Scholes specialization through bsV_continuousOn_sigma. A safeguarded Newton iteration is not formalized. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-black-futures",
       "name": "Black-76 Formula for Futures Options",
       "description": "European call on a futures contract: V = e^{-rT} [F Phi(d_1) - K Phi(d_2)] where d_1 = (log(F/K) + sigma^2 T/2) / (sigma sqrt(T)) and d_2 = d_1 - sigma sqrt(T). Specialization of BS to zero-drift futures + independent discount rate.",

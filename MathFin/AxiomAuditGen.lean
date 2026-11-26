@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1168 MathFin constants, 29 upstream). Citations
+corpus (1171 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -1856,6 +1856,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsP_le_K_disc
 
+/-- info: 'MathFin.bsV_bisect_threshold_root' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bsV_bisect_threshold_root
+
 /-- info: 'MathFin.bsV_ge_forward_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_ge_forward_lower_bound
@@ -3031,6 +3035,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.impliedVol_bracket_exists' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.impliedVol_bracket_exists
+
+/-- info: 'MathFin.impliedVol_defining_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.impliedVol_defining_eq
 
 /-- info: 'MathFin.implied_volatility_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4255,6 +4263,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.tendsto_bsV_sigma_atTop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_bsV_sigma_atTop
+
+/-- info: 'MathFin.tendsto_bsV_sigma_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_bsV_sigma_zero
 
 /-- info: 'MathFin.tendsto_call_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

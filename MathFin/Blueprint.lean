@@ -25,6 +25,7 @@ import MathFin.Models.ModelFree.CarrMadan
 import MathFin.Models.ModelFree.CarrMadanMarket
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.PDE
+import MathFin.Models.BlackScholes.ImpliedVolExistence
 import MathFin.Models.Binomial.WillowTree
 import MathFin.Models.BlackScholes.PDEFromIto
 import MathFin.Models.BlackScholes.PDEFromFeynmanKac
@@ -926,6 +927,18 @@ attribute [blueprint "thm:bs-delta"
   representative of the five Greeks ($\delta, \gamma, \text{vega}, \theta, \rho$), each a real
   `HasDerivAt` derivation through `bs_identity`. -/)]
   MathFin.hasDerivAt_bsV_S
+
+attribute [blueprint "thm:implied-vol-existence"
+  (title := "Implied volatility for every arbitrage-free price")
+  (statement := /-- For $S, K, T > 0$, every call price $C$ in the open no-arbitrage range
+  $(S - Ke^{-rT})^+ < C < S$ has an implied volatility: a unique $\sigma > 0$ with
+  $V(K, r, \sigma, S, T) = C$ (`exists_impliedVol_of_lt`, packaged as the function
+  `impliedVol` with its defining equation `impliedVol_defining_eq`). What removes the
+  reference-volatility hypothesis of the earlier existence result is the
+  $\sigma \to 0^+$ limit $V \to (S - Ke^{-rT})^+$ (`tendsto_bsV_sigma_zero`); and at an
+  interior threshold of the price against $C$ the bisection estimates converge to that
+  threshold, which prices the option (`bsV_bisect_threshold_root`). -/)]
+  MathFin.exists_impliedVol_of_lt
 
 attribute [blueprint "thm:bs-pde"
   (title := "The Black–Scholes formula solves the Black–Scholes equation")

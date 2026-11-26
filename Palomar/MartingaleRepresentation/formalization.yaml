@@ -42,7 +42,7 @@ sources:
     location: Springer, second edition (1991), Section 3.4
     note: Textbook treatment of the representation of Brownian martingales; the registered statement is its terminal form for one-dimensional Brownian motion.
 status:
-  scope: 924 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 895 delivery-ready (full + library-wrapper).
+  scope: 927 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 898 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -131,9 +131,9 @@ alignment:
       status: full 41 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 126 statements
+      lean: 129 statements
       module: benchmarks/black_scholes.json
-      status: full 125 · wrapper 1 · reduced 0 · placeholder 0
+      status: full 128 · wrapper 1 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: brownian_motion (Saporito, Stochastic Processes)
       lean: 11 statements

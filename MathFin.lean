@@ -107,6 +107,9 @@ public import MathFin.Probability.Brownian.Wiener.WienerIntegralFiltration
 public import MathFin.Probability.Gaussian.StandardGaussianMGF
 public import MathFin.Probability.Analysis.ExponentialDiscount
 public import MathFin.Probability.Analysis.Bisection
+-- The straddle form of the bisection method: a step preserves the straddle, and continuity
+-- plus an initial straddle converge the nested endpoints to a root
+public import MathFin.Probability.Analysis.BisectionStraddle
 -- The quantile function (generalized inverse CDF): Galois connection, quantile transform,
 -- probability integral transform, equivariance; and the standard normal quantile Φ⁻¹
 public import MathFin.Probability.Laws.Quantile
@@ -444,6 +447,9 @@ public import MathFin.Models.BlackScholes.AsianGeometric
 -- Geometric-average Asian: n-date driver law + closed-form price via effective-BS reduction
 public import MathFin.Models.BlackScholes.AsianGeometricN
 public import MathFin.Models.BlackScholes.ImpliedVolatility
+-- Implied volatility for every arbitrage-free price: the sigma -> 0+ limit, existence on
+-- the whole no-arbitrage range, the impliedVol function, and bisection at a threshold
+public import MathFin.Models.BlackScholes.ImpliedVolExistence
 -- SABR (Hagan-Kumar-Lesniewski-Woodward 2002) lognormal implied-vol asymptotic
 -- approximation: eq. 2.17 -> eq. 2.18 as K -> f, backbone law, ATM Black-76 price
 public import MathFin.Models.StochVol.SABRImpliedVol

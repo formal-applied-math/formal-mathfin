@@ -1945,6 +1945,18 @@
   "label": "def:gaussian-factor-copula",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
+ {"uses": ["def:standard-normal-cdf"],
+  "title": "Implied volatility for every arbitrage-free price",
+  "text":
+  "For $S, K, T > 0$, every call price $C$ in the open no-arbitrage range\n  $(S - Ke^{-rT})^+ < C < S$ has an implied volatility: a unique $\\sigma > 0$ with\n  $V(K, r, \\sigma, S, T) = C$ (`exists_impliedVol_of_lt`, packaged as the function\n  `impliedVol` with its defining equation `impliedVol_defining_eq`). What removes the\n  reference-volatility hypothesis of the earlier existence result is the\n  $\\sigma \\to 0^+$ limit $V \\to (S - Ke^{-rT})^+$ (`tendsto_bsV_sigma_zero`); and at an\n  interior threshold of the price against $C$ the bisection estimates converge to that\n  threshold, which prices the option (`bsV_bisect_threshold_root`).",
+  "name": "MathFin.exists_impliedVol_of_lt",
+  "module": "MathFin.Models.BlackScholes.ImpliedVolExistence",
+  "line": 252,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:implied-vol-existence",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ImpliedVolExistence.lean"},
  {"uses":
   ["thm:superhedging-coherent",
    "thm:superhedging-price-lower-bound",
@@ -1972,18 +1984,6 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Bracket of the Itô integral",
-  "text":
-  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
-  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
-  "module": "MathFin.Probability.Martingales.BracketCompensator",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:bracket-compensator",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses": ["thm:carr-madan"],
   "title": "Breeden–Litzenberger formula",
   "text":
@@ -1996,6 +1996,18 @@
   "label": "thm:breeden-litzenberger",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Bracket of the Itô integral",
+  "text":
+  "$M^2 - \\langle M\\rangle$ is a martingale: $\\mathbb{E}[M_b^2 - \\langle\n  M\\rangle_b \\mid \\mathcal{F}_a] = M_a^2 - \\langle M\\rangle_a$ for $a \\le b \\le T$. Expanding\n  $(M_b-M_a)^2$, the cross term collapses by the martingale property of $M$, and the bracket\n  increment splits off the conditional expectation because $\\langle M\\rangle_a$ is adapted —\n  which holds because the predictable $\\sigma$-algebra, traced onto a band\n  $(a,b]\\times\\Omega$, is $\\mathcal{B}(\\mathbb{R}_{\\ge 0})\\otimes \\mathcal{F}_b$-measurable.\n  The bracket is the pathwise integral $\\int\\varphi^2\\,dt$; that it is the limit of the\n  realized quadratic variation is the frontier node `thm:bracket-quadratic-variation`.",
+  "name": "MathFin.BracketCompensator.condExp_sq_sub_bracket",
+  "module": "MathFin.Probability.Martingales.BracketCompensator",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:bracket-compensator",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -2125,6 +2137,18 @@
   "label": "thm:complete-mix-convex-order-minimum",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/CompleteMixability.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Martingale representation theorem",
+  "text":
+  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
+  "name": "MathFin.martingale_representation",
+  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
+  "line": 319,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:martingale-representation",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
  {"uses":
   ["def:market",
    "def:contract",
@@ -2142,42 +2166,6 @@
   "label": "thm:key-rate-market-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
- {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
-  "title": "Martingale representation theorem",
-  "text":
-  "Let $B$ be a Brownian motion with continuous paths and $\\mathbb{F}^B$ its\n  natural filtration. Every square-integrable martingale $M$ of $\\mathbb{F}^B$ is, up to a\n  horizon $T$, its initial value plus an Itô integral process, $M_t = M_0 + (\\varphi\\cdot\n  B)_t$ almost surely for $t \\le T$, for a predictable $L^2$ integrand $\\varphi$. That $M_0$\n  is a.e. constant is not assumed: it is the representation read at $t = 0$. At the horizon,\n  every $F \\in L^2(\\mathcal{F}^B_T)$ is $F = E[F] + \\int_0^T \\varphi\\,dB$ for a *unique*\n  $\\varphi$ (`exists_itoIntegral_representation`): the range of the Itô isometry is closed,\n  and Wiener-exponential totality kills the orthogonal remainder. One dimension, $L^2$ only.",
-  "name": "MathFin.martingale_representation",
-  "module": "MathFin.Probability.Brownian.MartingaleRepresentation",
-  "line": 319,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:martingale-representation",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/MartingaleRepresentation.lean"},
- {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
-  "title": "Tangent portfolio",
-  "text":
-  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
-  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
-  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:tangent-portfolio-efficient",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Lévy's characterization of Brownian motion",
-  "text":
-  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
-  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
-  "module": "MathFin.Probability.Brownian.LevyCharacterization",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:levy-characterization",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -2197,6 +2185,30 @@
   "label": "thm:market-completeness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Lévy's characterization of Brownian motion",
+  "text":
+  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
+  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
+  "module": "MathFin.Probability.Brownian.LevyCharacterization",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:levy-characterization",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
+ {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
+  "title": "Tangent portfolio",
+  "text":
+  "For positive semidefinite $\\Sigma$, a fully invested portfolio with\n  $\\Sigma w = \\lambda(\\mu - r_f)$ is a tangent portfolio and has the least variance among the\n  fully invested portfolios with the same expected return.",
+  "name": "MathFin.isTangentPortfolioN_and_portfolioVarN_le",
+  "module": "MathFin.Choice.Portfolio.MarkowitzLagrangian",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:tangent-portfolio-efficient",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
  {"uses":
   ["def:market",
    "def:pricing-measure",
