@@ -1788,7 +1788,8 @@ attribute [blueprint "thm:kelly-criterion"
   Over $n$ repeated bets the growth is $n\,g$, with the same stationary fraction
   (`kelly_n_periods_deriv_at_kelly`). With $\log x \le x - 1$ the condition gives the global
   form, Kelly's inequality: $f^*$ maximises $g$ among the fractions with positive wealth in both
-  states (`kelly_log_le`). The continuous-time case is not proved (`thm:log-optimal-numeraire`). -/)]
+  states (`kelly_log_le`). The continuous-time case is not proved
+  (`thm:log-optimal-numeraire`). -/)]
   MathFin.kellyGrowth_deriv_at_kelly
 
 attribute [blueprint "thm:kelly-is-log-optimal"
