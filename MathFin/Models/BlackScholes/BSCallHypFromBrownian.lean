@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.BlackScholes.Call
 public import MathFin.Models.Bachelier.Bachelier
+public import MathFin.Probability.Gaussian.GaussianMoments
 public import Mathlib.Probability.BrownianMotion.Basic
 
 /-!
@@ -51,6 +52,8 @@ discharges the BS / Bachelier hypothesis automatically.
 
 * `scaled_isPreBrownian_eval_law`: the core scaling identity for pre-
   Brownian motion under `· / √T`.
+* `scaled_increment_law`: the same scaling for the increment over a nondegenerate interval
+  `s < t`, `(W_t − W_s) / √(t − s) ~ N(0, 1)`.
 * `BSCallHyp.of_isPreBrownian`: BS hypothesis from a pre-Brownian motion.
 * `BachelierHyp.of_isPreBrownian`: Bachelier hypothesis from a pre-Brownian
   motion (same scaled `Z`).
@@ -96,6 +99,24 @@ lemma scaled_isPreBrownian_eval_law
       exact (Real.coe_toNNReal T hT.le).symm
     rw [h_sqrt_sq]
     exact (div_self (Real.toNNReal_pos.mpr hT).ne').symm
+
+/-- **Scaled increment law**: if `W` is a pre-Brownian motion under `Q` and `s < t`, the
+standardized increment `(W t − W s) / √(t − s)` has `gaussianReal 0 1` law. It combines
+`hasLaw_increment` (`W t − W s ~ N(0, t − s)`) with `gaussianReal_div_const`; the variance
+`(t − s) / (√(t − s))² = 1` collapses by `Real.sq_sqrt` and `div_self`. -/
+lemma scaled_increment_law
+    {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω}
+    {W : ℝ≥0 → Ω → ℝ} (hW : IsPreBrownianReal W Q) {s t : ℝ≥0} (hst : s < t) :
+    HasLaw (fun ω ↦ (W t ω - W s ω) / Real.sqrt ((t : ℝ) - (s : ℝ))) (gaussianReal 0 1) Q := by
+  have hdiv := gaussianReal_div_const (hasLaw_increment hW hst.le)
+    (Real.sqrt ((t : ℝ) - (s : ℝ)))
+  have h1 : (NNReal.mk ((Real.sqrt ((t : ℝ) - (s : ℝ))) ^ 2) (sq_nonneg _) : ℝ≥0) = t - s := by
+    apply NNReal.eq
+    rw [NNReal.coe_mk, Real.sq_sqrt (sub_nonneg.2 (by exact_mod_cast hst.le)),
+      NNReal.coe_sub hst.le]
+  refine ⟨hdiv.aemeasurable, ?_⟩
+  rw [hdiv.map_eq, zero_div, h1, div_self (tsub_pos_of_lt hst).ne']
 
 /-- **`BSCallHyp` from a pre-Brownian motion**. Given a pre-Brownian
 process `W` under `Q` and positive parameters `(S_0, K, σ, T)`, the

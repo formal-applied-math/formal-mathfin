@@ -1111,6 +1111,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof that the capped calls with thresholds t cover the level Σ t_i + c, then weak duality (mf-var-sum-dual-bound-weak-duality). The optimisation over t and c, and the sharpness of the bound, are not formalised. Lives in MathFin/Risk/DependenceUncertainty.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-es-convex-order-consistent",
+      "name": "Expected Shortfall Respects Convex Order",
+      "description": "Let X on (Ω, P) and Y on (Ω', P') be integrable losses and α ∈ (0, 1). Suppose the law of X is below the law of Y in convex order: ∫ φ d(law X) ≤ ∫ φ d(law Y) for every convex φ : ℝ → ℝ integrable under both laws. Then ES_α(X) ≤ ES_α(Y). The proof evaluates the Rockafellar–Uryasev objective of X at c = VaR_α(Y) and compares the calls struck at c.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.ConvexOrderSums\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem expectedShortfall_le_of_convexOrder_thm {Ω Ω' : Type*} {mΩ : MeasurableSpace Ω}\n    {mΩ' : MeasurableSpace Ω'} {P : Measure Ω} {P' : Measure Ω'} [IsProbabilityMeasure P]\n    [IsProbabilityMeasure P'] {X : Ω → ℝ} {Y : Ω' → ℝ} (hX : Integrable X P)\n    (hY : Integrable Y P') (h : ConvexOrder (P.map X) (P'.map Y)) {α : ℝ} (hα : α ∈ Ioo 0 1) :\n    expectedShortfall X P α ≤ expectedShortfall Y P' α :=\n  expectedShortfall_le_of_convexOrder hX hY h hα\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Shaked–Shanthikumar, Stochastic Orders (2007), Ch. 3; Rockafellar–Uryasev, Conditional value-at-risk for general loss distributions (2002)",
+        "citations": [
+          {
+            "key": "ShakedShanthikumar2007"
+          },
+          {
+            "key": "RockafellarUryasev2002"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof for integrable losses on arbitrary probability spaces, with convex order defined over the convex functions integrable under both laws (MathFin.ConvexOrder). Uses the library's Rockafellar–Uryasev bound and its attainment at VaR. Lives in MathFin/Risk/ConvexOrderSums.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-convex-order-no-minimal-sum",
+      "name": "Sums with Given Marginals Without a Convex-Order Minimum",
+      "description": "Let X₁, X₂, X₃ be random variables on a probability space, with laws uniform on the atoms {0, 0, 4}, {0, 2, 5} and {0, 4, 6} (a repeated atom carries its multiplicity) and any dependence between them. Then there are Y₁, Y₂, Y₃ on a three-point space with equal weights, with the same three laws, such that the law of X₁ + X₂ + X₃ is not below the law of Y₁ + Y₂ + Y₃ in convex order. So no sum with these marginals is the smallest in convex order. This is one instance of the open problem MF-OP-018 (Wang 2015), which asks for the conditions on the marginals under which such a minimum exists; the entry does not resolve it.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.ConvexOrderSums\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem exists_not_convexOrder_sum_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {X₁ X₂ X₃ : Ω → ℝ} (h₁ : HasLaw X₁ (uniform3 0 0 4) P)\n    (h₂ : HasLaw X₂ (uniform3 0 2 5) P) (h₃ : HasLaw X₃ (uniform3 0 4 6) P) :\n    ∃ Y₁ Y₂ Y₃ : Fin 3 → ℝ, HasLaw Y₁ (uniform3 0 0 4) (uniform3 (0 : Fin 3) 1 2) ∧\n      HasLaw Y₂ (uniform3 0 2 5) (uniform3 (0 : Fin 3) 1 2) ∧\n      HasLaw Y₃ (uniform3 0 4 6) (uniform3 (0 : Fin 3) 1 2) ∧\n      ¬ ConvexOrder (P.map (X₁ + X₂ + X₃)) ((uniform3 (0 : Fin 3) 1 2).map (Y₁ + Y₂ + Y₃)) :=\n  exists_not_convexOrder_sum h₁ h₂ h₃\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Bernard–Jiang–Wang, Risk aggregation with dependence uncertainty (2014), Example 3.1; Wang, Current open questions in complete mixability (2015)",
+        "citations": [
+          {
+            "key": "BernardJiangWang2014"
+          },
+          {
+            "key": "Wang2015CompleteMixability"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof for this one instance. Two explicit couplings, with sums 6, 6, 9 and 8, 8, 5, force a convex-order minimum to live on [6, 8] (convex order passes support bounds down); on the event X₂ = 5, of probability 1/3, every coupling's sum lies outside [6, 8]. The instance was found by an exhaustive search and is smaller than the published counterexample of Bernard–Jiang–Wang (atoms {0, 3, 8}, {0, 6, 16}, {0, 7, 13}). The general characterisation (MF-OP-018) is not formalised. Lives in MathFin/Risk/ConvexOrderSums.lean. Axioms-clean."
+      }
     }
   ]
 }

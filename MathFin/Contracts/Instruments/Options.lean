@@ -34,6 +34,8 @@ The capped call is *defined* by composition, as a long call at `K₁` and a shor
 * `upAndIn` — the discretely monitored up-and-in knock-in on a payoff `f`, from the running
   maximum `Payoff.obsMax` and `indicatorLt`.
 * `chooser` — the chooser option as the static portfolio of a call and a put at the chooser date.
+* `forwardStartCall` — the call whose strike is set at a reset date `t₁` as the multiple `α` of the
+  then-observed price, paying `max (S_T − α S_{t₁}) 0` at `T`.
 * `exchangeOption` — pays `max (S¹_T − S²_T) 0`.
 
 ## Main results
@@ -72,8 +74,8 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 
 ## Tags
 
-European option, digital option, capped call, chooser option, power call, exchange option,
-geometric Asian, barrier option, knock-in, MSC 91G20, JEL G13
+European option, digital option, capped call, chooser option, forward-start option, power call,
+exchange option, geometric Asian, barrier option, knock-in, MSC 91G20, JEL G13
 -/
 
 @[expose] public section
@@ -191,6 +193,12 @@ value at `t₁`, so this is the replicating portfolio, not the holder's choice w
 the rate `r` enters only through the put's strike. -/
 noncomputable def chooser (K r : ℝ) (T t₁ : ℝ≥0) : Contract Unit :=
   .both (europeanCall K T) (europeanPut (K * Real.exp (-(r * ((T : ℝ) - t₁)))) t₁)
+
+/-- The reified forward-start call: the strike is set at the reset date `t₁` as the multiple
+`α` of the then-observed price, and the call pays `max (S_T - α * S_{t₁}) 0` at the maturity
+`T ≥ t₁`. -/
+noncomputable def forwardStartCall (α : ℝ) (t₁ T : ℝ≥0) : Contract Unit :=
+  .pay T (.max (.sub (.obs () T) (.mul (.const α) (.obs () t₁))) (.const 0))
 
 /-- The reified exchange option (Margrabe) on two underlyings indexed by `Fin 2`: pays
 `max (S¹_T - S²_T) 0` at maturity `T`. -/

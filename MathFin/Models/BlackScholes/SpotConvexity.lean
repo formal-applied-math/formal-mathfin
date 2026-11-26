@@ -18,7 +18,7 @@ public import Mathlib.RingTheory.Smooth.Flat
 is its spot-direction dual at the two scales that make sense for `S`:
 
 1. **Payoff level**, `S ↦ max(S − K, 0)`: the positive part of an affine
-   function is convex.
+   function is convex (`convexOn_call_payoff_spot`, in `Probability/Laws/ConvexOrder.lean`).
 2. **Continuous price level**, `S ↦ bsV K r σ S τ`: strictly convex on `(0, ∞)`
    by the second-derivative test — gamma is positive
    (`hasDerivAt_deriv_bsV_S` + `strictConvexOn_of_deriv2_pos'`).
@@ -33,7 +33,6 @@ consumes the strict form (`bsV_spot_tangent_lt`) to make the domination strict.
 
 ## Main results
 
-* `convexOn_call_payoff_spot`: `S ↦ max(S − K, 0)` is convex (payoff level).
 * `bsV_spot_strictConvexOn`, `bsV_spot_convexOn`: `S ↦ bsV K r σ S τ` is strictly convex, hence
   convex, on `(0, ∞)` (continuous price level).
 * `bsV_spot_tangent_lt`, `bsV_spot_tangent_le`: the price lies above its tangent at any
@@ -56,18 +55,6 @@ JEL G13
 namespace MathFin
 
 open Set Real ProbabilityTheory
-
-/-- **Call payoff is convex in the spot**: `S ↦ max(S − K, 0)` is the
-positive part of an affine function. The spot-direction sibling of
-`convexOn_call_payoff`. -/
-lemma convexOn_call_payoff_spot (K : ℝ) :
-    ConvexOn ℝ Set.univ (fun S : ℝ ↦ max (S - K) 0) := by
-  refine ConvexOn.sup ⟨convex_univ, fun a _ b _ s t _ _ hst ↦ ?_⟩
-    (convexOn_const (0 : ℝ) convex_univ)
-  change s • a + t • b - K ≤ s • (a - K) + t • (b - K)
-  simp only [smul_eq_mul]
-  have h_kk : s * K + t * K = K := by linear_combination K * hst
-  linarith
 
 /-! ## The continuous-price face
 
