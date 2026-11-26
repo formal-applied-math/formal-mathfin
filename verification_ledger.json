@@ -3386,10 +3386,10 @@
     },
     "mf-implied-correlation-dispersion": {
       "benchmark_file": "portfolio_and_performance.json",
-      "date": "2026-11-25",
-      "elapsed_s": 4.7,
-      "input_hash": "07815fee4ec47d70bdcfd741e5a497e81f70297f37220c36cd4d6199bf911dbd",
-      "verified_at_commit": "6138d05"
+      "date": "2026-11-26",
+      "elapsed_s": 4.5,
+      "input_hash": "043df51f89249c73ee0c67129a0fefec731827f5685dc5e2a4a60efbe85f8e2f",
+      "verified_at_commit": "44cd807"
     },
     "mf-implied-vol-exists-above-reference": {
       "benchmark_file": "black_scholes.json",
