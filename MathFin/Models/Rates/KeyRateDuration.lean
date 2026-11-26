@@ -240,7 +240,7 @@ theorem hasDerivAt_price_parallel (s : Finset ι) (t : ι → ℕ) (c : ι → �
     (by simpa using hk i hi)).comp 0 ((hasDerivAt_id (0 : ℝ)).const_add (G.rate k (t i)))
   change HasDerivAt (fun ε ↦ c i / (1 + G.rate (fun j ↦ k j + ε) (t i)) ^ t i) _ _
   rw [e]
-  exact hc
+  exact hc.congr_deriv (by simp)
 
 variable (G)
 

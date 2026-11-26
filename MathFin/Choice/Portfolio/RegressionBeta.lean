@@ -131,7 +131,8 @@ theorem integral_sq_affine_eq_add (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar : 
   have i1 : Integrable (fun ω ↦ R ω ^ 2) P := hRm.integrable_sq
   have i2 : Integrable (fun ω ↦ 2 * (R ω * A ω)) P := hRA.const_mul 2
   have i3 : Integrable (fun ω ↦ A ω ^ 2) P := hAm.integrable_sq
-  rw [integral_add (i1.add i2) i3, integral_add i1 i2, integral_const_mul, horth']
+  have i12 : Integrable (fun ω ↦ R ω ^ 2 + 2 * (R ω * A ω)) P := i1.add i2
+  rw [integral_add i12 i3, integral_add i1 i2, integral_const_mul, horth']
   ring
 
 /-- **The CAPM beta is the least-squares slope**: for square-integrable `Y`, `X` with
