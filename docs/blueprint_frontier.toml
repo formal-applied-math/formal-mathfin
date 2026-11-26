@@ -854,7 +854,7 @@ area = "risk/insurance"
 [[node]]
 label = "thm:robust-binomial-duality"
 title = "Quasi-sure duality for the robust multi-period binomial model"
-statement = "Open (MF-OP-014): whether the robust multi-period binomial model satisfies the duality l(L^∞) = E', which makes its quasi-sure theory usable."
+statement = "MF-OP-014 (resolution reported, unformalised): whether the robust multi-period binomial model satisfies the duality l(L^∞) = E', which makes its quasi-sure theory usable; an internal argument gives yes on the power-set extension for every T, since every law of the model is purely atomic."
 uses = ["def:nondominated-model", "def:coin-flip-measure"]
 area = "valuation/trees"
 
