@@ -96,7 +96,6 @@ def Filtration.twoStep (Ω : Type*) [mΩ : MeasurableSpace Ω] : Filtration ℕ 
     · exact absurd (Nat.le_zero.mp (hb ▸ hab)) ha
     · exact le_rfl
   le' n := by
-    dsimp only
     split_ifs
     · exact bot_le
     · exact le_rfl
