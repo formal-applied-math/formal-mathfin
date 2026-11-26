@@ -217,7 +217,8 @@ title = "American options and optimal stopping"
 blurb = "early exercise as optimal stopping: the Snell envelope in trees, the American put and its free boundary"
 modules = [
   "MathFin.Models.BlackScholes.American", "MathFin.Models.Binomial.American",
-  "MathFin.Models.Binomial.AmericanMarket", "MathFin.Models.Binomial.Bermudan",
+  "MathFin.Models.Binomial.AmericanMarket", "MathFin.Models.Binomial.AmericanPutPremium",
+  "MathFin.Models.Binomial.Bermudan",
   "MathFin.Models.Binomial.SnellEnvelope",
   "MathFin.Models.Binomial.MertonAmericanCallTree",
 ]
