@@ -807,6 +807,7 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.bsV_bisect_threshold_root' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_bisect_threshold_root
+
 /-- info: 'MathFin.impliedVol_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.impliedVol_eq_zero_iff

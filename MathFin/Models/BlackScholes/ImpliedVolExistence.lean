@@ -315,8 +315,9 @@ theorem impliedVol_defining_eq {K r T S C : ℝ} (hK : 0 < K) (hT : 0 < T) (hS :
 
 /-- **Bisection on the Black–Scholes price at a threshold**: for `S, K, T > 0`, if some
 `σ` with `σ_lo < σ ≤ σ_hi` is the threshold of the price against `C` on the bracket
-(`bsV K r x S T < C ↔ x < σ` on `[σ_lo, σ_hi]` — in particular when the prices at the
-bracket ends straddle `C`), then the bisection estimates converge to `σ` and `σ` prices
+(`bsV K r x S T < C ↔ x < σ` on `[σ_lo, σ_hi]` — via
+`bsV_strictMonoOn_sigma`, in particular when the prices at the bracket ends
+straddle `C`), then the bisection estimates converge to `σ` and `σ` prices
 the option: `bsV K r σ S T = C`. Specializes `bisect_threshold_root` to
 `bsV_continuousOn_sigma`. -/
 theorem bsV_bisect_threshold_root {K r T S σ_lo σ_hi σ C : ℝ} (hK : 0 < K) (hT : 0 < T)
