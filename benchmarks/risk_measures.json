@@ -1163,10 +1163,10 @@
     {
       "id": "mf-simplex-complete-mixability",
       "name": "The Uniform Law on a Simplex Is Completely Mixable",
-      "description": "Let S be a simplex in ℝᵈ, the convex hull of d + 1 affinely independent points, and let k ≥ 1. Then there are k(d + 1) random vectors, each uniformly distributed on S, whose sum is almost surely constant. For k = 1 this is the boundary case n = d + 1 of the open problem MF-OP-016 (Wang 2015, Open Problem 5), restricted to simplices; the problem itself, for every convex body and every n ≥ d + 1, is not resolved.",
+      "description": "Let E be a finite-dimensional real vector space with a Haar measure (for instance ℝᵈ with Lebesgue measure), let S be a simplex in E, the convex hull of an affine basis with n vertices (n = d + 1 in ℝᵈ), and let k ≥ 1. Then there are kn random vectors, each uniformly distributed on S, whose sum is almost surely constant. For k = 1 in ℝᵈ this is the boundary case n = d + 1 of the open problem MF-OP-016 (Wang 2015, Open Problem 5), restricted to simplices; the problem itself, for every convex body and every n ≥ d + 1, is not resolved.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem simplex_completelyMixable_thm {d : ℕ}\n    (b : AffineBasis (Fin (d + 1)) ℝ (EuclideanSpace ℝ (Fin d))) {k : ℕ} (hk : 1 ≤ k) :\n    ∃ π : Measure (Fin (k * (d + 1)) → EuclideanSpace ℝ (Fin d)), IsProbabilityMeasure π ∧\n      (∀ i, π.map (fun x ↦ x i) = volume[|convexHull ℝ (range b)]) ∧\n      ∃ c, ∀ᵐ x ∂π, ∑ i, x i = c :=\n  CompletelyMixable.mul (completelyMixable_simplex volume b) hk\n"
+        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem simplex_completelyMixable_thm {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]\n    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure]\n    {n : ℕ} [NeZero n] (b : AffineBasis (Fin n) ℝ E) {k : ℕ} (hk : 1 ≤ k) :\n    ∃ π : Measure (Fin (k * n) → E), IsProbabilityMeasure π ∧\n      (∀ i, π.map (fun x ↦ x i) = μ[|convexHull ℝ (range b)]) ∧\n      ∃ c, ∀ᵐ x ∂π, ∑ i, x i = c :=\n  CompletelyMixable.mul (completelyMixable_simplex μ b) hk\n"
       },
       "metadata": {
         "chapter": 8,
@@ -1184,10 +1184,10 @@
     {
       "id": "mf-symmetric-complete-mixability",
       "name": "Centrally Symmetric Uniform Laws Are Completely Mixable in Even Numbers",
-      "description": "Let C be a measurable set in ℝᵈ of finite positive volume, symmetric about a point c (x ∈ C implies 2c − x ∈ C), and let k ≥ 1. Then there are 2k random vectors, each uniformly distributed on C, whose sum is almost surely constant. Convexity is not needed. For closed centrally symmetric convex bodies (parallelograms, discs, ellipsoids, boxes) this proves the case of the open problem MF-OP-016 (Wang 2015) for every even n ≥ d + 1; odd n, such as three copies of the uniform law on a parallelogram, is not covered.",
+      "description": "Let E be a finite-dimensional real vector space with a Haar measure (for instance ℝᵈ with Lebesgue measure), and let C be a measurable set in E of finite positive measure, symmetric about a point c (x ∈ C implies 2c − x ∈ C), and let k ≥ 1. Then there are 2k random vectors, each uniformly distributed on C, whose sum is almost surely constant. Convexity is not needed. For closed centrally symmetric convex bodies (parallelograms, discs, ellipsoids, boxes) this proves the case of the open problem MF-OP-016 (Wang 2015) for every even n ≥ d + 1; odd n, such as three copies of the uniform law on a parallelogram, is not covered.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem symmetric_completelyMixable_thm {d : ℕ} {C : Set (EuclideanSpace ℝ (Fin d))}\n    (hC : MeasurableSet C) (h0 : volume C ≠ 0) (htop : volume C ≠ ⊤)\n    (c : EuclideanSpace ℝ (Fin d)) (hsymm : ∀ x ∈ C, 2 • c - x ∈ C) {k : ℕ} (hk : 1 ≤ k) :\n    ∃ π : Measure (Fin (k * 2) → EuclideanSpace ℝ (Fin d)), IsProbabilityMeasure π ∧\n      (∀ i, π.map (fun x ↦ x i) = volume[|C]) ∧ ∃ s, ∀ᵐ x ∂π, ∑ i, x i = s :=\n  completelyMixable_of_symmetric volume hC h0 htop c hsymm hk\n"
+        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem symmetric_completelyMixable_thm {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]\n    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure]\n    {C : Set E} (hC : MeasurableSet C) (h0 : μ C ≠ 0) (htop : μ C ≠ ⊤) (c : E)\n    (hsymm : ∀ x ∈ C, 2 • c - x ∈ C) {k : ℕ} (hk : 1 ≤ k) :\n    ∃ π : Measure (Fin (k * 2) → E), IsProbabilityMeasure π ∧\n      (∀ i, π.map (fun x ↦ x i) = μ[|C]) ∧ ∃ s, ∀ᵐ x ∂π, ∑ i, x i = s :=\n  completelyMixable_of_symmetric μ hC h0 htop c hsymm hk\n"
       },
       "metadata": {
         "chapter": 8,

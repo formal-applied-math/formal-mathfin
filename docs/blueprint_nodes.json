@@ -2090,18 +2090,6 @@
   "label": "thm:continuous-ftap",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/ContinuousMarket.lean"},
- {"uses": ["def:convex-order"],
-  "title": "A complete mix is the convex-order minimum of the sum",
-  "text":
-  "If a coupling of $n$ copies of an integrable law $\\mu$ on $\\mathbb R$ has an\n  almost surely constant sum, the law of that sum is below, in convex order, the law of the sum\n  under every coupling of $n$ copies of $\\mu$: the constant is the common mean, and Jensen's\n  inequality (`ConvexOrder.dirac_integral_le`) compares it with any law of that mean.",
-  "name": "MathFin.convexOrder_sum_of_completelyMixable",
-  "module": "MathFin.Risk.CompleteMixability",
-  "line": 283,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:complete-mix-convex-order-minimum",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/CompleteMixability.lean"},
  {"uses": ["def:emm", "def:chain-ladder-prediction"],
   "title": "Mack's model: the chain-ladder predictions are a martingale",
   "text":
@@ -2142,6 +2130,18 @@
   "label": "thm:quantile-elicitability",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Elicitability.lean"},
+ {"uses": ["def:complete-mixability", "def:convex-order"],
+  "title": "A complete mix is the convex-order minimum of the sum",
+  "text":
+  "If an integrable law $\\mu$ on $\\mathbb R$ is $n$-completely mixable, the\n  complete mix's sum is below, in convex order, the sum under every coupling of $n$ copies of\n  $\\mu$ (`convexOrder_sum_of_completelyMixable`): the constant is the common mean, and Jensen's\n  inequality (`ConvexOrder.dirac_integral_le`) compares it with any law of that mean.",
+  "name": "MathFin.CompletelyMixable.exists_convexOrder_min",
+  "module": "MathFin.Risk.CompleteMixability",
+  "line": 317,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:complete-mix-convex-order-minimum",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/CompleteMixability.lean"},
  {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
   "title": "Martingale representation theorem",
   "text":

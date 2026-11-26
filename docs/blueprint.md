@@ -453,6 +453,7 @@ graph TD
   portfolioVariance --> capmEquilibrium
   coinFlipMeasure --> coinFlipMarkov
   markovPathLaw --> coinFlipMarkov
+  completeMixability --> completeMixConvexOrderMinimum
   convexOrder --> completeMixConvexOrderMinimum
   emm --> continuousFtap
   martingaleTransform --> continuousFtap
