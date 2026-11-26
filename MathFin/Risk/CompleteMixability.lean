@@ -19,7 +19,7 @@ A law `μ` is **`n`-completely mixable** when there are `n` random variables, ea
 whose sum is almost surely constant. Such a coupling is the extreme negative dependence of risk
 aggregation: among all sums of `n` risks with law `μ`, the constant one is the smallest in convex
 order (`convexOrder_sum_of_completelyMixable`), so it minimises every risk measure that respects
-convex order, expected shortfall among them. Sharp bounds on the `VaR` of a sum with given
+convex order; for expected shortfall that is `expectedShortfall_le_of_convexOrder`. Sharp bounds on the `VaR` of a sum with given
 marginals are built from completely mixable pieces.
 
 This file gives a criterion and the cases it proves for uniform laws. If `n` maps preserve `μ`
