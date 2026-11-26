@@ -9,6 +9,7 @@ public import MathFin.Contracts.Adapted
 public import MathFin.Pricing.Parity
 public import MathFin.Models.Binomial.PathMeasure
 public import MathFin.Models.Binomial.MartingaleRepresentation
+public import MathFin.Probability.Martingales.TimeChange
 
 /-!
 # The contracts priced in the binomial model
@@ -50,6 +51,8 @@ discounted spot (`pathPV_eq_value_add_gains`). The strategy comes from the tree
 * `Binomial.value_europeanCall`, `value_europeanPut`, `value_digitalCall` — each is the tree
   price of its payoff.
 * `Binomial.value_forward` — under no-arbitrage the forward is worth `S₀ − K e^{−ρN}`.
+* `Binomial.pathPV_eq_value_add_gains_of_obs` — the same for a contract paying a function of the
+  whole path up to `N`.
 * `Binomial.value_cappedCall` — the capped call is worth the difference of two call values.
 * `Binomial.pathPV_eq_value_add_gains` — a European contract's value is the cost of its hedge: on
   every path its discounted payoff is its value plus the gains of a predictable strategy in the
@@ -104,6 +107,10 @@ noncomputable def discount (ρ h : ℝ) : ℝ≥0 → ℝ := fun t ↦ Real.exp 
 
 variable {u d ρ h : ℝ} {q : ℝ≥0} (hq : q ≤ 1)
 
+/-- The step count `t ↦ ⌊t / h⌋₊` is monotone for a step `h ≥ 0`. -/
+theorem monotone_floor_div (hh : 0 ≤ h) : Monotone fun t : ℝ≥0 ↦ ⌊(t : ℝ) / h⌋₊ :=
+  fun _ _ hst ↦ Nat.floor_mono (div_le_div_of_nonneg_right (NNReal.coe_le_coe.2 hst) hh)
+
 /-- **A European payoff is worth its tree price.** Under the law of i.i.d. flips that go up with
 the risk-neutral probability `crrUpProb u d ρ`, if a cash flow at `T` pays `g` of the underlying
 at `T`, whatever the scenario, and `T` falls on step `N`, its binomial value is the
@@ -146,17 +153,29 @@ theorem value_digitalCall :
       = binomialPrice u d ρ (fun S ↦ if K < S then 1 else 0) N S₀ :=
   value_pay_eq_binomialPrice hq hqcrr S₀ hTN fun _ ↦ rfl
 
-/-- **The forward's binomial value** is `S₀ − K e^{−ρN}` under no-arbitrage: the discounted spot
-is a martingale (`binomialPrice_id`) and cash is discounted at `ρ` per step
-(`binomialPrice_const`). -/
-theorem value_forward (hna : BinomialNoArb u d ρ) :
+/-- **The forward's binomial value** is `S₀ − K e^{−ρN}` under no-arbitrage, for a step `h ≥ 0`:
+along the step count `t ↦ ⌊t / h⌋₊` the discounted spot is a martingale for the time-changed flip
+filtration (`martingale_discountedSpot`, `Martingale.comp`), so this is the trunk theorem
+`value_forward_of_martingale`; the deflator `e^{−ρ ⌊t/h⌋}` is the discount `e^{−ρ t / h}` at the
+payment date. -/
+theorem value_forward (hna : BinomialNoArb u d ρ) (hh : 0 ≤ h) :
     (forward K T).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
       = S₀ - K * Real.exp (-(ρ * N)) := by
-  rw [forward, value_pay_eq_binomialPrice hq hqcrr S₀ hTN (g := fun S ↦ S + -K)
-      fun _ ↦ sub_eq_add_neg _ _,
-    binomialPrice_add u d ρ (fun S ↦ S) (fun _ ↦ -K), binomialPrice_id u d ρ hna,
-    binomialPrice_const u d ρ _ hna, show -(N : ℝ) * ρ = -(ρ * N) by ring]
-  ring
+  have hfl : ⌊(T : ℝ) / h⌋₊ = N := by rw [hTN, Nat.floor_natCast]
+  have hM : Martingale
+      (fun (t : ℝ≥0) ω ↦ Real.exp (-(ρ * ⌊(t : ℝ) / h⌋₊)) * assets S₀ u d h () t ω)
+      (flipFiltration.comp (monotone_floor_div hh)) (coinFlipMeasure q hq) :=
+    (martingale_discountedSpot hna S₀ hq hqcrr).comp (monotone_floor_div hh)
+  have key := value_forward_of_martingale (K := K) (T := T) (S₀ := S₀)
+    (D := fun t : ℝ≥0 ↦ Real.exp (-(ρ * ⌊(t : ℝ) / h⌋₊))) (X := assets S₀ u d h) hM (by simp)
+    fun ω ↦ by simp [assets]
+  rw [hfl] at key
+  rw [← key]
+  simp only [Contract.value]
+  refine integral_congr_ae (.of_forall fun ω ↦
+    (forward K T).pathPV_congr trivial (fun t ht ↦ ?_) fun _ _ ↦ rfl)
+  rw [show t = T by simpa [forward, Contract.dates] using ht]
+  simp [discount, hTN, hfl]
 
 /-- **The capped call's binomial value, by composition**: the difference of two call values.
 Unlike its Black–Scholes counterpart it needs no integrability argument, since every fixed-date
@@ -190,10 +209,35 @@ theorem pathPV_eq_value_add_gains (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠
         = (Contract.pay T a).value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t)
             (assets S₀ u d h)
           + martingaleTransform H (discountedSpot S₀ u d ρ) N ω := by
-  obtain ⟨H, hH, hrep⟩ := binomialPrice_replication hna hS₀ g N
+  obtain ⟨H, hH, -, hrep⟩ := binomialPrice_replication hna hS₀ g N
   refine ⟨H, hH, fun ω ↦ ?_⟩
   rw [value_pay_eq_binomialPrice hq hqcrr S₀ hTN hg, ← hrep ω]
   simp [Contract.pathPV, Contract.cashflows, hg, scenarioAt, assets, discount, hTN]
+
+omit hTN in
+/-- **A path-dependent contract's binomial value is the cost of its hedge.** Under no-arbitrage,
+with paths drawn under the risk-neutral up-probability and `S₀ ≠ 0`, for a fixed-dated contract
+that observes the underlying only within the first `N` steps (payments may fall later), there is a
+predictable strategy `H` with
+
+  `pathPV = value + ∑_{k<N} H_{k+1} (S̃_{k+1} − S̃_k)`
+
+on every path. This is `binomial_replication_of_pathAdaptedAt` for the discounted payoff, a
+function of the first `N` flips; `pathPV_eq_value_add_gains` is the case of a payoff of the spot at
+`T`, which also names the hedge. -/
+theorem pathPV_eq_value_add_gains_of_obs (hna : BinomialNoArb u d ρ) (hS₀ : S₀ ≠ 0)
+    {c : Contract Unit} (hc : c.FixedDated)
+    (hobs : ∀ p ∈ c.obsList, ⌊((p.2 : ℝ≥0) : ℝ) / h⌋₊ ≤ N) :
+    ∃ H : ℕ → (ℕ → Bool) → ℝ, StronglyAdapted flipFiltration (fun n ↦ H (n + 1)) ∧ ∀ ω,
+      c.pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω)
+        = c.value (coinFlipMeasure q hq) (fun t _ ↦ discount ρ h t) (assets S₀ u d h)
+          + martingaleTransform H (discountedSpot S₀ u d ρ) N ω := by
+  have hY : PathAdaptedAt N fun ω ↦ c.pathPV (discount ρ h) (scenarioAt (assets S₀ u d h) ω) :=
+    fun ω ω' hω ↦ c.pathPV_congr hc (fun _ _ ↦ rfl) fun p hp ↦
+      (pathAdaptedAt_spotPath S₀ u d ⌊((p.2 : ℝ≥0) : ℝ) / h⌋₊).mono (hobs p hp) ω ω' hω
+  obtain ⟨H, hH, hrep⟩ := binomial_replication_of_pathAdaptedAt hna hS₀ hq hqcrr hY
+    (integrable_pathPV hq S₀ u d h (discount ρ h) hc)
+  exact ⟨H, hH, hrep⟩
 
 end MathFin.Contracts.Binomial
 
@@ -218,7 +262,7 @@ lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n 
     (Binomial.integrable_pathPV hq S u d 1 _ (c := europeanPut K n) trivial)
     (Binomial.integrable_pathPV hq S u d 1 _ (c := forward K n) trivial)
   rw [Binomial.value_europeanCall hq rfl S K hTN, Binomial.value_europeanPut hq rfl S K hTN,
-    Binomial.value_forward hq rfl S K hTN h] at this
+    Binomial.value_forward hq rfl S K hTN h zero_le_one] at this
   rw [this, show -(n : ℝ) * r = -(r * n) by ring]
 
 end MathFin

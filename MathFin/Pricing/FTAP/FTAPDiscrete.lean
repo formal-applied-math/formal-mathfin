@@ -381,7 +381,7 @@ theorem IsEMM.increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
     {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [FiniteDimensional ℝ F]
     {S : ι → Ω → F} {T : ι} {Q : Measure Ω}
     (h : IsEMM 𝓕 P S T Q) {s t : ι} (hs : s ≤ T) (ht : t ≤ T) :
-    OnePeriodVector.IsEMM P (S t - S s) Q := by
+    OnePeriodVector.IsCentringMeasure P (S t - S s) Q := by
   have := h.isProb
   have hmean {u : ι} (hu : u ≤ T) : ∫ ω, S u ω ∂Q = ∫ ω, S ⊥ ω ∂Q := by
     rw [← integral_condExp (𝓕.le ⊥)]

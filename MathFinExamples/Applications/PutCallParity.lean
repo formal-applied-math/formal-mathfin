@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: put–call parity as a check on quoted prices
@@ -63,7 +64,7 @@ open scoped NNReal
 
 /-- A call and a put on the same underlying, strike and maturity, as quoted, together with the
 market data the check needs and what it leaves out. -/
-structure QuoteSheet where
+structure QuoteSheet extends Provenance String where
   /-- The spot price of the underlying. -/
   spot : ℝ
   /-- The continuously compounded short rate, per year. -/
@@ -79,10 +80,6 @@ structure QuoteSheet where
   spot_pos : 0 < spot
   strike_pos : 0 < strike
   maturity_pos : 0 < maturity
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the check does not model. -/
-  unmodelled : List String
 
 namespace QuoteSheet
 

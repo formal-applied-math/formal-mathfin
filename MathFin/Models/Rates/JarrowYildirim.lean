@@ -8,6 +8,7 @@ module
 public import MathFin.Models.Rates.Caplet
 public import MathFin.Models.Rates.Inflation
 public import MathFin.Models.Rates.VasicekBondPrice
+public import Mathlib.LinearAlgebra.Matrix.PosDef
 
 /-!
 # Jarrow–Yildirim: the ZC inflation caplet and the YoY forward
@@ -41,10 +42,12 @@ first used. This module records what follows without the SDE calculus.
 * `jyVarIntegrand`: the variance integrand of `log F(·,T)` with constant parameters.
 * `jyVariance`: its integral `V(0,T)`.
 * `jyCorrDet`: the determinant of the `(I, r, n)` correlation matrix.
+* `jyCorrMatrix`: the `(I, r, n)` correlation matrix itself.
 
 ## Main results
 
 * `quad2_nonneg`, `quad3_nonneg`: the `2×2` and `3×3` quadratic-form lemmas behind the next item.
+* `posSemidef_jyCorrMatrix`: under their hypotheses `jyCorrMatrix` is Mathlib's `PosSemidef`.
 * `jyVarIntegrand_nonneg`, `jyVariance_nonneg` (for `T ≥ 0`): the integrand is the quadratic form of
   `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)` correlation matrix, non-negative when
   `ρ_{rI}² ≤ 1`, `ρ_{nI}² ≤ 1` and `jyCorrDet ≥ 0` (pairwise `|ρ| ≤ 1` is not enough for three
@@ -158,6 +161,27 @@ theorem quad3_nonneg {ρrI ρnI ρnr x y z : ℝ} (hrI : ρrI ^ 2 ≤ 1) (hnI : 
     (y := y) (z := z)
     (by linarith) (by linarith) (by unfold jyCorrDet at hdet; nlinarith)
   nlinarith [sq_nonneg (x + ρrI * y + ρnI * z)]
+
+/-- The `(I, r, n)` correlation matrix
+`[[1, ρ_{rI}, ρ_{nI}], [ρ_{rI}, 1, ρ_{nr}], [ρ_{nI}, ρ_{nr}, 1]]` of the driving Brownian
+motions. -/
+def jyCorrMatrix (ρrI ρnI ρnr : ℝ) : Matrix (Fin 3) (Fin 3) ℝ :=
+  !![1, ρrI, ρnI; ρrI, 1, ρnr; ρnI, ρnr, 1]
+
+/-- **The `(I, r, n)` correlation matrix is positive semidefinite** (Mathlib's
+`Matrix.PosSemidef`, the vocabulary of the portfolio theory) under the hypotheses of
+`quad3_nonneg`: its quadratic form is the three-factor form of `quad3_nonneg`. -/
+theorem posSemidef_jyCorrMatrix {ρrI ρnI ρnr : ℝ} (hrI : ρrI ^ 2 ≤ 1) (hnI : ρnI ^ 2 ≤ 1)
+    (hdet : 0 ≤ jyCorrDet ρrI ρnI ρnr) : (jyCorrMatrix ρrI ρnI ρnr).PosSemidef := by
+  refine Matrix.PosSemidef.of_dotProduct_mulVec_nonneg (Matrix.IsHermitian.ext fun i j ↦ ?_)
+    fun x ↦ ?_
+  · fin_cases i <;> fin_cases j <;> simp [jyCorrMatrix]
+  · have h := quad3_nonneg hrI hnI hdet (x := x 0) (y := x 1) (z := x 2)
+    simp only [jyCorrMatrix, dotProduct, Matrix.mulVec, Fin.sum_univ_three, star_trivial,
+      Pi.star_apply, Matrix.of_apply, Matrix.cons_val', Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_two, Matrix.empty_val', Matrix.cons_val_fin_one,
+      Fin.isValue, Matrix.head_cons, Matrix.tail_cons, Matrix.head_fin_const]
+    linarith
 
 /-- The integrand is the quadratic form of `(σ_I, −σ_r·B_r, σ_n·B_n)` against the `(I, r, n)`
 correlation matrix: the variance of `σ_I dW_I − σ_rB_r dW_r + σ_nB_n dW_n`. -/

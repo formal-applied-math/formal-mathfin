@@ -16,7 +16,7 @@ anchors = [
   "MathFin.Market.IsPricingMeasure",
   "MathFin.IsEMM",
   "MathFin.OnePeriod.IsEMM",
-  "MathFin.OnePeriodVector.IsEMM",
+  "MathFin.OnePeriodVector.IsCentringMeasure",
   "MathFin.HasEMMMultiState",
   "MathFin.HasEMMTwoState",
   "MathFin.NoArbitrage",

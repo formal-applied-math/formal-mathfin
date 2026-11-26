@@ -79,7 +79,8 @@ theorem absolutelyContinuous_withDensity_ofReal {Ω : Type*} {mΩ : MeasurableSp
 
 /-- `Q` is an **equivalent probability measure** for `P`: a probability measure with the same null
 sets, `Q ≪ P` and `P ≪ Q`. The prefix shared by every equivalent-martingale-measure structure of
-the library (`IsEMM`, at every time index, and `OnePeriodVector.IsEMM`), which `extend` it. -/
+the library (`IsEMM`, at every time index, and `OnePeriodVector.IsCentringMeasure`), which
+`extend` it. -/
 structure IsEquivProbMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω} (P Q : Measure Ω) : Prop where
   isProb : IsProbabilityMeasure Q
   ac : Q ≪ P

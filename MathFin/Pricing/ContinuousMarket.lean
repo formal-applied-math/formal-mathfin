@@ -171,10 +171,10 @@ def NoArbitrageSimple (𝓕 : Filtration ℝ≥0 mΩ) (P : Measure Ω) (S : ℝ�
   ∀ ψ : SimpleStrategy 𝓕 F, ψ.time (Fin.last ψ.N) ≤ T → (0 ≤ᵐ[P] fun ω ↦ ψ.gains S ω) →
     P {ω | 0 < ψ.gains S ω} = 0
 
-/-- The discrete `ℕ`-filtration `n ↦ 𝓕 (t n)` obtained by **sampling** a continuous-time
-filtration `𝓕` along a monotone schedule `t : ℕ → ℝ≥0`. -/
-def sampledFiltration (𝓕 : Filtration ℝ≥0 mΩ) {t : ℕ → ℝ≥0} (ht : Monotone t) :
-    Filtration ℕ mΩ where
+/-- The filtration `k ↦ 𝓕 (t k)` obtained by **sampling** a filtration `𝓕` along a monotone
+schedule `t : κ → ι`; for `t : ℕ → ℝ≥0` it is the discrete-time filtration of a continuous one. -/
+def sampledFiltration {ι κ : Type*} [Preorder ι] [Preorder κ] (𝓕 : Filtration ι mΩ) {t : κ → ι}
+    (ht : Monotone t) : Filtration κ mΩ where
   seq n := 𝓕 (t n)
   mono' _ _ hij := 𝓕.mono (ht hij)
   le' n := 𝓕.le (t n)
@@ -186,8 +186,8 @@ filtration `sampledFiltration 𝓕 ht`: adaptedness and the tower property both 
 `t`. A general, standalone structural lemma (the discrete-time trace of a continuous-time
 martingale), benchmarked as `gir-martingale-reindex`. `IsEMM.sampled` is its counterpart for a
 martingale stopped at the horizon, and is what `isEMM_noArbitrageSimple` uses. -/
-theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
-    (hS : Martingale S 𝓕 Q) {t : ℕ → ℝ≥0} (ht : Monotone t) :
+theorem martingale_comp_monotone {ι κ : Type*} [Preorder ι] [Preorder κ] {𝓕 : Filtration ι mΩ}
+    {Q : Measure Ω} {S : ι → Ω → F} (hS : Martingale S 𝓕 Q) {t : κ → ι} (ht : Monotone t) :
     Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=
   ⟨fun n ↦ hS.1 (t n), fun i j hij ↦ hS.2 (t i) (t j) (ht hij)⟩
 
@@ -262,15 +262,16 @@ theorem gains_eq_martingaleTransform (S : ℝ≥0 → Ω → F) :
 
 end SimpleStrategy
 
-variable {S : ℝ≥0 → Ω → F} {T : ℝ≥0} {Q : Measure Ω} in
-/-- **A continuous-time EMM, sampled, is a discrete-time EMM.** If `Q` is an equivalent
-martingale measure up to `T` for the discounted price `S` in continuous time, then along
-any monotone schedule `t 0 ≤ t 1 ≤ ⋯` whose first `T' + 1` dates lie in `[0, T]` it is an
-equivalent martingale measure, at the discrete horizon `T'`, for the sampled price `n ↦ S (t n)`
-and the sampled filtration `n ↦ 𝓕 (t n)`. General Ω; the sampled martingale is built from the
+variable {ι κ : Type*} [LinearOrder ι] [LinearOrder κ] {𝓕 : Filtration ι mΩ}
+  {S : ι → Ω → F} {T : ι} {Q : Measure Ω} in
+/-- **An EMM, sampled, is an EMM.** If `Q` is an equivalent martingale measure up to `T` for the
+discounted price `S`, then along any monotone schedule `t : κ → ι` whose dates up to `T'` lie
+below `T` it is an equivalent martingale measure, at the horizon `T'`, for the sampled price
+`k ↦ S (t k)` and the sampled filtration `k ↦ 𝓕 (t k)`; for `t : ℕ → ℝ≥0` this is the discrete
+trace of a continuous-time EMM. General Ω; the sampled martingale is built from the
 three consequences of `IsEMM` before the horizon (`martingale_min_iff`). -/
-theorem _root_.MathFin.IsEMM.sampled (h : IsEMM 𝓕 P S T Q) {t : ℕ → ℝ≥0} (ht : Monotone t)
-    (T' : ℕ) (hT' : t T' ≤ T) :
+theorem _root_.MathFin.IsEMM.sampled (h : IsEMM 𝓕 P S T Q) {t : κ → ι} (ht : Monotone t)
+    (T' : κ) (hT' : t T' ≤ T) :
     MathFin.IsEMM (sampledFiltration 𝓕 ht) P (fun n ↦ S (t n)) T' Q :=
   have := h.isProb
   ⟨h.toIsEquivProbMeasure, martingale_min_iff.mpr

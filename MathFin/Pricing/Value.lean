@@ -46,9 +46,9 @@ is load-bearing.
   Mathlib's Bochner integral (it returns `0` off the integrable set on both sides), while
   `value_both` genuinely needs both summands integrable — `integral_add` is false without
   them. That asymmetry, not a uniform "linearity", is the honest content of this pair.
-* `Contract.value_payFlows_sub`, `Contract.value_payFlows_add_sub` — a schedule whose payoffs are a
-  signed sum of the payoffs of other schedules (in the model, outcome by outcome) is worth the
-  same signed sum of their values.
+* `Contract.value_payFlows_add`, `Contract.value_payFlows_sub`,
+  `Contract.value_payFlows_add_sub` — a schedule whose payoffs are a signed sum of the payoffs of
+  other schedules (in the model, outcome by outcome) is worth the same signed sum of their values.
 * `Contract.value_deliverAsset` — a contract that simply delivers the asset `S` at time `T`
   is worth `∫ ω, S 0 ω ∂Q` today, given `S` is a `Q`-martingale and `Q` a probability
   measure. Mechanically this *is* conditional-expectation machinery (`condExp_ae_eq` +
@@ -199,8 +199,30 @@ theorem Contract.value_payFlows_sub (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ
   rw [← integral_sub (hc i hi) (hd i hi)]
   exact integral_congr_ae (ae_of_all _ fun ω ↦ by simp only [h i hi ω]; ring)
 
+/-- **A schedule whose payoffs are a sum of two schedules' payoffs is worth the sum of their
+values**: the additive companion of `value_payFlows_sub`, given integrable deflated payoffs for
+the two. -/
+theorem Contract.value_payFlows_add (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)
+    (t : ℕ → ℝ≥0) (a b c : ℕ → Payoff ι) (n : ℕ)
+    (h : ∀ i < n, ∀ ω, (a i).eval (scenarioAt X ω)
+      = (b i).eval (scenarioAt X ω) + (c i).eval (scenarioAt X ω))
+    (hb : ∀ i < n, Integrable (fun ω ↦ D (t i) ω * (b i).eval (scenarioAt X ω)) Q)
+    (hc : ∀ i < n, Integrable (fun ω ↦ D (t i) ω * (c i).eval (scenarioAt X ω)) Q) :
+    (payFlows t a n).value Q D X = (payFlows t b n).value Q D X + (payFlows t c n).value Q D X := by
+  have ha (i : ℕ) (hi : i < n) : Integrable (fun ω ↦ D (t i) ω * (a i).eval (scenarioAt X ω)) Q :=
+    ((hb i hi).add (hc i hi)).congr
+      (ae_of_all _ fun ω ↦ by simp only [Pi.add_apply, h i hi ω]; ring)
+  rw [Contract.value_payFlows _ _ _ _ _ _ ha, Contract.value_payFlows _ _ _ _ _ _ hb,
+    Contract.value_payFlows _ _ _ _ _ _ hc, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun i hi ↦ ?_
+  have hi := Finset.mem_range.1 hi
+  simp only [Contract.value_pay]
+  rw [← integral_add (hb i hi) (hc i hi)]
+  exact integral_congr_ae (ae_of_all _ fun ω ↦ by simp only [h i hi ω]; ring)
+
 /-- **A schedule whose payoffs are `b i + c i - d i` is worth `b + c - d`**: the three-term form
-of `value_payFlows_sub`, for a payoff identity of the type `max a b + min a b = a + b`. -/
+of `value_payFlows_sub`, for a payoff identity of the type `max a b + min a b = a + b`. It is
+`value_payFlows_sub` for the schedule `b + c` against `d`, then `value_payFlows_add`. -/
 theorem Contract.value_payFlows_add_sub (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ)
     (X : ι → ℝ≥0 → Ω → ℝ) (t : ℕ → ℝ≥0) (a b c d : ℕ → Payoff ι) (n : ℕ)
     (h : ∀ i < n, ∀ ω, (a i).eval (scenarioAt X ω)
@@ -212,23 +234,11 @@ theorem Contract.value_payFlows_add_sub (Q : Measure Ω) (D : ℝ≥0 → Ω →
     (payFlows t a n).value Q D X
       = (payFlows t b n).value Q D X + (payFlows t c n).value Q D X
         - (payFlows t d n).value Q D X := by
-  have ha (i : ℕ) (hi : i < n) : Integrable (fun ω ↦ D (t i) ω * (a i).eval (scenarioAt X ω)) Q :=
-    (((hb i hi).add (hc i hi)).sub (hd i hi)).congr
-      (ae_of_all _ fun ω ↦ by simp only [Pi.sub_apply, Pi.add_apply, h i hi ω]; ring)
-  rw [Contract.value_payFlows _ _ _ _ _ _ ha, Contract.value_payFlows _ _ _ _ _ _ hb,
-    Contract.value_payFlows _ _ _ _ _ _ hc, Contract.value_payFlows _ _ _ _ _ _ hd,
-    ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
-  refine Finset.sum_congr rfl fun i hi ↦ ?_
-  have hi := Finset.mem_range.1 hi
-  simp only [Contract.value_pay]
-  calc ∫ ω, D (t i) ω * (a i).eval (scenarioAt X ω) ∂Q
-      = ∫ ω, (D (t i) ω * (b i).eval (scenarioAt X ω) + D (t i) ω * (c i).eval (scenarioAt X ω)
-          - D (t i) ω * (d i).eval (scenarioAt X ω)) ∂Q :=
-        integral_congr_ae (ae_of_all _ fun ω ↦ by simp only [h i hi ω]; ring)
-    _ = _ := by
-        rw [integral_sub (f := fun ω ↦ D (t i) ω * (b i).eval (scenarioAt X ω)
-          + D (t i) ω * (c i).eval (scenarioAt X ω)) ((hb i hi).add (hc i hi)) (hd i hi),
-          integral_add (hb i hi) (hc i hi)]
+  rw [Contract.value_payFlows_sub Q D X t a (fun i ↦ (b i).add (c i)) d n
+    (fun i hi ω ↦ by simp only [Payoff.eval, h i hi ω])
+    (fun i hi ↦ ((hb i hi).add (hc i hi)).congr
+      (ae_of_all _ fun ω ↦ by simp only [Pi.add_apply, Payoff.eval]; ring)) hd,
+    Contract.value_payFlows_add Q D X t _ b c n (fun i hi ω ↦ rfl) hb hc]
 
 /-- Under a `Q`-martingale `S` and `Q` a probability measure, a contract that simply
 delivers the asset `S` at time `T`, undeflated, is worth `∫ ω, S 0 ω ∂Q` today — the

@@ -1505,10 +1505,13 @@ attribute [blueprint "thm:balancer-invariant"
   (`constantMeanPayoff`, `eval_constantMeanPayoff`); at the pool's own spot price the mark is
   the reserves $xP + y$, the constant value distribution $B_Y/W_Y$
   (`eval_constantMeanPayoff_eq_reserves`); paying it at $T$ is worth the discounted
-  expectation of the mark (`price_constantMeanPayoff`, the tagged statement, the market's price
-  of a payment unfolded); and at $w = 1/2$ the position is the constant-product payoff of
-  invariant $V^2$ (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
-  MathFin.DeFi.price_constantMeanPayoff
+  expectation of the mark (`price_constantMeanPayoff`, the market's price of a payment
+  unfolded); in a market whose price of $X$ in $Y$ at $T$ is the pool's own spot price almost
+  surely, the position is priced as its reserves, the claim paying $xP_T + y$
+  (`price_constantMeanPayoff_eq_hodl`, the tagged statement); and at $w = 1/2$ the position is
+  the constant-product payoff of invariant $V^2$
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
+  MathFin.DeFi.price_constantMeanPayoff_eq_hodl
 
 attribute [blueprint "def:v3-position-value"
   (title := "Value of a concentrated-liquidity position")
@@ -1784,19 +1787,21 @@ attribute [blueprint "thm:kelly-criterion"
   growth of one bet, $g(f) = p\log(1+fb) + (1-p)\log(1-f)$, has derivative zero at the Kelly
   fraction $f^* = (pb - q)/b$, $q = 1-p$: the first-order condition of growth-optimal betting.
   Over $n$ repeated bets the growth is $n\,g$, with the same stationary fraction
-  (`kelly_n_periods_deriv_at_kelly`). First order only: global optimality and the
-  continuous-time case are not proved (`thm:log-optimal-numeraire`). -/)]
+  (`kelly_n_periods_deriv_at_kelly`). With $\log x \le x - 1$ the condition gives the global
+  form, Kelly's inequality: $f^*$ maximises $g$ among the fractions with positive wealth in both
+  states (`kelly_log_le`). The continuous-time case is not proved
+  (`thm:log-optimal-numeraire`). -/)]
   MathFin.kellyGrowth_deriv_at_kelly
 
 attribute [blueprint "thm:kelly-is-log-optimal"
   (title := "The Kelly wealth is the numéraire portfolio of the betting market")
   (statement := /-- In the two-state market of a bond (price $1$) and a bet of odds $b > 0$ won with
   probability $p \in (0,1)$, the portfolio of one bond and the fraction $f^* = (pb - q)/b$ on the
-  bet is stationary for the expected log wealth (its derivative along the bet is
-  $g'(f^*) = 0$, `thm:kelly-criterion`), so by `thm:log-optimal-numeraire-one-period` its terminal
-  wealth $W$ satisfies $\mathrm{sdf} = 1/W$ under the fair-odds pricing measure
-  $q_+ = 1/(b+1)$, $q_- = b/(b+1)$, and $E_P[S_k(1)/W] = S_k(0)$ for the bond and the bet (price
-  $0$). The market is complete; first order only, global optimality is not proved. -/)]
+  bet is a local maximum of the expected log wealth on the budget set (`kelly_isLocalMaxOn`, from
+  Kelly's inequality, the global form of `thm:kelly-criterion`), hence stationary, so by
+  `thm:log-optimal-numeraire-one-period` its terminal wealth $W$ satisfies $\mathrm{sdf} = 1/W$
+  under the fair-odds pricing measure $q_+ = 1/(b+1)$, $q_- = b/(b+1)$, and
+  $E_P[S_k(1)/W] = S_k(0)$ for the bond and the bet (price $0$). The market is complete. -/)]
   MathFin.kellyMarket_numeraire_portfolio
 
 -- ===== choice/trading: Strategic trading =====

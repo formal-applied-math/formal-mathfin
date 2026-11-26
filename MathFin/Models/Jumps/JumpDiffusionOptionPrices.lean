@@ -7,6 +7,7 @@ module
 
 public import MathFin.Models.Jumps.JumpDiffusionProcess
 public import MathFin.Models.Jumps.JumpImpliedVol
+public import MathFin.Pricing.Parity
 public import MathFin.Probability.Analysis.IndepFreezing
 
 /-!
@@ -110,32 +111,19 @@ theorem jumpDiffusionCallPrice_eq (S K r b σ : ℝ) (Λ : ℝ≥0) {ν : Measur
         + S * rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1) - r) * τ)
         - K * rexp (-r * τ) := by
   have hexp := integrable_exp_jumpDiffusionIncrementLaw b σ Λ hν τ
-  have hput : Integrable (fun y ↦ rexp (-r * τ) * max (K - S * rexp y) 0)
-      (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
-    ((integrable_const K).sub (hexp.const_mul S)).pos_part.const_mul _
-  have hfwd : Integrable (fun y ↦ rexp (-r * τ) * (S * rexp y))
-      (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
-    (hexp.const_mul S).const_mul _
-  have hdiff : Integrable (fun y ↦ rexp (-r * τ) * (S * rexp y) - rexp (-r * τ) * K)
-      (jumpDiffusionIncrementLaw b σ Λ ν τ) :=
-    hfwd.sub (integrable_const _)
-  have hfwdI : ∫ y, rexp (-r * τ) * (S * rexp y) ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
-      = S * rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1) - r) * τ) := by
-    rw [integral_const_mul, integral_const_mul,
-      integral_exp_jumpDiffusionIncrementLaw b σ Λ hν τ, mul_left_comm, ← Real.exp_add]
-    congr 2
+  have h : jumpDiffusionCallPrice S K r b σ Λ ν τ - jumpDiffusionPutPrice S K r b σ Λ ν τ
+      = rexp (-r * τ) * (∫ y, S * rexp y ∂(jumpDiffusionIncrementLaw b σ Λ ν τ) - K) :=
+    Contracts.integral_call_sub_put (hexp.const_mul S) _ K
+  have hE : ∫ y, S * rexp y ∂(jumpDiffusionIncrementLaw b σ Λ ν τ)
+      = S * rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * τ) := by
+    rw [integral_const_mul, integral_exp_jumpDiffusionIncrementLaw b σ Λ hν τ]
+  have hm : rexp (-r * τ) * rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * τ)
+      = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1) - r) * τ) := by
+    rw [← Real.exp_add]
+    congr 1
     ring
-  -- the call payoff is the put payoff plus the forward
-  have hpar (y : ℝ) : rexp (-r * τ) * max (S * rexp y - K) 0
-      = rexp (-r * τ) * max (K - S * rexp y) 0
-        + (rexp (-r * τ) * (S * rexp y) - rexp (-r * τ) * K) := by
-    have hx := max_zero_sub_max_neg_zero_eq_self (S * rexp y - K)
-    rw [neg_sub] at hx
-    linear_combination rexp (-r * τ) * hx
-  rw [jumpDiffusionCallPrice, jumpDiffusionPutPrice, integral_congr_ae (ae_of_all _ hpar),
-    integral_add hput hdiff, integral_sub hfwd (integrable_const _), hfwdI, integral_const,
-    probReal_univ, one_smul]
-  ring
+  rw [hE] at h
+  linear_combination h + S * hm
 
 /-- **Put–call parity at the compensated drift**: when `b = r − σ²/2 − Λ(𝔼[e^J] − 1)` the
 forward is worth `S`, and `C(S, τ) = P(S, τ) + S − Ke^{−rτ}`. -/

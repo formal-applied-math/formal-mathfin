@@ -12,7 +12,7 @@ public import MathFin.Probability.Gaussian.GaussianMoments
 
 /-! # Girsanov's theorem for the filtration: `B^θ` is a `Q`-Brownian motion
 
-`Btheta_isQBrownianMotion_predictable_of_bdd` fixes the finite-dimensional laws of the
+`Btheta_isBrownianOn_predictable_of_bdd` fixes the finite-dimensional laws of the
 drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u` under `Q = Z_T·μ` on `[0, T]`.
 This file upgrades the conclusion for a bounded predictable `θ` to Brownian motion *for the
 filtration*, on the whole time axis, and, when `B` has almost surely continuous paths, with

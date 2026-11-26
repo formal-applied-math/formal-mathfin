@@ -30,10 +30,10 @@
     {
       "id": "mf-svi-call-convex-iff-durrleman",
       "name": "Durrleman's Condition is Convexity of the SVI-Smiled Call in Strike",
-      "description": "For raw SVI with sigma > 0 and total variance positive at every log-strike, the Black–Scholes call price with the SVI volatility substituted strike by strike (spot, maturity and discount factor normalised to one) is convex in strike on (0, infinity) if and only if Durrleman's function g is nonnegative at every log-strike. The price is MathFin's bsV evaluated at the smile, not a constant-volatility derivative.",
+      "description": "For raw SVI with sigma > 0 and total variance positive at every log-strike, the Black–Scholes call price with the SVI volatility substituted strike by strike (spot, maturity and discount factor normalised to one) is convex in strike on (0, infinity) if and only if Durrleman's function g is nonnegative at every log-strike. The price is MathFin's bsV evaluated at the smile, not a constant-volatility derivative. Consequently, in a market with unit numeraire, a positive asset and a pricing measure Q up to T whose forward-normalised calls at every strike k > 0 are this smiled call, Durrleman's g is nonnegative at every log-strike: the market's normalised calls are convex in the strike.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Models.ModelFree.SVI.ExtendedFormula\n\nopen MathFin MathFin.SVI Set\n\n/-- **Durrleman's condition is convexity of the call in strike.** For raw SVI with `σ > 0` and\n    positive total variance, the Black–Scholes call with the SVI volatility substituted strike by\n    strike (spot, maturity and discount factor one) is convex on `(0, ∞)` exactly when Durrleman's\n    function is nonnegative at every log-strike. Re-export of `MathFin.SVI.bsSmile_convex_iff`. -/\ntheorem svi_call_convex_iff_durrleman (p : Params) (hs : 0 < p.sigma)\n    (hw : ∀ k : ℝ, 0 < variance p k) :\n    ConvexOn ℝ (Ioi 0) (bsSmile p) ↔ ∀ k : ℝ, 0 ≤ durrleman p k :=\n  bsSmile_convex_iff p hs hw\n"
+        "lean": "import MathFin.Models.ModelFree.SVI.MarketRealisation\n\nopen MathFin MathFin.SVI MathFin.Contracts MeasureTheory Set\nopen scoped NNReal\n\n/-- **Durrleman's condition is convexity of the call in strike.** For raw SVI with `σ > 0` and\n    positive total variance, the Black–Scholes call with the SVI volatility substituted strike by\n    strike (spot, maturity and discount factor one) is convex on `(0, ∞)` exactly when Durrleman's\n    function is nonnegative at every log-strike. Re-export of `MathFin.SVI.bsSmile_convex_iff`. -/\ntheorem svi_call_convex_iff_durrleman (p : Params) (hs : 0 < p.sigma)\n    (hw : ∀ k : ℝ, 0 < variance p k) :\n    ConvexOn ℝ (Ioi 0) (bsSmile p) ↔ ∀ k : ℝ, 0 ≤ durrleman p k :=\n  bsSmile_convex_iff p hs hw\n\n/-- **A market that prices the SVI smile satisfies Durrleman's condition.** Re-export of\n    `MathFin.SVI.durrleman_nonneg_of_isPricingMeasure`. -/\ntheorem svi_market_durrleman_nonneg {Ω : Type*} [MeasurableSpace Ω] {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} {p : Params} (hs : 0 < p.sigma)\n    (hw : ∀ k : ℝ, 0 < variance p k) (hQ : M.IsPricingMeasure T Q)\n    (hN : ∀ t ω, M.numeraire t ω = 1) (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ}\n    (hF : F = M.price Q (.pay T (.obs () T)))\n    (hsmile : ∀ k > 0, M.price Q (europeanCall (k * F) T) / F = bsSmile p k) (k : ℝ) :\n    0 ≤ durrleman p k :=\n  durrleman_nonneg_of_isPricingMeasure hs hw hQ hN hpos hF hsmile k\n"
       },
       "metadata": {
         "alignment_source": "Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
@@ -45,7 +45,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Re-export of MathFin.SVI.bsSmile_convex_iff. The second strike derivative of the smiled call is computed with the smile's first and second derivatives (blackCall_deriv2) and its sign identified with that of g; bsSmile is MathFin.bsV K 0 (sqrt w(log K)) 1 1. SCOPE. sigma > 0 and positive variance are hypotheses. Normalised spot, maturity and discount; convexity on (0, infinity) only, with no statement about limits at 0 or infinity or about the call being a price under a measure.",
+        "formalization_scope": "Re-export of MathFin.SVI.bsSmile_convex_iff. The second strike derivative of the smiled call is computed with the smile's first and second derivatives (blackCall_deriv2) and its sign identified with that of g; bsSmile is MathFin.bsV K 0 (sqrt w(log K)) 1 1. SCOPE. sigma > 0 and positive variance are hypotheses. Normalised spot, maturity and discount; convexity on (0, infinity) only, with no statement about limits at 0 or infinity. The market consequence (svi_market_durrleman_nonneg, MathFin.SVI.durrleman_nonneg_of_isPricingMeasure in MarketRealisation.lean) assumes that a market's normalised calls are the smiled call and derives g ≥ 0 from their convexity (Market.IsPricingMeasure.isNormalizedCallPrice); it does not construct such a market.",
         "provenance": {
           "source": "butterfly-free-svi",
           "revision": "eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a",
@@ -192,6 +192,32 @@
         "formalization_scope": "Re-export of MathFin.SVI.exists_market_of_butterflyFreeFormula (MathFin/Models/ModelFree/SVI/MarketRealisation.lean). Proof. butterflyFreeFormula_iff_isNormalizedCallPrice turns the sign formula into IsNormalizedCallPrice (bsSmile p), and exists_market_of_isNormalizedCallPrice (Roper's converse) gives the market: the one-date market on the reals with the Breeden-Litzenberger law of the smile as reference and pricing measure. SCOPE. (1) The asset is nonnegative, not strictly positive (a call price function may have an atom at 0). (2) One maturity, forward normalised to one, unit numeraire, positive strikes. (3) No calendar-spread condition and no SVI surface across maturities; no continuous-time model realising the smile.",
         "provenance": {
           "source": "mathfin"
+        }
+      }
+    },
+    {
+      "id": "mf-ssvi-tail-condition",
+      "name": "The Tail Condition for an SSVI Slice, by Instantiation of Raw SVI",
+      "description": "For one SSVI slice with at-the-money total variance theta >= 0, skew-scale phi > 0 and rho^2 <= 1, whose total variance (theta/2)(1 + rho phi k + sqrt((phi k + rho)^2 + 1 - rho^2)) is positive at every log-moneyness, the SVI-smiled Black–Scholes call tends to 0 at large strikes exactly when theta phi (1 + rho) < 4. The slice is the raw SVI slice with a = theta(1-rho^2)/2, b = theta phi/2, m = -rho/phi, sigma = sqrt(1-rho^2)/phi (ssviVariance_eq_variance), and the condition is the raw tail condition b(1+rho) < 2 at those parameters. Consequently, in a market with unit numeraire, a positive asset and a pricing measure Q up to T whose forward-normalised calls at every strike k > 0 are this smiled call, theta phi (1 + rho) < 4 holds: the market's normalised calls vanish at large strikes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.SVI.SSVI\n\nopen MathFin MathFin.SVI MathFin.Contracts MeasureTheory Filter Topology\nopen scoped NNReal\n\n/-- **The tail condition for an SSVI slice.** For `θ ≥ 0`, `φ > 0`, `ρ² ≤ 1` and SSVI total\n    variance positive at every log-moneyness, the SVI-smiled call at the raw parameters of the\n    slice tends to `0` at large strikes exactly when `θ φ (1 + ρ) < 4`. Re-export of\n    `MathFin.SVI.tendsto_bsSmile_ssviParams_zero_iff`. -/\ntheorem ssvi_call_tendsto_zero_iff {θ φ ρ : ℝ} (hθ : 0 ≤ θ) (hφ : 0 < φ) (hρ : ρ ^ 2 ≤ 1)\n    (hw : ∀ k : ℝ, 0 < ssviVariance θ φ ρ k) :\n    Tendsto (bsSmile (ssviParams θ φ ρ)) atTop (𝓝 0) ↔ θ * φ * (1 + ρ) < 4 :=\n  tendsto_bsSmile_ssviParams_zero_iff hθ hφ hρ hw\n\n/-- **A market that prices an SSVI slice satisfies the tail condition.** Re-export of\n    `MathFin.SVI.ssvi_tail_of_isPricingMeasure`. -/\ntheorem ssvi_market_tail_condition {Ω : Type*} [MeasurableSpace Ω] {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} {θ φ ρ : ℝ} (hθ : 0 ≤ θ) (hφ : 0 < φ) (hρ : ρ ^ 2 ≤ 1)\n    (hw : ∀ k : ℝ, 0 < ssviVariance θ φ ρ k) (hQ : M.IsPricingMeasure T Q)\n    (hN : ∀ t ω, M.numeraire t ω = 1) (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ}\n    (hF : F = M.price Q (.pay T (.obs () T)))\n    (hsmile : ∀ k > 0, M.price Q (europeanCall (k * F) T) / F = bsSmile (ssviParams θ φ ρ) k) :\n    θ * φ * (1 + ρ) < 4 :=\n  ssvi_tail_of_isPricingMeasure hθ hφ hρ hw hQ hN hpos hF hsmile\n"
+      },
+      "metadata": {
+        "alignment_source": "Gatheral and Jacquier (2014), Section 4",
+        "reference": "Gatheral and Jacquier, Arbitrage-free SVI volatility surfaces (2014), Section 4 for the SSVI slice and Lemma 2.2 for the raw tail condition it is instantiated at.",
+        "citations": [
+          {
+            "key": "GatheralJacquier2014",
+            "locator": "Section 4"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Re-export of MathFin.SVI.tendsto_bsSmile_ssviParams_zero_iff (MathFin/Models/ModelFree/SVI/SSVI.lean), which instantiates tendsto_bsSmile_zero_iff at ssviParams theta phi rho through ssviVariance_eq_variance: the SSVI square root is phi times the raw one because (phi k + rho)^2 + 1 - rho^2 = phi^2((k - m)^2 + sigma^2). SCOPE. (1) One slice only: the surface, the dependence of phi on theta, and the SSVI calendar-spread conditions are not formalised. (2) Positive variance at every log-moneyness is a hypothesis. (3) Only the tail condition is stated for SSVI; butterfly-freeness of the slice follows from the raw SVI results by the same instantiation but is not restated. (4) Strikes are positive; the forward and discount factor are normalised to one. The market consequence (ssvi_market_tail_condition, MathFin.SVI.ssvi_tail_of_isPricingMeasure) assumes that a market's normalised calls are the SSVI-smiled call and derives the condition from their vanishing at large strikes (Market.IsPricingMeasure.isNormalizedCallPrice); it does not construct such a market.",
+        "provenance": {
+          "source": "mathfin",
+          "note": "The raw SVI tail condition it instantiates is MathFin's."
         }
       }
     }

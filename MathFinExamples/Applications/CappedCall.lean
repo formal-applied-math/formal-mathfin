@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: from a term sheet to a checked price
@@ -67,7 +68,7 @@ structure Clause where
 
 /-- The terms of a capped call as a term sheet states them, with the clauses they come from and
 the features of the instrument the formal contract leaves out. -/
-structure CappedCallSheet where
+structure CappedCallSheet extends Provenance Clause where
   /-- The strike `K₁`. -/
   strike : ℝ
   /-- The cap level `K₂`: the payoff stops growing once the index passes it. -/
@@ -77,10 +78,6 @@ structure CappedCallSheet where
   strike_pos : 0 < strike
   strike_le_cap : strike ≤ cap
   maturity_pos : 0 < maturity
-  /-- The clauses the terms above are read from. -/
-  sources : List Clause
-  /-- Features of the instrument that the contract below does not model. -/
-  unmodelled : List String
 
 /-- An illustrative sheet: strike `100`, cap `120`, one year. -/
 noncomputable def sample : CappedCallSheet where
@@ -197,7 +194,9 @@ payoff, and no property of `Φ` is used. -/
 theorem BSMarket.call_sub_mem_Icc [IsProbabilityMeasure Q] (m : BSMarket Q) {K₁ K₂ : ℝ}
     (hK₁ : 0 < K₁) (hK : K₁ ≤ K₂) {T : ℝ≥0} (hT : 0 < T) :
     m.call K₁ T - m.call K₂ T ∈ Set.Icc 0 (Real.exp (-m.rate * T) * (K₂ - K₁)) := by
-  let c : CappedCallSheet := ⟨K₁, K₂, T, hK₁, hK, hT, [], []⟩
+  let c : CappedCallSheet :=
+    { strike := K₁, cap := K₂, maturity := T, strike_pos := hK₁, strike_le_cap := hK,
+      maturity_pos := hT, sources := [], unmodelled := [] }
   have h := c.value_mem_Icc m
   rwa [c.value_contract m] at h
 

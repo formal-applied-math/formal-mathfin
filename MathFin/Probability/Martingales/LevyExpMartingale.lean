@@ -21,7 +21,7 @@ bounded (`|M| ≤ K`) real process with every path continuous, such that `M` and
 
 and for the clock `A_t = t`, `M` meets the library's exponential-martingale characterisation data
 `IsExpQMartingale P 𝓕 M T` as soon as it starts at `0` (`isExpQMartingale`). From there
-`isQBrownianMotion_of_expMartingale` (`ExpMartingaleQBrownian`) delivers `N(0, t − s)`
+`isBrownianOn_of_expMartingale` (`ExpMartingaleQBrownian`) delivers `N(0, t − s)`
 increments and independent increments: `M` is a Brownian motion in law.
 
 No quadratic-variation process and no stochastic integral against `M` is used; this matters at
@@ -66,7 +66,7 @@ moment-generating function is propagated cell by cell, and no ODE for
 
 `M` is **bounded** and **every** path is continuous. The localisation to continuous local
 martingales is `LevyCharacterization`, which uses the stopped clock `t ∧ τ` for `A`. The conclusion
-that `M` is a Brownian motion is `isQBrownianMotion_of_expMartingale` applied to
+that `M` is a Brownian motion is `isBrownianOn_of_expMartingale` applied to
 `isExpQMartingale`; independence of `M_t − M_s` from `𝓕_s` is `ExpMartingaleBrownian`.
 
 ## Tags
@@ -465,7 +465,7 @@ end Exp
 /-- **Lévy's characterisation, analytic core.** A bounded process `M` with continuous paths,
 started at `0`, such that `M` and `M² − t` are martingales, satisfies the library's
 exponential-martingale characterisation data `IsExpQMartingale P 𝓕 M T` for every horizon
-`T`. Composed with `isQBrownianMotion_of_expMartingale`, `M` has `N(0, t − s)` increments and
+`T`. Composed with `isBrownianOn_of_expMartingale`, `M` has `N(0, t − s)` increments and
 independent increments on `[0, T]`. It is `setIntegral_exp_eq` for the clock `A_t = t`. -/
 theorem isExpQMartingale (hM : Martingale M 𝓕 P)
     (hM2 : Martingale (fun t ω ↦ M t ω ^ 2 - (t : ℝ)) 𝓕 P) (hK : ∀ t ω, |M t ω| ≤ K)

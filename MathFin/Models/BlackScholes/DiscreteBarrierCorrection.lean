@@ -167,17 +167,9 @@ theorem bgkDownOutCall_timeScale {β : ℝ} {m : ℕ} {K H r σ S T c : ℝ} (hc
 /-- The shifted barrier tends to `H` as the number of dates grows. -/
 theorem tendsto_bgkDownBarrier (β H σ T : ℝ) :
     Tendsto (fun m : ℕ ↦ bgkDownBarrier β m H σ T) atTop (𝓝 H) := by
-  have h0 : Tendsto (fun m : ℕ ↦ T / (m : ℝ)) atTop (𝓝 0) :=
-    tendsto_const_div_atTop_nhds_zero_nat T
-  have hs : Tendsto (fun m : ℕ ↦ Real.sqrt (T / (m : ℝ))) atTop (𝓝 0) := by
-    have := (Real.continuous_sqrt.tendsto 0).comp h0
-    rwa [Real.sqrt_zero] at this
-  have he : Tendsto (fun m : ℕ ↦ Real.exp (-(β * σ * Real.sqrt (T / (m : ℝ))))) atTop
-      (𝓝 1) := by
-    have := (Real.continuous_exp.tendsto _).comp (hs.const_mul (β * σ)).neg
-    rwa [mul_zero, neg_zero, Real.exp_zero] at this
-  have := he.const_mul H
-  rwa [mul_one] at this
+  have hc : Continuous fun x : ℝ ↦ H * Real.exp (-(β * σ * Real.sqrt x)) := by fun_prop
+  simpa [bgkDownBarrier, Function.comp_def] using
+    (hc.tendsto 0).comp (tendsto_const_div_atTop_nhds_zero_nat T)
 
 /-- **Many-dates limit.** As `m → ∞` the expression `bgkDownOutCall` tends to `ptDownOutCall` at
 the unshifted barrier, for nonzero spot and barrier, at every strike, rate, volatility and

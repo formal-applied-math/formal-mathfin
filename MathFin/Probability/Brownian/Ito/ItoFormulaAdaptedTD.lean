@@ -395,8 +395,8 @@ theorem ito_formula_adapted_td_against {Ct C₁ C₂ : ℝ} (hbt : ∀ t x, |f_t
     (Cw := 1) fun _ _ ↦ abs_one.le
   -- a common subsequence along which all three converge almost surely
   obtain ⟨n₁, hn₁, h1⟩ := hM.exists_seq_tendsto_ae
-  obtain ⟨n₂, hn₂, h2⟩ := exists_seq_tendsto_ae_comp hW hn₁
-  obtain ⟨n₃, hn₃, h3⟩ := exists_seq_tendsto_ae_comp hQ (hn₁.comp hn₂)
+  obtain ⟨n₂, hn₂, h2⟩ := exists_seq_tendsto_ae_comp hW hn₁.tendsto_atTop
+  obtain ⟨n₃, hn₃, h3⟩ := exists_seq_tendsto_ae_comp hQ (hn₁.comp hn₂).tendsto_atTop
   have hν : Tendsto (fun i ↦ n₁ (n₂ (n₃ i))) atTop atTop :=
     hn₁.tendsto_atTop.comp (hn₂.tendsto_atTop.comp hn₃.tendsto_atTop)
   filter_upwards [h1, h2, h3, hXc, adaptedItoProcess_zero hB T hBmeas hBcont φ x₀ (b := b)]

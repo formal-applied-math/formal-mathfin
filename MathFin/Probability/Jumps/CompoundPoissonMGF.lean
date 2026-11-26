@@ -33,6 +33,10 @@ This composes two genuine theorems rather than positing the algebraic shell
   (`Probability/Jumps/PoissonPgf.integral_pow_poissonMeasure`), evaluated at `x = M_X(t)`.
 
 
+## Main definitions
+
+* `compoundSum N X`: the compound sum `ω ↦ ∑_{i<N ω} X i ω`, the aggregate loss of a compound model.
+
 ## Main results
 
 * `compoundPoisson_mgf` — `∫ n, mgf (∑_{i<n} Xᵢ) t ∂Poisson(λ) = exp(λ·(mgf X₀ t − 1))`.
@@ -79,6 +83,15 @@ theorem _root_.ProbabilityTheory.iIndepFun.integrable_exp_mul_sum₀ [IsFiniteMe
       (h_int i (Finset.mem_insert_self _ _))
       (h_rec fun j hj ↦ h_int j (Finset.mem_insert_of_mem hj))
 
+/-- The **compound sum** `∑_{i < N ω} X i ω` of the claims `X i` up to the random count `N`: the
+aggregate loss of a compound-Poisson (or any compound) model. -/
+def compoundSum {Ω : Type*} (N : Ω → ℕ) (X : ℕ → Ω → ℝ) (ω : Ω) : ℝ :=
+  ∑ i ∈ Finset.range (N ω), X i ω
+
+/-- The compound sum at `ω` is the sum of the first `N ω` summands. -/
+theorem compoundSum_apply {Ω : Type*} (N : Ω → ℕ) (X : ℕ → Ω → ℝ) (ω : Ω) :
+    compoundSum N X ω = ∑ i ∈ Finset.range (N ω), X i ω := rfl
+
 /-- **The `n`-claim aggregate MGF is the `n`-th power of the common claim MGF.** For i.i.d.
 claim sizes `X` (independent, identically distributed), the MGF of the `n`-claim aggregate
 `∑_{i<n} Xᵢ` is `M_X(t)ⁿ`. -/
@@ -121,7 +134,7 @@ theorem compoundPoisson_mgf_of_indepFun (lam : ℝ≥0) (t : ℝ) {N : Ω → �
     (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ)
     (hNX : IndepFun N (fun ω i ↦ X i ω) μ)
     (hint : Integrable (fun ω ↦ Real.exp (t * X 0 ω)) μ) :
-    mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t
+    mgf (compoundSum N X) μ t
       = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) := by
   have := hindep.isProbabilityMeasure
   have hgm (n : ℕ) : Measurable fun x : ℕ → ℝ ↦ Real.exp (t * ∑ i ∈ Finset.range n, x i) := by
@@ -130,7 +143,7 @@ theorem compoundPoisson_mgf_of_indepFun (lam : ℝ≥0) (t : ℝ) {N : Ω → �
       (poissonMeasure lam) := by
     simp_rw [mgf_range_sum_of_iid t X hindep hident]
     exact PoissonPgf.integrable_pow_poissonMeasure lam _
-  calc mgf (fun ω ↦ ∑ i ∈ Finset.range (N ω), X i ω) μ t
+  calc mgf (compoundSum N X) μ t
       = ∫ n, mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t ∂(poissonMeasure lam) :=
         integral_comp_of_hasLaw_of_countable
           (F := fun n x ↦ Real.exp (t * ∑ i ∈ Finset.range n, x i))

@@ -129,8 +129,6 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 include hD
 
 
-set_option maxHeartbeats 1600000 in
--- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The integrated Itô–drift identity for adapted coefficients**, conditional on the
 process `M`. For `β, δ` bounded, `natFiltration`-adapted and path-continuous, a hypothesized
 `natFiltration`-adapted `M` with `M t =ᵐ (δ●B)_t` for every `t` (`hD.ae_eq`), and a hypothesized

@@ -326,6 +326,26 @@ def test_values_review_is_current() -> None:
         )
 
 
+def test_every_review_backlog_item_has_an_outcome() -> None:
+    """Each backlog item ends with its outcome: an issue, `[done: …]` or `[retired: …]`.
+
+    docs/status.md makes the issue tracker the one backlog. Until 2026-11-25 nothing held that,
+    and an audit of all 326 items found 102 that were neither done nor in an issue.
+    """
+    from tools.verify import review_backlog
+
+    untagged = [
+        f"{VALUES_REVIEW_PATH}:{it.line}: {it.text.splitlines()[0][:90]}"
+        for it in review_backlog.items(VALUES_REVIEW_PATH.read_text())
+        if it.outcome is None
+    ]
+    assert not untagged, (
+        "backlog items with no outcome tag: end each with [#N] (the issue that tracks it), "
+        "[done: <where>] or [retired: <why>] (tools/verify/review_backlog.py):\n"
+        + "\n".join(untagged)
+    )
+
+
 # --------------------------------------------------------------------------
 # The prose-vs-statement gate.
 #
@@ -400,6 +420,48 @@ def test_prose_does_not_outrun_statement() -> None:
         "their statement leaves the existential witness unnamed — either carry "
         "the identification into the statement, or reword the prose to say what "
         f"is actually proved: {sorted(offenders)}"
+    )
+
+
+# A scope word in an entry's NAME promises the notion itself. When the entry's own disclosure
+# ("Not proved: ...") names the same notion as missing, the name outruns the statement unless it
+# carries the qualifier that narrows it (2026-11-07 review, "name checks for scope words").
+SCOPE_WORDS = {
+    "self-financing": "self-financing",
+    "strong solution": "strong solution",
+    "existence and uniqueness": "uniqueness",
+    "replicat": "replicat",
+}
+SCOPE_NAME_ALLOWLIST = {
+    # the name says "Equation ... (Integral Identity on [0, T'])": it claims the identity the
+    # integral form of the hedge satisfies, and the "Not proved" clause says the strategy is not
+    # a structure, which the name does not claim.
+    "mf-bs-self-financing-hedge",
+    # the name claims only the lower bound; the clause that mentions the super-replication cone
+    # disclaims the duality equality, which the name does not claim.
+    "mf-superhedging-bounded-below",
+}
+
+
+def test_scope_words_in_names_are_not_disclaimed() -> None:
+    offenders = []
+    for _path, entry in iter_entries():
+        name = (entry.get("name") or "").lower()
+        words = [(w, stem) for w, stem in SCOPE_WORDS.items() if w in name]
+        if not words or entry["id"] in SCOPE_NAME_ALLOWLIST:
+            continue
+        meta = entry.get("metadata") or {}
+        text = f"{entry.get('description') or ''}\n{meta.get('formalization_scope') or ''}"
+        for match in SCOPE_DISCLOSURE_RE.finditer(text):
+            clause = text[match.start() : match.start() + 300].lower()
+            clause = clause.split(". ")[0]
+            if any(stem in clause for _w, stem in words):
+                offenders.append(entry["id"])
+                break
+    assert not offenders, (
+        "these entries name a notion (self-financing, strong solution, existence and "
+        "uniqueness, replication) that their own 'not proved' clause says is missing: narrow "
+        f"the name or allowlist with a justification: {sorted(offenders)}"
     )
 
 

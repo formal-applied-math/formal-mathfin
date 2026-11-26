@@ -5,6 +5,7 @@ Authors: Yang Ye
 -/
 module
 
+public import MathFin.Models.BlackScholes.ForwardStart
 public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PDE
 public import MathFin.Probability.Gaussian.StandardNormal
@@ -49,7 +50,7 @@ derived here. Rogers and Shi's paper itself was not read.
 * `condBoundCall_sub_mean_le_integral_max_neg`: the put form, via parity.
 * `condBoundCall_one_fixing`: with one fixing `t < T` the bound is `S₀ · bsV 1 r σ 1 (T − t)`,
   the forward-start call struck at the fixing; `condBoundCall_one_fixing_eq_marketPrice` states
-  it as `S` times the Black–Scholes market's price of the unit-strike call.
+  it as `S` times the Black–Scholes market's price of `forwardStartCall 1 t₁ T`.
 
 ## Scope
 
@@ -79,6 +80,8 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Finset
 open scoped NNReal
+
+namespace AsianAverageStrike
 
 /-! ### Exponential sums and their single crossing -/
 
@@ -135,10 +138,15 @@ theorem expSum_pos_iff_of_root {n : ℕ} {a d c : Fin n → ℝ} {p zs : ℝ}
 
 /-! ### The Gaussian closed form -/
 
+/-- `exp(c z)` is integrable against the standard normal density: Mathlib's
+`integrable_exp_mul_gaussianReal`, read through the density. -/
 lemma integrable_exp_mul_gaussianPDFReal (c : ℝ) :
     Integrable (fun z ↦ Real.exp (c * z) * gaussianPDFReal 0 1 z) := by
-  simp_rw [exp_mul_gaussianPDFReal_zero_one]
-  exact (integrable_gaussianPDFReal c 1).const_mul _
+  have h := integrable_exp_mul_gaussianReal (μ := 0) (v := 1) c
+  rw [gaussianReal_of_var_ne_zero _ one_ne_zero,
+    integrable_withDensity_iff_integrable_smul' (measurable_gaussianPDF 0 1)
+      (ae_of_all _ fun _ ↦ gaussianPDF_lt_top)] at h
+  simpa [toReal_gaussianPDF, mul_comm] using h
 
 /-- The closed form: `E[(expSum Z)⁺]` for a standard normal density, when the sum is positive
 exactly to the right of `zs`. -/
@@ -368,32 +376,32 @@ theorem condBoundCall_one_fixing (S r σ t T : ℝ) (hS : 0 < S) (hσ : 0 < σ)
   have h2 : Real.exp (-(r * T)) * Real.exp (r * T) = 1 := by rw [← Real.exp_add]; simp
   linear_combination (-(S * Phi (-zs))) * h1 + S * Phi (s - zs) * h2
 
-/-- **The one-fixing bound is `S` times the market price of the unit-strike call.** In the
+/-- **The one-fixing bound is `S` times the market price of the forward-start call.** In the
 Black–Scholes market of spot `1`, drift and rate `r`, the pricing measure's price of
-`europeanCall 1 τ` (`τ = T − t > 0`, horizon `H ≥ τ`) is `bsV 1 r σ 1 τ`
-(`price_europeanCall_constGirsanovMeasure`), so the one-fixing conditioning bound of
-`condBoundCall_one_fixing` is `S` times it: the forward-start call, grounded in the pricing
-functional. Only `τ > 0` is used; for `0 ≤ t` this is the forward-start price. -/
+`forwardStartCall 1 t₁ T` (reset date `0 < t₁ < T`, horizon `H ≥ T`) is `bsV 1 r σ 1 (T − t₁)`
+(`price_forwardStartCall_constGirsanovMeasure`, Rubinstein's factorization), so the one-fixing
+conditioning bound of `condBoundCall_one_fixing` is `S` times it: the call struck at the fixing,
+grounded in the pricing functional. -/
 theorem condBoundCall_one_fixing_eq_marketPrice {Ω : Type*} [MeasurableSpace Ω]
     {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)
-    (hWmeas : ∀ s, Measurable (W s)) (S r σ t T : ℝ) {τ H : ℝ≥0} (hS : 0 < S) (hσ : 0 < σ)
-    (htT : t < T) (hτ : (τ : ℝ) = T - t) (hτH : τ ≤ H) :
-    let ts : Fin 2 → ℝ := ![t, T]
+    (hWmeas : ∀ s, Measurable (W s)) (S r σ : ℝ) {t₁ T H : ℝ≥0} (hS : 0 < S) (hσ : 0 < σ)
+    (ht₁ : 0 < (t₁ : ℝ)) (htT : (t₁ : ℝ) < T) (hTH : T ≤ H) :
+    let ts : Fin 2 → ℝ := ![t₁, T]
     let u : Fin 2 → ℝ := ![-1, 1]
-    let F : Fin 2 → ℝ := ![S * Real.exp (r * t), S * Real.exp (r * T)]
+    let F : Fin 2 → ℝ := ![S * Real.exp (r * t₁), S * Real.exp (r * T)]
     let c := condRate σ ts u
     let d := condShift F c
-    let zs := σ * Real.sqrt (T - t) / 2 - r * (T - t) / (σ * Real.sqrt (T - t))
+    let zs := σ * Real.sqrt (T - t₁) / 2 - r * (T - t₁) / (σ * Real.sqrt (T - t₁))
     condBoundCall (Real.exp (-(r * T))) u d c zs
       = S * (Contracts.BlackScholes.market μ hWmeas 1 r r σ).price
           (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas 0 H)
-          (Contracts.europeanCall 1 τ) := by
+          (Contracts.forwardStartCall 1 t₁ T) := by
   intro ts u F c d zs
-  have hτpos : 0 < (τ : ℝ) := hτ ▸ sub_pos.2 htT
-  have key := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
-    (S_0 := 1) (m := r) (r := r) (σ := σ) (K := 1) hW hWmeas hτH one_pos one_pos hσ hτpos
+  have key := Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure
+    (S_0 := 1) (m := r) (r := r) (σ := σ) (α := 1) hW hWmeas hTH one_pos one_pos hσ ht₁ htT
   rw [sub_self, zero_div] at key
-  rw [key, (condBoundCall_one_fixing S r σ t T hS hσ htT).2, bsV, hτ]
-  simp only [one_mul, neg_mul]
+  rw [key, (condBoundCall_one_fixing S r σ t₁ T hS hσ htT).2, one_mul]
+
+end AsianAverageStrike
 
 end MathFin

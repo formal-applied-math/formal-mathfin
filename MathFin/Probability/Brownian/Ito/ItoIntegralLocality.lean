@@ -358,19 +358,15 @@ theorem coeFn_restrictAfterCLM (T a : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
 identities. (`trim_T` is the *predictable* trim: the fibre is a bottom rectangle.) -/
 lemma ae_fst_ne_zero (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
     ∀ᵐ p ∂(trimMeasure (μ := μ) T hBmeas), p.1 ≠ 0 := by
-  set 𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas
-  have hbot : MeasurableSet[𝓕.predictable] (({(⊥ : ℝ≥0)} : Set ℝ≥0) ×ˢ (Set.univ : Set Ω)) :=
-    MeasureTheory.measurableSet_predictable_singleton_bot_prod (𝓕 := 𝓕) MeasurableSet.univ
-  have htime : timeMeasureHorizon T ({(⊥ : ℝ≥0)} : Set ℝ≥0) = 0 :=
+  have htime : timeMeasureHorizon T ({(0 : ℝ≥0)} : Set ℝ≥0) = 0 :=
     nonpos_iff_eq_zero.mp
       ((Measure.restrict_apply_le _ _).trans
-        (ItoIntegralL2.timeMeasure_singleton (⊥ : ℝ≥0)).le)
+        (ItoIntegralL2.timeMeasure_singleton (0 : ℝ≥0)).le)
   have hnull : (trimMeasure (μ := μ) T hBmeas)
-      (({(⊥ : ℝ≥0)} : Set ℝ≥0) ×ˢ (Set.univ : Set Ω)) = 0 := by
-    unfold trimMeasure
-    rw [MeasureTheory.trim_measurableSet_eq _ hbot, Measure.prod_prod, htime, zero_mul]
+      (({(0 : ℝ≥0)} : Set ℝ≥0) ×ˢ (Set.univ : Set Ω)) = 0 :=
+    trim_singleton_zero_prod_eq_zero htime hBmeas MeasurableSet.univ
   have hset : {p : ℝ≥0 × Ω | ¬ p.1 ≠ 0}
-      = ({(⊥ : ℝ≥0)} : Set ℝ≥0) ×ˢ (Set.univ : Set Ω) := by
+      = ({(0 : ℝ≥0)} : Set ℝ≥0) ×ˢ (Set.univ : Set Ω) := by
     ext p
     simp
   rw [ae_iff, hset]
