@@ -1732,7 +1732,8 @@ Safe wording: "for a compensated jump-diffusion whose jump part is not almost su
 any jump law, the call has a unique Black–Scholes implied volatility, and it is strictly above the
 diffusion volatility, at every strike and maturity". Not covered: how the implied volatility
 varies with the strike (the shape of the smile); the `σ → 0` limit of the Black–Scholes price,
-and with it implied-volatility existence across the whole no-arbitrage range; the put's implied
+and with it implied-volatility existence across the whole no-arbitrage range — now formalized,
+see the straddle section below (2026-11-26); the put's implied
 volatility (parity holds for the price functions, `jumpDiffusionCallPrice_eq_of_compensated`, but
 the put's implied volatility is not stated).
 

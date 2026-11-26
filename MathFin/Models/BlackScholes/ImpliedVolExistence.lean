@@ -288,8 +288,8 @@ noncomputable def impliedVol (K r : ℝ) (S T C : ℝ) : ℝ :=
 
 /-- `impliedVol` is the junk `0` exactly where no positive volatility both prices to `C` and
 is the only one: the iff quantifies over the function's whole domain, including degenerate
-inputs (a strike of `0` makes the price non-injective in `σ`), so the uniqueness clause is
-part of what is characterized. -/
+inputs (with a strike of `0` and a positive rate the price is non-injective in `σ`), so the
+uniqueness clause is part of what is characterized. -/
 lemma impliedVol_eq_zero_iff (K r : ℝ) (S T C : ℝ) :
     impliedVol K r S T C = 0 ↔
       ¬∃ σ, 0 < σ ∧ bsV K r σ S T = C ∧ ∀ σ' > 0, bsV K r σ' S T = C → σ' = σ := by
@@ -426,3 +426,5 @@ theorem marketCallPrice_bisect_threshold_root {Ω : Type*} [mΩ : MeasurableSpac
         (le_trans h1lo (le_trans h1σ h2σ)) h2hi (le_trans h1σ h2σ)
   filter_upwards with n
   rw [bisectMid, bisectMid, hag n]
+
+end MathFin

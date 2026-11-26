@@ -785,6 +785,9 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_impliedVol_gt_of_bsV_lt
 
+
+/-! ## 2026-11-26: implied volatility for every arbitrage-free price (issue #317) -/
+
 /-- info: 'MathFin.tendsto_bsV_sigma_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_bsV_sigma_zero
@@ -804,6 +807,13 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.bsV_bisect_threshold_root' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_bisect_threshold_root
+/-- info: 'MathFin.impliedVol_eq_zero_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.impliedVol_eq_zero_iff
+
+/-- info: 'MathFin.bsV_lt_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.bsV_lt_S
 
 /-- info: 'MathFin.tendsto_marketCallPrice_sigma_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

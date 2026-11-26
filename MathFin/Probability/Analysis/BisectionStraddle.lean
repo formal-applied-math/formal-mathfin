@@ -60,8 +60,6 @@ namespace MathFin
 
 open Filter Set Topology
 
-variable {f : ℝ → ℝ} {C a b : ℝ}
-
 /-- One bisection step keeps a straddling bracket straddling, whatever `f` and `C` are. -/
 theorem mapsTo_bisectStep_straddle (f : ℝ → ℝ) (C : ℝ) :
     MapsTo (bisectStep f C) {I | f I.1 < C ∧ C ≤ f I.2} {I | f I.1 < C ∧ C ≤ f I.2} := by

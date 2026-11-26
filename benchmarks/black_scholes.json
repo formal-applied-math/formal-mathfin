@@ -425,7 +425,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The price C is assumed in the open no-arbitrage range; non-attainment at the range endpoints is not formalized (the strict lower bound bsV > (S - K e^{-rT})^+ at positive sigma is not proved here; the strict upper bound bsV < S is bsV_lt_S). The function returns the junk 0 outside the range, characterized by impliedVol_eq_zero_iff. The snippet restates the market-level corollary impliedVol_eq_model_vol, whose proof consumes impliedVol_defining_eq (existence and uniqueness on the whole range) and price_europeanCall_constGirsanovMeasure; a safeguarded Newton iteration is not formalized. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The price C is assumed in the open no-arbitrage range; non-attainment at the range endpoints is not formalized (the strict lower bound bsV > (S - K e^{-rT})^+ at positive sigma is not proved here; the strict upper bound bsV < S is bsV_lt_S). Where no positive volatility both prices to C and is unique the function returns the junk 0, characterized by impliedVol_eq_zero_iff. The snippet restates the market-level corollary impliedVol_eq_model_vol, whose proof consumes impliedVol_defining_eq (existence and uniqueness on the whole range) and price_europeanCall_constGirsanovMeasure; a safeguarded Newton iteration is not formalized. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
       }
     },
     {
