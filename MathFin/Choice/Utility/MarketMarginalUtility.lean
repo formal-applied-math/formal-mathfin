@@ -89,7 +89,7 @@ variable [IsProbabilityMeasure M.P] (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ} {
 
 include hQ hS
 
-omit hQ hS in
+omit [NeZero N] hQ hS in
 /-- **A local maximum of the expected log-wealth on the budget set is stationary.** If `θ` of cost
 `w₀` with positive terminal wealth `W` is a local maximum of `θ' ↦ ∫ log W(θ') ∂P` on the budget
 set `{θ' | cost θ' = w₀}`, then `∑ ω, P{ω} · W⁻¹ · (payoff of d) = 0` for every budget-neutral `d`:

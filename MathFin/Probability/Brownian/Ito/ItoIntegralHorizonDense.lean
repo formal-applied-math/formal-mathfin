@@ -166,12 +166,12 @@ lemma ae_trimMeasure_of_ae_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     hC.compl).trans (ae_iff.mp h)
 
 omit [IsProbabilityMeasure μ] in
-/-- **The time origin is trim-null.** For any s-finite time measure `ν` that charges no point at
-the origin, the predictable trim of `ν ⊗ μ` gives no mass to a bottom rectangle `{0} × F` with `F`
+/-- **The time origin is trim-null.** For any time measure `ν` that charges no point at the
+origin, the predictable trim of `ν ⊗ μ` gives no mass to a bottom rectangle `{0} × F` with `F`
 in `𝓕 ⊥`: the trim agrees with the product on predictable sets, and the product of the rectangle is
 `ν {0} · μ F = 0`. The one computation behind every "off the time origin" almost-everywhere
 statement of the Itô tower. -/
-lemma trim_singleton_zero_prod_eq_zero {ν : Measure ℝ≥0} [SFinite ν] [SFinite μ]
+lemma trim_singleton_zero_prod_eq_zero {ν : Measure ℝ≥0} [SFinite μ]
     (hν : ν {(0 : ℝ≥0)} = 0) (hBmeas : ∀ t, Measurable (B t)) {F : Set Ω}
     (hF : MeasurableSet[ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas ⊥] F) :
     ((ν.prod μ).trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)
