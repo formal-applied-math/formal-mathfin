@@ -406,7 +406,8 @@ theorem marketCallPrice_bisect_threshold_root {Ω : Type*} [mΩ : MeasurableSpac
     intro I h1lo h1hi h2lo h2hi hle
     simp only [bisectStep]
     rw [hkey _ ⟨by linarith, by linarith⟩]
-  have hag : ∀ n, bisect mp C σ_lo σ_hi n = bisect (fun v ↦ bsV K r v S_0 (T : ℝ)) C σ_lo σ_hi n := by
+  have hag : ∀ n, bisect mp C σ_lo σ_hi n =
+      bisect (fun v ↦ bsV K r v S_0 (T : ℝ)) C σ_lo σ_hi n := by
     intro n
     induction n with
     | zero => rfl
