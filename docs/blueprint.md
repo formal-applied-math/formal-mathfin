@@ -895,6 +895,7 @@ graph TD
   pricingFunctional --> kellyIsLogOptimal
   pricingMeasure --> kellyIsLogOptimal
   expectedUtilityIntegral --> kellyIsLogOptimal
+  kellyCriterion --> kellyIsLogOptimal
   logOptimalNumeraireOnePeriod --> kellyIsLogOptimal
   oneDateMarket --> kellyIsLogOptimal
   emm --> calibratedMartingaleMeasures
