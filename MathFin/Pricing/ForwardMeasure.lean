@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -39,7 +39,11 @@ coincides with the risk-neutral measure — the forward-price identity below the
 reduces to the familiar `𝔼^Q[S_T] = S_0·e^{rT}`. The *construction* and the
 change-of-numéraire identity are stated for a general bank account and carry over verbatim
 to a stochastic short rate (where `Q^T ≠ Q`); only the concrete constant-rate instance is
-degenerate.
+degenerate. The stochastic-rate instance is the Hull–White `S`-forward measure of
+`Models/Rates/TimingAdjustment`: this `forwardMeasure` at the bank account `exp(∫₀ˢ r)`, with
+the short rate's law under it (`HullWhite.shortRate_hasLaw_forwardMeasure`) and the forward
+curve as its mean of the calibrated short rate
+(`HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve`).
 
 ## Main definitions
 

@@ -6,6 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Models.BlackScholes.ImpliedVolatility
+public import MathFin.Models.BlackScholes.ScalingInvariance
 public import MathFin.Models.ModelFree.SVI.BlackScholesBridge
 public import MathFin.Probability.Martingales.CondExpCallJensen
 public import Mathlib.Probability.Martingale.Basic
@@ -105,13 +106,10 @@ theorem bsV_eq_totalVarianceCall {K S σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     bsV K 0 σ S T = totalVarianceCall K S (σ ^ 2 * T) := by
   have hs : Real.sqrt (σ ^ 2 * T) = σ * Real.sqrt T := by
     rw [Real.sqrt_mul (sq_nonneg σ), Real.sqrt_sq hσ.le]
-  have hsT : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
-  have hd1 : bsd1 S K 0 (σ * Real.sqrt T) 1 = bsd1 S K 0 σ T := by
-    simp only [bsd1, Real.sqrt_one, mul_one, zero_add, mul_pow, Real.sq_sqrt hT.le]
-    congr 1
-    ring
-  unfold totalVarianceCall bsV
-  simp only [bsd2, hd1, hs, Real.sqrt_one, mul_one, zero_mul, neg_zero, Real.exp_zero]
+  have h := bsV_timeScale (K := K) (r := 0) (σ := σ) (S := S) (τ := T) hT
+  rw [mul_zero, div_self hT.ne'] at h
+  rw [totalVarianceCall, hs]
+  exact h.symm
 
 /-- The total-variance call is strictly increasing in total variance on `(0, ∞)`, for strike
 and spot `K, S > 0`. -/

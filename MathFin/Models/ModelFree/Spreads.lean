@@ -21,7 +21,8 @@ Two static no-arbitrage payoff inequalities at expiry, both expressing
 
 These are not two independent theorems; they are the *antitone* and *convex*
 faces of `K ↦ max(S − K, 0)`. Both structural facts are recorded in
-`StrikeConvexity.lean` (`antitone_call_payoff` and `convexOn_call_payoff`).
+`Contracts/Instruments/CallPayoff.lean` (`antitone_call_payoff`) and
+`Probability/Laws/ConvexOrder.lean` (`convexOn_call_payoff`).
 
 The same convexity, applied infinitesimally rather than discretely, yields
 non-negativity of the second `K`-derivative of the European call price —

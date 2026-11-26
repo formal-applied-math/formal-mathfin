@@ -49,6 +49,211 @@ One `full` entry in `benchmarks/contracts.json`. Corpus 906 → 907 (866 full be
   `pathPV`s directly); no strict-convexity or strict-monotonicity form; the convexity hypothesis
   is almost everywhere, not pointwise. Each proof is the matching order property of the Bochner
   integral applied to `Contract.value`; no new machinery.
+### The 2026-11-25 merge
+
+Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
+917 entries: 871 full (from 866), 18 library wrappers, 28 reduced cores (from 22); 889 are
+delivery-ready (`full` + `library_wrapper`). The dated sections below record what each pull
+request added.
+
+### The Ho–Lee bond price (2026-11-24)
+
+One `full` entry in `benchmarks/interest_rates.json`. It adds one
+entry to the corpus.
+
+- **`mf-holee-bond-price`** (MathFin/Models/Rates/HoLeeBondPrice.lean): the zero-coupon bond price
+  `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` of the Ho–Lee short rate `dr = θ(t) dt + σ dB` (continuous `θ`,
+  no mean reversion, the `κ = 0` case that `HullWhiteCalibration` excludes), equal to
+  `A(T)·exp(−T·r₀)` with the linear loading `B(T) = T` and
+  `A(T) = exp(−∫₀ᵀ θ(s)(T−s) ds + σ²T³/6)` (`bondPrice_affine`). It is the instance
+  `m = M(T)`, `c = σ`, `f = (T−u)` of `integral_exp_neg_add_mul_wienerIntegralLp`
+  (`bondPrice_eq`), with the kernel `T−u` and its variance `∫₀ᵀ (T−u)² du = T³/3` shared with the
+  driftless Gaussian model (`brownianIntegratedKernelLp_integral_sq`) and the mean identity `∫₀ᵀ (r₀ + ∫₀ˢ θ) ds =
+  r₀T + ∫₀ᵀ θ(s)(T−s) ds` by integration by parts (`integratedMean_eq`). Cited: Ho & Lee (1986),
+  Brigo & Mercurio 2nd ed. §3.3.1. Disclosed out of scope: the integrated short rate is carried
+  in its Wiener representation, as in the Vasicek and Hull–White files, so the Ho–Lee SDE and
+  the swap of time integrals behind that representation are cited, not proved; the bond price at
+  `t > 0`, calibration of `θ` to an initial curve and a change of measure are not treated.
+  Axioms-clean, `full`.
+
+  Follow-up additions in the same module: the constant-drift coefficient
+  `A(T) = exp(−θ·T²/2 + σ²T³/6)` (`bondA_const`, with the drift loading
+  `∫₀ᵀ θ·(T−s) ds = θ·T²/2`, by the reflection substitution
+  (`integral_const_driftLoading`)); the
+  zero-drift identification `bondPrice_zero_drift` (at `θ ≡ 0` the Ho–Lee price is the driftless
+  price `brownianBondPrice_eq` of `VasicekZeroMeanReversionLimit.lean`); and the bridge
+  `tendsto_vasicekBondPrice_hoLee`: the Vasicek closed form at long-run level `θ/κ` — the level
+  rescaling that lets the drift `κ(θ/κ − r) → θ` survive vanishing mean reversion — tends to the
+  constant-drift Ho–Lee price as `κ → 0⁺`. A limit of the closed forms, not of random variables;
+  at level `0` the limit is the driftless price instead (`tendsto_vasicekBondPrice_brownianBondPrice`),
+  so the level, not the limit, carries the drift. The two added theorems carry curated
+  `#print axioms` guards in `MathFin/AxiomAudit.lean`.
+### The numéraire density is the Radon–Nikodym derivative (2026-11-23)
+
+Three additive lemmas on `MathFin/Pricing/Numeraire.lean`. No corpus entry: the issue asks for
+the lemmas, and `mf-change-of-numeraire` already covers the node. It adds no
+corpus entry.
+
+- **`numeraireMeasure_rnDeriv`** — for σ-finite `Q` and measurable numéraire terminals,
+  `(numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q] numeraireDensity BT NT B0 N0`: the
+  docstring's `dQ^N/dQ` reading, proved by Mathlib's `Measure.rnDeriv_withDensity`.
+- **`numeraireMeasure_absolutelyContinuous`** — `Q^N ≪ Q`, with no hypothesis beyond the
+  definition (`withDensity_absolutelyContinuous`).
+- **`numeraireMeasure_absolutelyContinuous'`** — with measurable, positive numéraires
+  (`B0 > 0`, `N0 > 0`) also `Q ≪ Q^N`: the density is then strictly positive at every state
+  (the library's `absolutelyContinuous_withDensity_ofReal`, which wraps Mathlib's
+  `withDensity_absolutelyContinuous'`).
+
+The `## Honest scope` note of `MathFin/Pricing/ForwardMeasure.lean` now cites the stochastic-rate
+instance, the Hull–White `S`-forward measure of `Models/Rates/TimingAdjustment`
+(`HullWhite.shortRate_hasLaw_forwardMeasure`,
+`HullWhite.forwardMeasure_shortRate_mean_eq_forwardCurve`). Not delivered here: a change of
+numéraire between two numéraire measures; the lemmas are named for that reuse.
+### Contango, backwardation and basis convergence (2026-11-23)
+
+One `full` entry in `benchmarks/commodities.json`. It adds one
+entry to the corpus.
+
+- **`mf-contango-basis-convergence`** (MathFin/Models/Forwards/ContangoBackwardation.lean): the
+  qualitative market structure of the cost-of-carry forward
+  `fxForward S r δ T = S·e^{(r−δ)T}` — the covered-parity forward of `FxForwardParity.lean`
+  read with the commodity convenience yield `δ` in the foreign-rate slot (the curve is derived,
+  in its FX reading, from `forward_price_from_no_arbitrage` and `expected_terminal_eq_forward`,
+  not re-posited here; the commodity reading is the same formula, not a separate derivation).
+  For spot `S > 0` and maturity `T > 0`: contango `S < F(T) ↔ δ < r`
+  (`fxForward_contango_iff`), backwardation `F(T) < S ↔ r < δ`
+  (`fxForward_backwardation_iff`), the forward meets the spot iff `r = δ`
+  (`fxForward_eq_spot_iff`); the term-structure trichotomy — strictly increasing iff
+  `δ < r` (`fxForward_strictMono_iff`), strictly decreasing iff `r < δ`
+  (`fxForward_strictAnti_iff`), flat iff `r = δ` (`fxForward_const_iff`) — and the
+  spot-minus-forward basis `S − F(T)` (Hull ch. 3's sign convention; #88's
+  `b(T) = S − F(T)`; `TheoryOfStorage.lean`'s carry identity `F − S = C − Y` is the same gap
+  negated) vanishing at `T = 0` (`fxForward_basis_zero`) and tending to `0` as `T → 0⁺`
+  (`fxForward_basis_tendsto_zero`). Pure `Real.exp` monotonicity; no new definitions, and
+  nothing probabilistic. Hull's cost of carry is read as the financing rate alone (zero
+  storage cost), and ch. 18's normal/inverted terminology, stated there for futures
+  prices, is applied to this forward curve; neither identification is a proved claim. Not proved: normal backwardation (futures below the expected spot
+  under the physical measure) — a different statement about a different object; and the
+  second-maturity basis-risk decomposition of hedging, which needs a contract object the
+  library does not have. Cited: Hull ch. 3, ch. 5 and ch. 18 (11th ed. slide decks, slides 5, 23 and 26
+  of the respective chapter files), Kaldor (1939), Working (1949).
+### American put early-exercise premium, strict (2026-11-24)
+
+One `full` entry in `benchmarks/binomial.json`. It adds one
+entry to the corpus.
+
+- **`mf-american-put-premium`** (MathFin/Models/Binomial/AmericanPutPremium.lean): the American
+  put is strictly worth more than the European put of the same strike and expiry in the binomial
+  model whenever immediate exercise is strictly optimal at some node of positive probability.
+  Proved: the market-level statement
+  (`Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation`:
+  in the binomial market at unit step under the risk-neutral coin flips, the price of
+  `europeanPut K` with horizon `N` is strictly below the market's American price of the put) and
+  its tree-level form
+  (`binomialPrice_lt_americanPrice_put_of_immediate_exercise_gt_continuation`); the propagation
+  it rests on (`americanPrice_premium_supermartingale`: the premium dominates its one-period
+  discounted continuation, any payoff; `americanPrice_premium_mul_weight_le`: the root premium
+  bounds every path-weighted premium below it); and the deep-in-the-money closed forms
+  (`americanPutPrice_eq_intrinsic_of_deep_in_the_money`: `K − S`, with `r ≥ 0` in the
+  hypothesis;
+  `binomialPutPrice_eq_discountedStrike_sub_spot_of_deep_in_the_money`: `K e^{−rn} − S`;
+  `binomialPrice_lt_americanPrice_put_of_deep_in_the_money`: the strict inequality, which with
+  the two closed forms gives the premium `K (1 − e^{−rn}) > 0` for `r > 0`, `n ≥ 1`, exhibiting
+  witnesses). Not proved: the continuous-time strict
+  premium (the Black–Scholes modules carry only the weak bound), any exercise-boundary
+  statement, the superhedging characterization, and a CRR limit of the premium; the market-level
+  statement takes the physical law to be i.i.d. flips with `0 < p < 1` and prices at time 0
+  only.
+### Forward-start call: Rubinstein's factorization (2026-11-24)
+
+One `full` entry in `benchmarks/exotic_options.json`, delivering the frontier node
+`thm:forward-start-call`. It adds one entry to the corpus.
+
+- **`mf-forward-start-call`** (MathFin/Models/BlackScholes/ForwardStart.lean): the forward-start
+  call — strike set at a reset date `t₁` as the multiple `α` of the observed price, payoff
+  `max (S_T − α S_{t₁}) 0` — has price `S₀ · bsV α r σ 1 (T − t₁)` in the library's Black–Scholes
+  market under the Girsanov pricing measure (`price_forwardStartCall_constGirsanovMeasure`),
+  whatever the physical drift. The theorem is a market price (a `Market.price` statement), derived
+  by Rubinstein's factorization: the payoff splits as the price at `t₁` against the ratio
+  `S_T/S_{t₁}`, a function of the Brownian increment `B_T − B_{t₁}` independent of `𝓕_{t₁}`
+  (`condExp_mul_of_indep`); the frozen leg has the martingale mean `e^{−rt₁}𝔼[S_{t₁}] = S₀`
+  (`discounted_terminal_eq_S0`) and the ratio leg is `bsV` on a unit spot
+  (`integral_bsCall_payoff_eq_bsV`). The reified `forwardStartCall` contract is added to
+  `Contracts/Instruments/Options.lean`: the call whose strike is set at the reset date `t₁` as
+  the multiple `α` of the then-observed price. What is not proved: the dividend-yield generalization (the market's asset pays no
+  dividends, so the delivered statement is the `q = 0` case of Rubinstein's formula, without the
+  whole-formula dividend scaling `S₀ e^{−qT}` and the ratio leg's rate `r − q`), and cliquets (a
+  series of forward starts) are out of scope. Rubinstein's Risk column is cited as 4(2), February 1991,
+  pp. 44–47 as Hull's bibliography gives it, not checked against the original; the delivered closed form at
+  `q = 0` coincides with what the reference implementation `ql/pricingengines/forward/forwardengine.hpp`
+  computes.
+### Balancer constant-mean invariant and spot price (2026-11-23)
+
+One `full` entry in `benchmarks/defi.json`. It adds one entry to the corpus.
+
+- **`mf-balancer-invariant`** (MathFin/Markets/DeFi/ConstantMeanAMM.lean): the constant-mean
+  (weighted-product) invariant `V = ∏ k, B k ^ w k` of a Balancer pool with reserves
+  `B k > 0` and weights `w k > 0`. Proved: a trade of `Δ` of token `i` in for the whitepaper's
+  Out-Given-In out-amount of token `j` out preserves the weighted product of the reserves
+  (`swap_preserves_constantMean`, on the post-trade reserve vector `swapReserves`), the
+  out-amount is positive and bounded by the output reserve (`swapOut_pos`,
+  `swapOut_lt_reserve`), and the spot price `(B j / w j) / (B i / w i)` is derived as the
+  marginal rate — the derivative at zero trade of the out-amount in the in-amount
+  (`hasDerivAt_swapOut_zero`). The equal-weight two-token instance is proved equal to the
+  library's constant-product pool: the invariant squared is `x * y`
+  (`constantMeanInvariant_two_sq_eq`), the spot price is `internalPrice x y`
+  (`spotPrice_two_eq_internalPrice`), and the out-amount is `swapOutput x y Δ`
+  (`swapOut_two_eq_swapOutput`) — the three reduction theorems in
+  `Markets/DeFi/ConstantMeanAMM.lean`, proved equal to the constant-product side's
+  `internalPrice` and `swapOutput` in `Markets/DeFi/ConstantProductAMM.lean`.
+  Cited: Martinelli & Mushegian, *Balancer* whitepaper, v2019-09-19 ("Theory": Value
+  Function, Spot Price, Out-Given-In; the spot price there is printed with in/out exchanged,
+  `SP^o_i = (Bᵢ/Wᵢ)/(Bₒ/Wₒ)`, the price of `o` in units of `i`, the same ratio
+  reciprocated). Disclosed out of scope: fees
+  (the fee factor is one); the weights need only be positive — the sum-to-one normalization
+  that makes `V` the invariant of a constant-value-share portfolio; the
+  constant-value-share theorem, In-Given-Out, In-Given-Price and liquidity provision are
+  not formalized. Axioms-clean, `full`.
+
+  **Delivered 2026-11-25 (bridge; the node closes)**: `MathFin/Markets/DeFi/ConstantMeanLPContract.lean`
+  reprices the two-token position through the payoff language, the way `LPContract.lean`
+  reprices the constant-product and concentrated-liquidity positions. Proved: the position of
+  invariant `V` and weight `w` on X, marked at the price `P` of X in Y, is worth
+  `V P^w/(w^w(1-w)^(1-w))` in Y (`constantMeanPayoff`, `eval_constantMeanPayoff`); the
+  marking identity — at the pool's own spot price the mark is the reserves `xP + y`, the
+  whitepaper's constant value distribution `B_Y/W_Y`
+  (`eval_constantMeanPayoff_eq_reserves`, stated via the library's `spotPrice` and
+  `constantMeanInvariant`); paying it at `T` is worth the discounted expectation of the mark
+  in any market (`price_constantMeanPayoff`); and at `w = 1/2` the position *is* the
+  constant-product payoff of invariant `V²`
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
+  the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
+  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
+  trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
+  (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
+  Axioms-clean, `full`.
+### Jarrow–Yildirim: the ZC inflation caplet and the YoY forward (2026-11-20)
+
+Two `reduced_core` entries in `benchmarks/interest_rates.json` (module
+`Models/Rates/JarrowYildirim.lean`), each composing existing results under model hypotheses (the
+module's variance lemmas are module-only, not corpus entries). They add two
+reduced cores to the corpus.
+
+- **`mf-jarrow-yildirim-zc-inflation-caplet`** (`jyZcCaplet_price`): the priced zero-coupon
+  inflation caplet is `Pⁿ(0,T)` times the Black caplet on the curve forward `I₀Pʳ/Pⁿ`, given the
+  lognormal law of the index under the nominal `T`-forward measure. Not derived: the index-linked
+  bond pricing hident (the time-0 case of the forward-index martingale, Bagaria eq. 17.6), the
+  lognormality of the index under the nominal T-forward measure (hypothesis hZ), its SDE-level
+  derivation, and the real-rate drift shift. V is a free positive input; this statement does not
+  identify it with jyVariance.
+- **`mf-jarrow-yildirim-yoy-forward-convexity`** (`jyYoyPayment_price`): the time-0 price of the
+  year-on-year payment, from the forward identity `jyYoyForward_eq_convexity` (the
+  conditional-expectation (martingale) hypothesis for the forward index plus the tower step
+  `jyYoyForward_eq_bondRatio`, closed by `yoyConvexity_eq`) and the numéraire change.
+  Not derived: the martingale property of the forward index under Q^T (the conditional-expectation
+  hypothesis), the Hull-White reconstitution form hR of the bond ratio, the means, variances and
+  covariance of the rate deviations and the Hull-White loadings B^n, B^r (free inputs), their
+  SDE-level derivation, and the real-rate drift shift.
 
 ### Marchenko-Pastur support edges (2026-11-08)
 
@@ -681,6 +886,25 @@ split by area. What each bridge proves, by area:
   closed form dominates the vanilla call struck at the running minimum, via a Mills-ratio
   monotonicity argument on its removable-singularity carry term
   (`mf-continuous-lookback-floating-strike`, `reduced_core`).
+  The Broadie–Glasserman–Kou shifted barrier for discretely monitored down-and-out calls
+  (`mf-bgk-discrete-barrier-shift`, `reduced_core`) is proved to make the shifted-barrier
+  expression tend to `ptDownOutCall` as `m → ∞` (for nonzero spot and barrier; a price reading
+  needs `σ > 0`, `0 < T`, positive `S, K, H`, `1 ≤ m` and the shifted barrier at most `K` and
+  below the spot). It is invariant under the `(r, σ, T) ↦ (cr, σ√c, T/c)` rescaling for `c > 0`.
+  `ptDownOutCall` is spatially homogeneous in `(S, K, H)` for every real `c`. It equals its image
+  form for positive `S, K, H, σ`, also with a dividend yield in the printed shape. At `H = 0` it
+  is `0`, a junk value, and the BGK knock-in is the whole `bsV`, also a junk value. The closed
+  form `bsV` obeys the same two rescalings (`bsV_scale`, `bsV_timeScale`). Not derived:
+  `ptDownOutCall` as a discounted expected payoff, the value of `β`, any rate of convergence in
+  `m`, and the accuracy of the shift as an approximation to the discretely monitored price.
+  (`mf-continuous-lookback-floating-strike`, `reduced_core`). For the discrete arithmetic
+  average-strike Asian call, the Gaussian positive part of a single-crossing exponential sum,
+  the Jensen conditioning lower bound for an integrable payoff given the conditional-mean
+  property, and the one-fixing case as the forward-start call at the Black–Scholes price
+  (`mf-asian-avgstrike-expsum-gaussian-positive-part`,
+  `mf-asian-avgstrike-conditioning-lower-bound`, `mf-asian-avgstrike-one-fixing-market-price`,
+  all `reduced_core`: the conditional-mean identification under Brownian motion and the
+  closeness of the bound to the price are not proved).
 - **Structural** (`black_scholes.json`, `binomial.json`). The American put is at least the
   Black–Scholes(–Merton) put (`mf-american-put-ge-bsm-european-put`; the early-exercise premium's
   positivity is not proved); its value is unchanged by null-set horizon changes

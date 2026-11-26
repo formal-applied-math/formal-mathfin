@@ -65,14 +65,6 @@ area = "valuation/insurance"
 family = "insurance"
 
 [[node]]
-label = "thm:american-put-premium"
-title = "American put early-exercise premium"
-statement = "In the binomial model with a positive interest rate, the American put is worth strictly more than the European put with the same strike and expiry whenever immediate exercise is worth more than continuation at some node reached with positive probability."
-uses = ["thm:snell-envelope"]
-area = "valuation/american"
-family = "trees"
-
-[[node]]
 label = "thm:barrier-lookback-closed-forms"
 title = "Barrier and lookback closed forms"
 statement = "In the Black–Scholes model the down-and-out call and the floating-strike lookback call have closed-form prices, obtained from the reflection principle for Brownian motion with drift."
@@ -87,14 +79,6 @@ statement = "If the moments E[S_T^p] of the terminal price are finite exactly up
 uses = ["thm:bs-call"]
 area = "valuation/smile"
 family = "volatility"
-
-[[node]]
-label = "thm:forward-start-call"
-title = "Forward-start call"
-statement = "In the Black–Scholes model, a call struck at a fixed multiple of the asset price at a future date T₁ and expiring at T₂ has the Rubinstein closed-form price, a multiple of a Black–Scholes call price at time T₁."
-uses = ["thm:bs-call"]
-area = "valuation/diffusions"
-family = "diffusions"
 
 [[node]]
 label = "thm:implied-vol-existence"
@@ -203,14 +187,6 @@ area = "risk/credit"
 family = "mechanisms"
 
 [[node]]
-label = "thm:balancer-invariant"
-title = "Balancer constant-mean AMM"
-statement = "In Balancer's constant-mean automated market maker, trades preserve the weighted product ∏ Bᵢ^{wᵢ} of the reserves Bᵢ with weights wᵢ summing to one, and the spot price of one asset in terms of another is the ratio of their reserve-to-weight ratios."
-uses = ["thm:impermanent-loss"]
-area = "valuation/model-free"
-family = "mechanisms"
-
-[[node]]
 label = "thm:compound-exchange-rate-bridge"
 title = "Compound's exchange rate as a money-market account"
 statement = "Compound's cToken exchange rate equals the deposit index of a money-market account accruing at the borrow index, which ties Markets/DeFi/Compound to the library's lending indices, or the statement records exactly where the two differ."
@@ -240,7 +216,7 @@ label = "thm:affine-term-structure"
 title = "Affine term structure"
 statement = "A short-rate model whose bond prices have the form P(t,T) = exp(A(T−t) − B(T−t)r_t) is an affine term structure, a single abstraction of which the Vasicek, Ho–Lee and Hull–White models are instances."
 uses = ["thm:vasicek-bond-pde"]
-core = ["mf-affine-bond-pde-from-riccati"]
+core = ["mf-affine-bond-pde-from-riccati", "mf-holee-bond-price"]
 area = "valuation/term"
 family = "term"
 
@@ -496,14 +472,6 @@ title = "Stochastic Fubini for Itô–Lévy integrals"
 statement = "For the compensated-Poisson (Itô–Lévy) integral and a jointly measurable integrand satisfying the integrability conditions, integrating over a parameter and taking the stochastic integral commute almost surely."
 uses = ["thm:stochastic-fubini"]
 area = "probability/jumps"
-
-[[node]]
-label = "thm:futures-basis-convergence"
-title = "Contango, backwardation and basis convergence"
-statement = "For a forward price F = S e^{(r−δ)T}, the curve is in contango when r > δ and in backwardation when r < δ, and the basis F − S converges to zero as T tends to zero."
-uses = ["thm:interest-rate-parity"]
-area = "valuation/forwards"
-family = "term"
 
 [[node]]
 label = "thm:siegel-paradox"
@@ -820,14 +788,6 @@ uses = ["def:emm"]
 area = "valuation/model-free"
 
 [[node]]
-label = "def:convex-order"
-title = "Convex order"
-statement = "μ ≤_cx ν when ∫ φ dμ ≤ ∫ φ dν for every convex φ; for laws on ℝ with equal means, the ordering of call prices at every strike. Peacocks, martingale couplings and minimal-variance aggregation are stated in it."
-uses = ["thm:market-carr-madan"]
-ground = "Mathlib: ConvexOn, integral"
-area = "valuation/model-free"
-
-[[node]]
 label = "def:markov-martingale"
 title = "Markov martingales"
 statement = "A martingale that is a Markov process with respect to a given filtration, raw or satisfying the usual conditions, and the mimicking problem: a Markov martingale with prescribed one-dimensional marginals."
@@ -929,4 +889,100 @@ label = "thm:convex-order-minimal-sum"
 title = "Convex-order minimal sums"
 statement = "Open (MF-OP-018, Wang 2015): which conditions on marginals F₁,…,Fₙ are necessary and sufficient for the sums with these marginals to have a smallest element in convex order."
 uses = ["def:convex-order", "thm:frechet-hoeffding"]
+core = ["mf-convex-order-no-minimal-sum"]
 area = "risk/aggregation"
+
+[[node]]
+label = "thm:jarrow-yildirim-index-sde"
+title = "Jarrow–Yildirim: the index SDE, the real-rate drift shift and the year-on-year caplet"
+statement = "In the Jarrow–Yildirim model, with Hull–White nominal and real short rates and a lognormal price index driven by correlated Brownian motions, the real rate carries the drift shift −ρ_{rI}σ_rσ_I under the nominal measure, the forward index I·Pʳ/Pⁿ is a martingale under the nominal forward measure with log-variance V(0,T) = ∫₀ᵀ of the correlated quadratic form, and the zero-coupon and year-on-year caplets have their exact prices."
+uses = ["thm:girsanov-brownian-characterisation", "thm:black76-caplet", "thm:zero-coupon-bond-price"]
+area = "valuation/term"
+family = "term"
+
+[[node]]
+label = "thm:asian-conditioning-bound"
+title = "Asian average-strike call: the conditioning bound and its gap"
+statement = "For the discrete arithmetic average-strike call (S_T − A)⁺ in the Black–Scholes market and a Gaussian linear functional Z of the Brownian path at the fixing dates, the conditional mean E[S_T − A | Z] is a signed sum of exponentials in Z, so that E[(S_T − A)⁺] ≥ E[(E[S_T − A | Z])⁺] with a closed-form right side, and the gap is at most the L¹ distance of S_T − A from its conditional mean."
+uses = ["thm:forward-start-call", "def:gbm"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:bs-pricing-measure-unique-general"
+title = "Black–Scholes: the pricing measure is unique for every density"
+statement = "In the Black–Scholes market every pricing measure up to the horizon that has a density with respect to the Girsanov measure of θ = (m − r)/σ, whether or not that density is square-integrable, agrees with the Girsanov measure on the information at the horizon, and so prices the European call at the Black–Scholes price."
+uses = ["thm:bs-arbitrage-free-price", "thm:girsanov-brownian-characterisation"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "def:marchenko-pastur-law"
+title = "The Marchenko–Pastur law"
+statement = "For σ > 0 and aspect ratio c > 0 the Marchenko–Pastur law is the probability measure on [0, ∞) with density √((λ₊ − x)(x − λ₋))/(2πσ²c x) on [λ₋, λ₊], λ± = σ²(1 ± √c)², plus an atom of mass 1 − 1/c at 0 when c > 1; its support is [λ₋, λ₊] together with 0 when c > 1."
+ground = "Mathlib: Measure.withDensity, the support of a measure, and Real.sqrt"
+area = "statistics"
+
+[[node]]
+label = "thm:shout-floor-value"
+title = "The shout floor is the at-the-money put when r ≤ q"
+statement = "In the Black–Scholes market with dividend yield q ≥ r, the shout floor, the value of the right to choose a stopping time and receive then the European put struck at the current spot, equals the at-the-money European put, so that shouting at once is optimal."
+uses = ["def:american-price", "thm:bs-call", "thm:put-call-parity"]
+area = "valuation/american"
+family = "diffusions"
+
+[[node]]
+label = "thm:discrete-hedge-expected-shortfall"
+title = "Expected shortfall of a discretely rebalanced delta hedge"
+statement = "In the Black–Scholes market a seller who receives the call's value and rebalances the delta hedge at n equally spaced dates has a terminal hedging error whose expected shortfall at every level α in (0,1) is bounded by an explicit constant over √n, in contrast with the binomial hedge, whose expected shortfall is zero."
+uses = ["thm:hedged-position-risk", "thm:bs-delta-hedge", "def:expected-shortfall", "thm:bs-delta"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:ito-integral-horizon-free"
+title = "The Itô integral of a continuous integrand on every horizon at once"
+statement = "For a predictable integrand with almost surely continuous paths there is one continuous local martingale t ↦ ∫₀ᵗ σ dB on ℝ≥0 whose restriction to [0, T] is the Itô integral on horizon T for every T, and Itô's formula holds along the Itô process built on it."
+uses = ["def:ito-integral-clm", "thm:ito-formula-c2"]
+area = "probability/brownian"
+
+[[node]]
+label = "thm:binomial-american-hedge"
+title = "The binomial American value is the cost of its hedge with consumption"
+statement = "In the binomial tree under no arbitrage, the American value is the least initial capital of a self-financing strategy with consumption whose discounted value dominates the discounted exercise payoff at every date: the martingale part of the Snell envelope is the gains of a predictable holding, the compensator is the consumption, and the hedge is exact up to the first contact time."
+uses = ["thm:binomial-american-market", "thm:snell-doob-decomposition", "thm:binomial-representation"]
+area = "valuation/trees"
+family = "trees"
+
+[[node]]
+label = "thm:weak-forward-flow-gaussian"
+title = "A constant-coefficient weak forward flow is the initial law convolved with a Gaussian"
+statement = "A flow of probability measures solving the integrated weak forward equation with constant drift b and constant variance v ≥ 0, on [0, T] and tested against functions with bounded first three derivatives, is the initial law convolved with N(bs, vs) at every time s, so that two such flows with the same initial law coincide."
+ground = "Mathlib: Gronwall's inequality for linear ODEs, uniqueness of a measure from its characteristic function, and Gaussian convolution"
+area = "probability/gaussian"
+
+
+[[node]]
+label = "thm:monte-carlo-pricing"
+title = "Monte Carlo pricing of a European payoff"
+statement = "For a European payoff of the terminal value of a model with a known simulation scheme, the Monte Carlo sample mean of the discounted payoff along independent copies of the scheme converges almost surely to the arbitrage price under the pricing measure, and √n times its error converges in distribution to a centred normal law whose variance is that of the discounted payoff, so that the estimator and its confidence interval are justified for payoffs beyond the Black–Scholes put and call."
+uses = ["thm:bs-call", "thm:bs-arbitrage-free-price"]
+core = ["mf-monte-carlo-put-call-consistency"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:finite-difference-scheme"
+title = "Finite-difference schemes for the Black–Scholes equation"
+statement = "The implicit and Crank–Nicolson finite-difference schemes for the Black–Scholes equation on a grid are stable and consistent, and so converge to the closed-form price at the order of the scheme as the grid is refined."
+uses = ["thm:bs-pde", "thm:bs-call"]
+area = "valuation/diffusions"
+family = "diffusions"
+
+[[node]]
+label = "thm:longstaff-schwartz"
+title = "Longstaff–Schwartz regression for American options"
+statement = "For a Bermudan option on a Markov state, the Longstaff–Schwartz algorithm, which estimates the continuation value at each exercise date by least-squares regression on a basis of the state along simulated paths and exercises when the payoff exceeds it, converges to the Snell envelope value as the number of paths and the size of the basis grow."
+uses = ["thm:snell-envelope", "thm:american-put-optimal-exercise", "thm:monte-carlo-pricing"]
+area = "valuation/american"
+family = "diffusions"
