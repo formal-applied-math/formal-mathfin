@@ -3387,9 +3387,9 @@
     "mf-implied-correlation-dispersion": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-26",
-      "elapsed_s": 2.8,
-      "input_hash": "5a6a693770b9552214ab04fb95d6fbdcb39966b0e458960e671a98ef5455b384",
-      "verified_at_commit": "fa3ee1f"
+      "elapsed_s": 4.2,
+      "input_hash": "b0260c467770a9bdbbe512836348143fe7ccffe58dd4c469e6f0b7c2810b2f92",
+      "verified_at_commit": "de33418"
     },
     "mf-implied-vol-exists-above-reference": {
       "benchmark_file": "black_scholes.json",
