@@ -313,7 +313,7 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .sel-ring { fill: none; stroke: var(--ink); stroke-width: 1.4; }
 /* layers behind the buttons (tree.js layerOf): hidden unless shown, except what a selection lights */
 #tree:not(.show-future) .layer-future, #tree:not(.show-open) .layer-open,
-#tree:not(.show-gaps) .layer-gaps, #tree:not(.show-leaves) .layer-leaves { display: none; }
+#tree:not(.show-gaps) .layer-gaps, #tree:not(.show-leaves) .layer-leaves, #tree:not(.show-literature) .layer-literature { display: none; }
 #tree.focus:not(.show-future) .layer-future.on, #tree.focus:not(.show-open) .layer-open.on { display: inline; }
 #tree-box .iss-ring { fill: none; stroke-width: 1.6; opacity: .9; }
 #tree.show-future .shoot.layer-future, #tree.show-open .shoot.layer-open { opacity: .55; }
@@ -351,3 +351,10 @@ details.tableview summary { cursor: pointer; color: var(--ink-2); }
 #tree-box .isl.ring .isl-lbl { fill: var(--tr-alert); }
 .t-metrics .tile .v { font-size: 1.5rem; }
 .sock { display: inline-block; font-size: 0.68rem; border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; margin-left: 4px; color: var(--good, #23896f); }
+/* the literature atlas (tree.html, "The field beside the library") */
+.warn { display: inline-block; font-size: 0.68rem; border: 1px solid currentColor; border-radius: 999px; padding: 0 6px; margin-left: 4px; color: var(--warn-ink, #b4572e); }
+.t-founding details { border-bottom: 1px solid var(--line); padding: 6px 0; }
+.t-founding ol { margin: 6px 0 4px 1.2em; font-size: 0.88rem; }
+.t-founding li { margin: 2px 0; }
+.lit-band { fill: var(--s1); stroke: none; }
+.lit-band.gap { stroke: var(--s3); stroke-width: 3; stroke-dasharray: 8 5; }

@@ -1,0 +1,5291 @@
+{
+ "generated": "2026-11-26",
+ "corpus": {
+  "papers": 24505,
+  "placed": 22059,
+  "outside_every_cell": 2446,
+  "sources": "q-fin arXiv and OpenAlex open-access papers"
+ },
+ "classifier": {
+  "model": "BAAI/bge-small-en-v1.5 + BAAI/bge-base-en-v1.5",
+  "train": 2983,
+  "heldout": {
+   "papers": 297,
+   "top1": 0.714,
+   "top2": 0.869
+  }
+ },
+ "limits": [
+  "the corpus leans towards recent and open-access work",
+  "an arXiv record OpenAlex did not merge with its journal version splits its citations between the two",
+  "each paper counts in its first cell only"
+ ],
+ "last_year": 2025,
+ "cells": {
+  "choice/dynamic": {
+   "papers": 1759,
+   "by_year": {
+    "1939": 1,
+    "1972": 2,
+    "1979": 3,
+    "1980": 1,
+    "1985": 2,
+    "1987": 1,
+    "1988": 1,
+    "1989": 2,
+    "1990": 2,
+    "1991": 1,
+    "1992": 1,
+    "1993": 1,
+    "1994": 1,
+    "1995": 1,
+    "1996": 2,
+    "1997": 3,
+    "1998": 8,
+    "1999": 7,
+    "2000": 10,
+    "2001": 9,
+    "2002": 14,
+    "2003": 15,
+    "2004": 14,
+    "2005": 21,
+    "2006": 24,
+    "2007": 38,
+    "2008": 29,
+    "2009": 34,
+    "2010": 45,
+    "2011": 50,
+    "2012": 62,
+    "2013": 72,
+    "2014": 85,
+    "2015": 69,
+    "2016": 76,
+    "2017": 74,
+    "2018": 84,
+    "2019": 89,
+    "2020": 83,
+    "2021": 83,
+    "2022": 98,
+    "2023": 92,
+    "2024": 113,
+    "2025": 149,
+    "2026": 168
+   },
+   "growth": 1.32,
+   "cited_in_corpus": 4609,
+   "founding": [
+    {
+     "title": "Optimum consumption and portfolio rules in a continuous-time model",
+     "year": 1971,
+     "doi": "https://doi.org/10.1016/0022-0531(71)90038-x",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2005158847",
+     "cited_by_cell": 405
+    },
+    {
+     "title": "Lifetime Portfolio Selection under Uncertainty: The Continuous-Time Case",
+     "year": 1969,
+     "doi": "https://doi.org/10.2307/1926560",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W1984697146",
+     "cited_by_cell": 391
+    },
+    {
+     "title": "The asymptotic elasticity of utility functions and optimal investment in incomplete markets",
+     "year": 1999,
+     "doi": "https://doi.org/10.1214/aoap/1029962818",
+     "authors": [
+      "Dmitry Kramkov",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W1979627408",
+     "cited_by_cell": 170
+    },
+    {
+     "title": "Controlled Markov Processes and Viscosity Solutions",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/0-387-31071-1",
+     "authors": [
+      "Wendell Helms Fleming",
+      "H. Mete Soner"
+     ],
+     "openalex": "W4210791600",
+     "cited_by_cell": 158
+    },
+    {
+     "title": "PORTFOLIO SELECTION*",
+     "year": 1952,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1952.tb01525.x",
+     "authors": [
+      "Harry M. Markowitz"
+     ],
+     "openalex": "W4232474910",
+     "cited_by_cell": 152
+    },
+    {
+     "title": "Methods of Mathematical Finance",
+     "year": 1998,
+     "doi": "https://doi.org/10.1007/978-1-4939-6845-9",
+     "authors": [
+      "Ioannis Karatzas",
+      "Steven E. Shreve"
+     ],
+     "openalex": "W2042775870",
+     "cited_by_cell": 152
+    },
+    {
+     "title": "Optimal Portfolio and Consumption Decisions for a “Small Investor” on a Finite Horizon",
+     "year": 1987,
+     "doi": "https://doi.org/10.1137/0325086",
+     "authors": [
+      "Ioannis Karatzas",
+      "John P. Lehoczky",
+      "Steven E. Shreve"
+     ],
+     "openalex": "W2090220594",
+     "cited_by_cell": 141
+    },
+    {
+     "title": "Continuous-time Stochastic Control and Optimization with Financial Applications",
+     "year": 2009,
+     "doi": "https://doi.org/10.1007/978-3-540-89500-8",
+     "authors": [
+      "Huyên Pham"
+     ],
+     "openalex": "W1507126399",
+     "cited_by_cell": 140
+    },
+    {
+     "title": "Portfolio Selection with Transaction Costs",
+     "year": 1990,
+     "doi": "https://doi.org/10.1287/moor.15.4.676",
+     "authors": [
+      "Mark H. Davis",
+      "A. R. Norman"
+     ],
+     "openalex": "W2115580984",
+     "cited_by_cell": 128
+    },
+    {
+     "title": "Optimal consumption and portfolio policies when asset prices follow a diffusion process",
+     "year": 1989,
+     "doi": "https://doi.org/10.1016/0022-0531(89)90067-7",
+     "authors": [
+      "John C. Cox",
+      "Chi-fu Huang"
+     ],
+     "openalex": "W1963901383",
+     "cited_by_cell": 125
+    }
+   ],
+   "agreement": {
+    "precision": 0.725,
+    "recall": 0.725,
+    "labelled": 149
+   }
+  },
+  "choice/equilibrium": {
+   "papers": 267,
+   "by_year": {
+    "1988": 2,
+    "1991": 2,
+    "1994": 1,
+    "1996": 1,
+    "1997": 3,
+    "1998": 1,
+    "1999": 2,
+    "2000": 3,
+    "2001": 2,
+    "2002": 3,
+    "2003": 9,
+    "2005": 4,
+    "2006": 4,
+    "2007": 10,
+    "2008": 5,
+    "2009": 3,
+    "2010": 7,
+    "2011": 12,
+    "2012": 12,
+    "2013": 6,
+    "2014": 12,
+    "2015": 10,
+    "2016": 12,
+    "2017": 16,
+    "2018": 15,
+    "2019": 9,
+    "2020": 13,
+    "2021": 7,
+    "2022": 10,
+    "2023": 9,
+    "2024": 19,
+    "2025": 16,
+    "2026": 25
+   },
+   "growth": 0.94,
+   "cited_in_corpus": 543,
+   "founding": [
+    {
+     "title": "CAPITAL ASSET PRICES: A THEORY OF MARKET EQUILIBRIUM UNDER CONDITIONS OF RISK*",
+     "year": 1964,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1964.tb02865.x",
+     "authors": [
+      "William F. Sharpe"
+     ],
+     "openalex": "W2029056003",
+     "cited_by_cell": 39
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 29
+    },
+    {
+     "title": "Common risk factors in the returns on stocks and bonds",
+     "year": 1993,
+     "doi": "https://doi.org/10.1016/0304-405x(93)90023-5",
+     "authors": [
+      "Eugene F. Fama",
+      "Kenneth R. French"
+     ],
+     "openalex": "W1995834279",
+     "cited_by_cell": 24
+    },
+    {
+     "title": "The equity premium: A puzzle",
+     "year": 1985,
+     "doi": "https://doi.org/10.1016/0304-3932(85)90061-3",
+     "authors": [
+      "Rajnish Mehra",
+      "Edward C. Prescott"
+     ],
+     "openalex": "W2570834760",
+     "cited_by_cell": 24
+    },
+    {
+     "title": "Asset Prices in an Exchange Economy",
+     "year": 1978,
+     "doi": "https://doi.org/10.2307/1913837",
+     "authors": [
+      "Robert E. Lucas"
+     ],
+     "openalex": "W2119143694",
+     "cited_by_cell": 24
+    },
+    {
+     "title": "The Valuation of Risk Assets and the Selection of Risky Investments in Stock Portfolios and Capital Budgets",
+     "year": 1965,
+     "doi": "https://doi.org/10.2307/1924119",
+     "authors": [
+      "John Lintner"
+     ],
+     "openalex": "W4239488419",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "The arbitrage theory of capital asset pricing",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0022-0531(76)90046-6",
+     "authors": [
+      "Stephen A. Ross"
+     ],
+     "openalex": "W2010681793",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Substitution, Risk Aversion, and the Temporal Behavior of Consumption and Asset Returns: A Theoretical Framework",
+     "year": 1989,
+     "doi": "https://doi.org/10.2307/1913778",
+     "authors": [
+      "Larry G. Epstein",
+      "Stanley E. Zin"
+     ],
+     "openalex": "W1574786337",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Risks for the Long Run: A Potential Resolution of Asset Pricing Puzzles",
+     "year": 2000,
+     "doi": "https://doi.org/10.3386/w8059",
+     "authors": [
+      "Ravi Bansal",
+      "Amir Yaron"
+     ],
+     "openalex": "W2113704261",
+     "cited_by_cell": 19
+    },
+    {
+     "title": "PORTFOLIO SELECTION*",
+     "year": 1952,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1952.tb01525.x",
+     "authors": [
+      "Harry M. Markowitz"
+     ],
+     "openalex": "W4232474910",
+     "cited_by_cell": 18
+    }
+   ],
+   "agreement": {
+    "precision": 0.654,
+    "recall": 0.667,
+    "labelled": 51
+   }
+  },
+  "choice/portfolio": {
+   "papers": 1094,
+   "by_year": {
+    "1983": 1,
+    "1997": 2,
+    "1998": 2,
+    "1999": 1,
+    "2000": 2,
+    "2001": 2,
+    "2002": 6,
+    "2003": 4,
+    "2004": 1,
+    "2005": 3,
+    "2006": 5,
+    "2007": 8,
+    "2008": 4,
+    "2009": 11,
+    "2010": 10,
+    "2011": 9,
+    "2012": 15,
+    "2013": 32,
+    "2014": 25,
+    "2015": 28,
+    "2016": 29,
+    "2017": 36,
+    "2018": 46,
+    "2019": 54,
+    "2020": 66,
+    "2021": 82,
+    "2022": 80,
+    "2023": 100,
+    "2024": 121,
+    "2025": 140,
+    "2026": 168
+   },
+   "growth": 2.26,
+   "cited_in_corpus": 2150,
+   "founding": [
+    {
+     "title": "PORTFOLIO SELECTION*",
+     "year": 1952,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1952.tb01525.x",
+     "authors": [
+      "Harry M. Markowitz"
+     ],
+     "openalex": "W4232474910",
+     "cited_by_cell": 591
+    },
+    {
+     "title": "Optimal Versus Naive Diversification: How Inefficient is the 1/ N Portfolio Strategy?",
+     "year": 2007,
+     "doi": "https://doi.org/10.1093/rfs/hhm075",
+     "authors": [
+      "Victor DeMiguel",
+      "Lorenzo Garlappi",
+      "Raman Uppal"
+     ],
+     "openalex": "W2163969674",
+     "cited_by_cell": 185
+    },
+    {
+     "title": "Optimization of conditional value-at-risk",
+     "year": 2000,
+     "doi": "https://doi.org/10.21314/jor.2000.038",
+     "authors": [
+      "Ralph Tyrrell Rockafellar",
+      "Stan Uryasev"
+     ],
+     "openalex": "W1647779468",
+     "cited_by_cell": 135
+    },
+    {
+     "title": "CAPITAL ASSET PRICES: A THEORY OF MARKET EQUILIBRIUM UNDER CONDITIONS OF RISK*",
+     "year": 1964,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1964.tb02865.x",
+     "authors": [
+      "William F. Sharpe"
+     ],
+     "openalex": "W2029056003",
+     "cited_by_cell": 130
+    },
+    {
+     "title": "Risk Reduction in Large Portfolios: Why Imposing the Wrong Constraints Helps",
+     "year": 2003,
+     "doi": "https://doi.org/10.1111/1540-6261.00580",
+     "authors": [
+      "Ravi Jagannathan",
+      "Tongshu Ma"
+     ],
+     "openalex": "W2891118671",
+     "cited_by_cell": 98
+    },
+    {
+     "title": "Common risk factors in the returns on stocks and bonds",
+     "year": 1993,
+     "doi": "https://doi.org/10.1016/0304-405x(93)90023-5",
+     "authors": [
+      "Eugene F. Fama",
+      "Kenneth R. French"
+     ],
+     "openalex": "W1995834279",
+     "cited_by_cell": 95
+    },
+    {
+     "title": "Global Portfolio Optimization",
+     "year": 1992,
+     "doi": "https://doi.org/10.2469/faj.v48.n5.28",
+     "authors": [
+      "Fischer Black",
+      "Robert B. Litterman"
+     ],
+     "openalex": "W2138490239",
+     "cited_by_cell": 90
+    },
+    {
+     "title": "The Markowitz Optimization Enigma: Is ‘Optimized’ Optimal?",
+     "year": 1989,
+     "doi": "https://doi.org/10.2469/faj.v45.n1.31",
+     "authors": [
+      "Richard O. Michaud"
+     ],
+     "openalex": "W3125435015",
+     "cited_by_cell": 87
+    },
+    {
+     "title": "A well-conditioned estimator for large-dimensional covariance matrices",
+     "year": 2003,
+     "doi": "https://doi.org/10.1016/s0047-259x(03)00096-4",
+     "authors": [
+      "Olivier Ledoit",
+      "Michael Wolf"
+     ],
+     "openalex": "W2062125287",
+     "cited_by_cell": 86
+    },
+    {
+     "title": "Improved estimation of the covariance matrix of stock returns with an application to portfolio selection",
+     "year": 2003,
+     "doi": "https://doi.org/10.1016/s0927-5398(03)00007-0",
+     "authors": [
+      "Olivier Ledoit",
+      "Michael Wolf"
+     ],
+     "openalex": "W2165408259",
+     "cited_by_cell": 82
+    }
+   ],
+   "agreement": {
+    "precision": 0.65,
+    "recall": 0.698,
+    "labelled": 96
+   }
+  },
+  "choice/preferences": {
+   "papers": 163,
+   "by_year": {
+    "1984": 1,
+    "1987": 1,
+    "1990": 1,
+    "1994": 1,
+    "1997": 1,
+    "2000": 3,
+    "2004": 3,
+    "2005": 3,
+    "2006": 3,
+    "2007": 2,
+    "2008": 2,
+    "2009": 6,
+    "2010": 3,
+    "2011": 12,
+    "2012": 3,
+    "2013": 4,
+    "2014": 10,
+    "2015": 6,
+    "2016": 5,
+    "2017": 7,
+    "2018": 7,
+    "2019": 7,
+    "2020": 7,
+    "2021": 10,
+    "2022": 11,
+    "2023": 4,
+    "2024": 8,
+    "2025": 11,
+    "2026": 21
+   },
+   "growth": 1.33,
+   "cited_in_corpus": 543,
+   "founding": [
+    {
+     "title": "Advances in prospect theory: Cumulative representation of uncertainty",
+     "year": 1992,
+     "doi": "https://doi.org/10.1007/bf00122574",
+     "authors": [
+      "Amos Tversky",
+      "Daniel J. Kahneman"
+     ],
+     "openalex": "W2041946752",
+     "cited_by_cell": 31
+    },
+    {
+     "title": "Prospect Theory: An Analysis of Decision under Risk",
+     "year": 1979,
+     "doi": "https://doi.org/10.2307/1914185",
+     "authors": [
+      "Daniel J. Kahneman",
+      "Amos Tversky"
+     ],
+     "openalex": "W3011865677",
+     "cited_by_cell": 26
+    },
+    {
+     "title": "The asymptotic elasticity of utility functions and optimal investment in incomplete markets",
+     "year": 1999,
+     "doi": "https://doi.org/10.1214/aoap/1029962818",
+     "authors": [
+      "Dmitry Kramkov",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W1979627408",
+     "cited_by_cell": 24
+    },
+    {
+     "title": "Risk Aversion in the Small and in the Large",
+     "year": 1964,
+     "doi": "https://doi.org/10.2307/1913738",
+     "authors": [
+      "John W. Pratt"
+     ],
+     "openalex": "W4252707658",
+     "cited_by_cell": 22
+    },
+    {
+     "title": "The Dual Theory of Choice under Risk",
+     "year": 1987,
+     "doi": "https://doi.org/10.2307/1911158",
+     "authors": [
+      "Menahem E. Yaari"
+     ],
+     "openalex": "W2056819186",
+     "cited_by_cell": 22
+    },
+    {
+     "title": "Maxmin expected utility with non-unique prior",
+     "year": 1989,
+     "doi": "https://doi.org/10.1016/0304-4068(89)90018-9",
+     "authors": [
+      "Itzhak Gilboa",
+      "David Schmeidler"
+     ],
+     "openalex": "W2067477904",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Subjective Probability and Expected Utility without Additivity",
+     "year": 1989,
+     "doi": "https://doi.org/10.2307/1911053",
+     "authors": [
+      "David Schmeidler"
+     ],
+     "openalex": "W3121172931",
+     "cited_by_cell": 19
+    },
+    {
+     "title": "PORTFOLIO SELECTION*",
+     "year": 1952,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1952.tb01525.x",
+     "authors": [
+      "Harry M. Markowitz"
+     ],
+     "openalex": "W4232474910",
+     "cited_by_cell": 17
+    },
+    {
+     "title": "Optimum consumption and portfolio rules in a continuous-time model",
+     "year": 1971,
+     "doi": "https://doi.org/10.1016/0022-0531(71)90038-x",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2005158847",
+     "cited_by_cell": 14
+    },
+    {
+     "title": "Lifetime Portfolio Selection under Uncertainty: The Continuous-Time Case",
+     "year": 1969,
+     "doi": "https://doi.org/10.2307/1926560",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W1984697146",
+     "cited_by_cell": 14
+    }
+   ],
+   "agreement": {
+    "precision": 0.561,
+    "recall": 0.64,
+    "labelled": 50
+   }
+  },
+  "choice/trading": {
+   "papers": 1484,
+   "by_year": {
+    "1997": 1,
+    "1998": 1,
+    "1999": 5,
+    "2000": 7,
+    "2001": 17,
+    "2002": 5,
+    "2003": 13,
+    "2004": 19,
+    "2005": 14,
+    "2006": 11,
+    "2007": 13,
+    "2008": 25,
+    "2009": 25,
+    "2010": 33,
+    "2011": 33,
+    "2012": 47,
+    "2013": 43,
+    "2014": 63,
+    "2015": 69,
+    "2016": 76,
+    "2017": 70,
+    "2018": 55,
+    "2019": 69,
+    "2020": 87,
+    "2021": 77,
+    "2022": 73,
+    "2023": 81,
+    "2024": 98,
+    "2025": 120,
+    "2026": 228
+   },
+   "growth": 1.26,
+   "cited_in_corpus": 8127,
+   "founding": [
+    {
+     "title": "Optimal execution of portfolio transactions",
+     "year": 2001,
+     "doi": "https://doi.org/10.21314/jor.2001.041",
+     "authors": [
+      "Robert F. Almgren",
+      "Neil A. Chriss"
+     ],
+     "openalex": "W1988270113",
+     "cited_by_cell": 358
+    },
+    {
+     "title": "Continuous Auctions and Insider Trading",
+     "year": 1985,
+     "doi": "https://doi.org/10.2307/1913210",
+     "authors": [
+      "Albert S. Kyle"
+     ],
+     "openalex": "W2050031929",
+     "cited_by_cell": 296
+    },
+    {
+     "title": "High-frequency trading in a limit order book",
+     "year": 2008,
+     "doi": "https://doi.org/10.1080/14697680701381228",
+     "authors": [
+      "Marco Avellaneda",
+      "SASHA F. STOIKOV"
+     ],
+     "openalex": "W2162288466",
+     "cited_by_cell": 198
+    },
+    {
+     "title": "Optimal control of execution costs",
+     "year": 1998,
+     "doi": "https://doi.org/10.1016/s1386-4181(97)00012-8",
+     "authors": [
+      "Dimitris Bertsimas",
+      "Andrew W. Lo"
+     ],
+     "openalex": "W2001770658",
+     "cited_by_cell": 187
+    },
+    {
+     "title": "Fluctuations and response in financial markets: the subtle nature of ‘random’ price changes",
+     "year": 2004,
+     "doi": "https://doi.org/10.1080/14697680400000022",
+     "authors": [
+      "Jean‐Philippe Bouchaud",
+      "Yuval Gefen",
+      "Marc Potters"
+     ],
+     "openalex": "W3099406319",
+     "cited_by_cell": 187
+    },
+    {
+     "title": "Algorithmic and High-Frequency Trading",
+     "year": 2015,
+     "doi": null,
+     "authors": [
+      "Álvaro Cartea",
+      "Sebastian Jaimungal",
+      "José Penalva"
+     ],
+     "openalex": "W2292370562",
+     "cited_by_cell": 185
+    },
+    {
+     "title": "Optimal trading strategy and supply/demand dynamics",
+     "year": 2012,
+     "doi": "https://doi.org/10.1016/j.finmar.2012.09.001",
+     "authors": [
+      "Anna A. Obizhaeva",
+      "Jiang Wang"
+     ],
+     "openalex": "W3023274588",
+     "cited_by_cell": 169
+    },
+    {
+     "title": "No-dynamic-arbitrage and market impact",
+     "year": 2010,
+     "doi": "https://doi.org/10.1080/14697680903373692",
+     "authors": [
+      "Jim Gatheral"
+     ],
+     "openalex": "W2103620446",
+     "cited_by_cell": 159
+    },
+    {
+     "title": "A Stochastic Model for Order Book Dynamics",
+     "year": 2010,
+     "doi": "https://doi.org/10.1287/opre.1090.0780",
+     "authors": [
+      "Rama Cont",
+      "SASHA F. STOIKOV",
+      "Rishi Talreja"
+     ],
+     "openalex": "W3125796404",
+     "cited_by_cell": 151
+    },
+    {
+     "title": "Bid, ask and transaction prices in a specialist market with heterogeneously informed traders",
+     "year": 1985,
+     "doi": "https://doi.org/10.1016/0304-405x(85)90044-3",
+     "authors": [
+      "Lawrence R. Glosten",
+      "Paul Milgrom"
+     ],
+     "openalex": "W1985808284",
+     "cited_by_cell": 146
+    }
+   ],
+   "agreement": {
+    "precision": 0.699,
+    "recall": 0.769,
+    "labelled": 121
+   }
+  },
+  "market": {
+   "papers": 356,
+   "by_year": {
+    "1992": 1,
+    "1997": 3,
+    "1998": 3,
+    "1999": 2,
+    "2000": 6,
+    "2001": 6,
+    "2002": 5,
+    "2003": 10,
+    "2004": 2,
+    "2005": 4,
+    "2006": 9,
+    "2007": 10,
+    "2008": 13,
+    "2009": 11,
+    "2010": 6,
+    "2011": 9,
+    "2012": 17,
+    "2013": 23,
+    "2014": 30,
+    "2015": 22,
+    "2016": 14,
+    "2017": 11,
+    "2018": 9,
+    "2019": 20,
+    "2020": 14,
+    "2021": 14,
+    "2022": 15,
+    "2023": 19,
+    "2024": 8,
+    "2025": 15,
+    "2026": 19
+   },
+   "growth": 1.04,
+   "cited_in_corpus": 1420,
+   "founding": [
+    {
+     "title": "A general version of the fundamental theorem of asset pricing",
+     "year": 1994,
+     "doi": "https://doi.org/10.1007/bf01450498",
+     "authors": [
+      "Freddy Delbaen",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W4244967830",
+     "cited_by_cell": 126
+    },
+    {
+     "title": "Martingales and arbitrage in multiperiod securities markets",
+     "year": 1979,
+     "doi": "https://doi.org/10.1016/0022-0531(79)90043-7",
+     "authors": [
+      "J. Michael Harrison",
+      "David M. Kreps"
+     ],
+     "openalex": "W1985018066",
+     "cited_by_cell": 66
+    },
+    {
+     "title": "Martingales and stochastic integrals in the theory of continuous trading",
+     "year": 1981,
+     "doi": "https://doi.org/10.1016/0304-4149(81)90026-0",
+     "authors": [
+      "J. Michael Harrison",
+      "Stanley R. Pliska"
+     ],
+     "openalex": "W2041550349",
+     "cited_by_cell": 65
+    },
+    {
+     "title": "The numéraire portfolio in semimartingale financial models",
+     "year": 2007,
+     "doi": "https://doi.org/10.1007/s00780-007-0047-3",
+     "authors": [
+      "Ioannis Karatzas",
+      "Constantinos Kardaras"
+     ],
+     "openalex": "W2164288937",
+     "cited_by_cell": 60
+    },
+    {
+     "title": "Equivalent martingale measures and no-arbitrage in stochastic securities market models",
+     "year": 1990,
+     "doi": "https://doi.org/10.1080/17442509008833613",
+     "authors": [
+      "Robert C. Dalang",
+      "A. J. Morton",
+      "Walter Willinger"
+     ],
+     "openalex": "W2078274626",
+     "cited_by_cell": 56
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 52
+    },
+    {
+     "title": "The fundamental theorem of asset pricing for unbounded stochastic processes",
+     "year": 1998,
+     "doi": "https://doi.org/10.1007/s002080050220",
+     "authors": [
+      "Freddy Delbaen",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W2095487918",
+     "cited_by_cell": 51
+    },
+    {
+     "title": "The Mathematics of Arbitrage",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/978-3-540-31299-4",
+     "authors": [
+      "Freddy Delbaen",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W4232656348",
+     "cited_by_cell": 49
+    },
+    {
+     "title": "Limit Theorems for Stochastic Processes",
+     "year": 2003,
+     "doi": "https://doi.org/10.1007/978-3-662-05265-5",
+     "authors": [
+      "Jean Jacod",
+      "Albert Nikolaevich Shiryaev"
+     ],
+     "openalex": "W4293092461",
+     "cited_by_cell": 38
+    },
+    {
+     "title": "Arbitrage and equilibrium in economies with infinitely many commodities",
+     "year": 1981,
+     "doi": "https://doi.org/10.1016/0304-4068(81)90010-0",
+     "authors": [
+      "David M. Kreps"
+     ],
+     "openalex": "W2089020092",
+     "cited_by_cell": 37
+    }
+   ],
+   "agreement": {
+    "precision": 0.653,
+    "recall": 0.696,
+    "labelled": 46
+   }
+  },
+  "probability/analysis": {
+   "papers": 18,
+   "by_year": {
+    "1983": 1,
+    "1990": 1,
+    "2010": 1,
+    "2014": 2,
+    "2016": 2,
+    "2017": 1,
+    "2018": 2,
+    "2019": 1,
+    "2020": 1,
+    "2022": 2,
+    "2024": 2,
+    "2025": 1,
+    "2026": 1
+   },
+   "growth": 0.71,
+   "cited_in_corpus": 58,
+   "founding": [
+    {
+     "title": "Model-Independent Bounds for Option Prices: A Mass Transport Approach",
+     "year": 2011,
+     "doi": "https://doi.org/10.1007/s00780-013-0205-8",
+     "authors": [
+      "Mathias Beiglböck",
+      "Pierre Henry‐Labordère",
+      "Friedrich Penkner"
+     ],
+     "openalex": "W2952331020",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "The Existence of Probability Measures with Given Marginals",
+     "year": 1965,
+     "doi": "https://doi.org/10.1214/aoms/1177700153",
+     "authors": [
+      "Volker Strassen"
+     ],
+     "openalex": "W2070589948",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "Convex measures of risk and trading constraints",
+     "year": 2002,
+     "doi": "https://doi.org/10.1007/s007800200072",
+     "authors": [
+      "Hans Föllmer",
+      "Alexander Schied"
+     ],
+     "openalex": "W2046396733",
+     "cited_by_cell": 4
+    },
+    {
+     "title": "Putting order in risk measures",
+     "year": 2002,
+     "doi": "https://doi.org/10.1016/s0378-4266(02)00270-4",
+     "authors": [
+      "Marco Frittelli",
+      "Emanuela Rosazza Gianin"
+     ],
+     "openalex": "W1969897341",
+     "cited_by_cell": 4
+    },
+    {
+     "title": "Stochastic Finance: An Introduction in Discrete Time",
+     "year": 2011,
+     "doi": "https://doi.org/10.1515/9783110218053",
+     "authors": [
+      "Hans Föllmer",
+      "Alexander Schied"
+     ],
+     "openalex": "W4213065535",
+     "cited_by_cell": 4
+    },
+    {
+     "title": "Arbitrage and duality in nondominated discrete-time models",
+     "year": 2015,
+     "doi": "https://doi.org/10.1214/14-aap1011",
+     "authors": [
+      "Bruno Bouchard",
+      "Marcel Nutz"
+     ],
+     "openalex": "W2157767596",
+     "cited_by_cell": 4
+    },
+    {
+     "title": "Complete duality for martingale optimal transport on the line",
+     "year": 2017,
+     "doi": "https://doi.org/10.1214/16-aop1131",
+     "authors": [
+      "Mathias Beiglböck",
+      "Marcel Nutz",
+      "Nizar Touzi"
+     ],
+     "openalex": "W849469867",
+     "cited_by_cell": 4
+    },
+    {
+     "title": "On the Extension of the Namioka-Klee Theorem and on the Fatou Property for Risk Measures",
+     "year": 2009,
+     "doi": "https://doi.org/10.1007/978-3-642-02608-9_1",
+     "authors": [
+      "Sara Biagini",
+      "Marco Frittelli"
+     ],
+     "openalex": "W51204563",
+     "cited_by_cell": 3
+    },
+    {
+     "title": "Coherent Measures of Risk",
+     "year": 1999,
+     "doi": "https://doi.org/10.1111/1467-9965.00068",
+     "authors": [
+      "Philippe Artzner",
+      "Freddy Delbaen",
+      "Jean‐Marc Eber"
+     ],
+     "openalex": "W2019291268",
+     "cited_by_cell": 3
+    },
+    {
+     "title": "Monetary utility functions",
+     "year": 2012,
+     "doi": null,
+     "authors": [
+      "Freddy Delbaen"
+     ],
+     "openalex": "W645573447",
+     "cited_by_cell": 3
+    }
+   ],
+   "agreement": {
+    "precision": 0.222,
+    "recall": 0.182,
+    "labelled": 11
+   }
+  },
+  "probability/brownian": {
+   "papers": 1337,
+   "by_year": {
+    "1950": 1,
+    "1951": 1,
+    "1952": 1,
+    "1958": 1,
+    "1959": 1,
+    "1960": 1,
+    "1963": 1,
+    "1964": 1,
+    "1967": 3,
+    "1968": 2,
+    "1969": 1,
+    "1970": 1,
+    "1971": 4,
+    "1972": 2,
+    "1973": 2,
+    "1974": 3,
+    "1975": 2,
+    "1976": 3,
+    "1977": 3,
+    "1978": 3,
+    "1979": 5,
+    "1980": 2,
+    "1981": 5,
+    "1983": 1,
+    "1984": 1,
+    "1985": 7,
+    "1986": 5,
+    "1987": 5,
+    "1988": 3,
+    "1989": 4,
+    "1990": 4,
+    "1991": 3,
+    "1992": 4,
+    "1993": 2,
+    "1994": 4,
+    "1995": 10,
+    "1996": 6,
+    "1997": 9,
+    "1998": 8,
+    "1999": 15,
+    "2000": 10,
+    "2001": 20,
+    "2002": 20,
+    "2003": 17,
+    "2004": 16,
+    "2005": 34,
+    "2006": 21,
+    "2007": 22,
+    "2008": 26,
+    "2009": 42,
+    "2010": 26,
+    "2011": 25,
+    "2012": 43,
+    "2013": 52,
+    "2014": 43,
+    "2015": 54,
+    "2016": 56,
+    "2017": 43,
+    "2018": 67,
+    "2019": 50,
+    "2020": 55,
+    "2021": 52,
+    "2022": 64,
+    "2023": 59,
+    "2024": 76,
+    "2025": 82,
+    "2026": 97
+   },
+   "growth": 1.23,
+   "cited_in_corpus": 1641,
+   "founding": [
+    {
+     "title": "Adapted solution of a backward stochastic differential equation",
+     "year": 1990,
+     "doi": "https://doi.org/10.1016/0167-6911(90)90082-6",
+     "authors": [
+      "Étienne Pardoux",
+      "Shige Peng"
+     ],
+     "openalex": "W2078895915",
+     "cited_by_cell": 170
+    },
+    {
+     "title": "Backward Stochastic Differential Equations in Finance",
+     "year": 1997,
+     "doi": "https://doi.org/10.1111/1467-9965.00022",
+     "authors": [
+      "Nicole El Karoui",
+      "Shige Peng",
+      "Marie-Claire Quenez"
+     ],
+     "openalex": "W2157883119",
+     "cited_by_cell": 146
+    },
+    {
+     "title": "The Malliavin Calculus and Related Topics",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/3-540-28329-3",
+     "authors": [
+      "David Nualart"
+     ],
+     "openalex": "W1554577510",
+     "cited_by_cell": 97
+    },
+    {
+     "title": "Continuous Martingales and Brownian Motion",
+     "year": 1999,
+     "doi": "https://doi.org/10.1007/978-3-662-06400-9",
+     "authors": [
+      "Daniel Revuz",
+      "Marc Yor"
+     ],
+     "openalex": "W1545370368",
+     "cited_by_cell": 72
+    },
+    {
+     "title": "Conjugate convex functions in optimal stochastic control",
+     "year": 1973,
+     "doi": "https://doi.org/10.1016/0022-247x(73)90066-8",
+     "authors": [
+      "Jean‐Michel Bismut"
+     ],
+     "openalex": "W2009905602",
+     "cited_by_cell": 66
+    },
+    {
+     "title": "Reflected solutions of backward SDE's, and related obstacle problems for PDE's",
+     "year": 1997,
+     "doi": "https://doi.org/10.1214/aop/1024404416",
+     "authors": [
+      "Nicole El Karoui",
+      "C. Kapoudjian",
+      "Étienne Pardoux"
+     ],
+     "openalex": "W2090929784",
+     "cited_by_cell": 58
+    },
+    {
+     "title": "Solving forward-backward stochastic differential equations explicitly — a four step scheme",
+     "year": 1994,
+     "doi": "https://doi.org/10.1007/bf01192258",
+     "authors": [
+      "Jin Ma",
+      "Philip E. Protter",
+      "Jiongmin Yong"
+     ],
+     "openalex": "W2046553535",
+     "cited_by_cell": 57
+    },
+    {
+     "title": "Backward stochastic differential equations and partial differential equations with quadratic growth",
+     "year": 2000,
+     "doi": "https://doi.org/10.1214/aop/1019160253",
+     "authors": [
+      "Magdalena Kobylanski"
+     ],
+     "openalex": "W1511896630",
+     "cited_by_cell": 55
+    },
+    {
+     "title": "Numerical Solution of Stochastic Differential Equations",
+     "year": 1992,
+     "doi": "https://doi.org/10.1007/978-3-662-12616-5",
+     "authors": [
+      "Peter E. Kloeden",
+      "Eckhard Platen"
+     ],
+     "openalex": "W4231021340",
+     "cited_by_cell": 55
+    },
+    {
+     "title": "Backward stochastic differential equations and quasilinear parabolic partial differential equations",
+     "year": 2005,
+     "doi": "https://doi.org/10.1007/bfb0007334",
+     "authors": [
+      "Étienne Pardoux",
+      "Shige Peng"
+     ],
+     "openalex": "W1994791309",
+     "cited_by_cell": 54
+    }
+   ],
+   "agreement": {
+    "precision": 0.63,
+    "recall": 0.75,
+    "labelled": 168
+   }
+  },
+  "probability/dependence": {
+   "papers": 168,
+   "by_year": {
+    "1962": 1,
+    "2002": 2,
+    "2004": 1,
+    "2005": 3,
+    "2006": 5,
+    "2007": 2,
+    "2008": 4,
+    "2009": 4,
+    "2010": 6,
+    "2012": 9,
+    "2013": 5,
+    "2014": 8,
+    "2015": 13,
+    "2016": 7,
+    "2017": 8,
+    "2018": 6,
+    "2019": 10,
+    "2020": 3,
+    "2021": 9,
+    "2022": 5,
+    "2023": 14,
+    "2024": 11,
+    "2025": 17,
+    "2026": 15
+   },
+   "growth": 1.65,
+   "cited_in_corpus": 219,
+   "founding": [
+    {
+     "title": "An Introduction to Copulas",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/0-387-28678-0",
+     "authors": [
+      "Roger B. Nelsen"
+     ],
+     "openalex": "W4234829730",
+     "cited_by_cell": 62
+    },
+    {
+     "title": "Fonctions de répartition à N dimensions et leurs marges",
+     "year": 1959,
+     "doi": null,
+     "authors": [
+      "Michael Sklar"
+     ],
+     "openalex": "W2907233437",
+     "cited_by_cell": 43
+    },
+    {
+     "title": "Multivariate Models and Multivariate Dependence Concepts",
+     "year": 1997,
+     "doi": "https://doi.org/10.1201/9780367803896",
+     "authors": [
+      "Harry Joe"
+     ],
+     "openalex": "W2507039649",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Dependence Modeling with Copulas",
+     "year": 2014,
+     "doi": "https://doi.org/10.1201/b17116",
+     "authors": [
+      "Harry Joe"
+     ],
+     "openalex": "W390686421",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Quantitative Risk Management: Concepts, Techniques, and Tools",
+     "year": 2005,
+     "doi": null,
+     "authors": [
+      "Alexander J. McNeil",
+      "Rdiger Frey",
+      "Paul Embrechts"
+     ],
+     "openalex": "W1542184596",
+     "cited_by_cell": 19
+    },
+    {
+     "title": "Correlation and Dependence in Risk Management: Properties and Pitfalls",
+     "year": 2002,
+     "doi": "https://doi.org/10.1017/cbo9780511615337.008",
+     "authors": [
+      "Paul Embrechts",
+      "Alexander J. McNeil",
+      "Daniel Straumann"
+     ],
+     "openalex": "W1491718027",
+     "cited_by_cell": 19
+    },
+    {
+     "title": "An Introduction to Copulas",
+     "year": 1999,
+     "doi": "https://doi.org/10.1007/978-1-4757-3076-0",
+     "authors": [
+      "Roger B. Nelsen"
+     ],
+     "openalex": "W2119436275",
+     "cited_by_cell": 16
+    },
+    {
+     "title": "Quantitative Risk Management: Concepts, Techniques and Tools : Concepts, Techniques and Tools",
+     "year": 2015,
+     "doi": null,
+     "authors": [
+      "Alexander J. McNeil",
+      "Rüdiger Frey",
+      "Paul Embrechts"
+     ],
+     "openalex": "W2793969909",
+     "cited_by_cell": 16
+    },
+    {
+     "title": "Principles of Copula Theory",
+     "year": 2015,
+     "doi": "https://doi.org/10.1201/b18674",
+     "authors": [
+      "Fabrizio Durante",
+      "Carlo Sempi"
+     ],
+     "openalex": "W1457220277",
+     "cited_by_cell": 14
+    },
+    {
+     "title": "Copula Methods in Finance",
+     "year": 2004,
+     "doi": "https://doi.org/10.1002/9781118673331",
+     "authors": [
+      "Umberto Cherubini",
+      "Elisa Luciano",
+      "Walter Vecchiato"
+     ],
+     "openalex": "W1590120741",
+     "cited_by_cell": 13
+    }
+   ],
+   "agreement": {
+    "precision": 0.63,
+    "recall": 0.68,
+    "labelled": 50
+   }
+  },
+  "probability/discrete": {
+   "papers": 75,
+   "by_year": {
+    "1992": 2,
+    "1995": 1,
+    "1996": 1,
+    "1998": 1,
+    "1999": 2,
+    "2004": 1,
+    "2005": 3,
+    "2006": 2,
+    "2007": 2,
+    "2008": 2,
+    "2009": 5,
+    "2010": 5,
+    "2011": 3,
+    "2012": 3,
+    "2013": 2,
+    "2014": 5,
+    "2015": 3,
+    "2016": 6,
+    "2017": 7,
+    "2018": 1,
+    "2019": 1,
+    "2020": 3,
+    "2021": 1,
+    "2022": 2,
+    "2023": 2,
+    "2025": 2,
+    "2026": 5
+   },
+   "growth": 0.39,
+   "cited_in_corpus": 119,
+   "founding": [
+    {
+     "title": "Asymptotic behaviour of Wiener-Hopf factors of a random walk",
+     "year": 1977,
+     "doi": "https://doi.org/10.1016/0304-4149(77)90047-3",
+     "authors": [
+      "Noël Veraverbeke"
+     ],
+     "openalex": "W2064423498",
+     "cited_by_cell": 7
+    },
+    {
+     "title": "The Value of Zero-Sum Stopping Games in Continuous Time",
+     "year": 2005,
+     "doi": "https://doi.org/10.1137/s0363012903429025",
+     "authors": [
+      "Rida Laraki",
+      "Eilon Solan"
+     ],
+     "openalex": "W1980473747",
+     "cited_by_cell": 6
+    },
+    {
+     "title": "Game options",
+     "year": 2000,
+     "doi": "https://doi.org/10.1007/pl00013527",
+     "authors": [
+      "Yuri Kifer"
+     ],
+     "openalex": "W4235532391",
+     "cited_by_cell": 6
+    },
+    {
+     "title": "Le jeu de dynkin en theorie generale sans l'hypothese de mokobodski",
+     "year": 1984,
+     "doi": "https://doi.org/10.1080/17442508408833309",
+     "authors": [
+      "J. P. Lepeltier",
+      "ET M. A. Maingueneau"
+     ],
+     "openalex": "W1969993064",
+     "cited_by_cell": 6
+    },
+    {
+     "title": "Sur un problème de dynkin",
+     "year": 1977,
+     "doi": "https://doi.org/10.1007/bf01844871",
+     "authors": [
+      "Jean‐Michel Bismut"
+     ],
+     "openalex": "W2312699981",
+     "cited_by_cell": 6
+    },
+    {
+     "title": "Stochastic Processes in Queueing Theory",
+     "year": 1976,
+     "doi": "https://doi.org/10.1007/978-1-4612-9866-3",
+     "authors": [
+      "Alexandr Alekseevich Borovkov"
+     ],
+     "openalex": "W62053411",
+     "cited_by_cell": 6
+    },
+    {
+     "title": "Game variant of a problem on optimal stopping",
+     "year": 1969,
+     "doi": null,
+     "authors": [
+      "E. B. Dynkin"
+     ],
+     "openalex": "W1586836993",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "The Continuous Time Nonzero-Sum Dynkin Game Problem and Application in Game Options",
+     "year": 2010,
+     "doi": "https://doi.org/10.1137/080738933",
+     "authors": [
+      "Saïd Hamadène",
+      "Jianfeng Zhang"
+     ],
+     "openalex": "W2023657524",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "Nonlinear variational inequalities and differential games with stopping times",
+     "year": 1974,
+     "doi": "https://doi.org/10.1016/0022-1236(74)90076-7",
+     "authors": [
+      "Alain Bensoussan",
+      "Avner Friedman"
+     ],
+     "openalex": "W2041324349",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "Continuous-Time Dynkin Games with Mixed Strategies",
+     "year": 2002,
+     "doi": "https://doi.org/10.1137/s0363012900369812",
+     "authors": [
+      "Nizar Touzi",
+      "Nicolas Vieille"
+     ],
+     "openalex": "W2076871097",
+     "cited_by_cell": 5
+    }
+   ],
+   "agreement": {
+    "precision": 0.478,
+    "recall": 0.407,
+    "labelled": 27
+   }
+  },
+  "probability/gaussian": {
+   "papers": 87,
+   "by_year": {
+    "1967": 1,
+    "1970": 1,
+    "1971": 1,
+    "1972": 1,
+    "1975": 1,
+    "1977": 1,
+    "1980": 1,
+    "1987": 1,
+    "1989": 1,
+    "1992": 1,
+    "1993": 1,
+    "1997": 1,
+    "2001": 1,
+    "2002": 2,
+    "2003": 3,
+    "2004": 2,
+    "2005": 2,
+    "2006": 1,
+    "2007": 2,
+    "2008": 3,
+    "2009": 3,
+    "2010": 1,
+    "2011": 2,
+    "2012": 2,
+    "2013": 5,
+    "2014": 3,
+    "2015": 3,
+    "2016": 2,
+    "2017": 2,
+    "2018": 4,
+    "2019": 4,
+    "2020": 4,
+    "2021": 5,
+    "2022": 2,
+    "2023": 4,
+    "2024": 1,
+    "2025": 5,
+    "2026": 6
+   },
+   "growth": 1.06,
+   "cited_in_corpus": 73,
+   "founding": [
+    {
+     "title": "Fractional Brownian Motions, Fractional Noises and Applications",
+     "year": 1968,
+     "doi": "https://doi.org/10.1137/1010093",
+     "authors": [
+      "Benoît B. Mandelbrot",
+      "John W. Van Ness"
+     ],
+     "openalex": "W2031753087",
+     "cited_by_cell": 19
+    },
+    {
+     "title": "The Malliavin Calculus and Related Topics",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/3-540-28329-3",
+     "authors": [
+      "David Nualart"
+     ],
+     "openalex": "W1554577510",
+     "cited_by_cell": 12
+    },
+    {
+     "title": "Wienersche spiralen und einige andere interessante Kurven in Hilbertscen Raum, C. R. (doklady)",
+     "year": 1940,
+     "doi": null,
+     "authors": [
+      "A. N. Kolmogorov"
+     ],
+     "openalex": "W2969647429",
+     "cited_by_cell": 8
+    },
+    {
+     "title": "Stochastic Calculus with Respect to Gaussian Processes",
+     "year": 2001,
+     "doi": "https://doi.org/10.1214/aop/1008956692",
+     "authors": [
+      "Elisa Alòs",
+      "Olivier Mazet",
+      "David Nualart"
+     ],
+     "openalex": "W2127436039",
+     "cited_by_cell": 8
+    },
+    {
+     "title": "An example of infinite dimensional quasi-helix",
+     "year": 2003,
+     "doi": "https://doi.org/10.1090/conm/336/06034",
+     "authors": [
+      "Christian Houdré",
+      "José Villa"
+     ],
+     "openalex": "W4229526196",
+     "cited_by_cell": 7
+    },
+    {
+     "title": "Sub-fractional Brownian motion and its relation to occupation times",
+     "year": 2004,
+     "doi": "https://doi.org/10.1016/j.spl.2004.06.035",
+     "authors": [
+      "Tomasz Bojdecki",
+      "Luis G. Gorostiza",
+      "Anna Talarczyk"
+     ],
+     "openalex": "W2152838163",
+     "cited_by_cell": 7
+    },
+    {
+     "title": "A series expansion of fractional Brownian motion",
+     "year": 2004,
+     "doi": "https://doi.org/10.1007/s00440-003-0310-2",
+     "authors": [
+      "Kacha Dzhaparidze",
+      "Harry J. van Zanten"
+     ],
+     "openalex": "W63803524",
+     "cited_by_cell": 6
+    },
+    {
+     "title": "Stochastic Analysis of the Fractional Brownian Motion",
+     "year": 1999,
+     "doi": "https://doi.org/10.1023/a:1008634027843",
+     "authors": [
+      "Laurent Decreusefond",
+      "Ali Süleyman Üstünel"
+     ],
+     "openalex": "W2029774109",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "Integration questions related to fractional Brownian motion",
+     "year": 2000,
+     "doi": "https://doi.org/10.1007/s440-000-8016-7",
+     "authors": [
+      "Vladas Pipiras",
+      "Murad S. Taqqu"
+     ],
+     "openalex": "W2003490810",
+     "cited_by_cell": 5
+    },
+    {
+     "title": "Some properties of the sub-fractional Brownian motion",
+     "year": 2007,
+     "doi": "https://doi.org/10.1080/17442500601100331",
+     "authors": [
+      "Constantin Tudor"
+     ],
+     "openalex": "W2010806909",
+     "cited_by_cell": 5
+    }
+   ],
+   "agreement": {
+    "precision": 0.471,
+    "recall": 0.516,
+    "labelled": 31
+   }
+  },
+  "probability/jumps": {
+   "papers": 308,
+   "by_year": {
+    "1962": 1,
+    "1963": 1,
+    "1967": 1,
+    "1971": 1,
+    "1978": 1,
+    "1980": 2,
+    "1983": 1,
+    "1984": 1,
+    "1986": 2,
+    "1989": 1,
+    "1990": 1,
+    "1991": 2,
+    "1996": 1,
+    "1997": 1,
+    "1998": 1,
+    "1999": 1,
+    "2000": 1,
+    "2001": 3,
+    "2002": 4,
+    "2003": 3,
+    "2004": 4,
+    "2005": 8,
+    "2006": 14,
+    "2007": 8,
+    "2008": 10,
+    "2009": 9,
+    "2010": 12,
+    "2011": 18,
+    "2012": 16,
+    "2013": 12,
+    "2014": 13,
+    "2015": 9,
+    "2016": 12,
+    "2017": 8,
+    "2018": 10,
+    "2019": 10,
+    "2020": 5,
+    "2021": 14,
+    "2022": 7,
+    "2023": 8,
+    "2024": 16,
+    "2025": 18,
+    "2026": 31
+   },
+   "growth": 1.4,
+   "cited_in_corpus": 668,
+   "founding": [
+    {
+     "title": "Levy Processes and Infinitely Divisible Distributions",
+     "year": 1999,
+     "doi": null,
+     "authors": [
+      "Ken‐iti Sato"
+     ],
+     "openalex": "W2797641211",
+     "cited_by_cell": 61
+    },
+    {
+     "title": "Introductory Lectures on Fluctuations of Lévy Processes with Applications",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/978-3-540-31343-4",
+     "authors": [
+      "Andreas E. Kyprianou"
+     ],
+     "openalex": "W356737467",
+     "cited_by_cell": 32
+    },
+    {
+     "title": "Spectra of Some Self-Exciting and Mutually Exciting Point Processes",
+     "year": 1971,
+     "doi": "https://doi.org/10.1093/biomet/58.1.83",
+     "authors": [
+      "Alan G. Hawkes"
+     ],
+     "openalex": "W2069849731",
+     "cited_by_cell": 25
+    },
+    {
+     "title": "The Fine Structure of Asset Returns: An Empirical Investigation",
+     "year": 2002,
+     "doi": "https://doi.org/10.1086/338705",
+     "authors": [
+      "Peter Carr",
+      "Hélyette Geman",
+      "Dilip B. Madan"
+     ],
+     "openalex": "W2138540172",
+     "cited_by_cell": 25
+    },
+    {
+     "title": "Limit Theorems for Stochastic Processes",
+     "year": 2003,
+     "doi": "https://doi.org/10.1007/978-3-662-05265-5",
+     "authors": [
+      "Jean Jacod",
+      "Albert Nikolaevich Shiryaev"
+     ],
+     "openalex": "W4293092461",
+     "cited_by_cell": 24
+    },
+    {
+     "title": "Lévy Processes and Stochastic Calculus",
+     "year": 2009,
+     "doi": "https://doi.org/10.1017/cbo9780511809781",
+     "authors": [
+      "David Applebaum"
+     ],
+     "openalex": "W3022439851",
+     "cited_by_cell": 22
+    },
+    {
+     "title": "Financial Modelling with Jump Processes",
+     "year": 2003,
+     "doi": "https://doi.org/10.1201/9780203485217",
+     "authors": [
+      "Peter Tankov"
+     ],
+     "openalex": "W1499969990",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "A cluster process representation of a self-exciting process",
+     "year": 1974,
+     "doi": "https://doi.org/10.1017/s0021900200096273",
+     "authors": [
+      "Alan G. Hawkes",
+      "David Oakes"
+     ],
+     "openalex": "W2328875713",
+     "cited_by_cell": 19
+    },
+    {
+     "title": "Russian and American put options under exponential phase-type Lévy models",
+     "year": 2003,
+     "doi": "https://doi.org/10.1016/j.spa.2003.07.005",
+     "authors": [
+      "Søren Asmussen",
+      "Florin Avram",
+      "Martijn R. Pistorius"
+     ],
+     "openalex": "W2090789457",
+     "cited_by_cell": 18
+    },
+    {
+     "title": "Option pricing when underlying stock returns are discontinuous",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90022-2",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2151065060",
+     "cited_by_cell": 18
+    }
+   ],
+   "agreement": {
+    "precision": 0.642,
+    "recall": 0.63,
+    "labelled": 54
+   }
+  },
+  "probability/laws": {
+   "papers": 522,
+   "by_year": {
+    "1903": 1,
+    "1953": 1,
+    "1959": 1,
+    "1961": 1,
+    "1962": 2,
+    "1963": 2,
+    "1964": 3,
+    "1971": 1,
+    "1974": 4,
+    "1975": 2,
+    "1976": 1,
+    "1977": 2,
+    "1978": 2,
+    "1979": 1,
+    "1980": 2,
+    "1982": 1,
+    "1983": 1,
+    "1985": 4,
+    "1987": 1,
+    "1988": 2,
+    "1989": 1,
+    "1990": 1,
+    "1991": 2,
+    "1992": 1,
+    "1993": 1,
+    "1994": 6,
+    "1995": 2,
+    "1996": 2,
+    "1997": 6,
+    "1998": 3,
+    "1999": 1,
+    "2000": 3,
+    "2001": 4,
+    "2002": 7,
+    "2003": 4,
+    "2004": 9,
+    "2005": 15,
+    "2006": 14,
+    "2007": 10,
+    "2008": 10,
+    "2009": 11,
+    "2010": 19,
+    "2011": 15,
+    "2012": 12,
+    "2013": 25,
+    "2014": 26,
+    "2015": 16,
+    "2016": 22,
+    "2017": 19,
+    "2018": 25,
+    "2019": 14,
+    "2020": 20,
+    "2021": 17,
+    "2022": 27,
+    "2023": 19,
+    "2024": 28,
+    "2025": 26,
+    "2026": 33
+   },
+   "growth": 1.17,
+   "cited_in_corpus": 600,
+   "founding": [
+    {
+     "title": "Statistical Inference Using Extreme Order Statistics",
+     "year": 1975,
+     "doi": "https://doi.org/10.1214/aos/1176343003",
+     "authors": [
+      "James Pickands"
+     ],
+     "openalex": "W2036983007",
+     "cited_by_cell": 83
+    },
+    {
+     "title": "Modelling Extremal Events",
+     "year": 1997,
+     "doi": "https://doi.org/10.1007/978-3-642-33483-2",
+     "authors": [
+      "Paul Embrechts",
+      "Claudia Klüppelberg",
+      "Thomas Mikosch"
+     ],
+     "openalex": "W2502254989",
+     "cited_by_cell": 72
+    },
+    {
+     "title": "An Introduction to Statistical Modeling of Extreme Values",
+     "year": 2001,
+     "doi": "https://doi.org/10.1007/978-1-4471-3675-0",
+     "authors": [
+      "Stuart Coles"
+     ],
+     "openalex": "W1500657154",
+     "cited_by_cell": 69
+    },
+    {
+     "title": "Extreme Values, Regular Variation and Point Processes",
+     "year": 1987,
+     "doi": "https://doi.org/10.1007/978-0-387-75953-1",
+     "authors": [
+      "Sidney I. Resnick"
+     ],
+     "openalex": "W1980620433",
+     "cited_by_cell": 68
+    },
+    {
+     "title": "Statistics of Extremes: Theory and Applications",
+     "year": 2004,
+     "doi": "https://doi.org/10.1002/0470012382",
+     "authors": [
+      "Jan Beirlant",
+      "Yuri Goegebeur",
+      "Jozef L. Teugels"
+     ],
+     "openalex": "W4229774059",
+     "cited_by_cell": 62
+    },
+    {
+     "title": "Extreme Value Theory: An Introduction",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/0-387-34471-3",
+     "authors": [
+      "Laurens de Haan",
+      "Ana Maria Ferreira"
+     ],
+     "openalex": "W2492055736",
+     "cited_by_cell": 60
+    },
+    {
+     "title": "A Simple General Approach to Inference About the Tail of a Distribution",
+     "year": 1975,
+     "doi": "https://doi.org/10.1214/aos/1176343247",
+     "authors": [
+      "Bruce M. Hill"
+     ],
+     "openalex": "W2048649579",
+     "cited_by_cell": 58
+    },
+    {
+     "title": "Limiting forms of the frequency distribution of the largest or smallest member of a sample",
+     "year": 1928,
+     "doi": "https://doi.org/10.1017/s0305004100015681",
+     "authors": [
+      "Ronald Aylmer Fisher",
+      "Leonard H. C. Tippett"
+     ],
+     "openalex": "W2122456939",
+     "cited_by_cell": 57
+    },
+    {
+     "title": "Sur La Distribution Limite Du Terme Maximum D'Une Serie Aleatoire",
+     "year": 1943,
+     "doi": "https://doi.org/10.2307/1968974",
+     "authors": [
+      "B Gnedenko"
+     ],
+     "openalex": "W2324099123",
+     "cited_by_cell": 49
+    },
+    {
+     "title": "Extremes and Related Properties of Random Sequences and Processes",
+     "year": 1983,
+     "doi": "https://doi.org/10.1007/978-1-4612-5449-2",
+     "authors": [
+      "Malcolm R. Leadbetter",
+      "Georg Lindgren",
+      "Holger Rootzén"
+     ],
+     "openalex": "W2109246257",
+     "cited_by_cell": 47
+    }
+   ],
+   "agreement": {
+    "precision": 0.577,
+    "recall": 0.602,
+    "labelled": 93
+   }
+  },
+  "probability/martingales": {
+   "papers": 143,
+   "by_year": {
+    "1967": 1,
+    "1968": 1,
+    "1970": 1,
+    "1972": 1,
+    "1975": 2,
+    "1978": 1,
+    "1979": 2,
+    "1980": 1,
+    "1982": 1,
+    "1984": 1,
+    "1985": 1,
+    "1986": 1,
+    "1987": 1,
+    "1989": 3,
+    "1990": 3,
+    "1993": 1,
+    "1996": 3,
+    "1997": 1,
+    "1999": 2,
+    "2000": 4,
+    "2002": 1,
+    "2003": 2,
+    "2004": 2,
+    "2005": 5,
+    "2006": 4,
+    "2007": 2,
+    "2009": 1,
+    "2010": 2,
+    "2011": 8,
+    "2012": 3,
+    "2013": 8,
+    "2014": 3,
+    "2015": 7,
+    "2016": 7,
+    "2017": 6,
+    "2018": 8,
+    "2019": 6,
+    "2020": 3,
+    "2021": 1,
+    "2022": 3,
+    "2023": 8,
+    "2024": 4,
+    "2025": 3,
+    "2026": 12
+   },
+   "growth": 0.63,
+   "cited_in_corpus": 323,
+   "founding": [
+    {
+     "title": "Continuous Martingales and Brownian Motion",
+     "year": 1999,
+     "doi": "https://doi.org/10.1007/978-3-662-06400-9",
+     "authors": [
+      "Daniel Revuz",
+      "Marc Yor"
+     ],
+     "openalex": "W1545370368",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Stochastic Integration and Differential Equations",
+     "year": 2005,
+     "doi": "https://doi.org/10.1007/978-3-662-10061-5",
+     "authors": [
+      "Philip E. Protter"
+     ],
+     "openalex": "W1995522593",
+     "cited_by_cell": 16
+    },
+    {
+     "title": "Limit Theorems for Stochastic Processes",
+     "year": 2003,
+     "doi": "https://doi.org/10.1007/978-3-662-05265-5",
+     "authors": [
+      "Jean Jacod",
+      "Albert Nikolaevich Shiryaev"
+     ],
+     "openalex": "W4293092461",
+     "cited_by_cell": 13
+    },
+    {
+     "title": "Calcul Stochastique et Problèmes de Martingales",
+     "year": 1979,
+     "doi": "https://doi.org/10.1007/bfb0064907",
+     "authors": [
+      "Jean Jacod"
+     ],
+     "openalex": "W1998107368",
+     "cited_by_cell": 12
+    },
+    {
+     "title": "The Existence of Probability Measures with Given Marginals",
+     "year": 1965,
+     "doi": "https://doi.org/10.1214/aoms/1177700153",
+     "authors": [
+      "Volker Strassen"
+     ],
+     "openalex": "W2070589948",
+     "cited_by_cell": 10
+    },
+    {
+     "title": "Limit Theorems for Stochastic Processes",
+     "year": 1987,
+     "doi": "https://doi.org/10.1007/978-3-662-02514-7",
+     "authors": [
+      "Jean Jacod",
+      "Albert Nikolaevich Shiryaev"
+     ],
+     "openalex": "W4297584681",
+     "cited_by_cell": 10
+    },
+    {
+     "title": "A general version of the fundamental theorem of asset pricing",
+     "year": 1994,
+     "doi": "https://doi.org/10.1007/bf01450498",
+     "authors": [
+      "Freddy Delbaen",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W4244967830",
+     "cited_by_cell": 10
+    },
+    {
+     "title": "Local martingales, bubbles and option prices",
+     "year": 2005,
+     "doi": "https://doi.org/10.1007/s00780-005-0162-y",
+     "authors": [
+      "Alexander M. G. Cox",
+      "David G. Hobson"
+     ],
+     "openalex": "W1994438934",
+     "cited_by_cell": 9
+    },
+    {
+     "title": "No Arbitrage Condition for Positive Diffusion Price Processes",
+     "year": 2002,
+     "doi": "https://doi.org/10.1023/a:1024173029378",
+     "authors": [
+      "Freddy Delbaen",
+      "Hiroshi Shirakawa"
+     ],
+     "openalex": "W30805069",
+     "cited_by_cell": 9
+    },
+    {
+     "title": "On a problem of optimal transport under marginal martingale constraints",
+     "year": 2016,
+     "doi": "https://doi.org/10.1214/14-aop966",
+     "authors": [
+      "Mathias Beiglböck",
+      "Nicolas Juillet"
+     ],
+     "openalex": "W2283275366",
+     "cited_by_cell": 8
+    }
+   ],
+   "agreement": {
+    "precision": 0.543,
+    "recall": 0.676,
+    "labelled": 37
+   }
+  },
+  "risk/aggregation": {
+   "papers": 282,
+   "by_year": {
+    "1996": 1,
+    "1998": 1,
+    "1999": 2,
+    "2000": 2,
+    "2001": 3,
+    "2002": 3,
+    "2003": 2,
+    "2004": 1,
+    "2005": 4,
+    "2006": 3,
+    "2007": 4,
+    "2008": 5,
+    "2009": 3,
+    "2010": 4,
+    "2011": 5,
+    "2012": 9,
+    "2013": 10,
+    "2014": 10,
+    "2015": 19,
+    "2016": 13,
+    "2017": 6,
+    "2018": 8,
+    "2019": 11,
+    "2020": 14,
+    "2021": 17,
+    "2022": 17,
+    "2023": 11,
+    "2024": 12,
+    "2025": 35,
+    "2026": 46
+   },
+   "growth": 1.77,
+   "cited_in_corpus": 994,
+   "founding": [
+    {
+     "title": "Coherent Measures of Risk",
+     "year": 1999,
+     "doi": "https://doi.org/10.1111/1467-9965.00068",
+     "authors": [
+      "Philippe Artzner",
+      "Freddy Delbaen",
+      "Jean‐Marc Eber"
+     ],
+     "openalex": "W2019291268",
+     "cited_by_cell": 84
+    },
+    {
+     "title": "Systemic Risk in Financial Systems",
+     "year": 2001,
+     "doi": "https://doi.org/10.1287/mnsc.47.2.236.9835",
+     "authors": [
+      "Larry Eisenberg",
+      "Thomas H. Noe"
+     ],
+     "openalex": "W2162337502",
+     "cited_by_cell": 37
+    },
+    {
+     "title": "The concept of comonotonicity in actuarial science and finance: theory",
+     "year": 2002,
+     "doi": "https://doi.org/10.1016/s0167-6687(02)00134-8",
+     "authors": [
+      "Jan Dhaene",
+      "Michel M. Denuit",
+      "Marc J. Goovaerts"
+     ],
+     "openalex": "W3121841769",
+     "cited_by_cell": 32
+    },
+    {
+     "title": "Quantitative Risk Management: Concepts, Techniques and Tools : Concepts, Techniques and Tools",
+     "year": 2015,
+     "doi": null,
+     "authors": [
+      "Alexander J. McNeil",
+      "Rüdiger Frey",
+      "Paul Embrechts"
+     ],
+     "openalex": "W2793969909",
+     "cited_by_cell": 31
+    },
+    {
+     "title": "Coherent allocation of risk capital",
+     "year": 2001,
+     "doi": "https://doi.org/10.21314/jor.2001.053",
+     "authors": [
+      "Michel Denault"
+     ],
+     "openalex": "W1481020722",
+     "cited_by_cell": 28
+    },
+    {
+     "title": "CoVaR",
+     "year": 2016,
+     "doi": "https://doi.org/10.1257/aer.20120555",
+     "authors": [
+      "Tobias Adrian",
+      "Markus Konrad Brunnermeier"
+     ],
+     "openalex": "W4246715751",
+     "cited_by_cell": 28
+    },
+    {
+     "title": "Correlation and Dependence in Risk Management: Properties and Pitfalls",
+     "year": 2002,
+     "doi": "https://doi.org/10.1017/cbo9780511615337.008",
+     "authors": [
+      "Paul Embrechts",
+      "Alexander J. McNeil",
+      "Daniel Straumann"
+     ],
+     "openalex": "W1491718027",
+     "cited_by_cell": 27
+    },
+    {
+     "title": "Stochastic Orders",
+     "year": 2007,
+     "doi": "https://doi.org/10.1007/978-0-387-34675-5",
+     "authors": [
+      "Moshe Shaked",
+      "Jeyaveerasingam George Shanthikumar"
+     ],
+     "openalex": "W4245777296",
+     "cited_by_cell": 26
+    },
+    {
+     "title": "An Introduction to Copulas",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/0-387-28678-0",
+     "authors": [
+      "Roger B. Nelsen"
+     ],
+     "openalex": "W4234829730",
+     "cited_by_cell": 24
+    },
+    {
+     "title": "PORTFOLIO SELECTION*",
+     "year": 1952,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1952.tb01525.x",
+     "authors": [
+      "Harry M. Markowitz"
+     ],
+     "openalex": "W4232474910",
+     "cited_by_cell": 24
+    }
+   ],
+   "agreement": {
+    "precision": 0.547,
+    "recall": 0.475,
+    "labelled": 61
+   }
+  },
+  "risk/credit": {
+   "papers": 390,
+   "by_year": {
+    "1999": 1,
+    "2002": 2,
+    "2003": 1,
+    "2004": 3,
+    "2005": 6,
+    "2006": 7,
+    "2007": 7,
+    "2008": 4,
+    "2009": 10,
+    "2010": 11,
+    "2011": 10,
+    "2012": 17,
+    "2013": 15,
+    "2014": 21,
+    "2015": 20,
+    "2016": 19,
+    "2017": 18,
+    "2018": 20,
+    "2019": 21,
+    "2020": 26,
+    "2021": 17,
+    "2022": 20,
+    "2023": 16,
+    "2024": 20,
+    "2025": 28,
+    "2026": 50
+   },
+   "growth": 0.97,
+   "cited_in_corpus": 856,
+   "founding": [
+    {
+     "title": "Systemic Risk in Financial Systems",
+     "year": 2001,
+     "doi": "https://doi.org/10.1287/mnsc.47.2.236.9835",
+     "authors": [
+      "Larry Eisenberg",
+      "Thomas H. Noe"
+     ],
+     "openalex": "W2162337502",
+     "cited_by_cell": 75
+    },
+    {
+     "title": "ON THE PRICING OF CORPORATE DEBT: THE RISK STRUCTURE OF INTEREST RATES*",
+     "year": 1974,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1974.tb03058.x",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2105973145",
+     "cited_by_cell": 65
+    },
+    {
+     "title": "Contagion in financial networks",
+     "year": 2010,
+     "doi": "https://doi.org/10.1098/rspa.2009.0410",
+     "authors": [
+      "Prasanna Gai",
+      "Sujit Kapadia"
+     ],
+     "openalex": "W3124498556",
+     "cited_by_cell": 58
+    },
+    {
+     "title": "Failure and Rescue in an Interbank Network",
+     "year": 2012,
+     "doi": "https://doi.org/10.1287/mnsc.1120.1569",
+     "authors": [
+      "L. C. G. Rogers",
+      "Luitgard Anna Maria Veraart"
+     ],
+     "openalex": "W1995245793",
+     "cited_by_cell": 48
+    },
+    {
+     "title": "Network models and financial stability",
+     "year": 2007,
+     "doi": "https://doi.org/10.1016/j.jedc.2007.01.014",
+     "authors": [
+      "Erlend Nier",
+      "Jing Yang",
+      "Tanju Yorulmazer"
+     ],
+     "openalex": "W3123232430",
+     "cited_by_cell": 37
+    },
+    {
+     "title": "Liquidity Risk and Contagion",
+     "year": 2005,
+     "doi": "https://doi.org/10.1162/jeea.2005.3.2-3.556",
+     "authors": [
+      "Rodrigo Cifuentes",
+      "Gianluigi Ferrucci",
+      "Hyun Song Shin"
+     ],
+     "openalex": "W3123913943",
+     "cited_by_cell": 35
+    },
+    {
+     "title": "Systemic Risk and Stability in Financial Networks",
+     "year": 2015,
+     "doi": "https://doi.org/10.1257/aer.20130456",
+     "authors": [
+      "Daron Acemoğlu",
+      "Asuman Ozdaglar",
+      "Alireza Tahbaz-Salehi"
+     ],
+     "openalex": "W3124317733",
+     "cited_by_cell": 35
+    },
+    {
+     "title": "Simulation methods to assess the danger of contagion in interbank markets",
+     "year": 2010,
+     "doi": "https://doi.org/10.1016/j.jfs.2010.12.001",
+     "authors": [
+      "Christian Upper"
+     ],
+     "openalex": "W2156614736",
+     "cited_by_cell": 33
+    },
+    {
+     "title": "DebtRank: Too Central to Fail? Financial Networks, the FED and Systemic Risk",
+     "year": 2012,
+     "doi": "https://doi.org/10.1038/srep00541",
+     "authors": [
+      "Stefano Battiston",
+      "Michelangelo Puliga",
+      "Rahul Kaushik"
+     ],
+     "openalex": "W2117899923",
+     "cited_by_cell": 33
+    },
+    {
+     "title": "How likely is contagion in financial networks?",
+     "year": 2014,
+     "doi": "https://doi.org/10.1016/j.jbankfin.2014.02.006",
+     "authors": [
+      "Paul Glasserman",
+      "Peyton Young"
+     ],
+     "openalex": "W3122663664",
+     "cited_by_cell": 33
+    }
+   ],
+   "agreement": {
+    "precision": 0.579,
+    "recall": 0.635,
+    "labelled": 52
+   }
+  },
+  "risk/exposure": {
+   "papers": 148,
+   "by_year": {
+    "2003": 1,
+    "2005": 1,
+    "2007": 1,
+    "2008": 1,
+    "2009": 1,
+    "2010": 8,
+    "2011": 8,
+    "2012": 5,
+    "2013": 7,
+    "2014": 18,
+    "2015": 13,
+    "2016": 10,
+    "2017": 13,
+    "2018": 12,
+    "2019": 7,
+    "2020": 8,
+    "2021": 7,
+    "2022": 3,
+    "2023": 9,
+    "2024": 5,
+    "2025": 1,
+    "2026": 8
+   },
+   "growth": 0.5,
+   "cited_in_corpus": 398,
+   "founding": [
+    {
+     "title": "Valuing American Options by Simulation: A Simple Least-Squares Approach",
+     "year": 2001,
+     "doi": "https://doi.org/10.1093/rfs/14.1.113",
+     "authors": [
+      "Francis A. Longstaff",
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2126311658",
+     "cited_by_cell": 28
+    },
+    {
+     "title": "Partial Differential Equation Representations of Derivatives with Bilateral Counterparty Risk and Funding Costs",
+     "year": 2010,
+     "doi": "https://doi.org/10.21314/jcr.2011.131",
+     "authors": [
+      "Christoph Burgard",
+      "Mats Kjaer"
+     ],
+     "openalex": "W4240828289",
+     "cited_by_cell": 25
+    },
+    {
+     "title": "Counterparty Credit Risk, Collateral and Funding: With Pricing Cases for All Asset Classes",
+     "year": 2013,
+     "doi": "https://doi.org/10.1002/9781118818589",
+     "authors": [
+      "Damiano Brigo",
+      "Massimo Morini",
+      "Andrea Pallavicini"
+     ],
+     "openalex": "W4233377166",
+     "cited_by_cell": 25
+    },
+    {
+     "title": "BILATERAL COUNTERPARTY RISK UNDER FUNDING CONSTRAINTS—PART II: CVA",
+     "year": 2012,
+     "doi": "https://doi.org/10.1111/mafi.12005",
+     "authors": [
+      "Stéphane Crépey"
+     ],
+     "openalex": "W1762134087",
+     "cited_by_cell": 22
+    },
+    {
+     "title": "Swap Rates and Credit Quality",
+     "year": 1996,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1996.tb02712.x",
+     "authors": [
+      "Darrell Duffie",
+      "MING HUANG"
+     ],
+     "openalex": "W2150812635",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "CVA and Wrong-Way Risk",
+     "year": 2012,
+     "doi": "https://doi.org/10.2469/faj.v68.n5.6",
+     "authors": [
+      "John C. Hull",
+      "Alan D White"
+     ],
+     "openalex": "W2158036201",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "ARBITRAGE‐FREE BILATERAL COUNTERPARTY RISK VALUATION UNDER COLLATERALIZATION AND APPLICATION TO CREDIT DEFAULT SWAPS",
+     "year": 2012,
+     "doi": "https://doi.org/10.1111/j.1467-9965.2012.00520.x",
+     "authors": [
+      "Damiano Brigo",
+      "Agostino Capponi",
+      "Andrea Pallavicini"
+     ],
+     "openalex": "W2135859161",
+     "cited_by_cell": 20
+    },
+    {
+     "title": "COUNTERPARTY RISK FOR CREDIT DEFAULT SWAPS: IMPACT OF SPREAD VOLATILITY AND DEFAULT CORRELATION",
+     "year": 2009,
+     "doi": "https://doi.org/10.1142/s0219024909005567",
+     "authors": [
+      "Damiano Brigo",
+      "Kyriakos Chourdakis"
+     ],
+     "openalex": "W3124950891",
+     "cited_by_cell": 18
+    },
+    {
+     "title": "Interest rate models : theory and practice : with smile, inflation and credit",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/3-540-34604-x",
+     "authors": [
+      "Damiano Brigo",
+      "Fabio Mercurio"
+     ],
+     "openalex": "W2956412360",
+     "cited_by_cell": 17
+    },
+    {
+     "title": "XVA: Credit, Funding and Capital Valuation Adjustments",
+     "year": 2015,
+     "doi": "https://doi.org/10.1002/9781119161233",
+     "authors": [
+      "ANDREW GREEN"
+     ],
+     "openalex": "W2476869282",
+     "cited_by_cell": 17
+    }
+   ],
+   "agreement": {
+    "precision": 0.724,
+    "recall": 0.808,
+    "labelled": 26
+   }
+  },
+  "risk/insurance": {
+   "papers": 2162,
+   "by_year": {
+    "1872": 1,
+    "1918": 2,
+    "1920": 1,
+    "1923": 1,
+    "1925": 1,
+    "1935": 1,
+    "1956": 1,
+    "1958": 1,
+    "1959": 5,
+    "1960": 5,
+    "1961": 9,
+    "1962": 20,
+    "1963": 13,
+    "1964": 7,
+    "1965": 4,
+    "1966": 7,
+    "1967": 13,
+    "1968": 9,
+    "1969": 11,
+    "1971": 20,
+    "1972": 14,
+    "1973": 4,
+    "1974": 10,
+    "1975": 12,
+    "1976": 1,
+    "1977": 14,
+    "1978": 7,
+    "1979": 12,
+    "1980": 11,
+    "1981": 6,
+    "1982": 12,
+    "1983": 4,
+    "1984": 12,
+    "1985": 12,
+    "1986": 18,
+    "1987": 6,
+    "1988": 14,
+    "1989": 10,
+    "1990": 10,
+    "1991": 10,
+    "1992": 10,
+    "1993": 12,
+    "1994": 14,
+    "1995": 7,
+    "1996": 11,
+    "1997": 16,
+    "1998": 13,
+    "1999": 19,
+    "2000": 11,
+    "2001": 18,
+    "2002": 11,
+    "2003": 18,
+    "2004": 29,
+    "2005": 35,
+    "2006": 28,
+    "2007": 53,
+    "2008": 47,
+    "2009": 48,
+    "2010": 51,
+    "2011": 52,
+    "2012": 47,
+    "2013": 77,
+    "2014": 68,
+    "2015": 64,
+    "2016": 81,
+    "2017": 71,
+    "2018": 76,
+    "2019": 66,
+    "2020": 78,
+    "2021": 86,
+    "2022": 89,
+    "2023": 100,
+    "2024": 113,
+    "2025": 151,
+    "2026": 138
+   },
+   "growth": 1.45,
+   "cited_in_corpus": 4533,
+   "founding": [
+    {
+     "title": "An introduction to mathematical risk theory",
+     "year": 1979,
+     "doi": null,
+     "authors": [
+      "Hans U. Gerber"
+     ],
+     "openalex": "W2022595598",
+     "cited_by_cell": 114
+    },
+    {
+     "title": "On the Time Value of Ruin",
+     "year": 1998,
+     "doi": "https://doi.org/10.1080/10920277.1998.10595671",
+     "authors": [
+      "Hans U. Gerber",
+      "Elias S. W. Shiu"
+     ],
+     "openalex": "W1981137970",
+     "cited_by_cell": 106
+    },
+    {
+     "title": "Aspects of Risk Theory",
+     "year": 1991,
+     "doi": "https://doi.org/10.1007/978-1-4613-9058-9",
+     "authors": [
+      "Jan Grandell"
+     ],
+     "openalex": "W1511170401",
+     "cited_by_cell": 103
+    },
+    {
+     "title": "Mathematical Methods in Risk Theory",
+     "year": 1970,
+     "doi": "https://doi.org/10.1007/978-3-540-30711-2",
+     "authors": [
+      "Hans Bühlmann"
+     ],
+     "openalex": "W2140843145",
+     "cited_by_cell": 82
+    },
+    {
+     "title": "Stochastic Processes for Insurance & Finance",
+     "year": 1999,
+     "doi": "https://doi.org/10.1002/9780470317044",
+     "authors": [
+      "Tomasz Rolski"
+     ],
+     "openalex": "W4232149037",
+     "cited_by_cell": 82
+    },
+    {
+     "title": "Modelling Extremal Events",
+     "year": 1997,
+     "doi": "https://doi.org/10.1007/978-3-642-33483-2",
+     "authors": [
+      "Paul Embrechts",
+      "Claudia Klüppelberg",
+      "Thomas Mikosch"
+     ],
+     "openalex": "W2502254989",
+     "cited_by_cell": 73
+    },
+    {
+     "title": "Recursive Evaluation of a Family of Compound Distributions",
+     "year": 1981,
+     "doi": "https://doi.org/10.1017/s0515036100006796",
+     "authors": [
+      "Harry H. Panjer"
+     ],
+     "openalex": "W2156812602",
+     "cited_by_cell": 73
+    },
+    {
+     "title": "Coherent Measures of Risk",
+     "year": 1999,
+     "doi": "https://doi.org/10.1111/1467-9965.00068",
+     "authors": [
+      "Philippe Artzner",
+      "Freddy Delbaen",
+      "Jean‐Marc Eber"
+     ],
+     "openalex": "W2019291268",
+     "cited_by_cell": 66
+    },
+    {
+     "title": "Ruin Probabilities",
+     "year": 2000,
+     "doi": "https://doi.org/10.1142/2779",
+     "authors": [
+      "Søren Asmussen"
+     ],
+     "openalex": "W4236669580",
+     "cited_by_cell": 62
+    },
+    {
+     "title": "Bonus-Malus Systems in Automobile Insurance",
+     "year": 1995,
+     "doi": "https://doi.org/10.1007/978-94-011-0631-3",
+     "authors": [
+      "Jean Lemaire"
+     ],
+     "openalex": "W656455340",
+     "cited_by_cell": 60
+    }
+   ],
+   "agreement": {
+    "precision": 0.809,
+    "recall": 0.797,
+    "labelled": 212
+   }
+  },
+  "risk/law-invariant": {
+   "papers": 417,
+   "by_year": {
+    "1997": 1,
+    "1999": 2,
+    "2000": 1,
+    "2001": 10,
+    "2002": 4,
+    "2004": 4,
+    "2005": 4,
+    "2006": 7,
+    "2007": 8,
+    "2008": 3,
+    "2009": 10,
+    "2010": 14,
+    "2011": 15,
+    "2012": 7,
+    "2013": 16,
+    "2014": 14,
+    "2015": 11,
+    "2016": 22,
+    "2017": 19,
+    "2018": 14,
+    "2019": 20,
+    "2020": 21,
+    "2021": 31,
+    "2022": 34,
+    "2023": 21,
+    "2024": 31,
+    "2025": 35,
+    "2026": 36
+   },
+   "growth": 1.58,
+   "cited_in_corpus": 933,
+   "founding": [
+    {
+     "title": "Coherent Measures of Risk",
+     "year": 1999,
+     "doi": "https://doi.org/10.1111/1467-9965.00068",
+     "authors": [
+      "Philippe Artzner",
+      "Freddy Delbaen",
+      "Jean‐Marc Eber"
+     ],
+     "openalex": "W2019291268",
+     "cited_by_cell": 150
+    },
+    {
+     "title": "On the coherence of expected shortfall",
+     "year": 2002,
+     "doi": "https://doi.org/10.1016/s0378-4266(02)00283-2",
+     "authors": [
+      "Carlo Acerbi",
+      "Dirk Tasche"
+     ],
+     "openalex": "W2132527237",
+     "cited_by_cell": 55
+    },
+    {
+     "title": "Optimization of conditional value-at-risk",
+     "year": 2000,
+     "doi": "https://doi.org/10.21314/jor.2000.038",
+     "authors": [
+      "Ralph Tyrrell Rockafellar",
+      "Stan Uryasev"
+     ],
+     "openalex": "W1647779468",
+     "cited_by_cell": 52
+    },
+    {
+     "title": "Generalized autoregressive conditional heteroskedasticity",
+     "year": 1986,
+     "doi": "https://doi.org/10.1016/0304-4076(86)90063-1",
+     "authors": [
+      "Tim Bollerslev"
+     ],
+     "openalex": "W1999996900",
+     "cited_by_cell": 50
+    },
+    {
+     "title": "CAViaR: Conditional Autoregressive Value at Risk by Regression Quantiles",
+     "year": 2004,
+     "doi": "https://doi.org/10.1198/073500104000000370",
+     "authors": [
+      "Robert F. Engle",
+      "Simone Manganelli"
+     ],
+     "openalex": "W2150747312",
+     "cited_by_cell": 50
+    },
+    {
+     "title": "Evaluating Interval Forecasts",
+     "year": 1998,
+     "doi": "https://doi.org/10.2307/2527341",
+     "authors": [
+      "Peter Christoffersen"
+     ],
+     "openalex": "W1977970167",
+     "cited_by_cell": 48
+    },
+    {
+     "title": "Conditional value-at-risk for general loss distributions",
+     "year": 2002,
+     "doi": "https://doi.org/10.1016/s0378-4266(02)00271-6",
+     "authors": [
+      "Ralph Tyrrell Rockafellar",
+      "Stan Uryasev"
+     ],
+     "openalex": "W3124407081",
+     "cited_by_cell": 48
+    },
+    {
+     "title": "Making and Evaluating Point Forecasts",
+     "year": 2011,
+     "doi": "https://doi.org/10.1198/jasa.2011.r10138",
+     "authors": [
+      "Tilmann Gneiting"
+     ],
+     "openalex": "W2075965721",
+     "cited_by_cell": 46
+    },
+    {
+     "title": "Techniques for Verifying the Accuracy of Risk Measurement Models",
+     "year": 1995,
+     "doi": "https://doi.org/10.3905/jod.1995.407942",
+     "authors": [
+      "Paul Kupiec"
+     ],
+     "openalex": "W2100406142",
+     "cited_by_cell": 44
+    },
+    {
+     "title": "Estimation of tail-related risk measures for heteroscedastic financial time series: an extreme value approach",
+     "year": 2000,
+     "doi": "https://doi.org/10.1016/s0927-5398(00)00012-8",
+     "authors": [
+      "Alexander J. McNeil",
+      "Rüdiger Frey"
+     ],
+     "openalex": "W2135177937",
+     "cited_by_cell": 43
+    }
+   ],
+   "agreement": {
+    "precision": 0.465,
+    "recall": 0.446,
+    "labelled": 74
+   }
+  },
+  "risk/measures": {
+   "papers": 429,
+   "by_year": {
+    "1977": 1,
+    "1984": 1,
+    "1998": 1,
+    "1999": 1,
+    "2001": 3,
+    "2002": 2,
+    "2003": 3,
+    "2004": 4,
+    "2005": 2,
+    "2006": 9,
+    "2007": 6,
+    "2008": 5,
+    "2009": 3,
+    "2010": 9,
+    "2011": 11,
+    "2012": 20,
+    "2013": 21,
+    "2014": 14,
+    "2015": 13,
+    "2016": 12,
+    "2017": 15,
+    "2018": 24,
+    "2019": 22,
+    "2020": 22,
+    "2021": 27,
+    "2022": 24,
+    "2023": 28,
+    "2024": 37,
+    "2025": 38,
+    "2026": 51
+   },
+   "growth": 1.62,
+   "cited_in_corpus": 1858,
+   "founding": [
+    {
+     "title": "Coherent Measures of Risk",
+     "year": 1999,
+     "doi": "https://doi.org/10.1111/1467-9965.00068",
+     "authors": [
+      "Philippe Artzner",
+      "Freddy Delbaen",
+      "Jean‐Marc Eber"
+     ],
+     "openalex": "W2019291268",
+     "cited_by_cell": 242
+    },
+    {
+     "title": "Convex measures of risk and trading constraints",
+     "year": 2002,
+     "doi": "https://doi.org/10.1007/s007800200072",
+     "authors": [
+      "Hans Föllmer",
+      "Alexander Schied"
+     ],
+     "openalex": "W2046396733",
+     "cited_by_cell": 140
+    },
+    {
+     "title": "Putting order in risk measures",
+     "year": 2002,
+     "doi": "https://doi.org/10.1016/s0378-4266(02)00270-4",
+     "authors": [
+      "Marco Frittelli",
+      "Emanuela Rosazza Gianin"
+     ],
+     "openalex": "W1969897341",
+     "cited_by_cell": 101
+    },
+    {
+     "title": "Stochastic Finance: An Introduction in Discrete Time",
+     "year": 2016,
+     "doi": "https://doi.org/10.1515/9783110463453",
+     "authors": [
+      "Hans Föllmer",
+      "Alexander Schied"
+     ],
+     "openalex": "W4248704747",
+     "cited_by_cell": 90
+    },
+    {
+     "title": "Coherent Risk Measures on General Probability Spaces",
+     "year": 2002,
+     "doi": "https://doi.org/10.1007/978-3-662-04790-3_1",
+     "authors": [
+      "Freddy Delbaen"
+     ],
+     "openalex": "W1553648478",
+     "cited_by_cell": 85
+    },
+    {
+     "title": "On law invariant coherent risk measures",
+     "year": 2001,
+     "doi": "https://doi.org/10.1007/978-4-431-67891-5_4",
+     "authors": [
+      "Shigeo Kusuoka"
+     ],
+     "openalex": "W1591570634",
+     "cited_by_cell": 81
+    },
+    {
+     "title": "Conditional and dynamic convex risk measures",
+     "year": 2005,
+     "doi": "https://doi.org/10.1007/s00780-005-0159-6",
+     "authors": [
+      "Kai Detlefsen",
+      "Giacomo Scandolo"
+     ],
+     "openalex": "W2118821424",
+     "cited_by_cell": 69
+    },
+    {
+     "title": "Spectral measures of risk: A coherent representation of subjective risk aversion",
+     "year": 2002,
+     "doi": "https://doi.org/10.1016/s0378-4266(02)00281-9",
+     "authors": [
+      "Carlo Acerbi"
+     ],
+     "openalex": "W2109122936",
+     "cited_by_cell": 56
+    },
+    {
+     "title": "Law invariant risk measures have the Fatou property",
+     "year": 2007,
+     "doi": "https://doi.org/10.1007/4-431-34342-3_4",
+     "authors": [
+      "Elyès Jouini",
+      "Walter Schachermayer",
+      "Nizar Touzi"
+     ],
+     "openalex": "W3122717349",
+     "cited_by_cell": 54
+    },
+    {
+     "title": "Dynamic Monetary Risk Measures for Bounded Discrete-Time Processes",
+     "year": 2006,
+     "doi": "https://doi.org/10.1214/ejp.v11-302",
+     "authors": [
+      "Patrick Cheridito",
+      "Freddy Delbaen",
+      "Michael Kupper"
+     ],
+     "openalex": "W2136862484",
+     "cited_by_cell": 51
+    }
+   ],
+   "agreement": {
+    "precision": 0.725,
+    "recall": 0.716,
+    "labelled": 81
+   }
+  },
+  "statistics": {
+   "papers": 1291,
+   "by_year": {
+    "1961": 1,
+    "1969": 1,
+    "1975": 1,
+    "1977": 2,
+    "1978": 1,
+    "1981": 2,
+    "1982": 1,
+    "1985": 2,
+    "1986": 3,
+    "1987": 1,
+    "1988": 1,
+    "1990": 1,
+    "1992": 2,
+    "1993": 3,
+    "1994": 4,
+    "1995": 1,
+    "1996": 1,
+    "1997": 5,
+    "1998": 11,
+    "1999": 8,
+    "2000": 4,
+    "2001": 13,
+    "2002": 14,
+    "2003": 14,
+    "2004": 21,
+    "2005": 19,
+    "2006": 25,
+    "2007": 25,
+    "2008": 26,
+    "2009": 43,
+    "2010": 33,
+    "2011": 43,
+    "2012": 53,
+    "2013": 47,
+    "2014": 31,
+    "2015": 58,
+    "2016": 47,
+    "2017": 57,
+    "2018": 55,
+    "2019": 55,
+    "2020": 52,
+    "2021": 48,
+    "2022": 57,
+    "2023": 66,
+    "2024": 78,
+    "2025": 94,
+    "2026": 147,
+    "2027": 1
+   },
+   "growth": 1.29,
+   "cited_in_corpus": 1866,
+   "founding": [
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 85
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 80
+    },
+    {
+     "title": "A Theory of the Term Structure of Interest Rates",
+     "year": 1985,
+     "doi": "https://doi.org/10.2307/1911242",
+     "authors": [
+      "John C. Cox",
+      "Jonathan E. Ingersoll",
+      "Stephen A. Ross"
+     ],
+     "openalex": "W3021444882",
+     "cited_by_cell": 80
+    },
+    {
+     "title": "Power and Bipower Variation with Stochastic Volatility and Jumps",
+     "year": 2004,
+     "doi": "https://doi.org/10.1093/jjfinec/nbh001",
+     "authors": [
+      "Ole Eiler Barndorff-Nielsen"
+     ],
+     "openalex": "W2051235503",
+     "cited_by_cell": 78
+    },
+    {
+     "title": "Generalized autoregressive conditional heteroskedasticity",
+     "year": 1986,
+     "doi": "https://doi.org/10.1016/0304-4076(86)90063-1",
+     "authors": [
+      "Tim Bollerslev"
+     ],
+     "openalex": "W1999996900",
+     "cited_by_cell": 77
+    },
+    {
+     "title": "Autoregressive Conditional Heteroscedasticity with Estimates of the Variance of United Kingdom Inflation",
+     "year": 1982,
+     "doi": "https://doi.org/10.2307/1912773",
+     "authors": [
+      "Robert F. Engle"
+     ],
+     "openalex": "W1979575715",
+     "cited_by_cell": 69
+    },
+    {
+     "title": "Econometric Analysis of Realized Volatility and its Use in Estimating Stochastic Volatility Models",
+     "year": 2002,
+     "doi": "https://doi.org/10.1111/1467-9868.00336",
+     "authors": [
+      "Ole Eiler Barndorff-Nielsen",
+      "Neil Shephard"
+     ],
+     "openalex": "W2140585983",
+     "cited_by_cell": 61
+    },
+    {
+     "title": "A Simple General Approach to Inference About the Tail of a Distribution",
+     "year": 1975,
+     "doi": "https://doi.org/10.1214/aos/1176343247",
+     "authors": [
+      "Bruce M. Hill"
+     ],
+     "openalex": "W2048649579",
+     "cited_by_cell": 61
+    },
+    {
+     "title": "Econometrics of Testing for Jumps in Financial Economics Using Bipower Variation",
+     "year": 2005,
+     "doi": "https://doi.org/10.1093/jjfinec/nbi022",
+     "authors": [
+      "Ole Eiler Barndorff-Nielsen"
+     ],
+     "openalex": "W2136215272",
+     "cited_by_cell": 59
+    },
+    {
+     "title": "A Tale of Two Time Scales: Determining Integrated Volatility With Noisy High-Frequency Data",
+     "year": 2005,
+     "doi": "https://doi.org/10.1198/016214505000000169",
+     "authors": [
+      "Lan Zhang",
+      "Per A. Mykland",
+      "Yacine Aït-Sahalia"
+     ],
+     "openalex": "W3095114851",
+     "cited_by_cell": 57
+    }
+   ],
+   "agreement": {
+    "precision": 0.562,
+    "recall": 0.52,
+    "labelled": 173
+   }
+  },
+  "valuation/american": {
+   "papers": 756,
+   "by_year": {
+    "1985": 2,
+    "1987": 2,
+    "1988": 1,
+    "1994": 2,
+    "1995": 4,
+    "1996": 1,
+    "1997": 1,
+    "1998": 2,
+    "1999": 4,
+    "2001": 5,
+    "2002": 8,
+    "2003": 13,
+    "2004": 12,
+    "2005": 16,
+    "2006": 16,
+    "2007": 22,
+    "2008": 23,
+    "2009": 29,
+    "2010": 36,
+    "2011": 32,
+    "2012": 29,
+    "2013": 35,
+    "2014": 33,
+    "2015": 40,
+    "2016": 27,
+    "2017": 34,
+    "2018": 29,
+    "2019": 38,
+    "2020": 32,
+    "2021": 33,
+    "2022": 20,
+    "2023": 25,
+    "2024": 33,
+    "2025": 46,
+    "2026": 62
+   },
+   "growth": 0.98,
+   "cited_in_corpus": 1793,
+   "founding": [
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 147
+    },
+    {
+     "title": "Valuing American Options by Simulation: A Simple Least-Squares Approach",
+     "year": 2001,
+     "doi": "https://doi.org/10.1093/rfs/14.1.113",
+     "authors": [
+      "Francis A. Longstaff",
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2126311658",
+     "cited_by_cell": 142
+    },
+    {
+     "title": "Optimal Stopping and Free-Boundary Problems",
+     "year": 2006,
+     "doi": "https://doi.org/10.1007/978-3-7643-7390-0",
+     "authors": [
+      "Goran Peškir",
+      "Albert Nikolaevich Shiryaev"
+     ],
+     "openalex": "W4211089673",
+     "cited_by_cell": 135
+    },
+    {
+     "title": "Option pricing: A simplified approach",
+     "year": 1979,
+     "doi": "https://doi.org/10.1016/0304-405x(79)90015-1",
+     "authors": [
+      "John C. Cox",
+      "Stephen A. Ross",
+      "Mark Rubinstein"
+     ],
+     "openalex": "W2146612430",
+     "cited_by_cell": 87
+    },
+    {
+     "title": "Theory of Rational Option Pricing",
+     "year": 1973,
+     "doi": "https://doi.org/10.1142/9789814759588_0002",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2584798035",
+     "cited_by_cell": 80
+    },
+    {
+     "title": "The Analytic Valuation of American Options",
+     "year": 1990,
+     "doi": "https://doi.org/10.1093/rfs/3.4.547",
+     "authors": [
+      "In Joon Kim"
+     ],
+     "openalex": "W1975527087",
+     "cited_by_cell": 70
+    },
+    {
+     "title": "Methods of Mathematical Finance",
+     "year": 1998,
+     "doi": "https://doi.org/10.1007/978-1-4939-6845-9",
+     "authors": [
+      "Ioannis Karatzas",
+      "Steven E. Shreve"
+     ],
+     "openalex": "W2042775870",
+     "cited_by_cell": 69
+    },
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 62
+    },
+    {
+     "title": "Appendix : A free boundary problem for the heat equation arising from a problem in mathematical economics",
+     "year": 1965,
+     "doi": null,
+     "authors": [
+      "H. P. Jr. Mackean"
+     ],
+     "openalex": "W2468801668",
+     "cited_by_cell": 58
+    },
+    {
+     "title": "Optimal Stopping and the American Put",
+     "year": 1991,
+     "doi": "https://doi.org/10.1111/j.1467-9965.1991.tb00007.x",
+     "authors": [
+      "Saul Jacka"
+     ],
+     "openalex": "W2151078973",
+     "cited_by_cell": 57
+    }
+   ],
+   "agreement": {
+    "precision": 0.81,
+    "recall": 0.794,
+    "labelled": 102
+   }
+  },
+  "valuation/default": {
+   "papers": 411,
+   "by_year": {
+    "1992": 1,
+    "1993": 1,
+    "1998": 2,
+    "1999": 2,
+    "2000": 1,
+    "2001": 5,
+    "2002": 5,
+    "2003": 3,
+    "2004": 6,
+    "2005": 6,
+    "2006": 5,
+    "2007": 7,
+    "2008": 15,
+    "2009": 20,
+    "2010": 31,
+    "2011": 18,
+    "2012": 31,
+    "2013": 26,
+    "2014": 26,
+    "2015": 22,
+    "2016": 16,
+    "2017": 19,
+    "2018": 11,
+    "2019": 19,
+    "2020": 20,
+    "2021": 12,
+    "2022": 12,
+    "2023": 13,
+    "2024": 17,
+    "2025": 19,
+    "2026": 17
+   },
+   "growth": 0.86,
+   "cited_in_corpus": 586,
+   "founding": [
+    {
+     "title": "ON THE PRICING OF CORPORATE DEBT: THE RISK STRUCTURE OF INTEREST RATES*",
+     "year": 1974,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1974.tb03058.x",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2105973145",
+     "cited_by_cell": 139
+    },
+    {
+     "title": "VALUING CORPORATE SECURITIES: SOME EFFECTS OF BOND INDENTURE PROVISIONS",
+     "year": 1976,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1976.tb01891.x",
+     "authors": [
+      "Fischer Black",
+      "John C. Cox"
+     ],
+     "openalex": "W2006804758",
+     "cited_by_cell": 79
+    },
+    {
+     "title": "Modeling Term Structures of Defaultable Bonds",
+     "year": 1999,
+     "doi": "https://doi.org/10.1093/rfs/12.4.687",
+     "authors": [
+      "Darrell Duffie",
+      "Kenneth J. Singleton"
+     ],
+     "openalex": "W2011886674",
+     "cited_by_cell": 76
+    },
+    {
+     "title": "Pricing Derivatives on Financial Securities Subject to Credit Risk",
+     "year": 1995,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1995.tb05167.x",
+     "authors": [
+      "Robert A. Jarrow",
+      "Stuart M. Turnbull"
+     ],
+     "openalex": "W2082317778",
+     "cited_by_cell": 66
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 58
+    },
+    {
+     "title": "Term Structures of Credit Spreads with Incomplete Accounting Information",
+     "year": 2001,
+     "doi": "https://doi.org/10.1111/1468-0262.00208",
+     "authors": [
+      "Darrell Duffie",
+      "David Lando"
+     ],
+     "openalex": "W2118891973",
+     "cited_by_cell": 52
+    },
+    {
+     "title": "On cox processes and credit risky securities",
+     "year": 1998,
+     "doi": "https://doi.org/10.1007/bf01531332",
+     "authors": [
+      "David Lando"
+     ],
+     "openalex": "W2084716442",
+     "cited_by_cell": 48
+    },
+    {
+     "title": "A Markov Model for the Term Structure of Credit Risk Spreads",
+     "year": 1997,
+     "doi": "https://doi.org/10.1093/rfs/10.2.481",
+     "authors": [
+      "Robert A. Jarrow",
+      "David Lando",
+      "Stuart M. Turnbull"
+     ],
+     "openalex": "W3023478198",
+     "cited_by_cell": 33
+    },
+    {
+     "title": "A Simple Approach to Valuing Risky Fixed and Floating Rate Debt",
+     "year": 1995,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1995.tb04037.x",
+     "authors": [
+      "Francis A. Longstaff",
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2132072990",
+     "cited_by_cell": 33
+    },
+    {
+     "title": "Credit Derivatives Pricing Models",
+     "year": 2003,
+     "doi": null,
+     "authors": [
+      "Philipp Schönbucher"
+     ],
+     "openalex": "W1578103278",
+     "cited_by_cell": 30
+    }
+   ],
+   "agreement": {
+    "precision": 0.831,
+    "recall": 0.681,
+    "labelled": 72
+   }
+  },
+  "valuation/diffusions": {
+   "papers": 1789,
+   "by_year": {
+    "1978": 1,
+    "1979": 1,
+    "1984": 1,
+    "1985": 1,
+    "1986": 1,
+    "1988": 1,
+    "1991": 2,
+    "1992": 4,
+    "1993": 1,
+    "1994": 4,
+    "1995": 3,
+    "1996": 5,
+    "1997": 9,
+    "1998": 12,
+    "1999": 17,
+    "2000": 13,
+    "2001": 19,
+    "2002": 26,
+    "2003": 22,
+    "2004": 24,
+    "2005": 26,
+    "2006": 29,
+    "2007": 30,
+    "2008": 47,
+    "2009": 41,
+    "2010": 43,
+    "2011": 46,
+    "2012": 50,
+    "2013": 76,
+    "2014": 61,
+    "2015": 75,
+    "2016": 80,
+    "2017": 74,
+    "2018": 81,
+    "2019": 70,
+    "2020": 74,
+    "2021": 71,
+    "2022": 123,
+    "2023": 137,
+    "2024": 108,
+    "2025": 120,
+    "2026": 133
+   },
+   "growth": 1.47,
+   "cited_in_corpus": 2089,
+   "founding": [
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 799
+    },
+    {
+     "title": "Theory of Rational Option Pricing",
+     "year": 1973,
+     "doi": "https://doi.org/10.1142/9789814759588_0002",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2584798035",
+     "cited_by_cell": 326
+    },
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 215
+    },
+    {
+     "title": "Option pricing: A simplified approach",
+     "year": 1979,
+     "doi": "https://doi.org/10.1016/0304-405x(79)90015-1",
+     "authors": [
+      "John C. Cox",
+      "Stephen A. Ross",
+      "Mark Rubinstein"
+     ],
+     "openalex": "W2146612430",
+     "cited_by_cell": 155
+    },
+    {
+     "title": "Option pricing when underlying stock returns are discontinuous",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90022-2",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2151065060",
+     "cited_by_cell": 149
+    },
+    {
+     "title": "The Pricing of Options on Assets with Stochastic Volatilities",
+     "year": 1987,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1987.tb02568.x",
+     "authors": [
+      "John C. Hull",
+      "Alan D White"
+     ],
+     "openalex": "W2148080284",
+     "cited_by_cell": 107
+    },
+    {
+     "title": "Monte Carlo Methods in Financial Engineering",
+     "year": 2003,
+     "doi": "https://doi.org/10.1007/978-0-387-21617-1",
+     "authors": [
+      "Paul Glasserman"
+     ],
+     "openalex": "W1602773783",
+     "cited_by_cell": 84
+    },
+    {
+     "title": "The valuation of options for alternative stochastic processes",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90023-4",
+     "authors": [
+      "John C. Cox",
+      "Stephen A. Ross"
+     ],
+     "openalex": "W1966119267",
+     "cited_by_cell": 81
+    },
+    {
+     "title": "Options: A Monte Carlo approach",
+     "year": 1977,
+     "doi": "https://doi.org/10.1016/0304-405x(77)90005-8",
+     "authors": [
+      "Phelim Paul Boyle"
+     ],
+     "openalex": "W1982039177",
+     "cited_by_cell": 79
+    },
+    {
+     "title": "Option Pricing and Replication with Transactions Costs",
+     "year": 1985,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1985.tb02383.x",
+     "authors": [
+      "Hayne E. Leland"
+     ],
+     "openalex": "W2161836471",
+     "cited_by_cell": 69
+    }
+   ],
+   "agreement": {
+    "precision": 0.724,
+    "recall": 0.736,
+    "labelled": 178
+   }
+  },
+  "valuation/forwards": {
+   "papers": 472,
+   "by_year": {
+    "1972": 1,
+    "1983": 1,
+    "1984": 1,
+    "1986": 4,
+    "1988": 2,
+    "1989": 2,
+    "1990": 1,
+    "1991": 2,
+    "1992": 1,
+    "1993": 3,
+    "1994": 1,
+    "1995": 1,
+    "1996": 1,
+    "1999": 1,
+    "2000": 5,
+    "2001": 5,
+    "2002": 8,
+    "2003": 6,
+    "2004": 7,
+    "2005": 10,
+    "2006": 9,
+    "2007": 14,
+    "2008": 10,
+    "2009": 12,
+    "2010": 18,
+    "2011": 11,
+    "2012": 26,
+    "2013": 22,
+    "2014": 16,
+    "2015": 19,
+    "2016": 17,
+    "2017": 19,
+    "2018": 22,
+    "2019": 21,
+    "2020": 24,
+    "2021": 18,
+    "2022": 16,
+    "2023": 17,
+    "2024": 30,
+    "2025": 27,
+    "2026": 37
+   },
+   "growth": 1.05,
+   "cited_in_corpus": 675,
+   "founding": [
+    {
+     "title": "The Stochastic Behavior of Commodity Prices: Implications for Valuation and Hedging",
+     "year": 1997,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1997.tb02721.x",
+     "authors": [
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2141186877",
+     "cited_by_cell": 105
+    },
+    {
+     "title": "The pricing of commodity contracts",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90024-6",
+     "authors": [
+      "Fischer Black"
+     ],
+     "openalex": "W2050067494",
+     "cited_by_cell": 76
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 76
+    },
+    {
+     "title": "Short-Term Variations and Long-Term Dynamics in Commodity Prices",
+     "year": 2000,
+     "doi": "https://doi.org/10.1287/mnsc.46.7.893.12034",
+     "authors": [
+      "Eduardo S. Schwartz",
+      "James E. Smith"
+     ],
+     "openalex": "W2145224101",
+     "cited_by_cell": 72
+    },
+    {
+     "title": "Electricity Prices and Power Derivatives: Evidence from the Nordic Power Exchange",
+     "year": 2002,
+     "doi": "https://doi.org/10.1023/a:1013846631785",
+     "authors": [
+      "Julio J. Lucia",
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2020041898",
+     "cited_by_cell": 56
+    },
+    {
+     "title": "Stochastic Convenience Yield and the Pricing of Oil Contingent Claims",
+     "year": 1990,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1990.tb05114.x",
+     "authors": [
+      "Rajna Gibson",
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2089240053",
+     "cited_by_cell": 54
+    },
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 42
+    },
+    {
+     "title": "Bond Pricing and the Term Structure of Interest Rates: A New Methodology for Contingent Claims Valuation",
+     "year": 1992,
+     "doi": "https://doi.org/10.2307/2951677",
+     "authors": [
+      "David Heath",
+      "Robert A. Jarrow",
+      "A. J. Morton"
+     ],
+     "openalex": "W2170444200",
+     "cited_by_cell": 41
+    },
+    {
+     "title": "Pricing in Electricity Markets: A Mean Reverting Jump Diffusion Model with Seasonality",
+     "year": 2005,
+     "doi": "https://doi.org/10.1080/13504860500117503",
+     "authors": [
+      "Álvaro Cartea",
+      "Marcelo G. Figueroa"
+     ],
+     "openalex": "W2150956140",
+     "cited_by_cell": 37
+    },
+    {
+     "title": "Option pricing when underlying stock returns are discontinuous",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90022-2",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2151065060",
+     "cited_by_cell": 37
+    }
+   ],
+   "agreement": {
+    "precision": 0.681,
+    "recall": 0.723,
+    "labelled": 65
+   }
+  },
+  "valuation/general": {
+   "papers": 673,
+   "by_year": {
+    "1988": 3,
+    "1989": 1,
+    "1990": 1,
+    "1992": 3,
+    "1994": 2,
+    "1995": 2,
+    "1996": 2,
+    "1997": 6,
+    "1998": 7,
+    "1999": 4,
+    "2000": 7,
+    "2001": 5,
+    "2002": 12,
+    "2003": 7,
+    "2004": 8,
+    "2005": 13,
+    "2006": 16,
+    "2007": 18,
+    "2008": 18,
+    "2009": 21,
+    "2010": 21,
+    "2011": 24,
+    "2012": 29,
+    "2013": 41,
+    "2014": 40,
+    "2015": 28,
+    "2016": 25,
+    "2017": 31,
+    "2018": 32,
+    "2019": 35,
+    "2020": 37,
+    "2021": 15,
+    "2022": 23,
+    "2023": 27,
+    "2024": 30,
+    "2025": 34,
+    "2026": 42
+   },
+   "growth": 0.81,
+   "cited_in_corpus": 2382,
+   "founding": [
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 191
+    },
+    {
+     "title": "Theory of Rational Option Pricing",
+     "year": 1973,
+     "doi": "https://doi.org/10.1142/9789814759588_0002",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2584798035",
+     "cited_by_cell": 99
+    },
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 83
+    },
+    {
+     "title": "Martingales and stochastic integrals in the theory of continuous trading",
+     "year": 1981,
+     "doi": "https://doi.org/10.1016/0304-4149(81)90026-0",
+     "authors": [
+      "J. Michael Harrison",
+      "Stanley R. Pliska"
+     ],
+     "openalex": "W2041550349",
+     "cited_by_cell": 82
+    },
+    {
+     "title": "A general version of the fundamental theorem of asset pricing",
+     "year": 1994,
+     "doi": "https://doi.org/10.1007/bf01450498",
+     "authors": [
+      "Freddy Delbaen",
+      "Walter Schachermayer"
+     ],
+     "openalex": "W4244967830",
+     "cited_by_cell": 78
+    },
+    {
+     "title": "Martingales and arbitrage in multiperiod securities markets",
+     "year": 1979,
+     "doi": "https://doi.org/10.1016/0022-0531(79)90043-7",
+     "authors": [
+      "J. Michael Harrison",
+      "David M. Kreps"
+     ],
+     "openalex": "W1985018066",
+     "cited_by_cell": 76
+    },
+    {
+     "title": "Option pricing: A simplified approach",
+     "year": 1979,
+     "doi": "https://doi.org/10.1016/0304-405x(79)90015-1",
+     "authors": [
+      "John C. Cox",
+      "Stephen A. Ross",
+      "Mark Rubinstein"
+     ],
+     "openalex": "W2146612430",
+     "cited_by_cell": 57
+    },
+    {
+     "title": "Option pricing when underlying stock returns are discontinuous",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90022-2",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2151065060",
+     "cited_by_cell": 53
+    },
+    {
+     "title": "Optimal replication of contingent claims under transaction costs",
+     "year": 1989,
+     "doi": null,
+     "authors": [
+      "Sarah Hodges"
+     ],
+     "openalex": "W3216707380",
+     "cited_by_cell": 51
+    },
+    {
+     "title": "Prices of State-Contingent Claims Implicit in Option Prices",
+     "year": 1978,
+     "doi": "https://doi.org/10.1086/296025",
+     "authors": [
+      "Douglas T. Breeden",
+      "Robert H. Litzenberger"
+     ],
+     "openalex": "W2026454108",
+     "cited_by_cell": 51
+    }
+   ],
+   "agreement": {
+    "precision": 0.55,
+    "recall": 0.412,
+    "labelled": 80
+   }
+  },
+  "valuation/insurance": {
+   "papers": 838,
+   "by_year": {
+    "1859": 1,
+    "1865": 2,
+    "1866": 3,
+    "1883": 1,
+    "1887": 1,
+    "1912": 1,
+    "1922": 2,
+    "1924": 1,
+    "1935": 2,
+    "1949": 1,
+    "1958": 1,
+    "1959": 2,
+    "1960": 2,
+    "1961": 1,
+    "1962": 4,
+    "1963": 3,
+    "1966": 1,
+    "1967": 2,
+    "1968": 1,
+    "1969": 3,
+    "1974": 6,
+    "1975": 2,
+    "1976": 1,
+    "1977": 5,
+    "1978": 1,
+    "1979": 2,
+    "1981": 1,
+    "1982": 1,
+    "1983": 1,
+    "1984": 1,
+    "1985": 2,
+    "1986": 1,
+    "1987": 6,
+    "1988": 2,
+    "1989": 5,
+    "1990": 3,
+    "1991": 5,
+    "1992": 2,
+    "1993": 2,
+    "1994": 5,
+    "1995": 4,
+    "1996": 6,
+    "1997": 7,
+    "1998": 3,
+    "1999": 9,
+    "2000": 4,
+    "2001": 6,
+    "2002": 10,
+    "2003": 9,
+    "2004": 10,
+    "2005": 8,
+    "2006": 20,
+    "2007": 14,
+    "2008": 27,
+    "2009": 15,
+    "2010": 18,
+    "2011": 23,
+    "2012": 16,
+    "2013": 32,
+    "2014": 33,
+    "2015": 23,
+    "2016": 33,
+    "2017": 36,
+    "2018": 38,
+    "2019": 31,
+    "2020": 31,
+    "2021": 40,
+    "2022": 36,
+    "2023": 43,
+    "2024": 40,
+    "2025": 54,
+    "2026": 62
+   },
+   "growth": 1.26,
+   "cited_in_corpus": 2128,
+   "founding": [
+    {
+     "title": "Distribution-free Calculation of the Standard Error of Chain Ladder Reserve Estimates",
+     "year": 1993,
+     "doi": "https://doi.org/10.2143/ast.23.2.2005092",
+     "authors": [
+      "Thomas M. Mack"
+     ],
+     "openalex": "W2134548066",
+     "cited_by_cell": 109
+    },
+    {
+     "title": "Stochastic Claims Reserving in General Insurance",
+     "year": 2002,
+     "doi": "https://doi.org/10.1017/s1357321700003809",
+     "authors": [
+      "Peter D. England",
+      "Richard J. Verrall"
+     ],
+     "openalex": "W2097536801",
+     "cited_by_cell": 68
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 64
+    },
+    {
+     "title": "Modeling and Forecasting U. S. Mortality",
+     "year": 1992,
+     "doi": "https://doi.org/10.1080/01621459.1992.10475265",
+     "authors": [
+      "Ronald Demos Lee",
+      "Lawrence R. Carter"
+     ],
+     "openalex": "W1969498530",
+     "cited_by_cell": 38
+    },
+    {
+     "title": "The pricing of equity-linked life insurance policies with an asset value guarantee",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90003-9",
+     "authors": [
+      "Michael John Brennan",
+      "Eduardo S. Schwartz"
+     ],
+     "openalex": "W2093824721",
+     "cited_by_cell": 38
+    },
+    {
+     "title": "Stochastic claims reserving methods in insurance",
+     "year": 2008,
+     "doi": null,
+     "authors": [
+      "Mario V. Wüthrich",
+      "Michael Merz"
+     ],
+     "openalex": "W565273688",
+     "cited_by_cell": 37
+    },
+    {
+     "title": "A Stochastic Model Underlying the Chain-Ladder Technique",
+     "year": 1998,
+     "doi": "https://doi.org/10.1017/s1357321700000222",
+     "authors": [
+      "Arthur E. Renshaw",
+      "Richard J. Verrall"
+     ],
+     "openalex": "W1993693796",
+     "cited_by_cell": 34
+    },
+    {
+     "title": "Financial valuation of guaranteed minimum withdrawal benefits",
+     "year": 2005,
+     "doi": "https://doi.org/10.1016/j.insmatheco.2005.06.012",
+     "authors": [
+      "Moshe A. Milevsky",
+      "Thomas S. Salisbury"
+     ],
+     "openalex": "W2101058764",
+     "cited_by_cell": 33
+    },
+    {
+     "title": "Mortality derivatives and the option to annuitise",
+     "year": 2001,
+     "doi": "https://doi.org/10.1016/s0167-6687(01)00093-2",
+     "authors": [
+      "Moshe A. Milevsky",
+      "S. David Promislow"
+     ],
+     "openalex": "W3123046357",
+     "cited_by_cell": 32
+    },
+    {
+     "title": "Stochastic mortality in life insurance: market reserves and mortality-linked insurance contracts",
+     "year": 2004,
+     "doi": "https://doi.org/10.1016/j.insmatheco.2004.05.003",
+     "authors": [
+      "Mikkel Dahl"
+     ],
+     "openalex": "W2035003768",
+     "cited_by_cell": 32
+    }
+   ],
+   "agreement": {
+    "precision": 0.74,
+    "recall": 0.671,
+    "labelled": 85
+   }
+  },
+  "valuation/jumps": {
+   "papers": 489,
+   "by_year": {
+    "1993": 1,
+    "1997": 2,
+    "1998": 1,
+    "1999": 3,
+    "2000": 2,
+    "2001": 2,
+    "2002": 5,
+    "2003": 7,
+    "2004": 9,
+    "2005": 6,
+    "2006": 18,
+    "2007": 11,
+    "2008": 17,
+    "2009": 10,
+    "2010": 21,
+    "2011": 27,
+    "2012": 22,
+    "2013": 27,
+    "2014": 26,
+    "2015": 25,
+    "2016": 23,
+    "2017": 26,
+    "2018": 24,
+    "2019": 21,
+    "2020": 14,
+    "2021": 26,
+    "2022": 11,
+    "2023": 18,
+    "2024": 21,
+    "2025": 27,
+    "2026": 32
+   },
+   "growth": 0.95,
+   "cited_in_corpus": 1734,
+   "founding": [
+    {
+     "title": "Option pricing when underlying stock returns are discontinuous",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90022-2",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2151065060",
+     "cited_by_cell": 184
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 144
+    },
+    {
+     "title": "Option valuation using the fast Fourier transform",
+     "year": 1999,
+     "doi": "https://doi.org/10.21314/jcf.1999.043",
+     "authors": [
+      "Peter Carr",
+      "Dilip B. Madan"
+     ],
+     "openalex": "W1480459000",
+     "cited_by_cell": 123
+    },
+    {
+     "title": "The Fine Structure of Asset Returns: An Empirical Investigation",
+     "year": 2002,
+     "doi": "https://doi.org/10.1086/338705",
+     "authors": [
+      "Peter Carr",
+      "Hélyette Geman",
+      "Dilip B. Madan"
+     ],
+     "openalex": "W2138540172",
+     "cited_by_cell": 114
+    },
+    {
+     "title": "A Jump-Diffusion Model for Option Pricing",
+     "year": 2002,
+     "doi": "https://doi.org/10.1287/mnsc.48.8.1086.166",
+     "authors": [
+      "Steven Kou"
+     ],
+     "openalex": "W3122167020",
+     "cited_by_cell": 108
+    },
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 103
+    },
+    {
+     "title": "The Variance Gamma Process and Option Pricing",
+     "year": 1998,
+     "doi": "https://doi.org/10.1023/a:1009703431535",
+     "authors": [
+      "Dilip B. Madan",
+      "Peter Carr",
+      "Eric Chieh C. Chang"
+     ],
+     "openalex": "W2100190417",
+     "cited_by_cell": 102
+    },
+    {
+     "title": "Levy Processes and Infinitely Divisible Distributions",
+     "year": 1999,
+     "doi": null,
+     "authors": [
+      "Ken‐iti Sato"
+     ],
+     "openalex": "W2797641211",
+     "cited_by_cell": 100
+    },
+    {
+     "title": "Financial Modelling with Jump Processes",
+     "year": 2003,
+     "doi": "https://doi.org/10.1201/9780203485217",
+     "authors": [
+      "Peter Tankov"
+     ],
+     "openalex": "W1499969990",
+     "cited_by_cell": 94
+    },
+    {
+     "title": "The Variance Gamma (V.G.) Model for Share Market Returns",
+     "year": 1990,
+     "doi": "https://doi.org/10.1086/296519",
+     "authors": [
+      "Dilip B. Madan",
+      "E. Seneta"
+     ],
+     "openalex": "W1980519218",
+     "cited_by_cell": 75
+    }
+   ],
+   "agreement": {
+    "precision": 0.651,
+    "recall": 0.661,
+    "labelled": 62
+   }
+  },
+  "valuation/model-free": {
+   "papers": 279,
+   "by_year": {
+    "2001": 1,
+    "2003": 1,
+    "2004": 1,
+    "2005": 1,
+    "2006": 1,
+    "2007": 1,
+    "2008": 2,
+    "2009": 5,
+    "2010": 9,
+    "2011": 5,
+    "2012": 2,
+    "2013": 6,
+    "2014": 7,
+    "2015": 5,
+    "2016": 7,
+    "2017": 11,
+    "2018": 4,
+    "2019": 5,
+    "2020": 8,
+    "2021": 24,
+    "2022": 28,
+    "2023": 32,
+    "2024": 30,
+    "2025": 36,
+    "2026": 47
+   },
+   "growth": 4.29,
+   "cited_in_corpus": 1596,
+   "founding": [
+    {
+     "title": "Improved Price Oracles: Constant Function Market Makers",
+     "year": 2020,
+     "doi": "https://doi.org/10.1145/3419614.3423251",
+     "authors": [
+      "Guillermo Angeris",
+      "Tarun Chitra"
+     ],
+     "openalex": "W4288079488",
+     "cited_by_cell": 54
+    },
+    {
+     "title": "Automated Market Making and Loss-Versus-Rebalancing",
+     "year": 2022,
+     "doi": "https://doi.org/10.48550/arxiv.2208.06046",
+     "authors": [
+      "Jason Milionis",
+      "Ciamac C. Moallemi",
+      "Tim Roughgarden"
+     ],
+     "openalex": "W4291961646",
+     "cited_by_cell": 54
+    },
+    {
+     "title": "Prices of State-Contingent Claims Implicit in Option Prices",
+     "year": 1978,
+     "doi": "https://doi.org/10.1086/296025",
+     "authors": [
+      "Douglas T. Breeden",
+      "Robert H. Litzenberger"
+     ],
+     "openalex": "W2026454108",
+     "cited_by_cell": 50
+    },
+    {
+     "title": "An Analysis of Uniswap markets",
+     "year": 2020,
+     "doi": "https://doi.org/10.21428/58320208.c9738e64",
+     "authors": [
+      "Guillermo Angeris",
+      "Hsien-Tang Kao",
+      "Rei Chiang"
+     ],
+     "openalex": "W2986978885",
+     "cited_by_cell": 49
+    },
+    {
+     "title": "Model-Independent Bounds for Option Prices: A Mass Transport Approach",
+     "year": 2011,
+     "doi": "https://doi.org/10.1007/s00780-013-0205-8",
+     "authors": [
+      "Mathias Beiglböck",
+      "Pierre Henry‐Labordère",
+      "Friedrich Penkner"
+     ],
+     "openalex": "W2952331020",
+     "cited_by_cell": 43
+    },
+    {
+     "title": "Robust hedging of the lookback option",
+     "year": 1998,
+     "doi": "https://doi.org/10.1007/s007800050044",
+     "authors": [
+      "David G. Hobson"
+     ],
+     "openalex": "W2087001647",
+     "cited_by_cell": 35
+    },
+    {
+     "title": "A Stochastic Control Approach to No-Arbitrage Bounds Given Marginals, with an Application to Lookback Options",
+     "year": 2011,
+     "doi": "https://doi.org/10.1214/13-aap925",
+     "authors": [
+      "Alfred Galichon",
+      "Pierre Henry‐Labordère",
+      "Nizar Touzi"
+     ],
+     "openalex": "W2791633628",
+     "cited_by_cell": 33
+    },
+    {
+     "title": "On a problem of optimal transport under marginal martingale constraints",
+     "year": 2016,
+     "doi": "https://doi.org/10.1214/14-aop966",
+     "authors": [
+      "Mathias Beiglböck",
+      "Nicolas Juillet"
+     ],
+     "openalex": "W2283275366",
+     "cited_by_cell": 31
+    },
+    {
+     "title": "The Existence of Probability Measures with Given Marginals",
+     "year": 1965,
+     "doi": "https://doi.org/10.1214/aoms/1177700153",
+     "authors": [
+      "Volker Strassen"
+     ],
+     "openalex": "W2070589948",
+     "cited_by_cell": 30
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 30
+    }
+   ],
+   "agreement": {
+    "precision": 0.625,
+    "recall": 0.545,
+    "labelled": 55
+   }
+  },
+  "valuation/smile": {
+   "papers": 374,
+   "by_year": {
+    "1986": 1,
+    "1989": 1,
+    "1994": 1,
+    "1995": 1,
+    "1996": 3,
+    "1997": 2,
+    "1998": 2,
+    "1999": 2,
+    "2000": 3,
+    "2001": 7,
+    "2002": 10,
+    "2003": 5,
+    "2004": 5,
+    "2005": 10,
+    "2006": 2,
+    "2007": 8,
+    "2008": 8,
+    "2009": 15,
+    "2010": 8,
+    "2011": 8,
+    "2012": 15,
+    "2013": 16,
+    "2014": 18,
+    "2015": 17,
+    "2016": 19,
+    "2017": 12,
+    "2018": 12,
+    "2019": 10,
+    "2020": 11,
+    "2021": 14,
+    "2022": 17,
+    "2023": 16,
+    "2024": 12,
+    "2025": 16,
+    "2026": 58
+   },
+   "growth": 1.17,
+   "cited_in_corpus": 1030,
+   "founding": [
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 150
+    },
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 96
+    },
+    {
+     "title": "Prices of State-Contingent Claims Implicit in Option Prices",
+     "year": 1978,
+     "doi": "https://doi.org/10.1086/296025",
+     "authors": [
+      "Douglas T. Breeden",
+      "Robert H. Litzenberger"
+     ],
+     "openalex": "W2026454108",
+     "cited_by_cell": 95
+    },
+    {
+     "title": "Implied Binomial Trees",
+     "year": 1994,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1994.tb00079.x",
+     "authors": [
+      "MARK RUBINSTEIN"
+     ],
+     "openalex": "W2106154424",
+     "cited_by_cell": 56
+    },
+    {
+     "title": "Arbitrage-free SVI volatility surfaces",
+     "year": 2013,
+     "doi": "https://doi.org/10.1080/14697688.2013.819986",
+     "authors": [
+      "Jim Gatheral",
+      "Antoine Jacquier"
+     ],
+     "openalex": "W2951800488",
+     "cited_by_cell": 48
+    },
+    {
+     "title": "Theory of Rational Option Pricing",
+     "year": 1973,
+     "doi": "https://doi.org/10.1142/9789814759588_0002",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2584798035",
+     "cited_by_cell": 45
+    },
+    {
+     "title": "Nonparametric Estimation of State‐Price Densities Implicit in Financial Asset Prices",
+     "year": 1998,
+     "doi": "https://doi.org/10.1111/0022-1082.215228",
+     "authors": [
+      "Yacine Aït-Sahalia",
+      "Andrew W. Lo"
+     ],
+     "openalex": "W2179356764",
+     "cited_by_cell": 45
+    },
+    {
+     "title": "Dynamics of implied volatility surfaces",
+     "year": 2002,
+     "doi": "https://doi.org/10.1088/1469-7688/2/1/304",
+     "authors": [
+      "Rama Cont",
+      "José Da Fonseca"
+     ],
+     "openalex": "W2103975365",
+     "cited_by_cell": 41
+    },
+    {
+     "title": "THE MOMENT FORMULA FOR IMPLIED VOLATILITY AT EXTREME STRIKES",
+     "year": 2004,
+     "doi": "https://doi.org/10.1111/j.0960-1627.2004.00200.x",
+     "authors": [
+      "Roger W. Lee"
+     ],
+     "openalex": "W2077545917",
+     "cited_by_cell": 41
+    },
+    {
+     "title": "The Volatility Surface: A Practitioner's Guide",
+     "year": 2006,
+     "doi": null,
+     "authors": [
+      "Jim Gatheral"
+     ],
+     "openalex": "W297795963",
+     "cited_by_cell": 40
+    }
+   ],
+   "agreement": {
+    "precision": 0.702,
+    "recall": 0.769,
+    "labelled": 52
+   }
+  },
+  "valuation/term": {
+   "papers": 1478,
+   "by_year": {
+    "1915": 1,
+    "1933": 1,
+    "1965": 1,
+    "1973": 1,
+    "1977": 1,
+    "1980": 2,
+    "1982": 1,
+    "1984": 4,
+    "1985": 1,
+    "1986": 1,
+    "1987": 1,
+    "1988": 2,
+    "1989": 2,
+    "1990": 1,
+    "1991": 5,
+    "1992": 3,
+    "1993": 4,
+    "1994": 5,
+    "1995": 8,
+    "1996": 11,
+    "1997": 16,
+    "1998": 14,
+    "1999": 14,
+    "2000": 18,
+    "2001": 27,
+    "2002": 20,
+    "2003": 43,
+    "2004": 43,
+    "2005": 56,
+    "2006": 50,
+    "2007": 45,
+    "2008": 49,
+    "2009": 54,
+    "2010": 55,
+    "2011": 48,
+    "2012": 65,
+    "2013": 51,
+    "2014": 66,
+    "2015": 62,
+    "2016": 79,
+    "2017": 57,
+    "2018": 48,
+    "2019": 47,
+    "2020": 55,
+    "2021": 53,
+    "2022": 45,
+    "2023": 48,
+    "2024": 61,
+    "2025": 45,
+    "2026": 61
+   },
+   "growth": 0.88,
+   "cited_in_corpus": 2823,
+   "founding": [
+    {
+     "title": "An equilibrium characterization of the term structure",
+     "year": 1977,
+     "doi": "https://doi.org/10.1016/0304-405x(77)90016-2",
+     "authors": [
+      "Oldrich Alfons Vasicek"
+     ],
+     "openalex": "W2076057077",
+     "cited_by_cell": 403
+    },
+    {
+     "title": "A Theory of the Term Structure of Interest Rates",
+     "year": 1985,
+     "doi": "https://doi.org/10.2307/1911242",
+     "authors": [
+      "John C. Cox",
+      "Jonathan E. Ingersoll",
+      "Stephen A. Ross"
+     ],
+     "openalex": "W3021444882",
+     "cited_by_cell": 371
+    },
+    {
+     "title": "Bond Pricing and the Term Structure of Interest Rates: A New Methodology for Contingent Claims Valuation",
+     "year": 1992,
+     "doi": "https://doi.org/10.2307/2951677",
+     "authors": [
+      "David Heath",
+      "Robert A. Jarrow",
+      "A. J. Morton"
+     ],
+     "openalex": "W2170444200",
+     "cited_by_cell": 290
+    },
+    {
+     "title": "A YIELD‐FACTOR MODEL OF INTEREST RATES",
+     "year": 1996,
+     "doi": "https://doi.org/10.1111/j.1467-9965.1996.tb00123.x",
+     "authors": [
+      "Darrell Duffie",
+      "Rui Kan"
+     ],
+     "openalex": "W2068629725",
+     "cited_by_cell": 253
+    },
+    {
+     "title": "Parsimonious Modeling of Yield Curves",
+     "year": 1987,
+     "doi": "https://doi.org/10.1086/296409",
+     "authors": [
+      "Charles R. Nelson",
+      "Andrew F. Siegel"
+     ],
+     "openalex": "W2077252204",
+     "cited_by_cell": 240
+    },
+    {
+     "title": "Pricing Interest-Rate-Derivative Securities",
+     "year": 1990,
+     "doi": "https://doi.org/10.1093/rfs/3.4.573",
+     "authors": [
+      "John C. Hull",
+      "Alan D White"
+     ],
+     "openalex": "W1998031535",
+     "cited_by_cell": 198
+    },
+    {
+     "title": "Specification Analysis of Affine Term Structure Models",
+     "year": 2000,
+     "doi": "https://doi.org/10.1111/0022-1082.00278",
+     "authors": [
+      "Qiang Dai",
+      "Kenneth J. Singleton"
+     ],
+     "openalex": "W3125050320",
+     "cited_by_cell": 186
+    },
+    {
+     "title": "Common Factors Affecting Bond Returns",
+     "year": 1991,
+     "doi": "https://doi.org/10.3905/jfi.1991.692347",
+     "authors": [
+      "Robert B. Litterman",
+      "Jose Alexandre Scheinkman"
+     ],
+     "openalex": "W2164777891",
+     "cited_by_cell": 182
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 158
+    },
+    {
+     "title": "Forecasting the Term Structure of Government Bond Yields",
+     "year": 2003,
+     "doi": "https://doi.org/10.3386/w10048",
+     "authors": [
+      "Francis X. Diebold",
+      "Canlin Li"
+     ],
+     "openalex": "W2891767402",
+     "cited_by_cell": 155
+    }
+   ],
+   "agreement": {
+    "precision": 0.752,
+    "recall": 0.758,
+    "labelled": 128
+   }
+  },
+  "valuation/trees": {
+   "papers": 244,
+   "by_year": {
+    "1990": 1,
+    "1993": 1,
+    "1994": 1,
+    "1996": 2,
+    "1997": 4,
+    "1998": 3,
+    "1999": 4,
+    "2000": 2,
+    "2001": 1,
+    "2002": 4,
+    "2003": 5,
+    "2004": 2,
+    "2005": 6,
+    "2006": 7,
+    "2007": 3,
+    "2008": 2,
+    "2009": 4,
+    "2010": 12,
+    "2011": 7,
+    "2012": 6,
+    "2013": 7,
+    "2014": 8,
+    "2015": 7,
+    "2016": 12,
+    "2017": 11,
+    "2018": 10,
+    "2019": 10,
+    "2020": 8,
+    "2021": 12,
+    "2022": 8,
+    "2023": 17,
+    "2024": 13,
+    "2025": 28,
+    "2026": 14
+   },
+   "growth": 1.53,
+   "cited_in_corpus": 320,
+   "founding": [
+    {
+     "title": "Option pricing: A simplified approach",
+     "year": 1979,
+     "doi": "https://doi.org/10.1016/0304-405x(79)90015-1",
+     "authors": [
+      "John C. Cox",
+      "Stephen A. Ross",
+      "Mark Rubinstein"
+     ],
+     "openalex": "W2146612430",
+     "cited_by_cell": 100
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 72
+    },
+    {
+     "title": "Theory of Rational Option Pricing",
+     "year": 1973,
+     "doi": "https://doi.org/10.1142/9789814759588_0002",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2584798035",
+     "cited_by_cell": 27
+    },
+    {
+     "title": "A Lattice Framework for Option Pricing with Two State Variables",
+     "year": 1988,
+     "doi": "https://doi.org/10.2307/2331019",
+     "authors": [
+      "Phelim P. Boyle"
+     ],
+     "openalex": "W2169218985",
+     "cited_by_cell": 21
+    },
+    {
+     "title": "Two-State Option Pricing",
+     "year": 1979,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1979.tb00058.x",
+     "authors": [
+      "Richard J. Rendleman",
+      "Brit Jeffrey Bartter"
+     ],
+     "openalex": "W2047628544",
+     "cited_by_cell": 17
+    },
+    {
+     "title": "The valuation of options for alternative stochastic processes",
+     "year": 1976,
+     "doi": "https://doi.org/10.1016/0304-405x(76)90023-4",
+     "authors": [
+      "John C. Cox",
+      "Stephen A. Ross"
+     ],
+     "openalex": "W1966119267",
+     "cited_by_cell": 17
+    },
+    {
+     "title": "Binomial models for option valuation - examining and improving convergence",
+     "year": 1996,
+     "doi": "https://doi.org/10.1080/13504869600000015",
+     "authors": [
+      "Dietmar P. J. Leisen",
+      "Matthias Reimer"
+     ],
+     "openalex": "W2050582772",
+     "cited_by_cell": 14
+    },
+    {
+     "title": "Stochastic Calculus for Finance I: The Binomial Asset Pricing Model",
+     "year": 2004,
+     "doi": "https://doi.org/10.1007/978-0-387-22527-2",
+     "authors": [
+      "Steven E. Shreve"
+     ],
+     "openalex": "W4248548705",
+     "cited_by_cell": 12
+    },
+    {
+     "title": "Implied Binomial Trees",
+     "year": 1994,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1994.tb00079.x",
+     "authors": [
+      "MARK RUBINSTEIN"
+     ],
+     "openalex": "W2106154424",
+     "cited_by_cell": 12
+    },
+    {
+     "title": "The Pricing of Options on Assets with Stochastic Volatilities",
+     "year": 1987,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1987.tb02568.x",
+     "authors": [
+      "John C. Hull",
+      "Alan D White"
+     ],
+     "openalex": "W2148080284",
+     "cited_by_cell": 11
+    }
+   ],
+   "agreement": {
+    "precision": 0.815,
+    "recall": 0.815,
+    "labelled": 54
+   }
+  },
+  "valuation/volatility": {
+   "papers": 1356,
+   "by_year": {
+    "1993": 1,
+    "1994": 1,
+    "1995": 1,
+    "1996": 5,
+    "1997": 7,
+    "1998": 4,
+    "1999": 8,
+    "2000": 4,
+    "2001": 7,
+    "2002": 8,
+    "2003": 15,
+    "2004": 21,
+    "2005": 14,
+    "2006": 20,
+    "2007": 16,
+    "2008": 29,
+    "2009": 32,
+    "2010": 33,
+    "2011": 44,
+    "2012": 47,
+    "2013": 55,
+    "2014": 54,
+    "2015": 53,
+    "2016": 51,
+    "2017": 52,
+    "2018": 67,
+    "2019": 75,
+    "2020": 51,
+    "2021": 74,
+    "2022": 71,
+    "2023": 81,
+    "2024": 82,
+    "2025": 125,
+    "2026": 134
+   },
+   "growth": 1.46,
+   "cited_in_corpus": 5246,
+   "founding": [
+    {
+     "title": "A Closed-Form Solution for Options with Stochastic Volatility with Applications to Bond and Currency Options",
+     "year": 1993,
+     "doi": "https://doi.org/10.1093/rfs/6.2.327",
+     "authors": [
+      "Steven L. Heston"
+     ],
+     "openalex": "W2064978316",
+     "cited_by_cell": 647
+    },
+    {
+     "title": "The Pricing of Options and Corporate Liabilities",
+     "year": 1973,
+     "doi": "https://doi.org/10.1086/260062",
+     "authors": [
+      "Fischer Black",
+      "Myron S. Scholes"
+     ],
+     "openalex": "W2077791698",
+     "cited_by_cell": 364
+    },
+    {
+     "title": "The Pricing of Options on Assets with Stochastic Volatilities",
+     "year": 1987,
+     "doi": "https://doi.org/10.1111/j.1540-6261.1987.tb02568.x",
+     "authors": [
+      "John C. Hull",
+      "Alan D White"
+     ],
+     "openalex": "W2148080284",
+     "cited_by_cell": 262
+    },
+    {
+     "title": "Pricing under rough volatility",
+     "year": 2015,
+     "doi": "https://doi.org/10.1080/14697688.2015.1099717",
+     "authors": [
+      "Christian Bayer",
+      "Peter K. Friz",
+      "Jim Gatheral"
+     ],
+     "openalex": "W3021131124",
+     "cited_by_cell": 175
+    },
+    {
+     "title": "A Theory of the Term Structure of Interest Rates",
+     "year": 1985,
+     "doi": "https://doi.org/10.2307/1911242",
+     "authors": [
+      "John C. Cox",
+      "Jonathan E. Ingersoll",
+      "Stephen A. Ross"
+     ],
+     "openalex": "W3021444882",
+     "cited_by_cell": 170
+    },
+    {
+     "title": "Stock Price Distributions with Stochastic Volatility: An Analytic Approach",
+     "year": 1991,
+     "doi": "https://doi.org/10.1093/rfs/4.4.727",
+     "authors": [
+      "Elias M. Stein",
+      "Jeremy C. Stein"
+     ],
+     "openalex": "W2094206697",
+     "cited_by_cell": 170
+    },
+    {
+     "title": "The Volatility Surface: A Practitioner's Guide",
+     "year": 2006,
+     "doi": null,
+     "authors": [
+      "Jim Gatheral"
+     ],
+     "openalex": "W297795963",
+     "cited_by_cell": 145
+    },
+    {
+     "title": "Theory of Rational Option Pricing",
+     "year": 1973,
+     "doi": "https://doi.org/10.1142/9789814759588_0002",
+     "authors": [
+      "Robert C. Merton"
+     ],
+     "openalex": "W2584798035",
+     "cited_by_cell": 133
+    },
+    {
+     "title": "Option valuation using the fast Fourier transform",
+     "year": 1999,
+     "doi": "https://doi.org/10.21314/jcf.1999.043",
+     "authors": [
+      "Peter Carr",
+      "Dilip B. Madan"
+     ],
+     "openalex": "W1480459000",
+     "cited_by_cell": 131
+    },
+    {
+     "title": "Volatility Is Rough",
+     "year": 2018,
+     "doi": "https://doi.org/10.1142/9789811259142_0008",
+     "authors": [
+      "Jim Gatheral",
+      "Thibault Jaisson",
+      "Mathieu Rosenbaum"
+     ],
+     "openalex": "W2949695413",
+     "cited_by_cell": 127
+    }
+   ],
+   "agreement": {
+    "precision": 0.753,
+    "recall": 0.715,
+    "labelled": 158
+   }
+  }
+ }
+}
