@@ -78,8 +78,9 @@ For each cell:
    profiles describe what the library has formalised, not the region of the field: `risk/insurance`
    is thin in the library and large in the corpus. So the cells are learned instead
    (`mathfin_corpus.place`, 2026-11-26):
-   - **Training labels:** 2,000 papers, each labelled once by an agent that read the title and the
-     full abstract against the cell list. `NONE` (outside every cell) is a class like the others.
+   - **Training labels:** 2,983 papers, each labelled once by an agent that read the title and the
+     full abstract against the cell list: 2,000 sampled across the cells, then 983 sampled near the
+     cells cross-validation found weak. `NONE` (outside every cell) is a class like the others.
    - **Features:** the paper's sentence embedding, its similarity to an agent-written description
      of each cell's field, and TF-IDF over its title and abstract.
    - **Model:** balanced logistic regression, its two settings chosen by cross-validation on the
@@ -98,18 +99,21 @@ For each cell:
      paper's gold cells. The training labels never include a held-out paper. The atlas reports
      agreement per cell, measured by cross-validation on the training labels, and shows a cell
      under 70% with that warning, not hidden.
-   - **Measured (2026-11-26).** Three embeddings were tried: `bge-small`, `bge-base`, and both
-     together. Cross-validation on the training labels prefers `bge-base` and both together
-     equally (1,353 and 1,352 of 2,000 right) over `bge-small` (1,330). On the held-out sample,
-     the first cell is a gold cell for 68% (`bge-base`) and 71% (both) of the papers, and one of
-     the first two for 86%. With 297 papers that difference is noise (one standard error is 2.7
-     points). The classifier sits at the bar, under the labellers' own 80%. The atlas uses both
-     embeddings.
+   - **Measured (2026-11-26).** Three embeddings were tried on the first 2,000 labels:
+     `bge-small`, `bge-base`, and both together. Cross-validation prefers `bge-base` and both
+     equally (1,353 and 1,352 right) over `bge-small` (1,330); on the held-out sample the first
+     cell was a gold cell for 68% and 71% of the papers. That sat at the bar, so 983 more papers
+     were labelled near the 19 cells with recall under 70%, and the classifier was refitted with
+     the same settings. On the untouched held-out sample its first cell is a gold cell for 71.4%
+     of the papers, and one of the first two for 86.9%, against the labellers' own 80%. With 297
+     papers one standard error is 2.6 points, so the bar is cleared, not by a wide margin. The
+     atlas uses both embeddings.
    - **What the atlas publishes is a count, and counts are steadier than placements.** Under
-     cross-validation, 7% of the training papers would move between cell totals. The errors are
-     not even, though: small cells are undercounted (`valuation/trees` 7 predicted against 20
-     labelled, `probability/discrete` 3 against 13). 20 of the 33 cells, almost all small ones,
-     have recall under 70%. The atlas marks them.
+     cross-validation, 3.5% of the training papers would move between cell totals. The new labels
+     mended the worst undercount (`valuation/trees`, 7 predicted against 20 labelled, now 54
+     against 54), but small cells remain the weak ones: 20 of the 33 cells have recall under 70%
+     (`valuation/general` 0.41, `probability/discrete` 0.41, `probability/analysis` 0.18). The
+     atlas marks them.
 
    This is enough because an atlas error misorders a roadmap and asserts no theorem.
 
