@@ -290,7 +290,8 @@ theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
 off-diagonal share of the equicorrelated portfolio variance to the off-diagonal weight mass
 `∑ wᵢwⱼ` — the pairwise correlations averaged over the weight products where that
 normalisation is positive (nonnegative at nonnegative index weights, positive once two or
-more components carry weight) — realises the common correlation. A swap struck at the common correlation therefore pays nothing. -/
+more components carry weight) — realises the common correlation. A swap struck at the common
+correlation therefore pays nothing. -/
 theorem realisedCorrelation_equicorrelation (w : n → ℝ) (ρ : ℝ)
     (hW : (∑ i, w i) ^ 2 ≠ ∑ i, w i ^ 2) :
     (portfolioVarN univ w (equicorrelationMatrix n ρ) - ∑ i, w i ^ 2)
