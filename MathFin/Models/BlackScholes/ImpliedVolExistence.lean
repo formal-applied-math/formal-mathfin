@@ -6,6 +6,7 @@ Authors: Yang Ye
 module
 
 public import MathFin.Models.BlackScholes.ImpliedVolatility
+public import MathFin.Models.BlackScholes.Market
 public import MathFin.Probability.Analysis.BisectionStraddle
 public import Mathlib.Topology.Order.LeftRightNhds
 
@@ -50,10 +51,15 @@ estimates converge to it and it prices the option (`bsV_bisect_threshold_root`).
   volatility prices to `C`.
 * `bsV_bisect_threshold_root`: bisection on the Black–Scholes price converges
   to an interior threshold and the threshold prices the option.
+* `tendsto_marketCallPrice_sigma_zero`, `impliedVol_eq_model_vol`,
+  `marketCallPrice_bisect_threshold_root`: the same three facts for the price the
+  Black–Scholes market's Girsanov measure assigns the call, through
+  `price_europeanCall_constGirsanovMeasure`.
 
 ## References
 
 * [J. C. Hull, *Options, Futures, and Other Derivatives*][Hull], 19.10
+* [J. Gatheral, *The Volatility Surface: A Practitioner's Guide*][Gatheral2006]
 * [R. L. Burden and J. D. Faires, *Numerical Analysis*][BurdenFaires2011], §2.1
 * [S. E. Shreve, *Stochastic Calculus for Finance II*][ShreveSCFII], 4.5
 
@@ -70,16 +76,11 @@ namespace MathFin
 open Filter MeasureTheory ProbabilityTheory Real Set
 open scoped NNReal ENNReal Topology
 
-/-- `Ioi 0` is a neighborhood within `Ioi 0`: the extraction fact used to turn the
-`σ → 0⁺` limits into concrete small volatilities. -/
-private lemma gt_zero_mem : Ioi (0 : ℝ) ∈ 𝓝[>] 0 :=
-  self_mem_nhdsWithin
-
 /-! ### The forward offset's sign converts to a spot-versus-forward comparison -/
 
-/-- The forward offset `log(S/K) + rT` is positive iff the spot is above the discounted
-strike. -/
-private lemma gt_forward_iff_log_add_rT_pos {S K r T : ℝ} (hK : 0 < K) (hS : 0 < S) :
+/-- The spot is above the discounted strike iff the forward offset `log(S/K) + rT` is
+positive. -/
+theorem lt_forward_iff_offset_pos {S K r T : ℝ} (hK : 0 < K) (hS : 0 < S) :
     K * Real.exp (-(r * T)) < S ↔ 0 < Real.log (S / K) + r * T := by
   have h1 : -(r * T) < Real.log (S / K) ↔ Real.exp (-(r * T)) < S / K :=
     Real.lt_log_iff_exp_lt (div_pos hS hK)
@@ -88,9 +89,9 @@ private lemma gt_forward_iff_log_add_rT_pos {S K r T : ℝ} (hK : 0 < K) (hS : 0
   rw [show (0 < Real.log (S / K) + r * T ↔ -(r * T) < Real.log (S / K)) from by
       constructor <;> intro h <;> linarith, ← h2, ← h1]
 
-/-- The forward offset `log(S/K) + rT` is negative iff the spot is below the discounted
-strike. -/
-private lemma lt_forward_iff_log_add_rT_neg {S K r T : ℝ} (hK : 0 < K) (hS : 0 < S) :
+/-- The spot is below the discounted strike iff the forward offset `log(S/K) + rT` is
+negative. -/
+theorem lt_forward_iff_offset_neg {S K r T : ℝ} (hK : 0 < K) (hS : 0 < S) :
     S < K * Real.exp (-(r * T)) ↔ Real.log (S / K) + r * T < 0 := by
   have h1 : Real.log (S / K) < -(r * T) ↔ S / K < Real.exp (-(r * T)) :=
     Real.log_lt_iff_lt_exp (div_pos hS hK)
@@ -114,7 +115,7 @@ private lemma tendsto_bsd1_atTop_of_forward_pos (S K r : ℝ) {T : ℝ} (hT : 0 
       continuous_const.mul continuous_id
     simpa using hc.tendsto 0 |>.mono_left nhdsWithin_le_nhds
   refine h2.add_atTop h1 |>.congr' ?_
-  filter_upwards [gt_zero_mem] with σ hσ
+  filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
   rw [bsd1_eq_inv_add S K r hσ.ne' hT]
   linarith
 
@@ -131,7 +132,7 @@ private lemma tendsto_bsd2_atTop_of_forward_pos (S K r : ℝ) {T : ℝ} (hT : 0 
       (continuous_const.mul continuous_id).neg
     simpa using hc.tendsto 0 |>.mono_left nhdsWithin_le_nhds
   refine h2.add_atTop h1 |>.congr' ?_
-  filter_upwards [gt_zero_mem] with σ hσ
+  filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
   rw [bsd2, bsd1_eq_inv_add S K r hσ.ne' hT]
   ring
 
@@ -148,7 +149,7 @@ private lemma tendsto_bsd1_atBot_of_forward_neg (S K r : ℝ) {T : ℝ} (hT : 0 
       continuous_const.mul continuous_id
     simpa using hc.tendsto 0 |>.mono_left nhdsWithin_le_nhds
   refine h2.add_atBot h1 |>.congr' ?_
-  filter_upwards [gt_zero_mem] with σ hσ
+  filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
   rw [bsd1_eq_inv_add S K r hσ.ne' hT]
   linarith
 
@@ -165,7 +166,7 @@ private lemma tendsto_bsd2_atBot_of_forward_neg (S K r : ℝ) {T : ℝ} (hT : 0 
       (continuous_const.mul continuous_id).neg
     simpa using hc.tendsto 0 |>.mono_left nhdsWithin_le_nhds
   refine h2.add_atBot h1 |>.congr' ?_
-  filter_upwards [gt_zero_mem] with σ hσ
+  filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
   rw [bsd2, bsd1_eq_inv_add S K r hσ.ne' hT]
   ring
 
@@ -183,10 +184,10 @@ private lemma tendsto_bsd1_bsd2_nhds_zero_of_forward_eq (S K r : ℝ) {T : ℝ} 
       (continuous_const.mul continuous_id).neg
     simpa using hc.tendsto 0 |>.mono_left nhdsWithin_le_nhds
   refine ⟨h1.congr' ?_, h2.congr' ?_⟩
-  · filter_upwards [gt_zero_mem] with σ hσ
+  · filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
     rw [bsd1_eq_inv_add S K r hσ.ne' hT, h]
     ring
-  · filter_upwards [gt_zero_mem] with σ hσ
+  · filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
     rw [bsd2, bsd1_eq_inv_add S K r hσ.ne' hT, h]
     ring
 
@@ -200,7 +201,7 @@ theorem tendsto_bsV_sigma_zero {S K r : ℝ} (hS : 0 < S) (hK : 0 < K) {T : ℝ}
     Tendsto (fun σ ↦ bsV K r σ S T) (𝓝[>] 0)
       (𝓝 (max (S - K * Real.exp (-(r * T))) 0)) := by
   rcases lt_trichotomy (K * Real.exp (-(r * T))) S with hF | heq | hF'
-  · have hlog := (gt_forward_iff_log_add_rT_pos hK hS).mp hF
+  · have hlog := (lt_forward_iff_offset_pos hK hS).mp hF
     have hp := ((tendsto_Phi_atTop.comp
         (tendsto_bsd1_atTop_of_forward_pos S K r hT hlog)).const_mul S).sub
       ((tendsto_Phi_atTop.comp
@@ -223,7 +224,7 @@ theorem tendsto_bsV_sigma_zero {S K r : ℝ} (hS : 0 < S) (hK : 0 < K) {T : ℝ}
     rw [hL] at hp
     rw [max_eq_right (by rw [heq]; linarith : S - K * Real.exp (-(r * T)) ≤ 0)]
     exact hp
-  · have hlog := (lt_forward_iff_log_add_rT_neg hK hS).mp hF'
+  · have hlog := (lt_forward_iff_offset_neg hK hS).mp hF'
     have hp := ((tendsto_Phi_atBot.comp
         (tendsto_bsd1_atBot_of_forward_neg S K r hT hlog)).const_mul S).sub
       ((tendsto_Phi_atBot.comp
@@ -317,4 +318,102 @@ theorem bsV_bisect_threshold_root {K r T S σ_lo σ_hi σ C : ℝ} (hK : 0 < K) 
   bisect_threshold_root hloσ hσhi hC
     ((bsV_continuousOn_sigma hK hT hS).mono fun _ hv ↦ hσlo.trans_le hv.1)
 
-end MathFin
+/-! ### The market's call price
+
+Through `price_europeanCall_constGirsanovMeasure` the Girsanov pricing measure of the
+Black–Scholes market prices the call at the formula value, so the three volatility facts
+above price the market's own call. -/
+
+/-- **The market's call price at vanishing model volatility**: as the Black–Scholes market's
+volatility `σ → 0⁺`, the Girsanov price of the European call tends to the positive part of
+the discounted intrinsic value, through `price_europeanCall_constGirsanovMeasure`. -/
+theorem tendsto_marketCallPrice_sigma_zero {Ω : Type*} [mΩ : MeasurableSpace Ω]
+    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t)) (S_0 m r K : ℝ)
+    {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S_0) (hK : 0 < K) (hT : 0 < (T : ℝ)) :
+    Tendsto (fun σ : ℝ ↦ (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (Contracts.europeanCall K T))
+      (𝓝[>] 0) (𝓝 (max (S_0 - K * Real.exp (-(r * (T : ℝ)))) 0)) := by
+  refine (tendsto_bsV_sigma_zero hS₀ hK hT).congr' ?_
+  filter_upwards [(self_mem_nhdsWithin : Ioi (0 : ℝ) ∈ 𝓝[>] 0)] with σ hσ
+  have key := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+    (S_0 := S_0) (m := m) (r := r) (σ := σ) (K := K) (T := T) (H := H)
+    hW hWmeas hTH hS₀ hK hσ hT
+  rw [← key.symm]
+  unfold bsV
+  simp only [neg_mul]
+
+/-- **The implied volatility of the market's call price is the model's volatility.** The
+Girsanov pricing measure prices the European call at the formula value
+(`price_europeanCall_constGirsanovMeasure`), so if that price lies in the formula's
+no-arbitrage range, the price's implied volatility is the model's own `σ`. -/
+theorem impliedVol_eq_model_vol {Ω : Type*} [mΩ : MeasurableSpace Ω]
+    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t)) (S_0 m r σ K : ℝ)
+    {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ))
+    {C : ℝ}
+    (hCprice : (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (Contracts.europeanCall K T) = C)
+    (hC : C ∈ Ioo (max (S_0 - K * Real.exp (-(r * (T : ℝ)))) 0) S_0) :
+    impliedVol K r S_0 (T : ℝ) C = σ := by
+  have key := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+    (S_0 := S_0) (m := m) (r := r) (σ := σ) (K := K) (T := T) (H := H)
+    hW hWmeas hTH hS₀ hK hσ hT
+  have hσC : bsV K r σ S_0 (T : ℝ) = C := by
+    rw [← key.symm] at hCprice
+    unfold bsV
+    rw [← hCprice]
+    simp only [neg_mul]
+  exact ((impliedVol_defining_eq hK hT hS₀ hC).2.2 σ hσ hσC).symm
+
+/-- **Bisection on the market's call price at a threshold**: at an interior threshold
+volatility the estimates of the Girsanov price converge to it, and it prices the option.
+The Girsanov price agrees with the formula on the bracket
+(`price_europeanCall_constGirsanovMeasure`), so the threshold theorem transfers. -/
+theorem marketCallPrice_bisect_threshold_root {Ω : Type*} [mΩ : MeasurableSpace Ω]
+    {W : ℝ≥0 → Ω → ℝ} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    (hW : IsPreBrownianReal W μ) (hWmeas : ∀ t, Measurable (W t)) (S_0 m r K : ℝ)
+    {T H : ℝ≥0} (hTH : T ≤ H) (hS₀ : 0 < S_0) (hK : 0 < K) (hT : 0 < (T : ℝ))
+    {σ_lo σ_hi σ C : ℝ} (hσlo : 0 < σ_lo) (hloσ : σ_lo < σ) (hσhi : σ ≤ σ_hi)
+    (hC : ∀ x ∈ Icc σ_lo σ_hi, (Contracts.BlackScholes.market μ hWmeas S_0 m r x).price
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / x) H)
+        (Contracts.europeanCall K T) < C ↔ x < σ) :
+    (Contracts.BlackScholes.market μ hWmeas S_0 m r σ).price
+        (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)
+        (Contracts.europeanCall K T) = C ∧
+      Tendsto (bisectMid (fun v : ℝ ↦ (Contracts.BlackScholes.market μ hWmeas S_0 m r v).price
+          (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / v) H)
+          (Contracts.europeanCall K T)) C σ_lo σ_hi) atTop (𝓝 σ) := by
+  set mp : ℝ → ℝ := fun v : ℝ ↦ (Contracts.BlackScholes.market μ hWmeas S_0 m r v).price
+      (Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / v) H)
+      (Contracts.europeanCall K T) with hmp
+  have hkey : ∀ v ∈ Icc σ_lo σ_hi, mp v = bsV K r v S_0 (T : ℝ) := fun v hv ↦ by
+    have hp := Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
+      (S_0 := S_0) (m := m) (r := r) (σ := v) (K := K) (T := T) (H := H)
+      hW hWmeas hTH hS₀ hK (hσlo.trans_le hv.1) hT
+    simp only [neg_mul] at hp
+    unfold bsV
+    rw [← hp]
+  have hmemσ : σ ∈ Icc σ_lo σ_hi := ⟨le_of_lt hloσ, hσhi⟩
+  have hC' : ∀ x ∈ Icc σ_lo σ_hi, bsV K r x S_0 (T : ℝ) < C ↔ x < σ := fun x hx ↦ by
+    rw [← hkey x hx]; exact hC x hx
+  obtain ⟨heq, hconv⟩ := bsV_bisect_threshold_root hK hT hS₀ hσlo hloσ hσhi hC'
+  refine ⟨(hkey σ hmemσ).trans heq, hconv.congr' ?_⟩
+  have hstep : ∀ I : ℝ × ℝ, σ_lo ≤ I.1 → I.1 ≤ σ_hi → σ_lo ≤ I.2 → I.2 ≤ σ_hi → I.1 ≤ I.2 →
+      bisectStep mp C I = bisectStep (fun v ↦ bsV K r v S_0 (T : ℝ)) C I := by
+    intro I h1lo h1hi h2lo h2hi hle
+    simp only [bisectStep]
+    rw [hkey _ ⟨by linarith, by linarith⟩]
+  have hag : ∀ n, bisect mp C σ_lo σ_hi n = bisect (fun v ↦ bsV K r v S_0 (T : ℝ)) C σ_lo σ_hi n := by
+    intro n
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+      obtain ⟨⟨h1lo, h1σ⟩, h2σ, h2hi⟩ := bisect_mem hC' hmemσ n
+      rw [bisect_succ, bisect_succ, ih]
+      exact hstep _ h1lo (le_trans (le_trans h1σ h2σ) h2hi)
+        (le_trans h1lo (le_trans h1σ h2σ)) h2hi (le_trans h1σ h2σ)
+  filter_upwards with n
+  rw [bisectMid, bisectMid, hag n]

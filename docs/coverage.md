@@ -2379,8 +2379,12 @@ monotonicity (`bisect_tendsto_root`) — the textbook theorem the 2026-09-18
 section above records as open; the threshold theorem of
 `Probability/Analysis/Bisection.lean` becomes the corollary
 `bisect_threshold_root` (continuity makes the limit an actual solution:
-`f σ = C`). The corpus entry is the Black–Scholes specialization
-`bsV_bisect_threshold_root`. A safeguarded Newton iteration is not formalized
+`f σ = C`). The corpus entry restates the market-level specialization
+`marketCallPrice_bisect_threshold_root`, which transfers the theorem to the Girsanov price of
+the Black–Scholes market through `price_europeanCall_constGirsanovMeasure`; the other two
+entries likewise restate the market-level corollaries
+`tendsto_marketCallPrice_sigma_zero` and `impliedVol_eq_model_vol` (the implied volatility of
+the market's call price is the model's own volatility). A safeguarded Newton iteration is not formalized
 (issue #317's third task); `impliedVol_bracket_exists` is not renamed (the
 issue scopes that rename to its corpus entry's next touch, and that entry is
 not touched here).

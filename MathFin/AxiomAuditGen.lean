@@ -1856,10 +1856,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsP_le_K_disc
 
-/-- info: 'MathFin.bsV_bisect_threshold_root' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.bsV_bisect_threshold_root
-
 /-- info: 'MathFin.bsV_ge_forward_lower_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.bsV_ge_forward_lower_bound
@@ -3036,9 +3032,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.impliedVol_bracket_exists
 
-/-- info: 'MathFin.impliedVol_defining_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.impliedVol_eq_model_vol' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.impliedVol_defining_eq
+#print axioms MathFin.impliedVol_eq_model_vol
 
 /-- info: 'MathFin.implied_volatility_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -3575,6 +3571,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.margrabe_exchange_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.margrabe_exchange_price
+
+/-- info: 'MathFin.marketCallPrice_bisect_threshold_root' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.marketCallPrice_bisect_threshold_root
 
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -4264,10 +4264,6 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_bsV_sigma_atTop
 
-/-- info: 'MathFin.tendsto_bsV_sigma_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.tendsto_bsV_sigma_zero
-
 /-- info: 'MathFin.tendsto_call_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_call_spread
@@ -4307,6 +4303,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.tendsto_juValueRaw_zero_rate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.tendsto_juValueRaw_zero_rate
+
+/-- info: 'MathFin.tendsto_marketCallPrice_sigma_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.tendsto_marketCallPrice_sigma_zero
 
 /-- info: 'MathFin.tendsto_mpLowerEdge_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
