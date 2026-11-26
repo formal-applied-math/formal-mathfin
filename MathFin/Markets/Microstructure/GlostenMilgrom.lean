@@ -321,7 +321,7 @@ theorem measureReal_of_likelihoods [IsProbabilityMeasure μ] (E H : Set Ω) (hH 
   have h3 := measureReal_inter_add_sdiff (μ := μ) (s := E) hH
   rw [ha, ht, Set.inter_comm] at h1
   rw [hc, probReal_compl_eq_one_sub hH, ht, Set.inter_comm] at h2
-  rw [Set.diff_eq] at h3
+  rw [Set.sdiff_eq] at h3
   linarith
 
 /-- **THE SEAM.** Bayes' theorem in `ℝ`: the posterior on `H` after observing `E` is the Bayes
