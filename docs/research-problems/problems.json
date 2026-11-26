@@ -1045,11 +1045,12 @@
       ],
       "background": "The quantitative Halmos--Savage theorems and the robust FTAP for large financial markets of Cuchiero--Klein--Köstenberger--Schmidt assume l(L^infty)=E'; without it the multi-period extension of their robust asymptotic-arbitrage theory is not available.",
       "difficulty": "unassessed",
-      "mathematical_status": "open",
+      "mathematical_status": "resolution_reported",
       "known_results": [
         "For T=1, l(L^infty)=E' holds for the robust binomial model after a canonical extension (Klein--Köstenberger, arXiv 2605.04912, Section 5.3 and Corollary 46).",
         "l(L^infty) is always weak* dense in E' (Lemma 3.4 of arXiv 2504.06686), so the issue is weak* closedness.",
-        "Klein--Köstenberger (Lemma 40, Remark 41) show the supports of the T=1 sub-families are not disjoint in general and that this already occurs for multi-period; the disjoint-support route of the one-period proof therefore does not transfer directly."
+        "Klein--Köstenberger (Lemma 40, Remark 41) show the supports of the T=1 sub-families are not disjoint in general and that this already occurs for multi-period; the disjoint-support route of the one-period proof therefore does not transfer directly.",
+        "Argument here (2026-11-25, not formalised, not refereed outside this project): every law of the Blanchard–Carassus model is purely atomic (Y_t bijective, two-point laws per step), for every T. So the 𝒫-completion of the Borel σ-algebra is the power set; the point masses form a strictly disjointly supported localization (KK Example 30, Def. 1), and KK Thm 4 gives l(L^∞) = E' on that extension for every T ≥ 1. On the Borel σ-algebra and on its universal completion l is not onto (a non-universally-measurable set in the support). A variant with non-injective Y_t (non-atomic laws) is not covered."
       ],
       "sources": [
         {
@@ -1095,6 +1096,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-25",
+          "status": "resolution_reported",
+          "reason": "Positive answer on the canonical extension for every T, by an internal argument checked by an adversarial second reading; thin (KK Example 30 specialised to point masses) and not confirmed with the authors, who may intend a non-injective variant."
         }
       ],
       "issue_number": 550,
