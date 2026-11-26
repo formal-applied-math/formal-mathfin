@@ -997,6 +997,7 @@ public import MathFin.Markets.DeFi.LPContract
 public import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 public import MathFin.Markets.Microstructure.GlostenMilgromMarket
 public import MathFin.Markets.Microstructure.GlostenMilgromSequential
+public import MathFin.Markets.Microstructure.Kyle
 -- Contributed 2026-11 (#432–#467): lattices, smile interpolation and quoting, SABR Greeks,
 -- lookback and shout options, Marchenko–Pastur edges, concentrated-liquidity VaR
 public import MathFin.Models.Binomial.TrinomialMomentMatching

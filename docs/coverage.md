@@ -26,6 +26,32 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Kyle single-period equilibrium (2026-11-25)
+
+Entry `mf-kyle-equilibrium` (benchmarks/market_microstructure.json), module
+`MathFin/Markets/Microstructure/Kyle.lean`. Corpus 906 → 907 entries.
+
+Proved: in the one-period Kyle model (KyleModel: Gaussian value v ~ N(p0, sigma_v^2),
+independent Gaussian noise u ~ N(0, sigma_u^2)), the linear demand x = beta*(v - p0) and
+linear pricing p = p0 + lam*(x + u) form an equilibrium exactly at beta = sigma_u/sigma_v
+and lam = sigma_v/(2*sigma_u). The market-maker half (kyleMarketEfficiency) is the bivariate
+Gaussian projection of v on the order flow, via
+BivariateGaussianHyp.conditional_expectation_formula; the informed half (kyleConditionalProfit)
+reduces the conditional expected profit to the quadratic (v - p0)*x - lam*x^2 under
+independence; the best response at every signal forces lam > 0 and beta = 1/(2*lam)
+(kyleMaxCoefficients); the fixed point gives the coefficients
+(kyleEquilibriumCoefficients) and the pair itself satisfies both conditions
+(existsKyleEquilibrium). The order flow of the witnessed model is Gaussian with variance
+beta^2*sigma_v^2 + sigma_u^2 (kyleFlow_hasLaw_prod, via hasLaw_linear_gaussianPair), and the
+model bundle is witnessed by independent Gaussian coordinates (kyleModel_prod).
+
+Not proved: uniqueness among all demands (upstream open problem #537, frontier node
+thm:kyle-equilibrium-unique); the multi-period and continuous-auction versions; the
+conditional-profit reduction for demands that are not measurable with respect to the signal.
+
+Frontier node thm:kyle-equilibrium stays open with the entry id in its core list; the module
+carries no blueprint tag (its proof stands on the Gaussian projection substrate, which has no
+node), so the node is advanced, not delivered.
 ### The 2026-11-25 merge
 
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
