@@ -17,9 +17,9 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 919 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 873 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 28 are
+The [corpus](docs/glossary.md#corpus) records 921 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 874 are proved in
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 29 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -166,7 +166,7 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
 
 ## Limitations
 
-- **Reduced cores.** Twenty-eight of the results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-nine of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
@@ -181,14 +181,15 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
     property of the forward index and the Hull–White reconstitution form of the bond ratio. The
     average-strike conditioning lower bound assumes the conditional-mean identification of the
     terminal payoff with its Gaussian conditional mean.
-  - Eleven prove a special case or check transcribed closed forms against each other: the first
+  - Twelve prove a special case or check transcribed closed forms against each other: the first
     arrival of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call
     on the maximum at zero strike, the Heynen–Kat barrier at zero correlation, Haug's and
     Rubinstein–Reiner's barrier formulas, a piecewise-linear interpolation of call quotes weaker
     than Kahalé's, the transcribed Goldman–Sosin–Gatto lookback bounded below by the call, the
     Broadie–Glasserman–Kou shifted barrier for discrete monitoring on the transcribed continuous
-    formula, the Gaussian positive part of a signed exponential sum, and the one-fixing
-    average-strike conditioning bound as the Black–Scholes forward-start call.
+    formula, the image form of the transcribed down-and-out call, the Gaussian positive part of a
+    signed exponential sum, and the one-fixing average-strike conditioning bound as the
+    Black–Scholes forward-start call.
 - **Girsanov.** Only bounded θ. Novikov's condition is not proved.
 - **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
   proved, and the hedge is not identified (Clark–Ocone,
