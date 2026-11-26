@@ -2090,16 +2090,13 @@ only a.e. adaptedness). -/
 alone. Five theorems are pinned, one per load-bearing claim.
 
 The **trade probabilities** are derived from the trader mix rather than assumed, which is what
-separates a `full` entry from a restatement. They are stated additively
-(`2 * μ[B | H] = 1 + p`) so that no step forms a difference in a type where subtraction
-truncates — the subtracting form follows from the additive one, so this buys the proofs, not
-the statements.
+separates a `full` entry from a restatement: `(μ[|H]).real B = (1 + p)/2`, on `μ.real` throughout.
 
-`cond_toReal_eq` is the **seam**: Bayes pushed through `.toReal` once, generically, which is
-what identifies the model's posterior `μ[H | B]` with the real function `postBuy` the closed
+`cond_real_eq` is the **seam**: Bayes in `ℝ` once, generically, which is
+what identifies the model's posterior `(μ[|B]).real H` with the real function `postBuy` the closed
 form is about. Without it the measure-theoretic half and the real-analysis half are true
-statements about unrelated objects. `toReal` sends `∞ ↦ 0` and `x/0 ↦ 0`, so this is exactly
-where a careless bridge would manufacture a silent wrong answer.
+statements about unrelated objects. Conditioning on a null event is the zero measure, so `x/0 ↦ 0`
+is exactly where a careless step would manufacture a silent wrong answer.
 
 `spread_pos_of_model` is the result itself, from the model's own primitives.
 
@@ -2114,13 +2111,13 @@ informed or not, uninformed trader tossing a coin — satisfies every hypothesis
 `spread_pos_of_model`, symbolically in `θ` and `p`, so the result is not true for want of a
 model. -/
 
-/-- info: 'MathFin.Execution.two_mul_cond_buy_high' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Execution.cond_buy_high' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Execution.two_mul_cond_buy_high
+#print axioms MathFin.Execution.cond_buy_high
 
-/-- info: 'MathFin.Execution.cond_toReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Execution.cond_real_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Execution.cond_toReal_eq
+#print axioms MathFin.Execution.cond_real_eq
 
 /-- info: 'MathFin.Execution.spread_pos_of_model' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

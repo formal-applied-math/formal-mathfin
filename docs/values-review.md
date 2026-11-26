@@ -8310,7 +8310,7 @@ Per-lens, briefly.
 3. **#211 register follow-ups** — fix the `variable` block rather than `omit`-ing 11 times; make
    `{θ p}` implicit; weaken `buy_denom_pos`/`sell_denom_pos` to `0 ≤ p`; restate the model
    hypotheses in `ℝ` via `μ.real`, collapsing the six `gmMeasure_…` bridges and three twin proof
-   pairs; rename `gmInf`. [#622]
+   pairs; rename `gmInf`. [done: `GlostenMilgrom*` restated on `μ.real`, the bridges and twins removed (#622)]
 4. **Give market microstructure one home** — `Foundations/{MarketMakingRiccati,
    MatrixMarketMakingRiccati, AlmgrenChriss}` are the same theme as the new `Execution/`, and the
    README already lists them in one bullet across two directories. [#321]
