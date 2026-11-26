@@ -3388,8 +3388,8 @@
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-26",
       "elapsed_s": 2.8,
-      "input_hash": "7d8b0b08b0543a474007a9d3e0c35a37e3092aaaecd33f420069021283dd1a52",
-      "verified_at_commit": "7aa5ac9"
+      "input_hash": "5a6a693770b9552214ab04fb95d6fbdcb39966b0e458960e671a98ef5455b384",
+      "verified_at_commit": "fa3ee1f"
     },
     "mf-implied-vol-exists-above-reference": {
       "benchmark_file": "black_scholes.json",
