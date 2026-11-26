@@ -2036,9 +2036,9 @@
     "mf-complete-mix-convex-order-minimum": {
       "benchmark_file": "risk_measures.json",
       "date": "2026-11-26",
-      "elapsed_s": 2.2,
-      "input_hash": "f783a6bcfce78336552e2243345f07202352179a33ba287d546b6eb4b90fef4a",
-      "verified_at_commit": "08f81d2"
+      "elapsed_s": 3.2,
+      "input_hash": "ea9403f67541e68f613eb0deb4489644892dc877af2d83958065c055d57cb2c3",
+      "verified_at_commit": "171c782"
     },
     "mf-component-var-gaussian-euler": {
       "benchmark_file": "risk_measures.json",
