@@ -129,6 +129,139 @@ check "beautiful"; it can check "nobody refreshed the backlog."
 
 ## Review log
 
+## 2026-11-25 — corpus 921, modules 808 — the recorded backlog cleared: every item done, filed or retired
+
+Scope: every ranked-backlog item recorded in this file, 326 across 57 entries. Ten workstreams
+worked them in parallel on runners and merged onto `backlog/integ`. The outcome of each item is
+tagged at its end, and `test_every_review_backlog_item_has_an_outcome` (with
+`tools/verify/review_backlog.py`) keeps it that way:
+- 179 are done, each tag naming where it landed;
+- 134 point to an issue, 40 of them filed in this wave (#593–#632), each with a `Blueprint:` line;
+- 13 are retired, each with its reason.
+
+Corpus 919 → 921: the down-and-out image form split out of the BGK entry, as a reduced core, and
+SSVI's tail condition, in full. Five new modules (`IndepPast`, `IdentDistribSum`, `DriftPath`,
+`BarrierReflection`, `SSVI`). The `MathFin/` diff is +3.9k / −2.5k across 127 files, mostly
+refactors toward one object per idea. All nine `maxHeartbeats` bumps are gone (ratchet 9 → 0).
+
+### The standing first pass: prose against statement
+
+- `TenorGrid.piecewiseLinear` was "linear interpolation between adjacent nodes"; only the node
+  values are proved, so the docstring says the linearity is by construction (backlog 7 asks for
+  the theorem).
+- `integral_abs_sum_le_of_identDistrib` was titled Wald's bound. It is the triangle inequality
+  plus one `L¹` norm per summand; it is now titled for what it says. The Wald step stays with
+  the Poisson count in `CompoundPoissonCVaR`.
+- The Markowitz diversification iff as the backlog wrote it is false: with shorting,
+  `V_min < σ₁²` holds iff `ρ ≠ σ₁/σ₂`. `portfolioVarTwo_gt_min` proves the true statement, and
+  the tag says so.
+- `kellyMarket_numeraire_portfolio`'s "first order only" disclaimer is gone because it stopped
+  being true: its stationarity now comes from `kelly_isLocalMaxOn` (Kelly's inequality), not the
+  first-order formula. The statement is unchanged.
+- The new entries' descriptions were read against their snippets (the image form's positivity
+  hypotheses, SSVI's `θφ(1+ρ) < 4` as raw SVI's `b(1+ρ) < 2`). No overclaim.
+
+### Upgrades executed
+
+These were done in this wave; the per-item tags carry the declaration names.
+- **One object per idea, built by the wave:**
+  - independence from the past, which Girsanov and the jump-diffusion both use
+    (`Probability/Dependence/IndepPast.lean`; `ExpMartingaleQBrownian` −330 lines);
+  - the discrete market along a time change, with the binomial market an instance
+    (`DiscreteMarket.ofTimeChange`);
+  - the reflection factor of the barrier formulas (`barrierReflection`);
+  - the compound sum (`compoundSum`);
+  - the exponential law proved once (`ExpMin.lean`);
+  - the Student-t law as `ProbabilityTheory.studentT`;
+  - the in-measure lemmas of the Itô tower (`LocalisationInMeasure`);
+  - the bundle `Market.IsFiniteComplete`.
+- **Theorems the backlog asked for:**
+  - Kelly optimality and the pricing-measure ≤ superhedging bound on `Market`;
+  - key-rate durations summing to the effective duration on any tenor grid;
+  - the par-strip bootstrap;
+  - best affine prediction by orthogonality;
+  - the compound-Poisson stop-loss recursion;
+  - jump-diffusion independent increments;
+  - binomial replication of path-dependent contracts;
+  - the CRR put limit;
+  - SSVI as raw SVI.
+- **The panel's merge fixes:**
+  - The wave had added `OnePeriodVector.twoStep` beside `Market.twoStepFiltration`. Two
+    reviewers found it independently. It is now one `Filtration.twoStep`, beside
+    `Filtration.comp` in `Probability/Martingales/TimeChange.lean`.
+  - Deriving `swap_preserves_invariant` from the constant-mean pool had added `0 < y` to an
+    identity that holds for every `y`; the algebraic proof is back. The instance lemmas still
+    tie the two pools together, and `hasDerivAt_swapOutput_zero` is derived.
+  - The stop-loss lemmas took `AEMeasurable S` beside `Integrable S`; the redundant hypothesis
+    is gone, and the lattice entry's snippet is stronger.
+  - `parBootstrap_reprices` needs only its own denominator.
+  - The `compoundSum_apply` docstring, a `↦`, and the LP contract's results list.
+- **Integration fixes:**
+  - Two workstreams had each proved `iIndepFun_of_indep_past`; the two copies are now one.
+  - A golfed state-price proof met the new `vecMul` form of `portfolioCost`.
+  - `KeyRateDuration`'s deprecated `if_pos`/`if_neg` and its two unused `DecidableEq`
+    instances.
+
+### Lens gradients
+
+The panel: four independent read-only reviewers, two lenses each (1+2, 3+4 with the prose
+pass, 5+6, 7+8), on the merged tree; adjudicated below.
+
+1. **Inspired math.** Exemplar: `iIndepFun_of_indep_past`, one peel-the-maximum induction that
+   replaced two bespoke independence arguments. Next: the superhedging joint as an equality in
+   the complete case (backlog 1).
+2. **Coherence.** Exemplar: `ProbabilityTheory.studentT` beside `gaussianReal` and
+   `cauchyMeasure`, anchored by `studentT_one`. Next: the in-measure lemmas and independence
+   from the past offered upstream (backlog 6, 9).
+3. **Zero slop.** Exemplar: `price_pay_le_superhedgingPrice`, a three-step chain with an honest
+   junk-value docstring. Next: the key-rate numéraire built from the nodes, not in a proof
+   (backlog 8).
+4. **Architecture.** Exemplar: `DiscreteMarket.ofTimeChange`, with `toMarket` and the binomial
+   market as instances. Next: one binomial path representation; `wordWeight`/`wordSpot` beside
+   `spotPath` is a third (backlog 10).
+5. **First principles.** Exemplar: `mem_martingaleProbVectors`, whose deterministic start is
+   exactly what it consumes. Next: the drift sums stated pathwise (backlog 5).
+6. **Idiomatic register.** Exemplar: `hasIndepIncrements_of_indep_past`, a bare term with minimal
+   classes. Next: the one-period names (backlog 11).
+7. **Concept clarity.** Exemplar: `barrierReflection`, defined once and grep-confirmed in three
+   formula families. Next: `compoundSum` where a reader would look (backlog 2).
+8. **Elegance.** Most beautiful: `ssviVariance_eq_variance`, whose content is one radicand
+   identity. Next: its proof as that identity alone, and the partial-time barrier forms through
+   `barrierReflection` (backlog 3, 4).
+
+Dissolved:
+- "Rename the `Horizon` suffix": each suffixed object has an all-times twin with the bare name,
+  and the docstrings now state the convention.
+- "Remove `iSup_rpow_of_monotone`": it waits on upstream `ENNReal.rpow_iSup` (#315).
+- "`exists_seq_tendsto_ae_comp` is a thin wrapper": it has five consumers.
+
+### Ranked backlog
+
+1. The superhedging joint as an equality in a complete finite market; `Market.IsFiniteComplete`
+   beside the finite-market FTAP; `martingaleProbVectors` over any finite index (M). [#633]
+2. `compoundSum` and its model-free facts in `Probability/Jumps/CompoundSum.lean` (S). [#634]
+3. The partial-time barrier closed forms through `barrierReflection` (S). [#635]
+4. `ssviVariance_eq_variance` as one radicand identity; the `ρ² = 1` slice in the docstring (S). [#636]
+5. `tendsto_sum_mul_driftPath_sub` with its hypotheses at the fixed path (S). [#637]
+6. `tendstoInMeasure_of_tendsto_integral_abs` over a normed group; both in-measure lemmas
+   upstream (S). [#638]
+7. `TenorGrid.piecewiseLinear`'s linearity between nodes as a theorem; shorter `rate_update` (S). [#639]
+8. The key-rate deterministic numéraire defined from the nodes (S). [#640]
+9. Independence from the past upstream; the Brownian conditional moments from Mathlib if it has
+   them (S). [#641]
+10. One binomial path representation: `wordWeight`/`wordSpot` and `spotPath` (M). [#642]
+11. `isEMM_one_iff` named for what it relates; the three notions called EMM sorted in one
+    sentence (S). [#643]
+
+### Evidence
+
+Each workstream finished on a green umbrella build (`MathFin MathFinExamples MathFinTest`) of its
+own branch. Each tried every item with runner builds before filing it: an item became FILE only
+after about two iterations failed to converge, and its half-done Lean was reverted. The merged
+tree had one more umbrella build and the blueprint export on a runner, then the ledger sweep and
+`build.yml`. Renamed declarations moved every caller, with no aliases; the release notes list
+them.
+
 ## 2026-11-25 — corpus 917, modules 801 — the eleven-PR wave of 2026-11-25, brought onto the library's objects before it lands
 
 Scope: pull requests #558 and #577–#586, merged on `integ/2026-11-25`. Eleven corpus entries
