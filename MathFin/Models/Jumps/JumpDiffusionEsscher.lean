@@ -9,6 +9,7 @@ public import MathFin.Models.Jumps.JumpDiffusionMerton
 public import MathFin.Models.Jumps.JumpDiffusionBrownian
 public import MathFin.Probability.Laws.Esscher
 public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Topology.Order.AtTopBotIxx
 
 /-!
 # The Esscher transform of a jump-diffusion
@@ -33,6 +34,10 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
   (`compensated_iff_exponent_one`) for the tilted Laplace exponent `u ↦ κ(u + θ) − κ(θ)`.
 * `existsUnique_esscher`: with a Gaussian part (`σ ≠ 0`) and every exponential moment of `ν`, the
   Esscher condition has exactly one solution, the Esscher parameter.
+* `existsUnique_esscher_of_steep`: with a Gaussian part and a positive jump rate, a jump law with
+  exponential moments on an interval `(α, β)`, `1 < β − α`, that blow up at both ends has exactly
+  one Esscher parameter in `(α, β − 1)`. Kou's double-exponential jumps are the case in mind; that
+  they meet the hypotheses is not proved here.
 * `integral_call_tilted_eq_jumpDiffusionCallPrice`: the call integrated against the tilted law is
   the call price function of the tilted characteristics, so results about price functions apply.
 * `integral_call_tilted_eq_merton`: at an Esscher parameter it is Merton's formula for the tilted
@@ -69,6 +74,11 @@ parameter is not proved.
   `κ(θ + 1) − κ(θ) = r`, with `κ` the Laplace exponent.
 * `existsUnique_esscher`: for `σ ≠ 0` and a jump law with every exponential moment, exactly one
   `θ` satisfies `κ(1 + θ) − κ(θ) = r`.
+* `existsUnique_esscher_of_steep`: for `σ ≠ 0`, `Λ > 0` and a jump law whose exponential moments
+  are finite on `(α, β)`, `1 < β − α`, and tend to `+∞` at both ends, exactly one
+  `θ ∈ (α, β − 1)` satisfies `κ(1 + θ) − κ(θ) = r`.
+* `existsUnique_mem_Ioo_eq_of_strictMonoOn`: a continuous strictly increasing real function on
+  `(a, b)` tending to `-∞` at `a` and `+∞` at `b` takes each value exactly once there.
 * `integral_call_tilted_eq_jumpDiffusionCallPrice`: the discounted call integrated against the
   tilted law is the call price function of the tilted characteristics.
 * `integral_call_tilted_eq_merton`: at an Esscher parameter, it is the Poisson mixture of
@@ -178,16 +188,16 @@ lemma jumpDiffusionExponent_one_add_sub (b σ : ℝ) (Λ : ℝ≥0) (ν : Measur
   ring
 
 /-- The jump part of the Esscher map, `θ ↦ ∫ e^{(1 + θ)x} dν − ∫ e^{θx} dν = ∫ e^{θx}(eˣ − 1) dν`,
-is nondecreasing: for `θ ≤ θ'` the difference of integrands `(e^{θ'x} − e^{θx})(eˣ − 1)` is
-nonnegative, both factors having the sign of `x`. -/
-lemma monotone_integral_exp_one_add_sub {ν : Measure ℝ}
-    (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) :
-    Monotone fun θ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν := by
-  intro θ θ' hθ
+is nondecreasing where both moments are finite: for `θ ≤ θ'` the difference of integrands
+`(e^{θ'x} − e^{θx})(eˣ − 1)` is nonnegative, both factors having the sign of `x`. -/
+lemma monotoneOn_integral_exp_one_add_sub {ν : Measure ℝ} :
+    MonotoneOn (fun θ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν)
+      {θ | Integrable (fun x ↦ rexp (θ * x)) ν ∧ Integrable (fun x ↦ rexp ((1 + θ) * x)) ν} := by
+  rintro θ ⟨hθ0, hθ1⟩ θ' ⟨hθ'0, hθ'1⟩ hθ
   change ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν
       ≤ ∫ x, rexp ((1 + θ') * x) ∂ν - ∫ x, rexp (θ' * x) ∂ν
-  rw [← integral_sub (hν _) (hν _), ← integral_sub (hν _) (hν _)]
-  refine integral_mono ((hν _).sub (hν _)) ((hν _).sub (hν _)) fun x ↦ ?_
+  rw [← integral_sub hθ1 hθ0, ← integral_sub hθ'1 hθ'0]
+  refine integral_mono (hθ1.sub hθ0) (hθ'1.sub hθ'0) fun x ↦ ?_
   change rexp ((1 + θ) * x) - rexp (θ * x) ≤ rexp ((1 + θ') * x) - rexp (θ' * x)
   have key : 0 ≤ (rexp (θ' * x) - rexp (θ * x)) * (rexp x - 1) := by
     rcases le_total 0 x with hx | hx
@@ -198,6 +208,26 @@ lemma monotone_integral_exp_one_add_sub {ν : Measure ℝ}
         (sub_nonpos.2 (Real.exp_le_one_iff.2 hx))
   rw [add_mul, add_mul, one_mul, Real.exp_add, Real.exp_add]
   linarith
+
+/-- With every exponential moment, the jump part of the Esscher map is nondecreasing
+(`monotoneOn_integral_exp_one_add_sub`). -/
+lemma monotone_integral_exp_one_add_sub {ν : Measure ℝ}
+    (hν : ∀ u, Integrable (fun x ↦ rexp (u * x)) ν) :
+    Monotone fun θ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν :=
+  fun _ _ h ↦ monotoneOn_integral_exp_one_add_sub ⟨hν _, hν _⟩ ⟨hν _, hν _⟩ h
+
+open Filter Topology Set in
+/-- A continuous strictly increasing real function on `(a, b)` that tends to `-∞` at `a` and to
+`+∞` at `b` takes every value exactly once on `(a, b)`: the intermediate value theorem
+(`ContinuousOn.surjOn_of_tendsto`) and injectivity. -/
+theorem existsUnique_mem_Ioo_eq_of_strictMonoOn {f : ℝ → ℝ} {a b : ℝ} (hab : a < b)
+    (hf : ContinuousOn f (Ioo a b)) (hmono : StrictMonoOn f (Ioo a b))
+    (hbot : Tendsto f (𝓝[>] a) atBot) (htop : Tendsto f (𝓝[<] b) atTop) (r : ℝ) :
+    ∃! x, x ∈ Ioo a b ∧ f x = r := by
+  obtain ⟨x, hx, hxr⟩ := hf.surjOn_of_tendsto (nonempty_Ioo.2 hab)
+    ((tendsto_comp_coe_Ioo_atBot hab).2 hbot) ((tendsto_comp_coe_Ioo_atTop hab).2 htop)
+    (mem_univ r)
+  exact ⟨x, ⟨hx, hxr⟩, fun y ⟨hy, hyr⟩ ↦ hmono.injOn hy hx (hyr.trans hxr.symm)⟩
 
 open Filter in
 /-- **The Esscher parameter exists and is unique** when there is a Gaussian part, `σ ≠ 0`, and the
@@ -229,6 +259,81 @@ theorem existsUnique_esscher (b σ r : ℝ) (hσ : σ ≠ 0) (Λ : ℝ≥0) {ν 
       ((eventually_le_atBot 0).mono fun θ hθ ↦ mul_le_mul_of_nonneg_left (hg hθ) Λ.coe_nonneg)
   obtain ⟨θ, hθ⟩ := hcont.surjective htop hbot r
   exact ⟨θ, (hF θ).trans hθ, fun θ' h ↦ hmono.injective (((hF θ').symm.trans h).trans hθ.symm)⟩
+
+open Filter Topology Set in
+/-- **The Esscher parameter for jump laws with exponential moments on an interval.** With a
+Gaussian part, `σ ≠ 0`, and a positive jump rate, suppose `ν` has the exponential moments
+`∫ e^{ux} dν < ∞` for `u ∈ (α, β)`, with `1 < β − α`, and that the moment map is steep:
+it tends to `+∞` at both ends of the interval, as for Kou's double-exponential jumps (not proved
+here). Then exactly one `θ ∈ (α, β − 1)` satisfies `κ(1 + θ) − κ(θ) = r`. On `(α, β − 1)` both
+`θ` and `1 + θ` lie in `(α, β)`, where the moment map is continuous (Mathlib's
+`continuousOn_mgf`); the Esscher map is the strictly increasing line `b + σ²/2 + σ²θ` plus `Λ`
+times a nondecreasing jump part (`monotoneOn_integral_exp_one_add_sub`). At `β − 1` the moment
+of order `1 + θ` blows up while that of order `θ` stays bounded, so the map tends to `+∞`; at
+`α` the moment of order `θ` blows up while that of order `1 + θ` stays bounded, so it tends to
+`−∞`. The intermediate value theorem
+(`existsUnique_mem_Ioo_eq_of_strictMonoOn`) gives the unique parameter. Uniqueness is within
+`(α, β − 1)` only, the interval where both moments are known to be finite. -/
+theorem existsUnique_esscher_of_steep (b σ r : ℝ) (hσ : σ ≠ 0) {Λ : ℝ≥0} (hΛ : 0 < Λ)
+    {ν : Measure ℝ} {α β : ℝ} (hαβ : 1 < β - α)
+    (hI : ∀ u ∈ Ioo α β, Integrable (fun x ↦ rexp (u * x)) ν)
+    (hα : Tendsto (fun u ↦ ∫ x, rexp (u * x) ∂ν) (𝓝[>] α) atTop)
+    (hβ : Tendsto (fun u ↦ ∫ x, rexp (u * x) ∂ν) (𝓝[<] β) atTop) :
+    ∃! θ, θ ∈ Ioo α (β - 1) ∧
+      jumpDiffusionExponent b σ Λ ν (1 + θ) - jumpDiffusionExponent b σ Λ ν θ = r := by
+  have hσ2 : 0 < σ ^ 2 := sq_pos_iff.2 hσ
+  have hΛ' : (0 : ℝ) < Λ := NNReal.coe_pos.2 hΛ
+  have hlt : α < β - 1 := by linarith
+  have hm : ContinuousOn (fun u ↦ ∫ x, rexp (u * x) ∂ν) (Ioo α β) :=
+    (continuousOn_mgf (X := id) (μ := ν)).mono
+      (isOpen_Ioo.subset_interior_iff.2 fun u hu ↦ hI u hu)
+  have hD (θ : ℝ) (hθ : θ ∈ Ioo α (β - 1)) : θ ∈ Ioo α β ∧ 1 + θ ∈ Ioo α β :=
+    ⟨⟨hθ.1, by linarith [hθ.2]⟩, ⟨by linarith [hθ.1], by linarith [hθ.2]⟩⟩
+  have hlin : Continuous fun θ : ℝ ↦ b + σ ^ 2 / 2 + σ ^ 2 * θ := by fun_prop
+  let f : ℝ → ℝ := fun θ ↦ b + σ ^ 2 / 2 + σ ^ 2 * θ
+    + Λ * (∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν)
+  simp only [jumpDiffusionExponent_one_add_sub b σ Λ ν]
+  refine existsUnique_mem_Ioo_eq_of_strictMonoOn hlt (f := f) ?_ ?_ ?_ ?_ r
+  · have h1 : ContinuousOn (fun θ : ℝ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν) (Ioo α (β - 1)) :=
+      hm.comp (continuousOn_const.add continuousOn_id) fun θ hθ ↦ (hD θ hθ).2
+    exact hlin.continuousOn.add
+      (continuousOn_const.mul (h1.sub (hm.mono fun θ hθ ↦ (hD θ hθ).1)))
+  · intro θ hθ θ' hθ' hθθ'
+    have hg : ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν
+        ≤ ∫ x, rexp ((1 + θ') * x) ∂ν - ∫ x, rexp (θ' * x) ∂ν :=
+      monotoneOn_integral_exp_one_add_sub ⟨hI _ (hD θ hθ).1, hI _ (hD θ hθ).2⟩
+        ⟨hI _ (hD θ' hθ').1, hI _ (hD θ' hθ').2⟩ hθθ'.le
+    have := mul_le_mul_of_nonneg_left hg hΛ'.le
+    have := mul_lt_mul_of_pos_left hθθ' hσ2
+    simp only [f]
+    linarith
+  · -- at `α`, the moment of order `θ` blows up and that of order `1 + θ` stays bounded
+    have h1c : ContinuousAt (fun θ : ℝ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν) α :=
+      ContinuousAt.comp (f := fun θ : ℝ ↦ 1 + θ)
+        (hm.continuousAt (isOpen_Ioo.mem_nhds ⟨by linarith, by linarith⟩))
+        (continuous_const.add continuous_id).continuousAt
+    have hg : Tendsto (fun θ : ℝ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν)
+        (𝓝[>] α) atBot :=
+      Tendsto.congr (fun θ ↦ (sub_eq_add_neg _ _).symm)
+        ((h1c.tendsto.mono_left nhdsWithin_le_nhds).add_atBot
+          (tendsto_neg_atTop_atBot.comp hα))
+    exact ((hlin.tendsto α).mono_left nhdsWithin_le_nhds).add_atBot (hg.const_mul_atBot hΛ')
+  · -- at `β - 1`, the moment of order `1 + θ` blows up and that of order `θ` stays bounded
+    have hshift : Tendsto (fun θ : ℝ ↦ 1 + θ) (𝓝[<] (β - 1)) (𝓝[<] β) := by
+      refine tendsto_nhdsWithin_iff.2 ⟨?_, eventually_nhdsWithin_of_forall fun θ hθ ↦ ?_⟩
+      · have : Tendsto (fun θ : ℝ ↦ 1 + θ) (𝓝 (β - 1)) (𝓝 (1 + (β - 1))) :=
+          (continuous_const.add continuous_id).tendsto _
+        rw [add_sub_cancel] at this
+        exact this.mono_left nhdsWithin_le_nhds
+      · exact (by linarith [show θ < β - 1 from hθ] : 1 + θ < β)
+    have h2 : ContinuousAt (fun u ↦ ∫ x, rexp (u * x) ∂ν) (β - 1) :=
+      hm.continuousAt (isOpen_Ioo.mem_nhds ⟨hlt, by linarith⟩)
+    have hg : Tendsto (fun θ : ℝ ↦ ∫ x, rexp ((1 + θ) * x) ∂ν - ∫ x, rexp (θ * x) ∂ν)
+        (𝓝[<] (β - 1)) atTop :=
+      Tendsto.congr (fun θ ↦ (sub_eq_add_neg _ _).symm)
+        ((hβ.comp hshift).atTop_add (h2.tendsto.mono_left nhdsWithin_le_nhds).neg)
+    exact ((hlin.tendsto (β - 1)).mono_left nhdsWithin_le_nhds).add_atTop
+      (hg.const_mul_atTop hΛ')
 
 /-- **The Esscher price is a price function of the tilted characteristics.** When the
 moment-generating function of the jump law is finite near `θ`, the discounted call payoff integrated

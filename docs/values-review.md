@@ -185,6 +185,15 @@ These were done in this wave; the per-item tags carry the declaration names.
   - binomial replication of path-dependent contracts;
   - the CRR put limit;
   - SSVI as raw SVI.
+- **Added at merge, from the final gates:**
+  - the SVI smile in a market: a market whose normalised calls are the smile satisfies
+    Durrleman's condition (`durrleman_nonneg_of_isPricingMeasure`), and an SSVI slice satisfies
+    `θφ(1+ρ) < 4` (`ssvi_tail_of_isPricingMeasure`), which ties both SVI entries to the trunk;
+  - Kelly's inequality derived from the first-order condition (`kelly_foc` along
+    `(0, y − f*)`), so the Kelly criterion stays on the tree;
+  - the fourth-moment facts as `MemLp` API (`MemLp.integrable_pow_four`, `integrable_cube_mul`,
+    `integrable_mul_cube`, `integrable_sq_mul_sq`, `integral_add_pow_four`), and four
+    Mathlib-shaped private lemmas inlined.
 - **The panel's merge fixes:**
   - The wave had added `OnePeriodVector.twoStep` beside `Market.twoStepFiltration`. Two
     reviewers found it independently. It is now one `Filtration.twoStep`, beside
@@ -8310,7 +8319,7 @@ Per-lens, briefly.
 3. **#211 register follow-ups** — fix the `variable` block rather than `omit`-ing 11 times; make
    `{θ p}` implicit; weaken `buy_denom_pos`/`sell_denom_pos` to `0 ≤ p`; restate the model
    hypotheses in `ℝ` via `μ.real`, collapsing the six `gmMeasure_…` bridges and three twin proof
-   pairs; rename `gmInf`. [#622]
+   pairs; rename `gmInf`. [done: `GlostenMilgrom*` restated on `μ.real`, the bridges and twins removed (#622)]
 4. **Give market microstructure one home** — `Foundations/{MarketMakingRiccati,
    MatrixMarketMakingRiccati, AlmgrenChriss}` are the same theme as the new `Execution/`, and the
    README already lists them in one bullet across two directories. [#321]

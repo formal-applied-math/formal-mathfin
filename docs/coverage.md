@@ -2368,19 +2368,18 @@ prior corpus audit, not a verification of this addition.
 > **The trade probabilities are derived, not posited.** `P(buy | V_H) = (1+p)/2` and
 > `P(buy | V_L) = (1−p)/2` follow from the four primitives — the prior, the informed event
 > independent of the value, informed traders trading on the value, uninformed traders tossing a
-> coin — which is what makes this `full` rather than a restatement. They are stated additively
-> (`2 · μ[B|H] = 1 + p`, `2 · μ[B|Hᶜ] + p = 1`) so that no step forms a difference in a type where
-> subtraction truncates; the textbook form does follow from the additive one, so this buys the
-> proofs, not the statements. The quotes are honest Bochner integrals: with the payoff written as
+> coin — which is what makes this `full` rather than a restatement. They are stated on `μ.real`
+> (`(μ[|H]).real B = (1 + p)/2`, `(μ[|Hᶜ]).real B = (1 − p)/2`). The quotes are honest Bochner
+> integrals: with the payoff written as
 > a constant plus an indicator, integrability is one line and the asset cancels, leaving
 > `(V_H − V_L)` times the gap between the posteriors.
 >
-> **The seam is the load-bearing part.** `cond_toReal_eq` is Bayes pushed through `.toReal` once
+> **The seam is the load-bearing part.** `cond_real_eq` is Bayes in `ℝ` (on `μ.real`) once
 > and generically; it is what identifies the model's `μ[H | B]` with the real function `postBuy`
 > the closed form is about, and the buy and sell sides are then the same lemma applied twice with
 > the likelihoods swapped. Without it the measure-theoretic half and the real-analysis half are
-> true statements about unrelated objects. `toReal` sends `∞ ↦ 0` and `x/0 ↦ 0`, so every
-> conversion carries its `≠ ∞` side condition.
+> true statements about unrelated objects. Conditioning on a null event is the zero
+> measure and `x/0 ↦ 0`, so every step carries its non-nullity condition.
 >
 > **`0 < θ < 1` is a hypothesis issue #107's acceptance criterion omits, and the prior's two
 > endpoints fail differently.** With `p < 1` a degenerate prior leaves nothing to be adversely
