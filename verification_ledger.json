@@ -1147,9 +1147,9 @@
     "mf-black-scholes-esscher-pricing": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.6,
-      "input_hash": "82c3c4834cee9f8d974800162833da21523742a476c41d77d6030b350b9f5d57",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 4.1,
+      "input_hash": "ae64c01f507799f1cb2e0aa622a3ee079f9eb27d8e8e8ca62b86460194b97db4",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-black-scholes-log-contract-discrete-swap": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3604,23 +3604,23 @@
     "mf-jump-diffusion-esscher-parameter": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.1,
-      "input_hash": "ce27114c6b8400ad346033323f2b826ba5d97f348531c4ec5c4d1bdef370f4be",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.7,
+      "input_hash": "e4b9cb8feaacdbe5b949208527dd8bc67a105bca91aaebd29f02fb833211ba77",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-jump-diffusion-esscher-pricing": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.4,
-      "input_hash": "8334caf54be7d57985ccb96f2240a74afae818be13f53f69c312a7b938fe92f1",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.9,
+      "input_hash": "b3479218a8ff6835d217aeab8bf65d1307c1f84432851d399e9ab2b6bc44325b",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-jump-diffusion-esscher-transform": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 2.2,
-      "input_hash": "794c163e0af88969f5a90d7b0e95958301251a58f0d8474d5885b85051bfa2b7",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.5,
+      "input_hash": "2ad6fdb9c28a5514ddc05ea135be9026274df815c1d7fbc4b195f9efcba38e66",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-jump-diffusion-exponential-martingales": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3653,9 +3653,9 @@
     "mf-jump-diffusion-incompleteness": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.6,
-      "input_hash": "610bece77a2fadeef8ec1b04ff086b0eda63e0abf3d06cd3a0db31a5eef59c1b",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.8,
+      "input_hash": "d39a5b70552f7288f6d3ee7a25c6d1509571058c26b43048165a735a9eba9c91",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-jump-diffusion-levy-exponent": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3723,16 +3723,16 @@
     "mf-jump-diffusion-market-esscher-pricing": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.8,
-      "input_hash": "b5d9ebd7ff2be2aef0eebd93fb8dc94cdde191c6629b95e728f33d0c8d5b0022",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.7,
+      "input_hash": "3e3de1acf846d550daf8785cf4d599403c0a5700815b857b3132832d7098dce7",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-jump-diffusion-market-incomplete": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.6,
-      "input_hash": "f3a8a1ffdadeb901b5706e93d87424e9882508d98d3829f2f171a2676842c117",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.8,
+      "input_hash": "37a029322e81d07a2d1820e44e6369b2a4c8f57df5facfdcf311d89325551950",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-jump-diffusion-merton-1976-every-date": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -4325,9 +4325,9 @@
     "mf-merton-esscher-pricing": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.2,
-      "input_hash": "e4efa684a8459e0c7451d2df610811aebee0a3d773c96b9f0d53d1191c1e1b75",
-      "verified_at_commit": "4599342"
+      "elapsed_s": 3.8,
+      "input_hash": "985525877a6720a0d94d928d3cde768e5cd3c7e613ba06b257076c1bba1f0dab",
+      "verified_at_commit": "cb6a4e0"
     },
     "mf-merton-gamma": {
       "benchmark_file": "jumps_and_variance_swaps.json",
