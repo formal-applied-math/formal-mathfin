@@ -482,13 +482,6 @@ area = "valuation/forwards"
 family = "term"
 
 [[node]]
-label = "thm:apt-pricing"
-title = "APT exact-factor pricing"
-statement = "In a market with K factors and no arbitrage, the expected excess return of each asset is E[Rᵢ] − r = Σₖ βᵢₖλₖ, where βᵢₖ are the factor loadings and λₖ the factor risk premia (exact-factor arbitrage pricing)."
-uses = ["def:emm", "thm:capm-equilibrium"]
-area = "choice/equilibrium"
-
-[[node]]
 label = "thm:log-optimal-numeraire"
 title = "Log-optimal portfolio is the numéraire"
 statement = "Prices deflated by the growth-optimal (log-optimal) portfolio are martingales under the physical measure, so an equivalent martingale measure is identified with the change of numéraire to that portfolio."

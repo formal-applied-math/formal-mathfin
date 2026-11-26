@@ -360,6 +360,7 @@ blurb = "CAPM, factor models, the stochastic discount factor"
 modules = [
   "MathFin.Choice.Portfolio.CAPM", "MathFin.Choice.Portfolio.CAPMEquilibrium",
   "MathFin.Choice.Portfolio.SingleIndexModel",
+  "MathFin.Choice.Portfolio.ArbitragePricingTheory",
 ]
 subjects = ["JEL G12", "JEL D53"]
 landmarks = ["MathFin.CAPM_from_market_equilibrium"]

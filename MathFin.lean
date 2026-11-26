@@ -920,6 +920,9 @@ public import MathFin.Choice.Portfolio.SharpeFOCDerivation
 public import MathFin.Choice.Portfolio.CAPMEquilibrium
 public import MathFin.Choice.Portfolio.StochasticDiscountFactor
 public import MathFin.Choice.Portfolio.MarketSDF
+-- Ross's exact-factor arbitrage pricing theory: the no-arbitrage condition, the premia
+-- decomposition, and the CAPM equilibrium identifying the factor premium
+public import MathFin.Choice.Portfolio.ArbitragePricingTheory
 -- Phase 23: N-asset Markowitz Lagrangian FOC (forward direction)
 public import MathFin.Choice.Portfolio.MarkowitzLagrangian
 -- Phase 26: N-asset risk parity from log-barrier Lagrangian FOC
