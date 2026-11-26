@@ -297,8 +297,8 @@ theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
 /-- **The correlation swap's floating leg under equicorrelation**: the ratio of the
 off-diagonal share of the equicorrelated portfolio variance to the off-diagonal weight mass
 `∑ wᵢwⱼ` — the pairwise correlations averaged over the weight products where that
-normalisation is positive (nonnegative at nonnegative index weights, positive once two or
-more components carry weight) — realises the common correlation. The source's printed payoff
+normalisation is positive (nonnegative at nonnegative index weights, and the theorem's gate
+excludes the zero case) — realises the common correlation. The source's printed payoff
 normalises over the unordered pairs, half this mass; the factor cancels in the average. A
 swap struck at the common correlation therefore pays nothing. -/
 theorem realisedCorrelation_equicorrelation (w : n → ℝ) (ρ : ℝ)
