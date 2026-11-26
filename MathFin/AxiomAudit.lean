@@ -3254,6 +3254,7 @@ end MathFin.AxiomAudit
 /-- info: 'MathFin.Contracts.Contract.value_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.Contracts.Contract.value_convexOn
+
 /-! ## The Ho–Lee bond price, continued — the zero-drift identification and the bridge
 
 `HoLeeBondPrice.lean`: at zero drift the Ho–Lee price is the driftless price of
