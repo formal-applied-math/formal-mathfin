@@ -4889,6 +4889,13 @@
       "input_hash": "38a1c0655776fdb2019cda7ec38632813071fa8d8c61804f5e756905873dba19",
       "verified_at_commit": "08f81d2"
     },
+    "mf-simplex-complete-mixability": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.4,
+      "input_hash": "e4665918640b4897ae23bbfe1d38ce3d28a00b5bd1f18237c70067c31d0e5825",
+      "verified_at_commit": "0d02b05"
+    },
     "mf-single-index-beta-capm": {
       "benchmark_file": "portfolio_and_performance.json",
       "date": "2026-11-16",
@@ -5112,6 +5119,13 @@
       "elapsed_s": 3.0,
       "input_hash": "78b2d0eae3ed435d8cd0e9d0e687c294354d54591d7acd752f33939aad497ad5",
       "verified_at_commit": "256ace0"
+    },
+    "mf-symmetric-complete-mixability": {
+      "benchmark_file": "risk_measures.json",
+      "date": "2026-11-26",
+      "elapsed_s": 2.5,
+      "input_hash": "fe90370044b72ff1fb303539cf6546cfe78ae026a2e51d63ce2b18fe07417f01",
+      "verified_at_commit": "0d02b05"
     },
     "mf-tangent-portfolio-N-sufficient": {
       "benchmark_file": "portfolio_and_performance.json",
