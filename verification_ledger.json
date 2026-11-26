@@ -3323,10 +3323,10 @@
     },
     "mf-heynen-kat-independent-bs-factor": {
       "benchmark_file": "exotic_options.json",
-      "date": "2026-11-16",
-      "elapsed_s": 3.3,
-      "input_hash": "991af0b10946eeb1a783d9b1a23c95200101ec55763a708924ea8b7d5f08e390",
-      "verified_at_commit": "c047ee3"
+      "date": "2026-11-26",
+      "elapsed_s": 4.3,
+      "input_hash": "bcaedebca3b41afc53359f579d96d3d6d099abb8496b20f3236e3508c569eebc",
+      "verified_at_commit": "6e6b054"
     },
     "mf-hjm-fixed-flows": {
       "benchmark_file": "interest_rates.json",
@@ -5941,17 +5941,17 @@
     },
     "qrm-student-t-cauchy": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-11-16",
-      "elapsed_s": 1.9,
-      "input_hash": "3fd26127cc7d3de26a060dac12dc396e9f523ff829702557b71d0fe10c99b111",
-      "verified_at_commit": "c047ee3"
+      "date": "2026-11-26",
+      "elapsed_s": 3.0,
+      "input_hash": "50b24acb2105dc962470576c8570f0c28527ef3b26b099218525db2c724892d5",
+      "verified_at_commit": "6e6b054"
     },
     "qrm-student-t-density": {
       "benchmark_file": "quantitative_risk_management.json",
-      "date": "2026-11-16",
-      "elapsed_s": 2.4,
-      "input_hash": "91dc54264c28d708fb31c5790e1516e53c001867747819b8bb518893438ebb8b",
-      "verified_at_commit": "c047ee3"
+      "date": "2026-11-26",
+      "elapsed_s": 3.0,
+      "input_hash": "b495811c73c94cfc3ba87911a55a830c7d8518db3b82bb04682fb38812449080",
+      "verified_at_commit": "6e6b054"
     },
     "qrm-student-t-es": {
       "benchmark_file": "quantitative_risk_management.json",
