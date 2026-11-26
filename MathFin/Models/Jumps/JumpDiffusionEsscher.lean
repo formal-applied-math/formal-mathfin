@@ -35,8 +35,9 @@ law `ν` (`jumpDiffusionIncrementLaw`), whose Laplace exponent is `κ` (`jumpDif
 * `existsUnique_esscher`: with a Gaussian part (`σ ≠ 0`) and every exponential moment of `ν`, the
   Esscher condition has exactly one solution, the Esscher parameter.
 * `existsUnique_esscher_of_steep`: with a Gaussian part and a positive jump rate, a jump law with
-  exponential moments on an interval `(α, β)`, `1 < β − α`, that blow up at both ends (Kou's
-  double-exponential jumps) has exactly one Esscher parameter in `(α, β − 1)`.
+  exponential moments on an interval `(α, β)`, `1 < β − α`, that blow up at both ends has exactly
+  one Esscher parameter in `(α, β − 1)`. Kou's double-exponential jumps are the case in mind; that
+  they meet the hypotheses is not proved here.
 * `integral_call_tilted_eq_jumpDiffusionCallPrice`: the call integrated against the tilted law is
   the call price function of the tilted characteristics, so results about price functions apply.
 * `integral_call_tilted_eq_merton`: at an Esscher parameter it is Merton's formula for the tilted
@@ -263,8 +264,8 @@ open Filter Topology Set in
 /-- **The Esscher parameter for jump laws with exponential moments on an interval.** With a
 Gaussian part, `σ ≠ 0`, and a positive jump rate, suppose `ν` has the exponential moments
 `∫ e^{ux} dν < ∞` for `u ∈ (α, β)`, with `1 < β − α`, and that the moment map is steep:
-it tends to `+∞` at both ends of the interval. This covers Kou's double-exponential jumps.
-Then exactly one `θ ∈ (α, β − 1)` satisfies `κ(1 + θ) − κ(θ) = r`. On `(α, β − 1)` both
+it tends to `+∞` at both ends of the interval, as for Kou's double-exponential jumps (not proved
+here). Then exactly one `θ ∈ (α, β − 1)` satisfies `κ(1 + θ) − κ(θ) = r`. On `(α, β − 1)` both
 `θ` and `1 + θ` lie in `(α, β)`, where the moment map is continuous (Mathlib's
 `continuousOn_mgf`); the Esscher map is the strictly increasing line `b + σ²/2 + σ²θ` plus `Λ`
 times a nondecreasing jump part (`monotoneOn_integral_exp_one_add_sub`). At `β − 1` the moment
