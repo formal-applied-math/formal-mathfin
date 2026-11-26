@@ -39,6 +39,7 @@ not formalised here.
 
 ## Main results
 
+* `integral_div_rpow`: `∫₀ᵃ (u/L)^p du = a^{p+1} / (L^p (p+1))`.
 * `integral_onDamping_sq`: `∫₀^{τ₁} ψ(t)² dt = onEffectiveTime τ₀ τ₁ q`, derived from the
   definition of `ψ`.
 * `onEffectiveTime_one`: for `q = 1` it is `s + (τ₁ − s)³ / (3 (τ₁ − τ₀)²)`.
@@ -125,6 +126,17 @@ private lemma continuous_onDamping (hq : 0 < q) :
   refine continuous_const.min ?_
   exact (Continuous.rpow_const (by fun_prop) fun _ => Or.inr hq.le)
 
+/-- **The scaled power integral** `∫₀ᵃ (u/L)^p du = a^{p+1} / (L^p (p+1))` for `L > 0`,
+`a ≥ 0` and `p > 0`: `integral_rpow` after pulling `L^{-p}` out of the integrand. -/
+theorem integral_div_rpow {L a p : ℝ} (hL : 0 < L) (ha : 0 ≤ a) (hp : 0 < p) :
+    ∫ u in (0 : ℝ)..a, (u / L) ^ p = a ^ (p + 1) / (L ^ p * (p + 1)) := by
+  have hinner : ∀ u ∈ Set.uIcc (0 : ℝ) a, (u / L) ^ p = (L ^ p)⁻¹ * u ^ p := fun u hu ↦ by
+    rw [Set.uIcc_of_le ha] at hu
+    rw [Real.div_rpow hu.1 hL.le]; ring
+  rw [intervalIntegral.integral_congr hinner, intervalIntegral.integral_const_mul,
+    integral_rpow (Or.inl (by linarith)), Real.zero_rpow (by linarith : 0 < p + 1).ne', sub_zero]
+  field_simp
+
 /-- **Damping-time identity.** For `0 < q`, `τ₀ < τ₁` and `0 < τ₁`, the integral of the
 squared damping over `[0, τ₁]` is `onEffectiveTime τ₀ τ₁ q`. -/
 theorem integral_onDamping_sq (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ₁) :
@@ -134,23 +146,12 @@ theorem integral_onDamping_sq (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ�
         = (τ₁ - s) * (((τ₁ - s) / L) ^ (2 * q)) / (2 * q + 1) := by
     intro s L hL hs
     have h2q : 0 < 2 * q := by linarith
-    have hsub : ∫ t in s..τ₁, ((τ₁ - t) / L) ^ (2 * q)
-        = ∫ u in (0 : ℝ)..(τ₁ - s), (u / L) ^ (2 * q) := by
-      have := intervalIntegral.integral_comp_sub_left
-        (fun u : ℝ => (u / L) ^ (2 * q)) (a := s) (b := τ₁) τ₁
-      simpa using this
-    rw [hsub]
-    have hinner : ∀ u ∈ Set.uIcc (0 : ℝ) (τ₁ - s),
-        (u / L) ^ (2 * q) = (L ^ (2 * q))⁻¹ * u ^ (2 * q) := by
-      intro u hu
-      have hu0 : 0 ≤ u := by
-        rw [Set.uIcc_of_le (by linarith)] at hu; exact hu.1
-      rw [Real.div_rpow hu0 hL.le]; ring
-    rw [intervalIntegral.integral_congr hinner, intervalIntegral.integral_const_mul,
-      integral_rpow (Or.inl (by linarith))]
     have hs' : 0 ≤ τ₁ - s := by linarith
-    rw [Real.zero_rpow (by linarith), sub_zero, Real.div_rpow hs' hL.le,
-      Real.rpow_add_one (by linarith [h2q]) ]
+    have := intervalIntegral.integral_comp_sub_left
+      (fun u : ℝ => (u / L) ^ (2 * q)) (a := s) (b := τ₁) τ₁
+    simp only [sub_self] at this
+    rw [this, integral_div_rpow hL hs' h2q, Real.div_rpow hs' hL.le,
+      Real.rpow_add_one (sub_pos.2 hs).ne']
     field_simp
   have hL : 0 < τ₁ - τ₀ := sub_pos.mpr hτ
   have hs0 : 0 ≤ max τ₀ 0 := le_max_right _ _

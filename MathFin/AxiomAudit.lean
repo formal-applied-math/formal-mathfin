@@ -179,9 +179,9 @@ namespace MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.exchange_payoff_eq_ratio
 
-/-- info: 'MathFin.margrabe_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.margrabePrice_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.margrabe_eq_bsVGarman
+#print axioms MathFin.margrabePrice_eq_bsVGarman
 
 /-- info: 'MathFin.margrabe_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in

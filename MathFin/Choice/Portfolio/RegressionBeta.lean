@@ -20,8 +20,12 @@ this one statement.
 
 ## Main results
 
+* `MathFin.integral_residual_mul_affine`: the residual `Y - (E Y + β (X - E X))` is orthogonal to
+  every affine function of `X`.
+* `MathFin.integral_sq_affine_eq_add`: Pythagoras, `E[(Y - (a + b X))²]` is the least-squares error
+  plus the mean squared distance between the predictors.
 * `MathFin.integral_sq_affine_le`: `E[(Y - (E Y + β (X - E X)))²] ≤ E[(Y - (a + b X))²]` for all
-  `a, b`.
+  `a, b`, the corollary.
 * `MathFin.integral_sq_sub_eq_variance_add`: `E[(Z - a)²] = Var Z + (E Z - a)²`.
 
 ## References
@@ -53,46 +57,93 @@ theorem integral_sq_sub_eq_variance_add (hZ : MemLp Z 2 P) (a : ℝ) :
   simp only [integral_const, probReal_univ, one_smul] at h
   linarith
 
+/-- **The residual of the regression is orthogonal to every affine function of `X`**: for
+square-integrable `Y`, `X` with `Var X ≠ 0`, the residual `Y − (E Y + β (X − E X))`,
+`β = beta Cov(Y, X) Var X`, has `E[residual · (c + d X)] = 0`. The residual has mean zero, and
+`E[residual · (X − E X)] = Cov(Y, X) − β Var X = 0`. -/
+theorem integral_residual_mul_affine (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar : Var[X; P] ≠ 0)
+    (c d : ℝ) :
+    ∫ ω, (Y ω - (P[Y] + beta cov[Y, X; P] Var[X; P] * (X ω - P[X]))) * (c + d * X ω) ∂P = 0 := by
+  rw [show beta cov[Y, X; P] Var[X; P] = cov[Y, X; P] / Var[X; P] from rfl]
+  obtain ⟨β, hβ⟩ : ∃ β : ℝ, β = cov[Y, X; P] / Var[X; P] := ⟨_, rfl⟩
+  rw [← hβ]
+  have hYc : MemLp (fun ω ↦ Y ω - P[Y]) 2 P := hY.sub (memLp_const _)
+  have hXc : MemLp (fun ω ↦ X ω - P[X]) 2 P := hX.sub (memLp_const _)
+  have hR : MemLp (fun ω ↦ (Y ω - P[Y]) - β * (X ω - P[X])) 2 P := hYc.sub (hXc.const_mul β)
+  have hi2 : Integrable (fun ω ↦ X ω - P[X]) P := hXc.integrable one_le_two
+  have h0 : ∫ ω, ((Y ω - P[Y]) - β * (X ω - P[X])) ∂P = 0 := by
+    rw [integral_sub (hYc.integrable one_le_two) (hi2.const_mul β), integral_const_mul,
+      integral_sub (hY.integrable one_le_two) (integrable_const _),
+      integral_sub (hX.integrable one_le_two) (integrable_const _)]
+    simp
+  have h1 : ∫ ω, ((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X]) ∂P = 0 := by
+    have e (ω : Ω) : ((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X])
+        = (Y ω - P[Y]) * (X ω - P[X]) - β * ((X ω - P[X]) * (X ω - P[X])) := by ring
+    simp_rw [e]
+    have i1 : Integrable (fun ω ↦ (Y ω - P[Y]) * (X ω - P[X])) P := hYc.integrable_mul hXc
+    have i2 : Integrable (fun ω ↦ (X ω - P[X]) * (X ω - P[X])) P := hXc.integrable_mul hXc
+    rw [integral_sub i1 (i2.const_mul β), integral_const_mul]
+    have hc : ∫ ω, (Y ω - P[Y]) * (X ω - P[X]) ∂P = cov[Y, X; P] := rfl
+    have hv : ∫ ω, (X ω - P[X]) * (X ω - P[X]) ∂P = Var[X; P] := by
+      rw [← covariance_self hX.aemeasurable]; rfl
+    rw [hc, hv, hβ, div_mul_cancel₀ _ hvar, sub_self]
+  have e (ω : Ω) : (Y ω - (P[Y] + β * (X ω - P[X]))) * (c + d * X ω)
+      = (c + d * P[X]) * ((Y ω - P[Y]) - β * (X ω - P[X]))
+        + d * (((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X])) := by ring
+  simp_rw [e]
+  have i3 : Integrable (fun ω ↦ ((Y ω - P[Y]) - β * (X ω - P[X])) * (X ω - P[X])) P :=
+    hR.integrable_mul hXc
+  rw [integral_add ((hR.integrable one_le_two).const_mul (c + d * P[X])) (i3.const_mul d),
+    integral_const_mul, integral_const_mul, h0, h1]
+  simp
+
+/-- **Pythagoras for the regression**: the mean squared error of any affine predictor `a + b X` is
+that of the least-squares predictor `E Y + β (X − E X)` plus the mean squared distance between the
+two predictors, because the residual is orthogonal to the difference, an affine function of `X`
+(`integral_residual_mul_affine`). -/
+theorem integral_sq_affine_eq_add (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar : Var[X; P] ≠ 0)
+    (a b : ℝ) :
+    ∫ ω, (Y ω - (a + b * X ω)) ^ 2 ∂P
+      = ∫ ω, (Y ω - (P[Y] + beta cov[Y, X; P] Var[X; P] * (X ω - P[X]))) ^ 2 ∂P
+        + ∫ ω, ((P[Y] + beta cov[Y, X; P] Var[X; P] * (X ω - P[X])) - (a + b * X ω)) ^ 2 ∂P := by
+  have horth := integral_residual_mul_affine hY hX hvar (P[Y] - beta cov[Y, X; P] Var[X; P] * P[X]
+    - a) (beta cov[Y, X; P] Var[X; P] - b)
+  obtain ⟨β, hβ⟩ : ∃ β : ℝ, β = beta cov[Y, X; P] Var[X; P] := ⟨_, rfl⟩
+  rw [← hβ] at horth ⊢
+  obtain ⟨R, hRd⟩ : ∃ R : Ω → ℝ, ∀ ω, R ω = Y ω - (P[Y] + β * (X ω - P[X])) :=
+    ⟨_, fun _ ↦ rfl⟩
+  obtain ⟨A, hAd⟩ : ∃ A : Ω → ℝ,
+      ∀ ω, A ω = (P[Y] + β * (X ω - P[X])) - (a + b * X ω) := ⟨_, fun _ ↦ rfl⟩
+  have hAd' (ω : Ω) : A ω = (P[Y] - β * P[X] - a) + (β - b) * X ω := by rw [hAd]; ring
+  have hRm : MemLp R 2 P := by
+    rw [show R = fun ω ↦ Y ω - (P[Y] + β * (X ω - P[X])) from funext hRd]
+    exact hY.sub ((memLp_const _).add ((hX.sub (memLp_const _)).const_mul β))
+  have hAm : MemLp A 2 P := by
+    rw [show A = fun ω ↦ (P[Y] - β * P[X] - a) + (β - b) * X ω from funext hAd']
+    exact (memLp_const _).add (hX.const_mul _)
+  have hRA : Integrable (fun ω ↦ R ω * A ω) P := hRm.integrable_mul hAm
+  have horth' : ∫ ω, R ω * A ω ∂P = 0 := by
+    simp_rw [hRd, hAd']
+    exact horth
+  have key (ω : Ω) : (Y ω - (a + b * X ω)) ^ 2 = R ω ^ 2 + 2 * (R ω * A ω) + A ω ^ 2 := by
+    rw [hRd, hAd]; ring
+  simp_rw [key, ← hRd, ← hAd]
+  have i1 : Integrable (fun ω ↦ R ω ^ 2) P := hRm.integrable_sq
+  have i2 : Integrable (fun ω ↦ 2 * (R ω * A ω)) P := hRA.const_mul 2
+  have i3 : Integrable (fun ω ↦ A ω ^ 2) P := hAm.integrable_sq
+  have i12 : Integrable (fun ω ↦ R ω ^ 2 + 2 * (R ω * A ω)) P := i1.add i2
+  rw [integral_add i12 i3, integral_add i1 i2, integral_const_mul, horth']
+  ring
+
 /-- **The CAPM beta is the least-squares slope**: for square-integrable `Y`, `X` with
 `Var X ≠ 0`, the affine predictor `E Y + β (X - E X)`, `β = beta Cov(Y, X) Var X`, has mean
-squared error at most that of any affine predictor `a + b X`. -/
+squared error at most that of any affine predictor `a + b X`: by Pythagoras
+(`integral_sq_affine_eq_add`) the other predictor's error exceeds it by a square. -/
 theorem integral_sq_affine_le (hY : MemLp Y 2 P) (hX : MemLp X 2 P) (hvar : Var[X; P] ≠ 0)
     (a b : ℝ) :
     ∫ ω, (Y ω - (P[Y] + beta cov[Y, X; P] Var[X; P] * (X ω - P[X]))) ^ 2 ∂P
       ≤ ∫ ω, (Y ω - (a + b * X ω)) ^ 2 ∂P := by
-  have hpos : 0 < Var[X; P] := lt_of_le_of_ne (variance_nonneg _ _) (Ne.symm hvar)
-  -- the mean squared error of `a + b X` is `Var (Y - bX) + (E(Y - bX) - a)²`
-  have hmse (a b : ℝ) : ∫ ω, (Y ω - (a + b * X ω)) ^ 2 ∂P
-      = Var[Y; P] - 2 * b * cov[Y, X; P] + b ^ 2 * Var[X; P] + (P[Y] - b * P[X] - a) ^ 2 := by
-    have hZ : MemLp (fun ω ↦ Y ω - b * X ω) 2 P := hY.sub (hX.const_mul b)
-    have h := integral_sq_sub_eq_variance_add hZ a
-    have e (ω : Ω) : Y ω - (a + b * X ω) = (Y ω - b * X ω) - a := by ring
-    have hvarZ : Var[fun ω ↦ Y ω - b * X ω; P]
-        = Var[Y; P] - 2 * b * cov[Y, X; P] + b ^ 2 * Var[X; P] := by
-      rw [variance_fun_sub hY (hX.const_mul b), covariance_const_mul_right,
-        variance_const_mul]
-      ring
-    simp_rw [e]
-    rw [h, hvarZ, integral_sub (hY.integrable one_le_two)
-      ((hX.const_mul b).integrable one_le_two), integral_const_mul]
-  have hβ : beta cov[Y, X; P] Var[X; P] = cov[Y, X; P] / Var[X; P] := rfl
-  have e (ω : Ω) : Y ω - (P[Y] + beta cov[Y, X; P] Var[X; P] * (X ω - P[X]))
-      = Y ω - ((P[Y] - beta cov[Y, X; P] Var[X; P] * P[X])
-          + beta cov[Y, X; P] Var[X; P] * X ω) := by
-    ring
-  simp_rw [e]
-  rw [hmse, hmse, hβ]
-  simp only [sub_self, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, add_zero]
-  have hc : 0 ≤ (P[Y] - b * P[X] - a) ^ 2 := sq_nonneg _
-  have hq : 0 ≤ Var[X; P] * (b - cov[Y, X; P] / Var[X; P]) ^ 2 :=
-    mul_nonneg hpos.le (sq_nonneg _)
-  have hid : Var[X; P] * (b - cov[Y, X; P] / Var[X; P]) ^ 2
-      = b ^ 2 * Var[X; P] - 2 * b * cov[Y, X; P] + cov[Y, X; P] ^ 2 / Var[X; P] := by
-    field_simp
-    ring
-  have hid2 : (cov[Y, X; P] / Var[X; P]) ^ 2 * Var[X; P] = cov[Y, X; P] ^ 2 / Var[X; P] := by
-    field_simp
-  have hid3 : cov[Y, X; P] / Var[X; P] * cov[Y, X; P] = cov[Y, X; P] ^ 2 / Var[X; P] := by ring
-  linarith [hid, hid2, hid3, hc, hq]
+  rw [integral_sq_affine_eq_add hY hX hvar a b]
+  exact le_add_of_nonneg_right (integral_nonneg fun _ ↦ sq_nonneg _)
 
 end MathFin

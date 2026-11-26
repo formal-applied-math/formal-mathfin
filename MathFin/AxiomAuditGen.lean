@@ -1532,9 +1532,9 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.SurvivalModel.survivalFunction_zero
 
-/-- info: 'MathFin.SurvivalModel.survive_eq_survivalFunction_ratio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.SurvivalModel.survive_eq_survivalFunction_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.SurvivalModel.survive_eq_survivalFunction_ratio
+#print axioms MathFin.SurvivalModel.survive_eq_survivalFunction_div
 
 /-- info: 'MathFin.SurvivalModel.survive_lifeTable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
