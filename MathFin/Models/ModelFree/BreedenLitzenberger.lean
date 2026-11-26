@@ -39,7 +39,7 @@ The non-negativity `0 ≤ f_{S_T}(K)` is *not* an independent fact. It is the
 infinitesimal manifestation of a convexity chain:
 
 1. The call **payoff** is convex in `K` (`convexOn_call_payoff` in
-   `StrikeConvexity.lean`).
+   `Probability/Laws/ConvexOrder.lean`).
 2. Risk-neutral expectation preserves convexity: integration against a positive
    measure does, for any law with a finite mean (`convexOn_integral_call`; the
    finite-state form is `callPrice_finiteState_convexOn_K`).

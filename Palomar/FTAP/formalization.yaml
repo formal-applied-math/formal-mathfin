@@ -55,7 +55,7 @@ sources:
     location: De Gruyter, Chapter 5
     note: "The proofs follow this book's one-asset argument for the first theorem and its proof of the second, with one change in the first: the one-period weights are left unnormalised and the total mass is normalised once, at the end, since a conditional one-period density of mean one can fail to exist."
 status:
-  scope: 918 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 890 delivery-ready (full + library-wrapper).
+  scope: 920 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 892 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -249,9 +249,9 @@ alignment:
       status: full 76 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 49 statements
+      lean: 51 statements
       module: benchmarks/risk_measures.json
-      status: full 49 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 51 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 64 statements

@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1161 MathFin constants, 29 upstream). Citations
+corpus (1163 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -2328,6 +2328,10 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_mem_valuedIn_range_integral_eq_stoppingValue
 
+/-- info: 'MathFin.exists_not_convexOrder_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.exists_not_convexOrder_sum
+
 /-- info: 'MathFin.exists_pos_price_le_superReplication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.exists_pos_price_le_superReplication
@@ -2375,6 +2379,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.expectedShortfall_isLUB_representingSet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedShortfall_isLUB_representingSet
+
+/-- info: 'MathFin.expectedShortfall_le_of_convexOrder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.expectedShortfall_le_of_convexOrder
 
 /-- info: 'MathFin.expectedShortfall_mono_level' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
