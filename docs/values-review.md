@@ -3940,7 +3940,7 @@ mathematical error or a dishonest hypothesis.
    shape. [done: `SpotConvexity.lean`]
 3. MertonGreeks: extract the gamma and vega term bounds (each proved twice), `gcongr` for the
    `mul_le_mul` chains, `positivity` for the `n = 0` terms; one `hasSum_weights_mul_mertonSpot` in
-   MertonJumpDiffusion for the three pgf-at-`1 + k` copies. [done: `mertonGamma_summand_le`, `mertonVega_summand_le`]
+   MertonJumpDiffusion for the three pgf-at-`1 + k` copies. [done: `mertonGamma_summand_le`; the vega bound inlined as two `mul_le_of_le_one_right` steps]
 4. The put, and put–call parity for any jump law:
    `C − P = S₀e^{−κ + Λ(𝔼[e^J] − 1)} − Ke^{−rT}`. [done: `JumpDiffusionOptionPrices.lean`]
 5. A witness that `JumpDiffusionHyp` and `MertonHyp` are satisfiable (`exists_hasLaw_indepFun`).
@@ -4721,7 +4721,7 @@ Adjudicated down:
 - The Gaussian-vector route to independence (`HasGaussianLaw.iIndepFun_of_covariance_eq_zero`).
   It needs joint Gaussianity plus a covariance computation, so two agents found it longer.
 - Trimming the hand-written `(t k : ℝ)` casts. They keep separately elaborated statements
-  syntactically aligned for `rw`. [done: `exp_sub_eq`, `integrable_expY_sub`]
+  syntactically aligned for `rw`. [done: `integrable_expY_sub`, the factorisation inlined as `sub_eq_neg_add` and `Real.exp_add`]
 
 ## 2026-09-18 — corpus 373 — bisection converges to the implied volatility
 

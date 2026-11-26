@@ -114,14 +114,6 @@ private lemma const_mem_lpMeas (c : ℝ) (T : ℝ≥0) (hBmeas : ∀ t, Measurab
     Lp.const 2 μ c ∈ lpMeas ℝ ℝ (ItoIntegralL2.natFiltration hBmeas T) 2 μ :=
   ⟨Function.const Ω c, stronglyMeasurable_const, Lp.coeFn_const 2 μ c⟩
 
-/-- The constant `c` is `c` times the constant `1`. -/
-private lemma lpConst_eq_smul_one (c : ℝ) : Lp.const 2 μ c = c • Lp.const 2 μ (1 : ℝ) :=
-  Lp.ext (by
-    filter_upwards [Lp.coeFn_const 2 μ c, Lp.coeFn_smul c (Lp.const 2 μ (1 : ℝ)),
-      Lp.coeFn_const 2 μ (1 : ℝ)] with ω h1 h2 h3
-    rw [h1, h2, Pi.smul_apply, h3]
-    simp)
-
 /-- Subtracting the mean, pointwise. -/
 lemma coeFn_sub_lpConst_integral (F : Lp ℝ 2 μ) :
     (⇑(F - Lp.const 2 μ (∫ x, F x ∂μ)) : Ω → ℝ) =ᵐ[μ] fun ω ↦ F ω - ∫ x, F x ∂μ := by
@@ -256,7 +248,12 @@ theorem itoIntegralCLM_surjective_onto_centered (hBmeas : ∀ t, Measurable (B t
           (Lp.const 2 μ (∫ x, F x ∂μ)), Lp.coeFn_const 2 μ (∫ x, F x ∂μ)] with ω h1 h2 h3
         rw [h1, h2, Pi.add_apply, h3, Function.const_apply, add_comm])]
     exact Submodule.add_mem_sup (LinearMap.mem_range_self _ φ)
-      (Submodule.mem_span_singleton.mpr ⟨_, (lpConst_eq_smul_one _).symm⟩)
+      (Submodule.mem_span_singleton.mpr ⟨∫ x, F x ∂μ, (Lp.ext (by
+        filter_upwards [Lp.coeFn_const 2 μ (∫ x, F x ∂μ),
+          Lp.coeFn_smul (∫ x, F x ∂μ) (Lp.const 2 μ (1 : ℝ)),
+          Lp.coeFn_const 2 μ (1 : ℝ)] with ω h1 h2 h3
+        rw [h1, h2, Pi.smul_apply, h3]
+        simp) : Lp.const 2 μ (∫ x, F x ∂μ) = (∫ x, F x ∂μ) • Lp.const 2 μ (1 : ℝ)).symm⟩)
 
 /-! ### The isometry onto the centered subspace -/
 

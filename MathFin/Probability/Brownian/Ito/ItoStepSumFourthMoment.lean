@@ -31,6 +31,10 @@ odd terms need is Young's inequality `|a|³|b| ≤ 3a⁴/4 + b⁴/4` against fou
 * `stepSum_pow4_le`: for a bounded integrand `φ j` (`|φ| ≤ D`), `𝓕_{s j}`-measurable along a
   monotone grid `s`, the fourth moment of `∑_{k<N} φ_k (B_{s_{k+1}} − B_{s_k})` is at most
   `3·(D²·total gap)²`.
+* `MemLp.integral_add_pow_four`: for `Z, Y ∈ L⁴` with `E[Z³Y] = E[ZY³] = 0`,
+  `E[(Z + Y)⁴] = E[Z⁴] + 6 E[Z²Y²] + E[Y⁴]`, with the integrability of the cross terms
+  (`MemLp.integrable_cube_mul`, `MemLp.integrable_mul_cube`, `MemLp.integrable_sq_mul_sq`) and of
+  the fourth power (`MemLp.integrable_pow_four`).
 
 ## Tags
 
@@ -67,7 +71,7 @@ section FourthPowers
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-- The fourth power of an `L⁴` function is integrable. -/
-private lemma integrable_pow_four_of_memLp {Z : Ω → ℝ} (hZ : MemLp Z 4 μ) :
+lemma _root_.MeasureTheory.MemLp.integrable_pow_four {Z : Ω → ℝ} (hZ : MemLp Z 4 μ) :
     Integrable (fun ω ↦ Z ω ^ 4) μ :=
   (hZ.integrable_norm_pow (by norm_num : (4 : ℕ) ≠ 0)).congr (Eventually.of_forall fun ω ↦ by
     change ‖Z ω‖ ^ 4 = Z ω ^ 4
@@ -75,10 +79,11 @@ private lemma integrable_pow_four_of_memLp {Z : Ω → ℝ} (hZ : MemLp Z 4 μ) 
 
 /-- `Z³Y` is integrable for `Z, Y ∈ L⁴`: Young's inequality `|a|³|b| ≤ 3a⁴/4 + b⁴/4` against
 fourth powers. -/
-private lemma integrable_cube_mul {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : MemLp Y 4 μ) :
+lemma _root_.MeasureTheory.MemLp.integrable_cube_mul {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ)
+    (hY : MemLp Y 4 μ) :
     Integrable (fun ω ↦ Z ω ^ 3 * Y ω) μ :=
-  Integrable.mono' (((integrable_pow_four_of_memLp hZ).const_mul (3 / 4)).add
-      ((integrable_pow_four_of_memLp hY).const_mul (1 / 4)))
+  Integrable.mono' ((hZ.integrable_pow_four.const_mul (3 / 4)).add
+      (hY.integrable_pow_four.const_mul (1 / 4)))
     ((hZ.aestronglyMeasurable.pow 3).mul hY.aestronglyMeasurable)
     (ae_of_all μ fun ω ↦ by
       change ‖Z ω ^ 3 * Y ω‖ ≤ 3 / 4 * Z ω ^ 4 + 1 / 4 * Y ω ^ 4
@@ -87,10 +92,11 @@ private lemma integrable_cube_mul {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : M
       linarith)
 
 /-- `ZY³` is integrable for `Z, Y ∈ L⁴`. -/
-private lemma integrable_mul_cube {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : MemLp Y 4 μ) :
+lemma _root_.MeasureTheory.MemLp.integrable_mul_cube {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ)
+    (hY : MemLp Y 4 μ) :
     Integrable (fun ω ↦ Z ω * Y ω ^ 3) μ :=
-  Integrable.mono' (((integrable_pow_four_of_memLp hZ).const_mul (1 / 4)).add
-      ((integrable_pow_four_of_memLp hY).const_mul (3 / 4)))
+  Integrable.mono' ((hZ.integrable_pow_four.const_mul (1 / 4)).add
+      (hY.integrable_pow_four.const_mul (3 / 4)))
     (hZ.aestronglyMeasurable.mul (hY.aestronglyMeasurable.pow 3))
     (ae_of_all μ fun ω ↦ by
       change ‖Z ω * Y ω ^ 3‖ ≤ 1 / 4 * Z ω ^ 4 + 3 / 4 * Y ω ^ 4
@@ -99,10 +105,11 @@ private lemma integrable_mul_cube {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : M
       linarith)
 
 /-- `Z²Y²` is integrable for `Z, Y ∈ L⁴`: `2a²b² ≤ a⁴ + b⁴`. -/
-private lemma integrable_sq_mul_sq {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : MemLp Y 4 μ) :
+lemma _root_.MeasureTheory.MemLp.integrable_sq_mul_sq {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ)
+    (hY : MemLp Y 4 μ) :
     Integrable (fun ω ↦ Z ω ^ 2 * Y ω ^ 2) μ :=
-  Integrable.mono' (((integrable_pow_four_of_memLp hZ).const_mul (1 / 2)).add
-      ((integrable_pow_four_of_memLp hY).const_mul (1 / 2)))
+  Integrable.mono' ((hZ.integrable_pow_four.const_mul (1 / 2)).add
+      (hY.integrable_pow_four.const_mul (1 / 2)))
     ((hZ.aestronglyMeasurable.pow 2).mul (hY.aestronglyMeasurable.pow 2))
     (ae_of_all μ fun ω ↦ by
       change ‖Z ω ^ 2 * Y ω ^ 2‖ ≤ 1 / 2 * Z ω ^ 4 + 1 / 2 * Y ω ^ 4
@@ -111,24 +118,24 @@ private lemma integrable_sq_mul_sq {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : 
 
 /-- **The fourth moment of a sum, with the odd cross terms vanishing**: for `Z, Y ∈ L⁴` with
 `E[Z³Y] = E[ZY³] = 0`, `E[(Z + Y)⁴] = E[Z⁴] + 6 E[Z²Y²] + E[Y⁴]`. -/
-private lemma integral_add_pow_four {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ) (hY : MemLp Y 4 μ)
-    (h3 : ∫ ω, Z ω ^ 3 * Y ω ∂μ = 0) (h1 : ∫ ω, Z ω * Y ω ^ 3 ∂μ = 0) :
+lemma _root_.MeasureTheory.MemLp.integral_add_pow_four {Z Y : Ω → ℝ} (hZ : MemLp Z 4 μ)
+    (hY : MemLp Y 4 μ) (h3 : ∫ ω, Z ω ^ 3 * Y ω ∂μ = 0) (h1 : ∫ ω, Z ω * Y ω ^ 3 ∂μ = 0) :
     ∫ ω, (Z ω + Y ω) ^ 4 ∂μ
       = ∫ ω, Z ω ^ 4 ∂μ + 6 * ∫ ω, Z ω ^ 2 * Y ω ^ 2 ∂μ + ∫ ω, Y ω ^ 4 ∂μ := by
-  have i4 := integrable_pow_four_of_memLp hZ
-  have j4 := integrable_pow_four_of_memLp hY
+  have i4 := hZ.integrable_pow_four
+  have j4 := hY.integrable_pow_four
   have e1 : Integrable (fun ω ↦ Z ω ^ 4 + 4 * (Z ω ^ 3 * Y ω)) μ :=
-    i4.add ((integrable_cube_mul hZ hY).const_mul 4)
+    i4.add ((hZ.integrable_cube_mul hY).const_mul 4)
   have e2 : Integrable (fun ω ↦ Z ω ^ 4 + 4 * (Z ω ^ 3 * Y ω) + 6 * (Z ω ^ 2 * Y ω ^ 2)) μ :=
-    e1.add ((integrable_sq_mul_sq hZ hY).const_mul 6)
+    e1.add ((hZ.integrable_sq_mul_sq hY).const_mul 6)
   have e3 : Integrable (fun ω ↦ Z ω ^ 4 + 4 * (Z ω ^ 3 * Y ω) + 6 * (Z ω ^ 2 * Y ω ^ 2)
       + 4 * (Z ω * Y ω ^ 3)) μ :=
-    e2.add ((integrable_mul_cube hZ hY).const_mul 4)
+    e2.add ((hZ.integrable_mul_cube hY).const_mul 4)
   have hfun : (fun ω ↦ (Z ω + Y ω) ^ 4) = fun ω ↦ Z ω ^ 4 + 4 * (Z ω ^ 3 * Y ω)
       + 6 * (Z ω ^ 2 * Y ω ^ 2) + 4 * (Z ω * Y ω ^ 3) + Y ω ^ 4 := funext fun ω ↦ by ring
-  rw [hfun, integral_add e3 j4, integral_add e2 ((integrable_mul_cube hZ hY).const_mul 4),
-    integral_add e1 ((integrable_sq_mul_sq hZ hY).const_mul 6),
-    integral_add i4 ((integrable_cube_mul hZ hY).const_mul 4), integral_const_mul,
+  rw [hfun, integral_add e3 j4, integral_add e2 ((hZ.integrable_mul_cube hY).const_mul 4),
+    integral_add e1 ((hZ.integrable_sq_mul_sq hY).const_mul 6),
+    integral_add i4 ((hZ.integrable_cube_mul hY).const_mul 4), integral_const_mul,
     integral_const_mul, integral_const_mul, h3, h1]
   ring
 
@@ -426,10 +433,10 @@ theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ : ℕ �
     have ihNreal : ∫ ω, stepSum B s φ N ω ^ 4 ∂μ
         ≤ 3 * (D ^ 2 * ∑ k ∈ Finset.range N, ((s (k + 1) : ℝ) - s k)) ^ 2 :=
       (ENNReal.ofReal_le_ofReal_iff (by positivity)).mp
-        ((ofReal_integral_eq_lintegral_ofReal (integrable_pow_four_of_memLp hZ4)
+        ((ofReal_integral_eq_lintegral_ofReal hZ4.integrable_pow_four
           (Eventually.of_forall (hnn N))).trans_le ihN)
     -- the expansion of `(Z + y)⁴`, odd terms zeroed
-    have hexp := integral_add_pow_four hZ4 hY4
+    have hexp := hZ4.integral_add_pow_four hY4
       (integral_stepSum_cube_mul_term hB hBmeas hsmono hφm N)
       (integral_stepSum_mul_term_cube hB hBmeas hsmono hφm N)
     have hreal : ∫ ω, stepSum B s φ (N + 1) ω ^ 4 ∂μ
@@ -448,7 +455,7 @@ theorem stepSum_pow4_le {s : ℕ → ℝ≥0} (hsmono : Monotone s) {φ : ℕ �
               (integral_term_pow_four_le hB hBmeas hsmono hφm hφbdd N)
         _ = _ := by ring
     exact ((ofReal_integral_eq_lintegral_ofReal
-      (integrable_pow_four_of_memLp (memLp_stepSum hB hBmeas hsmono hφm hφbdd (N + 1)))
+      ((memLp_stepSum hB hBmeas hsmono hφm hφbdd (N + 1)).integrable_pow_four)
       (Eventually.of_forall (hnn (N + 1)))).symm).trans_le (ENNReal.ofReal_le_ofReal hreal)
 
 end MathFin.ItoDriftConditional

@@ -320,15 +320,6 @@ theorem mertonGamma_pos (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) {S : ℝ} (hS 
 
 /-! ### Vega -/
 
-/-- The vega summand bound: `c p t q ≤ c t` for `c, t, q ≥ 0`, `p ≤ 1` and `q ≤ 1` (`ϕ ≤ 1`,
-`σ/σₙ ≤ 1`). -/
-private lemma mertonVega_summand_le {c p t q : ℝ} (hc : 0 ≤ c) (hp : p ≤ 1) (ht : 0 ≤ t)
-    (hq0 : 0 ≤ q) (hq1 : q ≤ 1) : c * p * t * q ≤ c * t :=
-  calc c * p * t * q ≤ c * 1 * t * 1 :=
-        mul_le_mul (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hp hc) ht) hq1 hq0
-          (mul_nonneg (mul_nonneg hc zero_le_one) ht)
-    _ = c * t := by ring
-
 /-- The conditional volatility `σₙ = √(σ² + nδ²/T)` has `σ`-derivative `σ/σₙ`. -/
 lemma hasDerivAt_mertonVol_sigma (δ : ℝ) (hT : 0 < T) (n : ℕ) (hσ : 0 < σ) :
     HasDerivAt (fun s ↦ mertonVol s δ T n) (σ / mertonVol σ δ T n) σ := by
@@ -381,7 +372,10 @@ theorem hasDerivAt_mertonCallPrice_sigma {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hT
     have hphi := gaussianPDFReal_zero_one_le_one
       (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
     have hphi0 := gaussianPDFReal_nonneg 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
-    have hinner := mertonVega_summand_le (hspot n).le hphi (Real.sqrt_nonneg T) hq0 hq1
+    -- `S ϕ √T (σ/σₙ) ≤ S ϕ √T ≤ S √T`, from `σ/σₙ ≤ 1` and `ϕ ≤ 1`
+    have hinner := (mul_le_of_le_one_right
+      (mul_nonneg (mul_nonneg (hspot n).le hphi0) (Real.sqrt_nonneg T)) hq1).trans
+        (mul_le_mul_of_nonneg_right (mul_le_of_le_one_right (hspot n).le hphi) (Real.sqrt_nonneg T))
     calc ‖rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
           (mertonSpot S k Λ n
             * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
@@ -425,9 +419,12 @@ theorem mertonVega_pos {S : ℝ} (hS : 0 < S) (hT : 0 < T) (hk : -1 < k) (hσ : 
             * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol σ δ T n) T)
             * Real.sqrt T * (σ / mertonVol σ δ T n))
         ≤ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * (mertonSpot S k Λ n * Real.sqrt T) :=
-          mul_le_mul_of_nonneg_left (mertonVega_summand_le (hspot n).le
-            (gaussianPDFReal_zero_one_le_one _) (Real.sqrt_nonneg T) (div_nonneg hσ.le hv.le)
-            ((div_le_one hv).mpr (le_mertonVol δ hσ.le hT n))) (by positivity)
+          mul_le_mul_of_nonneg_left ((mul_le_of_le_one_right (mul_nonneg
+            (mul_nonneg (hspot n).le (gaussianPDFReal_nonneg 0 1 _)) (Real.sqrt_nonneg T))
+            ((div_le_one hv).mpr (le_mertonVol δ hσ.le hT n))).trans
+              (mul_le_mul_of_nonneg_right
+                (mul_le_of_le_one_right (hspot n).le (gaussianPDFReal_zero_one_le_one _))
+                (Real.sqrt_nonneg T))) (by positivity)
       _ = rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot S k Λ n * Real.sqrt T := by ring
   refine hsum.tsum_pos hterm 0 ?_
   rw [pow_zero, Nat.factorial_zero, Nat.cast_one, mul_one, div_one]

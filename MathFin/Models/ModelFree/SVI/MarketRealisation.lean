@@ -26,11 +26,14 @@ with unit numéraire, a nonnegative asset of forward one and a pricing measure.
   SVI smile forces the finite sign formula `butterflyFreeFormula`.
 * `SVI.exists_market_of_butterflyFreeFormula`: a butterfly-free slice is the call price function
   of a market.
+* `SVI.durrleman_nonneg_of_isPricingMeasure`: for `σ > 0`, a pricing measure whose normalised
+  calls are the SVI smile forces Durrleman's condition `g ≥ 0`.
 
 ## References
 
 * [Gatheral and Jacquier, *Arbitrage-free SVI volatility surfaces*][GatheralJacquier2014], Lemma 2.2
 * [Roper, *Arbitrage free implied volatility surfaces*][Roper2010], Theorem 2.1
+* [R. Martin, *A polynomial-sign certificate for butterfly-free raw SVI*][MartinButterflyFreeSVI]
 
 ## Tags
 
@@ -73,5 +76,21 @@ theorem exists_market_of_butterflyFreeFormula {p : Params}
       M.price Q (.pay 1 (.obs () 1)) = 1 ∧ ∀ k > 0, M.price Q (europeanCall k 1) = bsSmile p k :=
   exists_market_of_isNormalizedCallPrice
     ((butterflyFreeFormula_iff_isNormalizedCallPrice p).1 h).2.2.2.2
+
+/-- **A market that prices the SVI smile satisfies Durrleman's condition.** In a market with unit
+numéraire and a positive asset, priced at `T` by `Q`, if the calls at the strikes `k F`, in units
+of the forward `F`, have the SVI-smiled Black price at every `k > 0`, and `σ > 0` with positive
+variance everywhere, then Durrleman's function is nonnegative at every log-strike: the market's
+normalised calls are convex in the strike (`Market.IsPricingMeasure.isNormalizedCallPrice`), and
+convexity of the smiled call is Durrleman's condition (`bsSmile_convex_iff`). -/
+theorem durrleman_nonneg_of_isPricingMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω} {p : Params} (hs : 0 < p.sigma)
+    (hw : ∀ k, 0 < variance p k) (hQ : M.IsPricingMeasure T Q)
+    (hN : ∀ t ω, M.numeraire t ω = 1) (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ}
+    (hF : F = M.price Q (.pay T (.obs () T)))
+    (hsmile : ∀ k > 0, M.price Q (europeanCall (k * F) T) / F = bsSmile p k) (k : ℝ) :
+    0 ≤ durrleman p k :=
+  (bsSmile_convex_iff p hs hw).1
+    ((hQ.isNormalizedCallPrice hN hpos hF).of_eqOn fun j hj ↦ hsmile j hj).convexOn k
 
 end MathFin.SVI

@@ -119,13 +119,6 @@ theorem map_eq_gaussianReal_of_mgf {X : Ω → ℝ} (hX : AEMeasurable X Q) {v :
   funext a
   rw [hmgf, zero_mul, zero_add]
 
-/-- The exponential martingale's term factors as a constant times `exp(a·x)`. -/
-private theorem exp_sub_eq (a x u : ℝ) :
-    Real.exp (a * x - a ^ 2 * u / 2) = Real.exp (-(a ^ 2 * u / 2)) * Real.exp (a * x) := by
-  rw [← Real.exp_add]
-  congr 1
-  ring
-
 /-- **Marginal `Q`-MGF.** `𝔼_Q[exp(a·Y_t)] = exp(½ t a²)`: read off from the exponential
 martingale at `s = 0` (the `Q`-integral of `exp(a·Y_t − ½a²t)` equals its value at `0`, which is
 `exp(a·Y_0) = 1` a.e. since `Y_0 = 0`). -/
@@ -142,7 +135,9 @@ private theorem mgf_expY_eq (h : IsExpQMartingale Q 𝓕 Y T) {t : ℝ≥0} (htT
   have hLHS : ∫ ω, Real.exp (a * Y t ω - a ^ 2 * (t : ℝ) / 2) ∂Q
       = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * ∫ ω, Real.exp (a * Y t ω) ∂Q := by
     rw [← integral_const_mul]
-    exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ exp_sub_eq a (Y t ω) t)
+    exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦
+      (congrArg Real.exp (sub_eq_neg_add (a * Y t ω) (a ^ 2 * (t : ℝ) / 2))).trans
+        (Real.exp_add _ _))
   rw [hLHS, mul_comm] at hbrick
   have hfac : Real.exp (-(a ^ 2 * (t : ℝ) / 2)) ≠ 0 := (Real.exp_pos _).ne'
   rw [(mul_eq_one_iff_eq_inv₀ hfac).mp hbrick, ← Real.exp_neg]
@@ -166,7 +161,9 @@ private theorem integrable_expY (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {u :
 private theorem integrable_expY_sub (h : IsExpQMartingale Q 𝓕 Y T) (a : ℝ) {u : ℝ≥0}
     (huT : u ≤ T) : Integrable (fun ω ↦ Real.exp (a * Y u ω - a ^ 2 * (u : ℝ) / 2)) Q :=
   ((integrable_expY h a huT).const_mul (Real.exp (-(a ^ 2 * (u : ℝ) / 2)))).congr
-    (Filter.Eventually.of_forall fun ω ↦ (exp_sub_eq a (Y u ω) u).symm)
+    (Filter.Eventually.of_forall fun ω ↦
+      ((congrArg Real.exp (sub_eq_neg_add (a * Y u ω) (a ^ 2 * (u : ℝ) / 2))).trans
+        (Real.exp_add _ _)).symm)
 
 omit [IsProbabilityMeasure Q] in
 /-- **Cauchy–Schwarz for exponentials.** If `exp(2f)` and `exp(2g)` are `Q`-integrable, so is

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.ModelFree.SVI.TailCondition
+public import MathFin.Models.ModelFree.MarketCallPrice
 
 /-!
 # SSVI slices are raw SVI slices
@@ -36,6 +37,8 @@ formalised.
   `ssviVariance θ φ ρ k`.
 * `tendsto_bsSmile_ssviParams_zero_iff`: for `θ ≥ 0`, `φ > 0`, `ρ² ≤ 1` and positive variance,
   the SSVI-smiled call tends to `0` at large strikes iff `θ φ (1 + ρ) < 4`.
+* `ssvi_tail_of_isPricingMeasure`: a pricing measure whose normalised calls are the SSVI-smiled
+  call forces `θ φ (1 + ρ) < 4`.
 
 ## References
 
@@ -52,6 +55,7 @@ namespace MathFin
 namespace SVI
 
 open Filter Topology
+open scoped NNReal
 
 /-- The SSVI total variance of the slice with at-the-money variance `θ`, skew-scale `φ` and
 correlation `ρ`, at log-moneyness `k`. -/
@@ -98,6 +102,23 @@ theorem tendsto_bsSmile_ssviParams_zero_iff {θ φ ρ : ℝ} (hθ : 0 ≤ θ) (h
   rw [tendsto_bsSmile_zero_iff _ (by simp only [ssviParams]; positivity) hw']
   simp only [ssviParams]
   constructor <;> intro h <;> linarith
+
+/-- **A market that prices an SSVI slice satisfies the tail condition.** In a market with unit
+numéraire and a positive asset, priced at `T` by `Q`, if the calls at the strikes `k F`, in units
+of the forward `F`, have the SSVI-smiled Black price at every `k > 0` (with `θ ≥ 0`, `φ > 0`,
+`ρ² ≤ 1` and positive variance), then `θ φ (1 + ρ) < 4`: the market's normalised calls vanish at
+large strikes (`Market.IsPricingMeasure.isNormalizedCallPrice`), so the smiled call does, and
+`tendsto_bsSmile_ssviParams_zero_iff` turns that into the condition. -/
+theorem ssvi_tail_of_isPricingMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {M : Market Unit Ω} {T : ℝ≥0} {Q : MeasureTheory.Measure Ω} {θ φ ρ : ℝ} (hθ : 0 ≤ θ)
+    (hφ : 0 < φ) (hρ : ρ ^ 2 ≤ 1) (hw : ∀ k : ℝ, 0 < ssviVariance θ φ ρ k)
+    (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1)
+    (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ} (hF : F = M.price Q (.pay T (.obs () T)))
+    (hsmile : ∀ k > 0,
+      M.price Q (Contracts.europeanCall (k * F) T) / F = bsSmile (ssviParams θ φ ρ) k) :
+    θ * φ * (1 + ρ) < 4 :=
+  (tendsto_bsSmile_ssviParams_zero_iff hθ hφ hρ hw).1
+    ((hQ.isNormalizedCallPrice hN hpos hF).of_eqOn fun j hj ↦ hsmile j hj).tendsto_zero
 
 end SVI
 end MathFin
