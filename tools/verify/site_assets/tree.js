@@ -281,6 +281,33 @@ cap(ground.append("text").attr("class", "stratum-sub").attr("x", 30).attr("y", B
   if (x < 40 + 460 * TF && y < BED + 58 * TF) continue;
   ground.append("ellipse").attr("class", "stone").attr("cx", x).attr("cy", y).attr("rx", 2 + r() * 5).attr("ry", 1.2 + r() * 2.2); } }
 
+// the Literature layer (docs/atlas.json, tools/verify/atlas.py): each cell's sector shaded by the
+// field's share of papers in it, the three largest gaps outlined; hover for the numbers
+const LIT = D.literature;
+if (LIT){
+  const litG = view.append("g").attr("class", "layer-literature");
+  const cells = LIT.cells, keys = Object.keys(cells);
+  const maxField = d3.max(keys, k => cells[k].field) || 1;
+  const gaps = new Set(keys.slice().sort((a, b) => cells[b].gap - cells[a].gap).slice(0, 3));
+  const band = k => { const [p, b] = k.split("/");
+    if (RSEC.has(k)) return [RSEC.get(k), RT - 8, BED - 6];
+    if (b && BSEC.has(k)) return [BSEC.get(k), TOP, LB + 50];
+    if (!b && PARTS.get(p)?.kind === "trunk") return [{x0:CX - 120, x1:CX + 120}, TT, GY - 8];
+    if (!b && RSEC.has(p)) return [RSEC.get(p), RT - 8, BED - 6];
+    return null; };
+  const pct = x => (x == null ? "–" : Math.round(100 * x) + "%");
+  for (const k of keys){
+    const at = band(k); if (!at) continue;
+    const [s, y0, y1] = at, c = cells[k];
+    const found = c.founding.slice(0, 3).map(f => `<li>${esc(f.title)}${f.year ? " (" + f.year + ")" : ""}</li>`).join("");
+    litG.append("rect").attr("class", "lit-band" + (gaps.has(k) ? " gap" : ""))
+      .attr("x", s.x0).attr("width", Math.max(4, s.x1 - s.x0)).attr("y", y0).attr("height", y1 - y0).attr("rx", 10)
+      .style("fill-opacity", (0.06 + 0.42 * Math.sqrt(c.field / maxField)).toFixed(3))
+      .on("mousemove", ev => showTip(ev, `<b>${esc(cellName(k))}</b><br>${c.papers.toLocaleString()} papers · ${c.field}% of the field, ${c.library}% of the library (gap ${c.gap > 0 ? "+" : ""}${c.gap} points)<br>${c.proved} proved nodes · ${c.entries} corpus entries · classifier agreement ${pct(c.recall)}${c.warn ? " (under 70%)" : ""}${found ? "<br>most cited:<ol>" + found + "</ol>" : ""}`))
+      .on("mouseleave", () => hideTip());
+  }
+}
+
 function taper(P, c1, c2, C, w0, w1, steps = 18){
   const L = [], Rr = [];
   for (let i = 0; i <= steps; i++){
@@ -678,6 +705,10 @@ function defaultPanel(){
       <div>${glyph("leaf")}<span><b>Leaves</b>: the corpus entries, hung on the deepest node their proof rests on.</span></div>
       <div>${glyph("fallen")}<span><b>Fallen leaves</b>: proved entries that rest on no node; each one is a missing tag or bridge.</span></div>
     </div>
+    ${LIT ? `<h3>Literature</h3>
+    <div class="legend">
+      <div><span><b>Shaded cells</b>: the field's map. The deeper the blue, the larger the cell's share of ${LIT.corpus.placed.toLocaleString()} papers placed by a trained classifier; a dashed outline marks the three cells where the field's share most exceeds the library's. Hover a cell for its numbers and the works it rests on; the table under the tree has them all.</span></div>
+    </div>` : ""}
     <div class="chips">${dots()}</div>
     <div><h3>Open problems</h3><div class="chips">${ops.map(n => chip(n.l)).join("")}</div></div>
     <div><h3>Ready to pick up · ${ready.length}</h3><div class="chips">${ready.sort((a, b) => a.t.localeCompare(b.t)).slice(0, 14).map(n => chip(n.l)).join("")}${ready.length > 14 ? ` <span class="muted" style="font-size:12.5px; align-self:center">and ${ready.length - 14} more on the tree</span>` : ""}</div></div>`;

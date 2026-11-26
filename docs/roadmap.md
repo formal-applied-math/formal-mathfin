@@ -59,6 +59,32 @@ The next rungs, each carried by an open issue; the blueprint's
   Itô–Lévy formula ([#132](https://github.com/formal-applied-math/formal-mathfin/issues/132)) and the pricing PIDE ([#133](https://github.com/formal-applied-math/formal-mathfin/issues/133)).
 * **Every price through the pricing functional** ([#450](https://github.com/formal-applied-math/formal-mathfin/issues/450)): the model families priced as markets.
 
+## What the literature says (2026-11-26)
+
+The [literature atlas](specs/2026-11-25-literature-atlas-design.md) placed 21,915 of 24,505 corpus
+papers in the taxonomy's cells, then compared each cell's share of the field with its share of the
+library's corpus entries. The program tree's Literature layer draws it; `docs/atlas.json` holds the
+numbers. The three largest gaps are below. The classifier finds 75–86% of each cell's labelled
+papers, so these three are well measured.
+
+* **Collective risk theory** (`risk/insurance`): 9.7% of the field, 0.5% of the library (4
+  entries, no proved node). The field rests on ruin theory: Gerber's *Introduction to
+  Mathematical Risk Theory*, the Gerber–Shiu *time value of ruin*, Grandell and Rolski et al.
+* **Dynamic choice** (`choice/dynamic`): 8.3% of the field, 0.9% of the library (8 entries, one
+  proved node). It rests on Merton's continuous-time portfolio problem (1969, 1971),
+  Kramkov–Schachermayer's utility maximisation in incomplete markets, and Fleming–Soner's
+  controlled Markov processes.
+* **Market microstructure** (`choice/trading`): 6.4% of the field, 1.2% of the library (11
+  entries, three proved nodes). It rests on Almgren–Chriss optimal execution, Kyle's insider
+  trading model and Avellaneda–Stoikov market making.
+
+These are candidates, not commitments: depth before breadth still decides. All three meet the
+spine at known points. Ruin theory would build on the compound Poisson law (the jumps rung
+above), Merton's problem on Itô's formula through a verification theorem, and optimal execution on
+discrete-time control over the library's `Market`. A cell can also be dense for empirical work
+the library does not formalise. The next step is a literature trail per cell (milestone 4 of the
+spec), before any issue is opened.
+
 ## What stays out
 
 Results that need mathematics Mathlib or BrownianMotion does not yet have, and that the library

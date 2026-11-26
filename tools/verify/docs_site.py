@@ -757,6 +757,7 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
            'pricing measure">priced in a market</b>' if f["socket"] else "") + "</span>"
         for f in data["families"]) + '<span><i style="background:var(--tr-bark)"></i>general '\
         'theory</span></div>'
+    literature = literature_section(data.get("literature"), names)
     public = sum(1 for d in site.idx.decls.values() if d.kind == "theorem" and not d.private)
     proved = sum(1 for n in nodes_json if n.get("leanOk", True))
     body = f"""<h1>The program tree</h1>
@@ -766,7 +767,8 @@ height is its distance from the trunk: one step if its statement mentions a mark
 it mentions an object one step away, and so on. The dark wood is what its proof uses, so a result
 the library has not yet connected stands high or floats beside its limb. Colour is the model
 family. The buttons add the gaps (stated bridges not yet proved, and unconnected clusters), the
-future work the open issues map out, the field's open problems and the corpus as leaves. Click a
+future work the open issues map out, the field's open problems, the corpus as leaves and, as
+Literature, how much the published field says in each cell. Click a
 node to trace its lineage; the panel beside the tree explains every mark.</p>
 <p class="ink2"><b>What the numbers count.</b> The library proves {public:,} public theorems.
 {m["theorems"]:,} of them are finance theorems on the limbs; the rest are probability tools in
@@ -782,6 +784,7 @@ the library; they hang as leaves on the node their proof rests on.</p>
 <button type="button" data-layer="future" aria-pressed="false" title="open issues, joined to the proved results they build on">Future work</button>
 <button type="button" data-layer="open" aria-pressed="false" title="open problems of the field">Open problems</button>
 <button type="button" data-layer="leaves" aria-pressed="false" title="corpus entries, on the tree and on the ground">Leaves</button>
+{'<button type="button" data-layer="literature" aria-pressed="false" title="the field, cell by cell: shaded by its share of the literature, the three largest gaps outlined">Literature</button>' if data.get("literature") else ""}
 <span class="t-zoom"><button type="button" id="t-zin" aria-label="Zoom in">+</button><button type="button" id="t-zout" aria-label="Zoom out">−</button></span>
 <button type="button" id="t-reset">Reset view</button></div>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
@@ -798,6 +801,7 @@ may not rise.</p>
 {legend([(v, label, "") for _, label, v in TREE_KINDS])}
 <h2>Off the map, by cell</h2><p class="ink2">One dot per entry; hover for its id.</p>
 <div class="t-bed">{plots}</div>
+{literature}
 <h2>Frontier with a proved core</h2>
 <p class="ink2">Frontier results that corpus entries already prove in part (the node's
 <code>core</code>). They stay on the frontier until the whole statement is proved.</p>
@@ -807,6 +811,55 @@ may not rise.</p>
     (out / "tree.html").write_text(page("Program tree — MathFin", body, "", "tree.html",
                                         "The MathFin blueprint as a tree, with the corpus as "
                                         "its leaves."), encoding="utf-8")
+
+
+def _founding(f: dict) -> str:
+    who = ", ".join(a for a in (f.get("authors") or [])[:2] if a)
+    head = esc(f.get("title") or "untitled")
+    if f.get("doi"):
+        head = f'<a href="{esc(f["doi"])}">{head}</a>'
+    return (f"<li>{head} <span class=\"ink2\">{esc(who)}{' et al.' if len(f.get('authors') or []) > 2 else ''}"
+            f"{', ' + str(f['year']) if f.get('year') else ''} · cited by {f['cited_by_cell']} of the "
+            f"cell's papers</span></li>")
+
+
+def literature_section(lit: dict | None, names: dict) -> str:
+    """The field beside the library, cell by cell (tools/verify/atlas.py, docs/atlas.json)."""
+    if not lit:
+        return ""
+    cells, corpus, clf = lit["cells"], lit["corpus"], lit["classifier"]
+    rows, cards = [], []
+    for k in sorted(cells, key=lambda k: -cells[k]["gap"]):
+        c = cells[k]
+        growth = f'{c["growth"]:g}×' if c.get("growth") else "–"
+        agree = (f'{100 * c["recall"]:.0f}%' if c.get("recall") is not None else "–") + (
+            ' <b class="warn" title="under the 70% bar: read this cell\'s numbers with care">'
+            "low</b>" if c["warn"] else "")
+        rows.append(f'<tr><td>{esc(names.get(k, k))}</td><td>{c["papers"]:,}</td><td>{growth}</td>'
+                    f'<td>{c["field"]:g}%</td><td>{c["library"]:g}%</td><td><b>{c["gap"]:+g}</b></td>'
+                    f'<td>{c["proved"]}</td><td>{c["entries"]}</td><td>{agree}</td></tr>')
+        if c["founding"]:
+            cards.append(f'<details><summary><b>{esc(names.get(k, k))}</b> '
+                         f'<span class="ink2">{c["papers"]:,} papers</span></summary><ol>'
+                         + "".join(_founding(f) for f in c["founding"]) + "</ol></details>")
+    h = clf["heldout"]
+    return f"""<h2 id="literature">The field beside the library</h2>
+<p class="ink2">A second map, from the literature. {corpus["papers"]:,} papers ({esc(corpus["sources"])})
+were placed in the taxonomy's cells by a classifier trained on agent labels; {corpus["outside_every_cell"]:,}
+fall outside every cell. Checked against {h["papers"]} held-out papers that two independent
+labellers placed, its first cell is theirs for {100 * h["top1"]:.0f}% of them and one of its first
+two for {100 * h["top2"]:.0f}%. A cell's <b>field</b> share is its share of the placed papers; its
+<b>library</b> share is its share of the corpus entries; the <b>gap</b> is the difference, in
+points. A large gap marks a roadmap candidate, not a verdict: some cells are dense with empirical
+work the library does not set out to formalise. <b>Agreement</b> is how often the classifier finds
+the cell's labelled papers; a cell under 70% is marked. Growth is papers a year over the last five
+years against the five before. Generated {esc(lit["generated"])}; {"; ".join(esc(x) for x in lit["limits"])}.</p>
+<table class="t-table"><thead><tr><th>Cell</th><th>Papers</th><th>Growth</th><th>Field</th>
+<th>Library</th><th>Gap</th><th>Proved nodes</th><th>Entries</th><th>Agreement</th></tr></thead>
+<tbody>{"".join(rows)}</tbody></table>
+<h3>What each cell rests on</h3>
+<p class="ink2">The ten works the cell's papers cite most, counted inside the corpus.</p>
+<div class="t-founding">{"".join(cards)}</div>"""
 
 
 LANDMARK_KEYS = ("decl", "title", "summary", "scope")
