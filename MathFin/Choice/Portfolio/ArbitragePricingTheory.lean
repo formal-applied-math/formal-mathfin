@@ -17,8 +17,9 @@ public import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 
 The exact-factor arbitrage pricing theory of Ross: in a market whose assets follow the exact
 factor model, the expected payoffs are an affine function of the factor loadings. The content
-is one hypothesis and its consequence, the premia decomposition, in two
-forms with two corollaries.
+is one hypothesis, the pricing-measure bridge that delivers it
+(`exactFactorNoArbitrage_of_pricingMeasure`), and its consequence, the premia decomposition,
+in two forms with two corollaries.
 
 The hypothesis `ExactFactorNoArbitrage s t p a β` is the exact-factor no-arbitrage condition:
 every portfolio `w` on the assets `s` that costs nothing (`∑ i ∈ s, w i * p i = 0`) and
@@ -46,7 +47,8 @@ loading columns.
 * `exists_premia_of_isPricingMeasure`: the decomposition with general prices, packaged from
   the two steps.
 * `lam0_eq_of_zeroLoadingAsset`: the intercept `lam₀` of any unit-price premia decomposition
-  is the payoff of an asset with zero loadings, the risk-free return of the market.
+  is the payoff of an asset with zero loadings on the set, the risk-free return of the
+  market.
 * `factorPremium_eq_marketPremium`: the one-factor case prices exactly as the CAPM
   equilibrium. With the loading equal to the CAPM beta (`MathFin.beta`) and the market
   portfolio tangent (`CAPM_from_market_equilibrium`), every premia decomposition is
@@ -272,8 +274,10 @@ the exact-factor no-arbitrage condition from the pricing measure, and the finite
 duality inside `exists_premia_of_exactFactorNoArbitrage` turns the condition into the
 decomposition. At unit prices `p` the statement is the decomposition of
 `exists_premia_of_exactFactorNoArbitrage`; the one-factor case with the market portfolio as
-the factor is the CAPM's security market line, which `factorPremium_eq_marketPremium` derives
-under the CAPM equilibrium hypothesis. -/
+the factor is the CAPM's security market line: under the CAPM equilibrium hypothesis, the
+loading hypothesis (the loading is the CAPM beta), and a zero-loading asset and a
+nonzero-loading asset on the set, `factorPremium_eq_marketPremium` pins every premia
+decomposition to `lam₀ = 0` and `lam` the market's excess return. -/
 theorem exists_premia_of_isPricingMeasure
     {ι κ Ω : Type*} [MeasurableSpace Ω] [Nonempty Ω]
     {M : MathFin.Market ι Ω} {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q)
@@ -286,8 +290,8 @@ theorem exists_premia_of_isPricingMeasure
     (exactFactorNoArbitrage_of_pricingMeasure hQ f hN hR)
 
 /-- The intercept `lam₀` of any unit-price premia decomposition is the payoff of an asset
-with zero loadings: that asset is riskless, so `lam₀` is the risk-free return of the
-market. At general prices the intercept is the per-unit-price coefficient, and the
+with zero loadings on the set: that asset is riskless, so `lam₀` is the risk-free return of
+the market. At general prices the intercept is the per-unit-price coefficient, and the
 corollary does not apply to it. -/
 theorem lam0_eq_of_zeroLoadingAsset {ι κ : Type*}
     {s : Finset ι} {t : Finset κ} {a : ι → ℝ} {β : ι → κ → ℝ}
@@ -307,9 +311,9 @@ exact-factor no-arbitrage condition supplies them at unit prices,
 `exists_premia_of_exactFactorNoArbitrage`), are determined: every pair `lam₀, lam` with
 `μ_excess i = lam₀ + lam * β i` on `s` has `lam₀ = 0` and `lam = portfolioReturn s w_M
 μ_excess`, the market's expected excess return, so the decomposition takes the security
-market line's form `μ i = lam * β i`. The market needs an asset with zero loading (which pins
-the intercept) and one with nonzero loading (which identifies the premium); the equilibrium
-relation is `CAPM_from_market_equilibrium`. -/
+market line's form `μ i = lam * β i`. The hypotheses include a zero-loading asset and a
+nonzero-loading asset on `s`: they pin the intercept and identify the premium in this proof's
+argument. The equilibrium relation is `CAPM_from_market_equilibrium`. -/
 theorem factorPremium_eq_marketPremium {ι : Type*} {s : Finset ι}
     {Sg : ι → ι → ℝ} {w_M μ_excess β : ι → ℝ}
     (h_FOC : ∀ j ∈ s, ∀ k ∈ s, μ_excess k * marginalVariance s Sg w_M j =
