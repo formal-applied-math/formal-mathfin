@@ -49,6 +49,7 @@ One `full` entry in `benchmarks/contracts.json`. Corpus 906 → 907 (866 full be
   `pathPV`s directly); no strict-convexity or strict-monotonicity form; the convexity hypothesis
   is almost everywhere, not pointwise. Each proof is the matching order property of the Bochner
   integral applied to `Contract.value`; no new machinery.
+
 ### The 2026-11-25 merge
 
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
