@@ -3237,6 +3237,24 @@ end MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.chainPrediction
 
+/-! ### The order on contract values (`ValueOrder.lean`) -/
+
+/-- info: 'MathFin.Contracts.Contract.value_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Contract.value_nonneg
+
+/-- info: 'MathFin.Contracts.Contract.value_le_value_of_pathPV_le_ae' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Contract.value_le_value_of_pathPV_le_ae
+
+/-- info: 'MathFin.Contracts.Contract.value_le_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Contract.value_le_value
+
+/-- info: 'MathFin.Contracts.Contract.value_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.Contracts.Contract.value_convexOn
+
 /-! ## The Ho–Lee bond price, continued — the zero-drift identification and the bridge
 
 `HoLeeBondPrice.lean`: at zero drift the Ho–Lee price is the driftless price of

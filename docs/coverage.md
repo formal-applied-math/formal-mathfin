@@ -26,6 +26,30 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### The order on contract values (2026-11-26)
+
+One `full` entry in `benchmarks/contracts.json`. Corpus 919 → 920 (873 full before, 874 after;
+891 → 892 delivery-ready): the one entry this topic adds over the tree it lands on.
+
+- **`mf-contract-value-order`** (MathFin/Pricing/ValueOrder.lean): the order properties of
+  `Contract.value`, stated at the `pathPV` level the file's lemmas use. Proved: a contract whose
+  present value is non-negative almost everywhere has a non-negative value, with **no**
+  integrability hypothesis (`Contract.value_nonneg` — the Bochner integral of a non-integrable
+  function is `0`, and `0 ≤ 0`); almost-everywhere dominance gives the order on values, with the
+  lower present value non-negative almost everywhere and the upper one integrable
+  (`Contract.value_le_value_of_pathPV_le_ae`, the `integral_mono_of_nonneg` hypotheses — without
+  integrability of the upper contract its value is the junk `0`, while the lower's honest integral
+  can be positive, and the order fails); the two-integrable companion (`Contract.value_le_value`,
+  `integral_mono_ae`); and
+  a family of contracts whose present value is convex in a real parameter almost everywhere, on
+  a convex parameter set, with each member integrable, has a `ConvexOn` value function
+  (`Contract.value_convexOn`, the `Contract.value` counterpart of `statePricePricing_convexOn`,
+  the integral in place of the state-price sum). Not proved: no order relation, `LE` instance or
+  dominance predicate on `Contract` is introduced (the statements compare two contracts'
+  `pathPV`s directly); no strict-convexity or strict-monotonicity form; the convexity hypothesis
+  is almost everywhere, not pointwise. Each proof is the matching order property of the Bochner
+  integral applied to `Contract.value`; no new machinery.
+
 ### The 2026-11-25 merge
 
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to

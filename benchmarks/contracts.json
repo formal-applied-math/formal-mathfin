@@ -2005,6 +2005,33 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. europeanCall_selfFinancing in MathFin/Models/BlackScholes/BlackScholesSelfFinancing.lean applies the product rule with the finite-variation factor e^{rt} to the discounted value, which is the Ito process localItoProcess of the delta-hedge integrand (capped in time by timeCap so that its paths are continuous): Ito's formula for f(t, x) = e^{rt} x (ito_formula_adapted_unbounded_process) gives V_t = V_0 + int r V ds + int e^{rs} H_s dB with H the discounted integrand, and r V = Delta r S + r psi splits the drift; the contract value comes from mf-bs-call-contract-value-pathassets and the replication theorem of mf-bs-delta-hedge-replication. SCOPE: an integral identity only. There is no trading-strategy structure and no admissibility or self-financing predicate; the gain int Delta dS is not an integral against the semimartingale S, it is spelled as int Delta r S ds + int Delta sigma S dB, with the Brownian integral predItoIntegral against B at horizon T'. The identity is on [0, T'] with T' < T. Not a legal instrument. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-contract-value-order",
+      "name": "The Order on Contract Values",
+      "description": "The order properties of Contract.value, the Q-integral of a contract's deflated pathwise present value: a contract whose present value is non-negative almost everywhere has non-negative value, with no integrability hypothesis (the Bochner integral of a non-integrable function is the junk value 0, and 0 <= 0); a contract whose present value dominates another's almost everywhere, with the lower one non-negative almost everywhere and the upper one integrable, is worth at least as much; the two-integrable companion needs only the dominance; and a family of contracts whose present value is convex in a real parameter almost everywhere, on a convex parameter set, with each member integrable, has a ConvexOn value function. Each proof is the matching order property of the Bochner integral (integral_nonneg_of_ae, integral_mono_of_nonneg, integral_mono_ae, integral_convexOn_of_integrand_ae) applied to Contract.value.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Pricing.ValueOrder\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {ι Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Present value non-negative a.e. gives non-negative value, no integrability hypothesis. -/\ntheorem value_nonneg' (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)\n    (c : Contract ι) (h : 0 ≤ᵐ[Q] fun ω ↦ c.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) :\n    0 ≤ c.value Q D X :=\n  MathFin.Contracts.Contract.value_nonneg Q D X c h\n\n/-- A.e. dominance with a.e.-nonneg lower and integrable upper orders two values. -/\ntheorem value_le_value_ae' (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)\n    (a b : Contract ι) (hnn : 0 ≤ᵐ[Q] fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω))\n    (hb : Integrable (fun ω ↦ b.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)\n    (hle : (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) ≤ᵐ[Q]\n      fun ω ↦ b.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) :\n    a.value Q D X ≤ b.value Q D X :=\n  MathFin.Contracts.Contract.value_le_value_of_pathPV_le_ae Q D X a b hnn hb hle\n\n/-- Both integrable: dominance alone orders the values. -/\ntheorem value_le_value' (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)\n    (a b : Contract ι) (ha : Integrable (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)\n    (hb : Integrable (fun ω ↦ b.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q)\n    (hle : (fun ω ↦ a.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) ≤ᵐ[Q]\n      fun ω ↦ b.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) :\n    a.value Q D X ≤ b.value Q D X :=\n  MathFin.Contracts.Contract.value_le_value Q D X a b ha hb hle\n\n/-- A.e. convexity in a parameter is preserved by the value. -/\ntheorem value_convexOn' (Q : Measure Ω) (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ)\n    {c : ℝ → Contract ι} {s : Set ℝ} (hs : Convex ℝ s)\n    (hconv : ∀ᵐ ω ∂Q, ConvexOn ℝ s fun k ↦ (c k).pathPV (fun t ↦ D t ω) (scenarioAt X ω))\n    (hint : ∀ k ∈ s, Integrable (fun ω ↦ (c k).pathPV (fun t ↦ D t ω) (scenarioAt X ω)) Q) :\n    ConvexOn ℝ s fun k ↦ (c k).value Q D X :=\n  MathFin.Contracts.Contract.value_convexOn Q D X hs hconv hint\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "No-arbitrage monotonicity at the value level (J. C. Hull, Options, Futures, and Other Derivatives, ch. 1; S. E. Shreve, Stochastic Calculus for Finance II, ch. 5). The statements are the Bochner integral's order properties; the finite-state counterpart is statePricePricing_convexOn (Breeden & Litzenberger 1978; Merton 1973), not cited by this entry's statement. Contract-reification framing after P. Bilokon, The Contract Is Not the Model (working paper, 2026), github.com/thalesians/lean_contracts (Apache-2.0); no code copied.",
+        "citations": [
+          {
+            "key": "Hull"
+          },
+          {
+            "key": "ShreveSCFII"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the four stated order properties of Contract.value (MathFin/Pricing/ValueOrder.lean): value_nonneg (a.e. pathwise non-negativity gives a non-negative value, unconditional), value_le_value_of_pathPV_le_ae (a.e. dominance + a.e.-nonneg lower + integrable upper), value_le_value (both integrable), value_convexOn (a.e. convexity of the pathwise present value in a real parameter + convex parameter set + per-member integrability). Stated at the pathPV level against a generic model X and deflator D, exactly as Contract.value is defined; no order relation, LE instance or dominance predicate on Contract is introduced. The convexity hypothesis is a.e., what integral_convexOn_of_integrand_ae consumes; a pointwise hypothesis implies it. The no-arbitrage reading (a claim that pays more in every state costs more) is the finance framing; the theorems themselves are properties of the integral against an arbitrary measure Q, not a theorem about a pricing measure. Payoff is a finite inductive, so any payoff kernel is over a finite observation grid; the Payoff/Contract language has no calendar, business-day convention, market-disruption, corporate-action or issuer-credit node at any instantiation, so this is never a legal instrument and none of that content is claimed. Axioms-clean."
+      }
     }
   ]
 }
