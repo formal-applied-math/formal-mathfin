@@ -890,10 +890,11 @@ graph TD
   smileNoArbitrage --> sviMarketRealisation
   contract --> kellyIsLogOptimal
   contractValue --> kellyIsLogOptimal
+  expectedUtility --> kellyIsLogOptimal
   market --> kellyIsLogOptimal
   pricingFunctional --> kellyIsLogOptimal
   pricingMeasure --> kellyIsLogOptimal
-  kellyCriterion --> kellyIsLogOptimal
+  expectedUtilityIntegral --> kellyIsLogOptimal
   logOptimalNumeraireOnePeriod --> kellyIsLogOptimal
   oneDateMarket --> kellyIsLogOptimal
   emm --> calibratedMartingaleMeasures

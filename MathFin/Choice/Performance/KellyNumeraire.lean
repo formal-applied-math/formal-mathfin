@@ -219,8 +219,9 @@ theorem kelly_foc (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) (d : Fin 2 → ℝ) (h
 /-- **Kelly's inequality**: among the fractions `y` with positive wealth in both states
 (`1 + y b > 0`, `1 − y > 0`), the Kelly fraction has the largest expected log-growth,
 `p log(1 + y b) + (1 − p) log(1 − y) ≤ p log(1 + f* b) + (1 − p) log(1 − f*)`. From
-`log x ≤ x − 1` applied to the wealth ratios `W / W*`, whose `P`-mean is `1` because `W*` is the
-Kelly wealth (`kellyGOPWealth_win`, `kellyGOPWealth_lose`). -/
+`log x ≤ x − 1` applied to the wealth ratios `W / W*`, whose `P`-mean is `1` by the first-order
+condition `kelly_foc` along the budget-neutral direction `(0, y − f*)`: the first-order condition
+and the concavity of `log` give the global bound. -/
 lemma kelly_log_le (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) {y : ℝ} (hA : 0 < 1 + y * b)
     (hB : 0 < 1 - y) :
     p * Real.log (1 + y * b) + (1 - p) * Real.log (1 - y) ≤
@@ -237,13 +238,11 @@ lemma kelly_log_le (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) {y : ℝ} (hA : 0 < 1
     exact Real.log_le_sub_one_of_pos (div_pos hB hB')
   have key : p * ((1 + y * b) / (1 + kellyFraction p b * b) - 1) +
       (1 - p) * ((1 - y) / (1 - kellyFraction p b) - 1) = 0 := by
-    have hp0 : p ≠ 0 := hp.ne'
-    have hq0 : 1 - p ≠ 0 := (sub_pos.2 hp1).ne'
-    have hb0 : b ≠ 0 := hb.ne'
-    have hb1 : b + 1 ≠ 0 := by positivity
-    rw [kellyGOPWealth_win hb0, kellyGOPWealth_lose hb0]
-    field_simp
-    ring
+    have h := kelly_foc hp hp1 hb ![0, y - kellyFraction p b] rfl
+    rw [Fin.sum_univ_two] at h
+    simp only [kellyPayoff_win, kellyPayoff_lose, Matrix.cons_val_zero, Matrix.cons_val_one] at h
+    rw [div_sub_one hA'.ne', div_sub_one hB'.ne']
+    linear_combination h
   nlinarith [mul_le_mul_of_nonneg_left h1 hp.le, mul_le_mul_of_nonneg_left h2 (sub_pos.2 hp1).le]
 
 /-- **The GOP-deflated probabilities are the state prices of the Kelly market.** The Kelly
