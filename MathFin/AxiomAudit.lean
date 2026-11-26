@@ -2190,6 +2190,14 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_le_of_convexOrder
 
+/-- info: 'MathFin.CompletelyMixable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CompletelyMixable
+
+/-- info: 'MathFin.CompletelyMixable.exists_convexOrder_min' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CompletelyMixable.exists_convexOrder_min
+
 /-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_isCoherentRiskMeasure

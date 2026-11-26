@@ -870,8 +870,9 @@ family = "volatility"
 label = "thm:uniform-convex-complete-mixability"
 title = "Complete mixability of uniform laws on convex bodies"
 statement = "Open (MF-OP-016, Wang 2015): whether the uniform law on a bounded convex body of ℝᵈ is n-completely mixable for every n ≥ d + 1."
-uses = ["thm:frechet-hoeffding"]
+uses = ["def:complete-mixability", "thm:frechet-hoeffding"]
 ground = "Mathlib: Measure.map, cond"
+core = ["mf-simplex-complete-mixability", "mf-symmetric-complete-mixability"]
 lean = "MathFinFrontier.uniform_convex_completelyMixable"
 area = "risk/aggregation"
 

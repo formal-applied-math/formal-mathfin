@@ -25,7 +25,10 @@ A coupling is a probability measure `π` on `Fin n → E` whose coordinate margi
 both statements use no definition the reader has to trust.
 
 * MF-OP-016 (Open Problem 5): the uniform law on a bounded convex body of `ℝᵈ` is `n`-completely
-  mixable for every `n ≥ d + 1`. Known for `d ≤ 1`.
+  mixable for every `n ≥ d + 1`. Known for `d ≤ 1`. The library proves two partial cases
+  (`MathFin/Risk/CompleteMixability.lean`): simplices for `n` a multiple of `d + 1`
+  (`MathFin.completelyMixable_simplex`) and centrally symmetric sets for even `n`
+  (`MathFin.completelyMixable_of_symmetric`).
 * MF-OP-017 (Open Problem 7): an absolutely continuous law on a bounded interval is
   `n`-completely mixable for all large `n`. Known when the density is bounded away from zero.
   Two unrefereed claims disagree: Yin–Zhu (arXiv 1706.05499) are reported to give a

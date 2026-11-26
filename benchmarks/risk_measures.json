@@ -1159,6 +1159,72 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof for this one instance. Two explicit couplings, with sums 6, 6, 9 and 8, 8, 5, force a convex-order minimum to live on [6, 8] (convex order passes support bounds down); on the event X₂ = 5, of probability 1/3, every coupling's sum lies outside [6, 8]. The instance was found by an exhaustive search and is smaller than the published counterexample of Bernard–Jiang–Wang (atoms {0, 3, 8}, {0, 6, 16}, {0, 7, 13}). The general characterisation (MF-OP-018) is not formalised. Lives in MathFin/Risk/ConvexOrderSums.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-simplex-complete-mixability",
+      "name": "The Uniform Law on a Simplex Is Completely Mixable",
+      "description": "Let E be a finite-dimensional real vector space with a Haar measure (for instance ℝᵈ with Lebesgue measure), let S be a simplex in E, the convex hull of an affine basis with n vertices (n = d + 1 in ℝᵈ), and let k ≥ 1. Then there are kn random vectors, each uniformly distributed on S, whose sum is almost surely constant. For k = 1 in ℝᵈ this is the boundary case n = d + 1 of the open problem MF-OP-016 (Wang 2015, Open Problem 5), restricted to simplices; the problem itself, for every convex body and every n ≥ d + 1, is not resolved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem simplex_completelyMixable_thm {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]\n    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure]\n    {n : ℕ} [NeZero n] (b : AffineBasis (Fin n) ℝ E) {k : ℕ} (hk : 1 ≤ k) :\n    ∃ π : Measure (Fin (k * n) → E), IsProbabilityMeasure π ∧\n      (∀ i, π.map (fun x ↦ x i) = μ[|convexHull ℝ (range b)]) ∧\n      ∃ c, ∀ᵐ x ∂π, ∑ i, x i = c :=\n  CompletelyMixable.mul (completelyMixable_simplex μ b) hk\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Wang, Current open questions in complete mixability (2015), §2.5, Open Problem 5",
+        "citations": [
+          {
+            "key": "Wang2015CompleteMixability"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. For the vertices b₀, …, b_d and each k, the affine map sending b j to b (j + k) (indices mod d + 1) maps the simplex onto itself, so it preserves Lebesgue measure (an affine bijection mapping a set of finite positive measure onto itself has |det| = 1) and the uniform law. In barycentric coordinates the d + 1 images of a point add up to b₀ + ⋯ + b_d, so the images of one uniform point form a complete mix; k independent copies side by side give k(d + 1). The statement is the frontier statement of MF-OP-016 with C a simplex and n a multiple of d + 1; other n and other convex bodies are not covered. Lives in MathFin/Risk/CompleteMixability.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-symmetric-complete-mixability",
+      "name": "Centrally Symmetric Uniform Laws Are Completely Mixable in Even Numbers",
+      "description": "Let E be a finite-dimensional real vector space with a Haar measure (for instance ℝᵈ with Lebesgue measure), and let C be a measurable set in E of finite positive measure, symmetric about a point c (x ∈ C implies 2c − x ∈ C), and let k ≥ 1. Then there are 2k random vectors, each uniformly distributed on C, whose sum is almost surely constant. Convexity is not needed. For closed centrally symmetric convex bodies (parallelograms, discs, ellipsoids, boxes) this proves the case of the open problem MF-OP-016 (Wang 2015) for every even n ≥ d + 1; odd n, such as three copies of the uniform law on a parallelogram, is not covered.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem symmetric_completelyMixable_thm {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]\n    [MeasurableSpace E] [BorelSpace E] (μ : Measure E) [μ.IsAddHaarMeasure]\n    {C : Set E} (hC : MeasurableSet C) (h0 : μ C ≠ 0) (htop : μ C ≠ ⊤) (c : E)\n    (hsymm : ∀ x ∈ C, 2 • c - x ∈ C) {k : ℕ} (hk : 1 ≤ k) :\n    ∃ π : Measure (Fin (k * 2) → E), IsProbabilityMeasure π ∧\n      (∀ i, π.map (fun x ↦ x i) = μ[|C]) ∧ ∃ s, ∀ᵐ x ∂π, ∑ i, x i = s :=\n  completelyMixable_of_symmetric μ hC h0 htop c hsymm hk\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Wang, Current open questions in complete mixability (2015), §2.5",
+        "citations": [
+          {
+            "key": "Wang2015CompleteMixability"
+          }
+        ],
+        "difficulty": "elementary",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The point reflection x ↦ 2c − x is an affine bijection mapping C onto itself, so it preserves Lebesgue measure and the uniform law on C; X and 2c − X form a 2-mix with sum 2c, and k independent copies side by side give a 2k-mix. Odd numbers of copies are not covered. Lives in MathFin/Risk/CompleteMixability.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-complete-mix-convex-order-minimum",
+      "name": "A Complete Mix Minimises the Sum in Convex Order",
+      "description": "Let μ be an integrable law on ℝ, and let π couple n copies of μ so that their sum is almost surely a constant c. Then for every coupling π' of n copies of μ, the law of the sum under π (the point mass at c) is below the law of the sum under π' in convex order. So a completely mixable law has a sum that is smallest in convex order among all dependence structures; with mf-es-convex-order-consistent, its expected shortfall is the smallest at every level. This is the case of the open problem MF-OP-018 in which a minimum exists; when it exists in general is not resolved.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Risk.CompleteMixability\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin\n\ntheorem convexOrder_sum_of_completelyMixable_thm {n : ℕ} {μ : Measure ℝ}\n    (hμ : Integrable id μ) {π π' : Measure (Fin n → ℝ)} [IsProbabilityMeasure π]\n    [IsProbabilityMeasure π'] (hπ : ∀ i, π.map (fun x ↦ x i) = μ)\n    (hπ' : ∀ i, π'.map (fun x ↦ x i) = μ) {c : ℝ} (hc : ∀ᵐ x ∂π, ∑ i, x i = c) :\n    ConvexOrder (π.map fun x ↦ ∑ i, x i) (π'.map fun x ↦ ∑ i, x i) :=\n  convexOrder_sum_of_completelyMixable hμ hπ hπ' hc\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Bernard–Jiang–Wang, Risk aggregation with dependence uncertainty (2014); Wang, Current open questions in complete mixability (2015)",
+        "citations": [
+          {
+            "key": "BernardJiangWang2014"
+          },
+          {
+            "key": "Wang2015CompleteMixability"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Under π the sum has law δ_c, and c is the common mean n∫x dμ of the sum under every coupling; Jensen's inequality, in the form δ_{mean} ≤cx ν (ConvexOrder.dirac_integral_le), gives the comparison. Lives in MathFin/Risk/CompleteMixability.lean. Axioms-clean."
+      }
     }
   ]
 }
