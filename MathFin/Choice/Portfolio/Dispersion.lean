@@ -35,7 +35,9 @@ identity and what it lets one solve for.
   nonnegative observed variance, by Jensen's inequality (`jensenProxy_le_bossuProxy`).
 * A **correlation swap** pays the pairwise correlations averaged over the pairwise weight
   products `wᵢwⱼ` (an average where the normalisation is positive — nonnegative at nonnegative
-  index weights, and positive once two or more components carry weight). Under equicorrelation
+  index weights, and positive once two or more components carry weight). The source's §3.2
+  payoff normalises over the unordered pairs, half this mass; the factor cancels in the
+  average, and both read the common correlation under equicorrelation. Under equicorrelation
   that ratio, read off the dispersion identity as the off-diagonal share of the portfolio
   variance, is the common correlation
   (`realisedCorrelation_equicorrelation`).
@@ -290,8 +292,9 @@ theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
 off-diagonal share of the equicorrelated portfolio variance to the off-diagonal weight mass
 `∑ wᵢwⱼ` — the pairwise correlations averaged over the weight products where that
 normalisation is positive (nonnegative at nonnegative index weights, positive once two or
-more components carry weight) — realises the common correlation. A swap struck at the common
-correlation therefore pays nothing. -/
+more components carry weight) — realises the common correlation. The source's printed payoff
+normalises over the unordered pairs, half this mass; the factor cancels in the average. A
+swap struck at the common correlation therefore pays nothing. -/
 theorem realisedCorrelation_equicorrelation (w : n → ℝ) (ρ : ℝ)
     (hW : (∑ i, w i) ^ 2 ≠ ∑ i, w i ^ 2) :
     (portfolioVarN univ w (equicorrelationMatrix n ρ) - ∑ i, w i ^ 2)
