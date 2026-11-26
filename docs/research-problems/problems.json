@@ -1196,7 +1196,8 @@
       "mathematical_status": "open",
       "known_results": [
         "d=1: uniform on an interval is n-CM for n>=2 (Gaffke-Ruschendorf 1981).",
-        "Projection of an n-CM law to any subspace is n-CM; concave-density laws on R are n-CM for n>=3 (Puccetti-Wang-Wang 2012)."
+        "Projection of an n-CM law to any subspace is n-CM; concave-density laws on R are n-CM for n>=3 (Puccetti-Wang-Wang 2012).",
+        "Proved here (2026-11-25, MathFin/Risk/CompleteMixability.lean): the uniform law on a simplex of R^d is k(d+1)-CM for every k >= 1 (cyclic vertex shifts; the case n = d+1 for simplices), and the uniform law on a centrally symmetric set is 2k-CM. Odd n for parallelograms and general convex bodies remain open."
       ],
       "sources": [
         {
@@ -1235,6 +1236,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-25",
+          "status": "open",
+          "reason": "Partial results formalised: simplices at n = k(d+1), centrally symmetric sets at even n (entries mf-simplex-complete-mixability, mf-symmetric-complete-mixability). The problem stays open."
         }
       ],
       "issue_number": 552,
@@ -1242,7 +1248,10 @@
       "formalization": {
         "status": "stated",
         "scope": "this repository",
-        "declarations": [],
+        "declarations": [
+          "MathFin.completelyMixable_simplex",
+          "MathFin.completelyMixable_of_symmetric"
+        ],
         "lean_statement": {
           "status": "stated",
           "blueprint": "thm:uniform-convex-complete-mixability",
@@ -1360,7 +1369,8 @@
       "mathematical_status": "open",
       "known_results": [
         "Counterexample class exists; smallest element exists for decreasing densities; Bernoulli marginals always have one (cited from search summary, not opened).",
-        "A smaller counterexample than Bernard-Jiang-Wang's: marginals uniform on {0,0,4}, {0,2,5}, {0,4,6} (machine-checked, MathFin.exists_not_convexOrder_sum, 2026-11-25)."
+        "A smaller counterexample than Bernard-Jiang-Wang's: marginals uniform on {0,0,4}, {0,2,5}, {0,4,6} (machine-checked, MathFin.exists_not_convexOrder_sum, 2026-11-25).",
+        "Proved here (2026-11-25): when the marginal is n-completely mixable, the complete mix is the convex-order minimum of the sum (MathFin.convexOrder_sum_of_completelyMixable)."
       ],
       "sources": [
         {

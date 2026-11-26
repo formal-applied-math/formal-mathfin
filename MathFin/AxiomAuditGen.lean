@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1164 MathFin constants, 29 upstream). Citations
+corpus (1168 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -259,6 +259,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.CVA.protectionLeg_eq_integral_coxDefaultTime
+
+/-- info: 'MathFin.CompletelyMixable.mul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.CompletelyMixable.mul
 
 /-- info: 'MathFin.ContinuousMarket.isEMM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2072,6 +2076,14 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.compensated_simple_isometry
 
+/-- info: 'MathFin.completelyMixable_of_symmetric' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.completelyMixable_of_symmetric
+
+/-- info: 'MathFin.completelyMixable_simplex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.completelyMixable_simplex
+
 /-- info: 'MathFin.compoundPoisson_mgf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.compoundPoisson_mgf
@@ -2115,6 +2127,10 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.convexOn_piecewiseLinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.convexOn_piecewiseLinear
+
+/-- info: 'MathFin.convexOrder_sum_of_completelyMixable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.convexOrder_sum_of_completelyMixable
 
 /-- info: 'MathFin.copulaOf_comp_strictMono' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

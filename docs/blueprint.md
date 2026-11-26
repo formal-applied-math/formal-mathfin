@@ -62,6 +62,7 @@ graph TD
   brownianMotion["Brownian motion (Mathlib, upstream)"]:::upstream
   chainLadderPrediction["Chain-ladder prediction"]:::proved
   coinFlipMeasure["The coin-flip path law"]:::proved
+  completeMixability["Complete mixability"]:::proved
   contract["Contract"]:::proved
   convexOrder["Convex order"]:::proved
   convexRiskMeasure["Convex risk measure"]:::proved
@@ -123,6 +124,7 @@ graph TD
   buhlmannCredibility["Bühlmann credibility"]:::proved
   capmEquilibrium["CAPM beta relation, given tangency of the market portfolio"]:::proved
   coinFlipMarkov["The coin-flip law is a Markov chain's path law"]:::proved
+  completeMixConvexOrderMinimum["A complete mix is the convex-order minimum of the sum"]:::proved
   continuousFtap["An equivalent martingale measure excludes simple arbitrage in continuous time"]:::proved
   dupireZeroRates["Dupire's formula at zero rates, from the conditional local variance"]:::proved
   entropicRiskCertaintyEquivalent["Entropic risk is the certainty equivalent of exponential utility"]:::proved
@@ -451,6 +453,8 @@ graph TD
   portfolioVariance --> capmEquilibrium
   coinFlipMeasure --> coinFlipMarkov
   markovPathLaw --> coinFlipMarkov
+  completeMixability --> completeMixConvexOrderMinimum
+  convexOrder --> completeMixConvexOrderMinimum
   emm --> continuousFtap
   martingaleTransform --> continuousFtap
   brownianMotion --> dupireZeroRates
@@ -1080,6 +1084,7 @@ graph TD
   relaxedControlledDiffusion --> timeInconsistentEquilibrium
   margrabe --> twoAssetOptionFormulas
   bsCall --> twoAssetOptionFormulas
+  completeMixability --> uniformConvexCompleteMixability
   frechetHoeffding --> uniformConvexCompleteMixability
   bsCall --> varianceGammaCall
   martingaleTransform --> varianceOptimalHedging
@@ -1099,6 +1104,7 @@ graph TD
 | `def:brownian-motion` Brownian motion (Mathlib, upstream) | ✅ upstream | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Abrownian-motion%22%20in%3Abody) |
 | `def:chain-ladder-prediction` Chain-ladder prediction | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Achain-ladder-prediction%22%20in%3Abody) |
 | `def:coin-flip-measure` The coin-flip path law | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acoin-flip-measure%22%20in%3Abody) |
+| `def:complete-mixability` Complete mixability | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acomplete-mixability%22%20in%3Abody) |
 | `def:contract` Contract | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Acontract%22%20in%3Abody) |
 | `def:convex-order` Convex order | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-order%22%20in%3Abody) |
 | `def:convex-risk-measure` Convex risk measure | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22def%3Aconvex-risk-measure%22%20in%3Abody) |
@@ -1160,6 +1166,7 @@ graph TD
 | `thm:buhlmann-credibility` Bühlmann credibility | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Abuhlmann-credibility%22%20in%3Abody) |
 | `thm:capm-equilibrium` CAPM beta relation, given tangency of the market portfolio | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acapm-equilibrium%22%20in%3Abody) |
 | `thm:coin-flip-markov` The coin-flip law is a Markov chain's path law | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acoin-flip-markov%22%20in%3Abody) |
+| `thm:complete-mix-convex-order-minimum` A complete mix is the convex-order minimum of the sum | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acomplete-mix-convex-order-minimum%22%20in%3Abody) |
 | `thm:continuous-ftap` An equivalent martingale measure excludes simple arbitrage in continuous time | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Acontinuous-ftap%22%20in%3Abody) |
 | `thm:dupire-zero-rates` Dupire's formula at zero rates, from the conditional local variance | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Adupire-zero-rates%22%20in%3Abody) |
 | `thm:entropic-risk-certainty-equivalent` Entropic risk is the certainty equivalent of exponential utility | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aentropic-risk-certainty-equivalent%22%20in%3Abody) |

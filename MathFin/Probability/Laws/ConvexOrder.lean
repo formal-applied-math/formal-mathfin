@@ -7,6 +7,8 @@ module
 
 public import MathFin.Init
 public import Mathlib.Analysis.Convex.Function
+public import Mathlib.Analysis.Convex.Continuous
+public import Mathlib.Analysis.Convex.Integral
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.MeasureTheory.Function.LocallyIntegrable
 
@@ -32,6 +34,8 @@ lives inside every interval `ν` lives in.
 ## Main results
 
 * `ConvexOrder.refl`: every law is below itself.
+* `ConvexOrder.dirac_integral_le`: the point mass at the mean is below the law (Jensen's
+  inequality). It is the smallest law with that mean.
 * `ConvexOrder.integral_id_eq`: ordered laws with a first moment have the same mean.
 * `ConvexOrder.integral_call_le`, `ConvexOrder.integral_put_le`: ordered laws have ordered call
   and put prices at every strike.
@@ -94,6 +98,15 @@ variable {μ ν : Measure ℝ}
 namespace ConvexOrder
 
 lemma refl (μ : Measure ℝ) : ConvexOrder μ μ := fun _ _ _ _ ↦ le_rfl
+
+/-- **Jensen's inequality, in convex order**: the point mass at the mean of a law is below the
+law. A convex function is continuous on `ℝ`, so `ConvexOn.map_integral_le` applies. -/
+lemma dirac_integral_le (ν : Measure ℝ) [IsProbabilityMeasure ν] (hν : Integrable id ν) :
+    ConvexOrder (Measure.dirac (∫ x, x ∂ν)) ν := by
+  intro φ hφ _ hφν
+  rw [integral_dirac]
+  exact hφ.map_integral_le (by simpa using hφ.continuousOn_interior) isClosed_univ
+    (ae_of_all _ fun _ ↦ mem_univ _) hν hφν
 
 /-- **Ordered laws have equal means.** The identity and its negative are both convex. -/
 lemma integral_id_eq (h : ConvexOrder μ ν) (hμ : Integrable id μ) (hν : Integrable id ν) :
