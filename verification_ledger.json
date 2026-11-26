@@ -1105,9 +1105,9 @@
     "mf-bisection-straddle": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-26",
-      "elapsed_s": 4.2,
-      "input_hash": "82ba7fb1cd0c113d1daa67356c80fcce78ccdfc6d097b74e83cf4489dfd6a170",
-      "verified_at_commit": "1ccd169"
+      "elapsed_s": 4.8,
+      "input_hash": "45bed78becaeb40cd333cdc20f367d4b95efd0069b1f91108d8cc0070e743951",
+      "verified_at_commit": "79e2362"
     },
     "mf-bivariate-normal-gaussian-characterization": {
       "benchmark_file": "stochastic_foundations.json",
@@ -1679,9 +1679,9 @@
     "mf-bsV-sigma-zero-limit": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.0,
-      "input_hash": "baef27e77ecdfc4fa4a7791350af41040da9628367e94e1e8d4e41f64e40a4ea",
-      "verified_at_commit": "1ccd169"
+      "elapsed_s": 3.3,
+      "input_hash": "3e2b46b162d75fe6c8ffe7c8cfafdb18a3c99625e443d894c2f6bd78ba2d40f7",
+      "verified_at_commit": "79e2362"
     },
     "mf-bsd1-K-deriv": {
       "benchmark_file": "black_scholes.json",
@@ -3415,9 +3415,9 @@
     "mf-implied-vol-existence": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-26",
-      "elapsed_s": 3.0,
-      "input_hash": "52d54a2572cf8d2c0b185376dbee027494814272a7c2cf51e553f246ad0efada",
-      "verified_at_commit": "1ccd169"
+      "elapsed_s": 3.4,
+      "input_hash": "76c221a29d61dff40e29c93721c9ef49d37c98c5883efbb4248dd3ded062ddab",
+      "verified_at_commit": "79e2362"
     },
     "mf-implied-vol-exists-above-reference": {
       "benchmark_file": "black_scholes.json",
