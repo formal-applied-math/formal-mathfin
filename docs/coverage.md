@@ -28,8 +28,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ### The order on contract values (2026-11-26)
 
-One `full` entry in `benchmarks/contracts.json`. Corpus 906 → 907 (866 full before, 867 after;
-884 → 885 delivery-ready).
+One `full` entry in `benchmarks/contracts.json`. Corpus 919 → 920 (873 full before, 874 after;
+891 → 892 delivery-ready): the one entry this topic adds over the tree it lands on.
 
 - **`mf-contract-value-order`** (MathFin/Pricing/ValueOrder.lean): the order properties of
   `Contract.value`, stated at the `pathPV` level the file's lemmas use. Proved: a contract whose
