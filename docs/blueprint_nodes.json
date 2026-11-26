@@ -1945,18 +1945,6 @@
   "label": "def:gaussian-factor-copula",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Dependence/GaussianCopula.lean"},
- {"uses": ["def:standard-normal-cdf"],
-  "title": "Implied volatility for every arbitrage-free price",
-  "text":
-  "For $S, K, T > 0$, every call price $C$ in the open no-arbitrage range\n  $(S - Ke^{-rT})^+ < C < S$ has an implied volatility: a unique $\\sigma > 0$ with\n  $V(K, r, \\sigma, S, T) = C$ (`exists_impliedVol_of_lt`, packaged as the function\n  `impliedVol` with its defining equation `impliedVol_defining_eq`). What removes the\n  reference-volatility hypothesis of the earlier existence result is the\n  $\\sigma \\to 0^+$ limit $V \\to (S - Ke^{-rT})^+$ (`tendsto_bsV_sigma_zero`); and at an\n  interior threshold of the price against $C$ the bisection estimates converge to that\n  threshold, which prices the option (`bsV_bisect_threshold_root`).",
-  "name": "MathFin.exists_impliedVol_of_lt",
-  "module": "MathFin.Models.BlackScholes.ImpliedVolExistence",
-  "line": 252,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:implied-vol-existence",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ImpliedVolExistence.lean"},
  {"uses":
   ["thm:superhedging-coherent",
    "thm:superhedging-price-lower-bound",
@@ -1972,6 +1960,18 @@
   "label": "thm:superhedging-duality",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Risk/Superhedging.lean"},
+ {"uses": ["def:standard-normal-cdf"],
+  "title": "Implied volatility for every arbitrage-free price",
+  "text":
+  "For $S, K, T > 0$, every call price $C$ in the open no-arbitrage range\n  $(S - Ke^{-rT})^+ < C < S$ has an implied volatility: a unique $\\sigma > 0$ with\n  $V(K, r, \\sigma, S, T) = C$ (`exists_impliedVol_of_lt`, packaged as the function\n  `impliedVol` with its defining equation `impliedVol_defining_eq`). What removes the\n  reference-volatility hypothesis of the earlier existence result is the\n  $\\sigma \\to 0^+$ limit $V \\to (S - Ke^{-rT})^+$ (`tendsto_bsV_sigma_zero`); and at an\n  interior threshold of the price against $C$ the bisection estimates converge to that\n  threshold, which prices the option (`bsV_bisect_threshold_root`).",
+  "name": "MathFin.exists_impliedVol_of_lt",
+  "module": "MathFin.Models.BlackScholes.ImpliedVolExistence",
+  "line": 253,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:implied-vol-existence",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/BlackScholes/ImpliedVolExistence.lean"},
  {"uses": ["def:portfolio-variance", "thm:kkt-sufficiency"],
   "title": "Markowitz mean–variance optimality",
   "text":
@@ -1984,18 +1984,6 @@
   "label": "thm:markowitz-lagrangian",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Choice/Portfolio/MarkowitzLagrangian.lean"},
- {"uses": ["thm:carr-madan"],
-  "title": "Breeden–Litzenberger formula",
-  "text":
-  "For a price process whose time-$s$ marginal is integrable and any smooth\n  compactly supported $\\psi$, $\\int \\psi''(K)\\,C(s,K)\\,dK = E[\\psi(X_s)]$, where $C(s,K) =\n  E[(X_s - K)^+]$ is the call surface at zero rates: $\\partial_K^2 C(s,\\cdot)$ is the law of\n  $X_s$ as a distribution. The weak form, for an arbitrary law.",
-  "name": "MathFin.Dupire.breedenLitzenberger_weak",
-  "module": "MathFin.Models.LocalVol.Dupire",
-  "line": 267,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:breeden-litzenberger",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Bracket of the Itô integral",
   "text":
@@ -2008,6 +1996,18 @@
   "label": "thm:bracket-compensator",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Martingales/BracketCompensator.lean"},
+ {"uses": ["thm:carr-madan"],
+  "title": "Breeden–Litzenberger formula",
+  "text":
+  "For a price process whose time-$s$ marginal is integrable and any smooth\n  compactly supported $\\psi$, $\\int \\psi''(K)\\,C(s,K)\\,dK = E[\\psi(X_s)]$, where $C(s,K) =\n  E[(X_s - K)^+]$ is the call surface at zero rates: $\\partial_K^2 C(s,\\cdot)$ is the law of\n  $X_s$ as a distribution. The weak form, for an arbitrary law.",
+  "name": "MathFin.Dupire.breedenLitzenberger_weak",
+  "module": "MathFin.Models.LocalVol.Dupire",
+  "line": 267,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:breeden-litzenberger",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/LocalVol/Dupire.lean"},
  {"uses":
   ["def:quantile",
    "def:value-at-risk",
@@ -2166,6 +2166,18 @@
   "label": "thm:key-rate-market-price",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Models/Rates/DeterministicMarket.lean"},
+ {"uses": ["def:brownian-motion"],
+  "title": "Lévy's characterization of Brownian motion",
+  "text":
+  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
+  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
+  "module": "MathFin.Probability.Brownian.LevyCharacterization",
+  "line": 323,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:levy-characterization",
+  "file":
+  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses":
   ["def:market",
    "def:brownian-motion",
@@ -2185,18 +2197,6 @@
   "label": "thm:market-completeness",
   "file":
   "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Pricing/MarketCompleteness.lean"},
- {"uses": ["def:brownian-motion"],
-  "title": "Lévy's characterization of Brownian motion",
-  "text":
-  "A continuous adapted real process $M$ with $M_0 = 0$ such that $M$ and\n  $M_t^2 - t$ are local martingales for a filtration $\\mathbb{F}$ is a Brownian motion; the\n  filtered version, with increments independent of $\\mathbb{F}$, is\n  `isFilteredPreBrownian_of_localMartingale`. The hypothesis is that $M^2 - t$ is a local\n  martingale, not that a quadratic variation process $\\langle M\\rangle$ equals $t$: no\n  quadratic variation is constructed for a general continuous local martingale.",
-  "name": "MathFin.LevyCharacterization.isBrownianReal_of_localMartingale",
-  "module": "MathFin.Probability.Brownian.LevyCharacterization",
-  "line": 323,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:levy-characterization",
-  "file":
-  "/home/runner/work/formal-mathfin/formal-mathfin/MathFin/Probability/Brownian/LevyCharacterization.lean"},
  {"uses": ["def:portfolio-variance", "thm:markowitz-lagrangian"],
   "title": "Tangent portfolio",
   "text":

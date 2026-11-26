@@ -17,3 +17,4 @@
 "thm:forward-measure" = "valuation/term"           # declared among the pricing files; it is the bond-numéraire measure
 "thm:carr-madan" = "probability/analysis"           # a pathwise Taylor identity; its market reading is thm:market-carr-madan
 "thm:marshall-olkin" = "probability/dependence"      # stated through the survival function in Insurance/; it is a dependence model
+"thm:implied-vol-existence" = "valuation/smile"    # declared in the Black-Scholes files; the smile's implied volatility is the cell the issue and the taxonomy give it
