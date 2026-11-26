@@ -1144,6 +1144,13 @@
       "input_hash": "9cf783206a198da7586237054166fd2e3fd99a46b2ddee2423fb61bf148aed8b",
       "verified_at_commit": "4599342"
     },
+    "mf-black-scholes-esscher-pricing": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.0,
+      "input_hash": "113c098ffdff84f042020cab75952c937c8c017cbbc829c2d8466b85f65fb69b",
+      "verified_at_commit": "7bd3971"
+    },
     "mf-black-scholes-log-contract-discrete-swap": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
@@ -2081,6 +2088,13 @@
       "elapsed_s": 2.4,
       "input_hash": "11f8dfcf859dd664b85079f5601895cd013d167e9b0b47881d5ae5c177f7e4f2",
       "verified_at_commit": "f7773e9"
+    },
+    "mf-conditional-expectation-pricing-measure": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-26",
+      "elapsed_s": 2.8,
+      "input_hash": "ff184e015503e0682af64fc1b87b92aa51b08e87cc519c7b1649c000f53094e6",
+      "verified_at_commit": "7bd3971"
     },
     "mf-contango-basis-convergence": {
       "benchmark_file": "commodities.json",
@@ -3216,6 +3230,34 @@
       "input_hash": "2d3b84b4946a1e8696490448860c7f1d2be3c2dcef97f73fc625a927fad9eb32",
       "verified_at_commit": "f7773e9"
     },
+    "mf-glosten-milgrom-model-witness": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-26",
+      "elapsed_s": 2.7,
+      "input_hash": "03699a302640cd1a8aabe23014707bdecab397218c18dc512b2f5c9b0f1297ad",
+      "verified_at_commit": "7bd3971"
+    },
+    "mf-glosten-milgrom-quote-condexp": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-26",
+      "elapsed_s": 2.8,
+      "input_hash": "a9019a9468c4b9caca2b64f9e7ba6fa93ddea952553b870383b5d40f57faf89a",
+      "verified_at_commit": "7bd3971"
+    },
+    "mf-glosten-milgrom-quote-sequence-pricing-measure": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-26",
+      "elapsed_s": 2.8,
+      "input_hash": "7cf6f83d7a2442a77383f19ef07fa61dd66e413ba17ac636018ba9467270b8d4",
+      "verified_at_commit": "7bd3971"
+    },
+    "mf-glosten-milgrom-spread-positive": {
+      "benchmark_file": "market_microstructure.json",
+      "date": "2026-11-26",
+      "elapsed_s": 7.3,
+      "input_hash": "9c8029bf39ebc3609981eba27952b2b7498d403155f282b2e63a727c7a9200a7",
+      "verified_at_commit": "7bd3971"
+    },
     "mf-gompertz-cumulative-force": {
       "benchmark_file": "actuarial.json",
       "date": "2026-11-26",
@@ -3559,6 +3601,27 @@
       "input_hash": "f238bdf9d4395c48b0097523d0bda9aceca46f3fd55ee0e021af33174ff3523d",
       "verified_at_commit": "f7773e9"
     },
+    "mf-jump-diffusion-esscher-parameter": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.0,
+      "input_hash": "c9020f2cd811403bc050a5d8a5cda1d9ac0cec1fed5515e5c8c8d7805e4d5dae",
+      "verified_at_commit": "7bd3971"
+    },
+    "mf-jump-diffusion-esscher-pricing": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.1,
+      "input_hash": "2a047ea6086c69a6c86468f0559122844551ed94a174bb092f4cade967c3d4d6",
+      "verified_at_commit": "7bd3971"
+    },
+    "mf-jump-diffusion-esscher-transform": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.1,
+      "input_hash": "d7cc60ea14bbdb5721633ab0abb128a3426827fa0e2ef35935eb9b43d3e8ded6",
+      "verified_at_commit": "7bd3971"
+    },
     "mf-jump-diffusion-exponential-martingales": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-26",
@@ -3586,6 +3649,13 @@
       "elapsed_s": 3.4,
       "input_hash": "c764fe00b6aa09b05744599d9322e1df00f49cd29cf16615a104a10f9262e6ac",
       "verified_at_commit": "4599342"
+    },
+    "mf-jump-diffusion-incompleteness": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.1,
+      "input_hash": "38b4d2632156dc2b05914c3942be223bede2cbf6f7a7ff0309e8ad120824b4f1",
+      "verified_at_commit": "7bd3971"
     },
     "mf-jump-diffusion-levy-exponent": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -3649,6 +3719,20 @@
       "elapsed_s": 2.6,
       "input_hash": "bb3d0e4e1c341b603288bce16e573614064cef3d0d61114c6bd1a4e70ff4bfff",
       "verified_at_commit": "f7773e9"
+    },
+    "mf-jump-diffusion-market-esscher-pricing": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.0,
+      "input_hash": "3cca1251799ea081bd3c7302f269d1a4b32b8b93ba3ab56008cc79b6d61b51ff",
+      "verified_at_commit": "7bd3971"
+    },
+    "mf-jump-diffusion-market-incomplete": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.0,
+      "input_hash": "4eff14ac6d6d7036bd44b950642127d478269d311c81e0a5db79c994b9436ad2",
+      "verified_at_commit": "7bd3971"
     },
     "mf-jump-diffusion-merton-1976-every-date": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -4237,6 +4321,13 @@
       "elapsed_s": 2.2,
       "input_hash": "4c964c532b59ba8760363331b9845b6ff69072d5a24052112be36fe1a8b34811",
       "verified_at_commit": "f7773e9"
+    },
+    "mf-merton-esscher-pricing": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-26",
+      "elapsed_s": 3.3,
+      "input_hash": "a4994ad23d91a72f95da27292fdee8f43180c980544e27e6503eed8cd372440b",
+      "verified_at_commit": "7bd3971"
     },
     "mf-merton-gamma": {
       "benchmark_file": "jumps_and_variance_swaps.json",
@@ -5374,10 +5465,10 @@
     },
     "mf-willow-tree-moment-marginal-constraints": {
       "benchmark_file": "binomial.json",
-      "date": "2026-11-16",
-      "elapsed_s": 2.1,
-      "input_hash": "9aa69308330203953820c2309e19dffdcecd414ec18ec7081eb313c39b26bd0a",
-      "verified_at_commit": "c047ee3"
+      "date": "2026-11-26",
+      "elapsed_s": 2.9,
+      "input_hash": "44f49c933028a8b6c05c248c7a371d71899cad812d8e87f28f67f906baf90c9c",
+      "verified_at_commit": "7bd3971"
     },
     "mf-worstcase-risk-representation": {
       "benchmark_file": "risk_measures.json",
