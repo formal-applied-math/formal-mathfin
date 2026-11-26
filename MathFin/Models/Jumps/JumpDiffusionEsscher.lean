@@ -9,6 +9,7 @@ public import MathFin.Models.Jumps.JumpDiffusionMerton
 public import MathFin.Models.Jumps.JumpDiffusionBrownian
 public import MathFin.Probability.Laws.Esscher
 public import Mathlib.Algebra.Ring.IsFormallyReal
+public import Mathlib.Topology.Order.AtTopBotIxx
 
 /-!
 # The Esscher transform of a jump-diffusion
