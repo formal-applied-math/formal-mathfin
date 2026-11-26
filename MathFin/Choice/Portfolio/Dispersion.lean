@@ -35,16 +35,15 @@ identity and what it lets one solve for.
   nonnegative observed variance, by Jensen's inequality (`jensenProxy_le_bossuProxy`).
 * A **correlation swap** pays the pairwise correlations averaged over the pairwise weight
   products `wᵢwⱼ` (an average where the normalisation is positive — nonnegative at nonnegative
-  index weights, and positive once two or more components carry weight). The source's §3.2
+  index weights, and the theorem's gate excludes the zero case). The source's §3.2
   payoff normalises over the unordered pairs, half this mass; the factor cancels in the
   average, and both read the common correlation under equicorrelation. Under equicorrelation
   that ratio, read off the dispersion identity as the off-diagonal share of the portfolio
   variance, is the common correlation
   (`realisedCorrelation_equicorrelation`).
 * The **dispersion P&L** of holding the components' variance at weight `wᵢ²` against the index
-  variance is `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`): at nonnegative weights and
-  volatilities with a common correlation `ρ ≥ 0` it is nonpositive, and strictly negative when
-  `ρ > 0` and two or more components contribute. At the flat weights `wᵢ = 1/d` the index
+  variance is `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`): its sign is that of the common
+  correlation times the negative of the off-diagonal share. At the flat weights `wᵢ = 1/d` the index
   variance is the diversification form `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²`
   (`indexVar_equicorrelation_flat_weights`), the heterogeneous-volatility generalisation of
   `portfolioVarN_equicorrelation_equal_weights`.
@@ -99,9 +98,17 @@ noncomputable def impliedCorrelation (w σ : n → ℝ) (V : ℝ) : ℝ :=
 the squared weighted sum of volatilities. For the equicorrelated index at a nonzero squared
 weighted-volatility sum it is the common correlation plus the idiosyncratic share
 (`bossuProxy_eq_add_gap`). It is junk when the squared
-weighted sum `∑ wᵢσᵢ` vanishes: there the division returns `0`, which is not a correlation. -/
+weighted sum `∑ wᵢσᵢ` vanishes: there the division returns `0`, which is not a correlation
+(`bossuProxy_junk_at_zero`). -/
 noncomputable def bossuProxy (w σ : n → ℝ) (V : ℝ) : ℝ :=
   V / (∑ i, w i * σ i) ^ 2
+
+omit [DecidableEq n] in
+/-- The Bossu proxy's junk corner: at a vanishing weighted-volatility sum the total division
+returns `0`, which is not a correlation. -/
+private theorem bossuProxy_junk_at_zero (w σ : n → ℝ) (V : ℝ) (h : ∑ i, w i * σ i = 0) :
+    bossuProxy w σ V = 0 := by
+  rw [bossuProxy, h, zero_pow two_ne_zero, div_zero]
 
 /-- The equicorrelation index variance in the affine form: the weighted variance sum plus the
 common correlation times the off-diagonal share. -/
@@ -252,9 +259,8 @@ theorem jensenProxy_le_bossuProxy (w σ : n → ℝ) (ρ : ℝ) (hflat : ∑ i, 
     exact hJ
 
 /-- **The dispersion P&L**: holding the components' variance at weights `wᵢ²` against the index
-variance realises `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` — at nonnegative weights and volatilities with a
-common correlation `ρ ≥ 0` it is nonpositive, and strictly negative when `ρ > 0` and two or
-more components contribute. -/
+variance realises `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` — the common correlation times the weighted
+variance sum less the squared weighted-volatility sum. -/
 theorem dispersionPnL_eq (w σ : n → ℝ) (ρ : ℝ) :
     ∑ i, w i ^ 2 * σ i ^ 2
         - portfolioVarN univ w (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j)
