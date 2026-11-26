@@ -26,7 +26,7 @@ identity and what it lets one solve for.
   (`indexVar_const_of_sq_sum_eq`); there the solved value carries no meaning.
 * The **Bossu proxy** `bossuProxy` divides the observed variance by the squared weighted sum of
   volatilities. It is not the implied correlation: for the equicorrelated index at a nonzero
-  squared weighted-volatility sum it exceeds the common correlation by exactly
+  squared weighted-volatility sum it is the common correlation plus
   `(1 − ρ)·∑ wᵢ²σᵢ² / (∑ wᵢσᵢ)²` (`bossuProxy_eq_add_gap`), the idiosyncratic share, and at
   nonnegative weights and volatilities with `ρ ≤ 1` it sits between the correlation and one
   (`bossuProxy_between`). The
@@ -93,8 +93,9 @@ noncomputable def impliedCorrelation (w σ : n → ℝ) (V : ℝ) : ℝ :=
   (V - ∑ i, w i ^ 2 * σ i ^ 2) / ((∑ i, w i * σ i) ^ 2 - ∑ i, w i ^ 2 * σ i ^ 2)
 
 /-- The **Bossu proxy** for the implied correlation: the observed index variance `V` divided by
-the squared weighted sum of volatilities. For the equicorrelated index it exceeds the common
-correlation by the idiosyncratic share (`bossuProxy_eq_add_gap`). It is junk when the squared
+the squared weighted sum of volatilities. For the equicorrelated index at a nonzero squared
+weighted-volatility sum it is the common correlation plus the idiosyncratic share
+(`bossuProxy_eq_add_gap`). It is junk when the squared
 weighted sum `∑ wᵢσᵢ` vanishes: there the division returns `0`, which is not a correlation. -/
 noncomputable def bossuProxy (w σ : n → ℝ) (V : ℝ) : ℝ :=
   V / (∑ i, w i * σ i) ^ 2
