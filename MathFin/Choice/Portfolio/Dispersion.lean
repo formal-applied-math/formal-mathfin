@@ -34,9 +34,10 @@ identity and what it lets one solve for.
   is a lower bound for it at nonnegative weights summing to one, nonnegative volatilities and a
   nonnegative observed variance, by Jensen's inequality (`jensenProxy_le_bossuProxy`).
 * A **correlation swap** pays the pairwise correlations averaged over the pairwise weight
-  products `wᵢwⱼ` (an average where the normalisation is positive, as it is at nonnegative
-  index weights). Under equicorrelation that ratio, read off the dispersion identity as the
-  off-diagonal share of the portfolio variance, is the common correlation
+  products `wᵢwⱼ` (an average where the normalisation is positive — nonnegative at nonnegative
+  index weights, and positive once two or more components carry weight). Under equicorrelation
+  that ratio, read off the dispersion identity as the off-diagonal share of the portfolio
+  variance, is the common correlation
   (`realisedCorrelation_equicorrelation`).
 * The **dispersion P&L** of holding the components' variance at weight `wᵢ²` against the index
   variance is `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`): at nonnegative weights and
@@ -288,8 +289,8 @@ theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
 /-- **The correlation swap's floating leg under equicorrelation**: the ratio of the
 off-diagonal share of the equicorrelated portfolio variance to the off-diagonal weight mass
 `∑ wᵢwⱼ` — the pairwise correlations averaged over the weight products where that
-normalisation is positive, as it is at nonnegative index weights — realises the common
-correlation. A swap struck at the common correlation therefore pays nothing. -/
+normalisation is positive (nonnegative at nonnegative index weights, positive once two or
+more components carry weight) — realises the common correlation. A swap struck at the common correlation therefore pays nothing. -/
 theorem realisedCorrelation_equicorrelation (w : n → ℝ) (ρ : ℝ)
     (hW : (∑ i, w i) ^ 2 ≠ ∑ i, w i ^ 2) :
     (portfolioVarN univ w (equicorrelationMatrix n ρ) - ∑ i, w i ^ 2)
