@@ -187,7 +187,7 @@ theorem exists_pos_smul_eq_of_stationary [NeZero N] {p : Fin N → ℝ} {u : ℝ
     ∃ μ : ℝ, 0 < μ ∧
       μ * w₀ = ∑ ω, p ω * deriv u (portfolioPayoff A θ ω) * portfolioPayoff A θ ω ∧
       ∀ k, ∑ ω, p ω * deriv u (portfolioPayoff A θ ω) * A k ω = μ * pr k := by
-  have hne : portfolioCost pr θ ≠ 0 := hθ ▸ hw₀.ne'
+  have hne : ∑ k, θ k * pr k ≠ 0 := hθ.trans_ne hw₀.ne'
   obtain ⟨k₀, -, hk₀⟩ := Finset.exists_ne_zero_of_sum_ne_zero hne
   obtain ⟨μ, hμ⟩ := exists_eq_smul_of_forall_cost_eq_zero
     (fun ω ↦ p ω * deriv u (portfolioPayoff A θ ω)) hfoc (right_ne_zero_of_mul hk₀)
