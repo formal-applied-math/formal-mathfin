@@ -26,8 +26,7 @@ measure `P` and write `P(S > c)` for `P.real {c < S}`; it is a probability when 
 
 ## Main results
 
-* `integral_max_sub_add_of_gap`: if `S` (almost everywhere measurable) has no mass in `(c, c + h)`
-  and `0 ≤ h`, then
+* `integral_max_sub_add_of_gap`: if `S` has no mass in `(c, c + h)` and `0 ≤ h`, then
   `E[(S − (c + h))⁺] = E[(S − c)⁺] − h · P(S > c)`.
 * `ae_notMem_Ioo_of_lattice`: an arithmetic loss `S ∈ hℤ` has no mass inside a lattice cell.
 * `integral_max_sub_succ_mul_of_lattice`: for `S ∈ hℤ` almost surely, the stop-loss recursion
@@ -62,7 +61,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasu
 strictly between `c` and `c + h` (almost surely) and `0 ≤ h`, then
 `E[(S − (c + h))⁺] = E[(S − c)⁺] − h · P(S > c)`: above the gap both payoffs differ by `h`, below
 it both vanish. -/
-theorem integral_max_sub_add_of_gap (hSm : AEMeasurable S P) (hS : Integrable S P) {c h : ℝ}
+theorem integral_max_sub_add_of_gap (hS : Integrable S P) {c h : ℝ}
     (hh : 0 ≤ h) (hgap : ∀ᵐ ω ∂P, S ω ∉ Set.Ioo c (c + h)) :
     ∫ ω, max (S ω - (c + h)) 0 ∂P = ∫ ω, max (S ω - c) 0 ∂P - h * P.real {ω | c < S ω} := by
   have key {S : Ω → ℝ} (hSm : Measurable S) (hS : Integrable S P)
@@ -85,7 +84,7 @@ theorem integral_max_sub_add_of_gap (hSm : AEMeasurable S P) (hS : Integrable S 
     rw [integral_congr_ae hpt, integral_sub hi ((integrable_const h).indicator hm),
       integral_indicator hm, setIntegral_const, smul_eq_mul]
     ring
-  obtain ⟨S', hS'm, hae⟩ := hSm
+  obtain ⟨S', hS'm, hae⟩ := hS.aemeasurable
   have hcongr (t : ℝ) : ∫ ω, max (S ω - t) 0 ∂P = ∫ ω, max (S' ω - t) 0 ∂P :=
     integral_congr_ae (hae.mono fun ω hω ↦ by simp only [hω])
   rw [hcongr, hcongr, measureReal_congr (t := {ω | c < S' ω})
@@ -108,21 +107,21 @@ theorem ae_notMem_Ioo_of_lattice {h : ℝ} (hh : 0 ≤ h) (hlat : ∀ᵐ ω ∂P
 /-- **The stop-loss recursion of an arithmetic loss.** If `S ∈ hℤ` almost surely, `0 ≤ h`, then
 for every integer retention level `j`,
 `E[(S − (j + 1)h)⁺] = E[(S − jh)⁺] − h · P(S > jh)`. -/
-theorem integral_max_sub_succ_mul_of_lattice (hSm : AEMeasurable S P) (hS : Integrable S P) {h : ℝ}
+theorem integral_max_sub_succ_mul_of_lattice (hS : Integrable S P) {h : ℝ}
     (hh : 0 ≤ h) (hlat : ∀ᵐ ω ∂P, ∃ n : ℤ, S ω = n * h) (j : ℤ) :
     ∫ ω, max (S ω - (j + 1) * h) 0 ∂P =
       ∫ ω, max (S ω - j * h) 0 ∂P - h * P.real {ω | j * h < S ω} := by
   rw [add_mul, one_mul]
-  exact integral_max_sub_add_of_gap hSm hS hh (ae_notMem_Ioo_of_lattice hh hlat j)
+  exact integral_max_sub_add_of_gap hS hh (ae_notMem_Ioo_of_lattice hh hlat j)
 
 /-- **The Rockafellar–Uryasev objective across a gap.** If `S` takes no value in `(c, c + h)`
 and `0 ≤ h`, the objective `c ↦ c + (1 − α)⁻¹E[(S − c)⁺]` (whose least value is expected
 shortfall when `α ∈ (0, 1)`) increases by `h · (1 − (1 − α)⁻¹ P(S > c))` from `c` to `c + h`. -/
-theorem rockafellarUryasev_add_of_gap (hSm : AEMeasurable S P) (hS : Integrable S P) {c h : ℝ}
+theorem rockafellarUryasev_add_of_gap (hS : Integrable S P) {c h : ℝ}
     (hh : 0 ≤ h) (hgap : ∀ᵐ ω ∂P, S ω ∉ Set.Ioo c (c + h)) (α : ℝ) :
     rockafellarUryasev S P α (c + h) =
       rockafellarUryasev S P α c + h * (1 - (1 - α)⁻¹ * P.real {ω | c < S ω}) := by
-  rw [rockafellarUryasev, rockafellarUryasev, integral_max_sub_add_of_gap hSm hS hh hgap]
+  rw [rockafellarUryasev, rockafellarUryasev, integral_max_sub_add_of_gap hS hh hgap]
   ring
 
 omit [IsFiniteMeasure P] in
@@ -131,7 +130,7 @@ lattice.** If `S ∈ hℤ` almost surely with `h > 0` and `α ∈ (0, 1)`, then 
 `c + (1 − α)⁻¹E[(S − c)⁺]` over the lattice points `c = jh`. Between two lattice points the
 objective is affine (`rockafellarUryasev_add_of_gap`), so its least value over the line
 (`isLeast_rockafellarUryasev`) is taken at an end of the cell holding a minimiser. -/
-theorem isLeast_rockafellarUryasev_lattice [IsProbabilityMeasure P] (hSm : AEMeasurable S P)
+theorem isLeast_rockafellarUryasev_lattice [IsProbabilityMeasure P]
     (hS : Integrable S P) {h : ℝ} (hh : 0 < h) (hlat : ∀ᵐ ω ∂P, ∃ n : ℤ, S ω = n * h) {α : ℝ}
     (hα : α ∈ Set.Ioo 0 1) :
     IsLeast (Set.range fun j : ℤ ↦ rockafellarUryasev S P α (j * h)) (expectedShortfall S P α) := by
@@ -144,10 +143,10 @@ theorem isLeast_rockafellarUryasev_lattice [IsProbabilityMeasure P] (hSm : AEMea
     have := (div_lt_iff₀ hh).1 (Int.lt_floor_add_one (c / h))
     rwa [add_mul, one_mul] at this
   have hgap := ae_notMem_Ioo_of_lattice hh.le hlat j
-  have hcell := rockafellarUryasev_add_of_gap hSm hS (sub_nonneg.2 hj)
+  have hcell := rockafellarUryasev_add_of_gap hS (sub_nonneg.2 hj)
     (hgap.mono fun ω hω h' ↦ hω ⟨h'.1, by linarith [h'.2]⟩) α
   rw [show (j : ℝ) * h + (c - j * h) = c by ring] at hcell
-  have hnext := rockafellarUryasev_add_of_gap hSm hS hh.le hgap α
+  have hnext := rockafellarUryasev_add_of_gap hS hh.le hgap α
   have h1 := hES.2 ⟨(j : ℝ) * h, rfl⟩
   have h2 := hES.2 ⟨(j : ℝ) * h + h, rfl⟩
   rcases le_or_gt 0 (1 - (1 - α)⁻¹ * P.real {ω | (j : ℝ) * h < S ω}) with hs | hs

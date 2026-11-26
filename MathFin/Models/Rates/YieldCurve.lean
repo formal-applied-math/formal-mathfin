@@ -148,11 +148,12 @@ theorem parAnnuity_eq_sum (c : ℕ → ℝ) (n : ℕ) :
   | zero => rfl
   | succ n ih => rw [parAnnuity, Finset.sum_range_succ, ← ih, parBootstrap]
 
-/-- **The bootstrapped curve reprices every bond of the par strip** (`bootstrap_consistency`). -/
-theorem parBootstrap_reprices (c : ℕ → ℝ) (hc : ∀ n, 1 + c n ≠ 0) (n : ℕ) :
+/-- **The bootstrapped curve reprices every bond of the par strip** (`bootstrap_consistency`):
+the bond of maturity `n` needs only its own denominator `1 + c n ≠ 0`. -/
+theorem parBootstrap_reprices (c : ℕ → ℝ) (n : ℕ) (hc : 1 + c n ≠ 0) :
     parBondPricingEq c (parBootstrap c) n := by
   have h := bootstrap_consistency (Finset.range n) (fun _ ↦ c n) (parBootstrap c) 1 (c n) 1
-    (by rw [add_comm]; exact hc n)
+    (by rw [add_comm]; exact hc)
   rwa [← Finset.mul_sum, ← parAnnuity_eq_sum, add_comm (c n) 1, ← parBootstrap] at h
 
 /-- **The bootstrapped curve is the only one that reprices the par strip.** A curve on which every

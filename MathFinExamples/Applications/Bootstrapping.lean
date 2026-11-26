@@ -73,7 +73,7 @@ def PricesAtPar (s : ParStrip) (B : ℕ → ℝ) (n : ℕ) : Prop :=
 
 /-- **The curve reprices every bond in the strip exactly** (`parBootstrap_reprices`). -/
 theorem df_reprices (s : ParStrip) (n : ℕ) : s.PricesAtPar s.df n :=
-  parBootstrap_reprices s.coupon (fun n ↦ by linarith [s.coupon_pos n]) n
+  parBootstrap_reprices s.coupon n (by linarith [s.coupon_pos n])
 
 /-- **The curve is the only one that reprices the strip** (`parBootstrap_unique`). -/
 theorem eq_df (s : ParStrip) {B : ℕ → ℝ} (hB : ∀ n, s.PricesAtPar B n) (n : ℕ) : B n = s.df n :=

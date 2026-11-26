@@ -288,7 +288,7 @@ theorem fee_invariant_growth
     x0 * y0 ≤ (x0 + Δx) * (y0 - swapOutputWithFee x0 y0 Δx γ) := by
   unfold swapOutputWithFee
   have hγΔx : 0 < γ * Δx := mul_pos hγ0 hΔx
-  have hinv := swap_preserves_invariant x0 y0 (γ * Δx) hx0 hy0 hγΔx
+  have hinv := swap_preserves_invariant x0 y0 (γ * Δx) hx0 hγΔx
   have hy_pos : 0 < y0 - swapOutput x0 y0 (γ * Δx) :=
     sub_pos.mpr (swap_output_lt_y x0 y0 (γ * Δx) hx0 hγΔx hy0)
   have hle : x0 + γ * Δx ≤ x0 + Δx := by linarith [mul_le_of_le_one_left hΔx.le hγ1]

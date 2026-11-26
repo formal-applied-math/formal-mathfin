@@ -181,8 +181,8 @@ theorem integral_max_sub_succ_mul_compoundPoisson {h : ℝ} (hh : 0 ≤ h)
     (hlat : ∀ i, ∀ᵐ ω ∂μ, ∃ k : ℤ, X i ω = k * h) (j : ℤ) :
     ∫ ω, max (compoundSum N X ω - (j + 1) * h) 0 ∂μ =
       ∫ ω, max (compoundSum N X ω - j * h) 0 ∂μ - h * μ.real {ω | j * h < compoundSum N X ω} :=
-  integral_max_sub_succ_mul_of_lattice (integrable_compoundPoisson hident hX hN hNX).aemeasurable
-    (integrable_compoundPoisson hident hX hN hNX) hh (ae_lattice_compoundPoisson hlat) j
+  integral_max_sub_succ_mul_of_lattice (integrable_compoundPoisson hident hX hN hNX) hh
+    (ae_lattice_compoundPoisson hlat) j
 
 /-- **Expected shortfall of a compound-Poisson aggregate of lattice claims is the least
 Rockafellar–Uryasev value on the lattice**: if the claims lie in `hℤ` almost surely with `h > 0`
@@ -193,8 +193,8 @@ theorem isLeast_rockafellarUryasev_compoundPoisson_lattice {h : ℝ} (hh : 0 < h
     IsLeast (range fun j : ℤ ↦
         rockafellarUryasev (compoundSum N X) μ α (j * h))
       (expectedShortfall (compoundSum N X) μ α) :=
-  isLeast_rockafellarUryasev_lattice (integrable_compoundPoisson hident hX hN hNX).aemeasurable
-    (integrable_compoundPoisson hident hX hN hNX) hh (ae_lattice_compoundPoisson hlat) hα
+  isLeast_rockafellarUryasev_lattice (integrable_compoundPoisson hident hX hN hNX) hh
+    (ae_lattice_compoundPoisson hlat) hα
 
 end Wald
 

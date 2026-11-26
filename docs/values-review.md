@@ -229,7 +229,7 @@ convergence on a deterministic curve, and the statement now says futures are not
 ### Ranked backlog
 
 1. Constant-product AMM as the `n = 2`, `w = 1/2` instance of the constant-mean pool:
-   `swap_preserves_invariant`, `hasDerivAt_swapOutput_zero` derived, not re-proved (M). [done: `swap_preserves_invariant`, the constant-product pool from constant-mean]
+   `swap_preserves_invariant`, `hasDerivAt_swapOutput_zero` derived, not re-proved (M). [done: `swapOut_two_eq_swapOutput`, `hasDerivAt_swapOutput_zero` from constant-mean; `swap_preserves_invariant` stays algebraic (true for every `y`)]
 2. Jarrow–Yildirim's `quad2_nonneg`/`quad3_nonneg` stated through `Matrix.PosSemidef`, or one
    bridge to it, joining the PSD vocabulary of `Choice/Portfolio` (S). [done: `posSemidef_jyCorrMatrix`]
 3. `condBoundCall_one_fixing_eq_marketPrice` restated as `S` times the price of

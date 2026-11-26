@@ -9,7 +9,7 @@ public import MathFin.Init
 public import Mathlib.Probability.IdentDistrib
 
 /-!
-# Wald's bound for a fixed number of identically distributed summands
+# The `L¹` norm of a sum of identically distributed summands
 
 The `L¹` norm of a sum is at most the sum of the `L¹` norms, and identically distributed summands
 have one `L¹` norm. So `𝔼|∑_{i∈s} Xᵢ| ≤ #s·𝔼|Y|` when every `Xᵢ` has the law of an integrable
@@ -38,8 +38,8 @@ open MeasureTheory
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
-/-- **Wald's bound for a fixed number of summands**: if every `Xᵢ`, `i ∈ s`, has the law of an
-integrable `Y`, then `𝔼|∑_{i∈s} Xᵢ| ≤ #s·𝔼|Y|`. No independence is assumed. -/
+/-- **The `L¹` norm of a sum of identically distributed summands**: if every `Xᵢ`, `i ∈ s`, has
+the law of an integrable `Y`, then `𝔼|∑_{i∈s} Xᵢ| ≤ #s·𝔼|Y|`. No independence is assumed. -/
 theorem integral_abs_sum_le_of_identDistrib {ι : Type*} {s : Finset ι}
     {X : ι → Ω → ℝ} {Y : Ω → ℝ} (hident : ∀ i ∈ s, IdentDistrib (X i) Y μ μ)
     (hY : Integrable Y μ) :

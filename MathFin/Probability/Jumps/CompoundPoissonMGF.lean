@@ -88,6 +88,7 @@ aggregate loss of a compound-Poisson (or any compound) model. -/
 def compoundSum {Ω : Type*} (N : Ω → ℕ) (X : ℕ → Ω → ℝ) (ω : Ω) : ℝ :=
   ∑ i ∈ Finset.range (N ω), X i ω
 
+/-- The compound sum at `ω` is the sum of the first `N ω` summands. -/
 theorem compoundSum_apply {Ω : Type*} (N : Ω → ℕ) (X : ℕ → Ω → ℝ) (ω : Ω) :
     compoundSum N X ω = ∑ i ∈ Finset.range (N ω), X i ω := rfl
 

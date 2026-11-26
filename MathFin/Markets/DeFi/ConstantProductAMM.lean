@@ -62,9 +62,10 @@ rate is what makes CPMMs "automated" — no order book, no oracle.
 The pool is the two-token, equal-weight instance of the constant-mean pool of
 `ConstantMeanAMM.lean`: this file imports it, states the instance lemmas
 (`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
-`swapOut_two_eq_swapOutput`) and derives the invariant preservation
-and the marginal price from the constant-mean theorems (`swap_preserves_constantMean`,
-`hasDerivAt_swapOut_zero`) instead of proving them again.
+`swapOut_two_eq_swapOutput`) and derives the marginal price from the constant-mean theorem
+`hasDerivAt_swapOut_zero` instead of proving it again. The invariant `swap_preserves_invariant`
+keeps its one-line algebraic proof: it holds for every `y`, where the constant-mean route needs
+positive reserves.
 
 This file formalises:
 
@@ -109,8 +110,7 @@ made here).
 
 * `constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
   `swapOut_two_eq_swapOutput`: the equal-weight two-token constant-mean pool is this pool.
-* `swap_preserves_invariant`: constant-product invariance under swap, from
-  `swap_preserves_constantMean`.
+* `swap_preserves_invariant`: constant-product invariance under swap.
 * `swap_output_pos`: `Δy > 0` when input is positive.
 * `swap_output_lt_y`: `Δy < y` (cannot drain pool).
 * `swap_round_trip`: a round trip through the pool returns exactly the input.
@@ -205,36 +205,22 @@ theorem swap_output_lt_y
   nlinarith [mul_pos hy hx]
 
 /-- **Constant-product invariant preservation**: after a swap of input
-`Δx` (with `x, y, Δx > 0`), the new reserves `(x + Δx, y − Δy)` satisfy
+`Δx` (with `x, Δx > 0`), the new reserves `(x + Δx, y − Δy)` satisfy
 
   `(x + Δx) · (y − Δy) = x · y`,
 
 where `Δy := swapOutput x y Δx`. This is the pricing rule of the CPMM: the swap
-is the trade that keeps the product fixed. It is the constant-mean pool's
-`swap_preserves_constantMean` at two tokens of weight `1/2`, the squared invariants being the
-products (`constantMeanInvariant_two_sq_eq`). That a round trip prints no money is
-`swap_round_trip`. -/
+is the trade that keeps the product fixed. It is an identity of the closed form, true for every
+`y`; for positive reserves it is the constant-mean pool's `swap_preserves_constantMean` at two
+tokens of weight `1/2` (`swapOut_two_eq_swapOutput`, `constantMeanInvariant_two_sq_eq`). That a
+round trip prints no money is `swap_round_trip`. -/
 theorem swap_preserves_invariant
-    (x y Δx : ℝ) (hx : 0 < x) (hy : 0 < y) (hΔx : 0 < Δx) :
+    (x y Δx : ℝ) (hx : 0 < x) (hΔx : 0 < Δx) :
     (x + Δx) * (y - swapOutput x y Δx) = x * y := by
-  have hy' : 0 < y - swapOutput x y Δx := sub_pos.2 (swap_output_lt_y x y Δx hx hΔx hy)
-  have hpres := swap_preserves_constantMean (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1
-    (Δ := Δx) hx hy (by norm_num) (by decide) hΔx
-  have hres : swapReserves (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] 0 1 Δx
-      = ![x + Δx, y - swapOutput x y Δx] := by
-    rw [← swapOut_two_eq_swapOutput x y Δx (by linarith)]
-    funext k
-    fin_cases k <;> simp [swapReserves, Function.update_apply]
-  have hpres' : constantMeanInvariant (![x + Δx, y - swapOutput x y Δx] : Fin 2 → ℝ)
-      ![1 / 2, 1 / 2] = constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2] := by
-    rw [hres] at hpres
-    exact hpres
-  calc (x + Δx) * (y - swapOutput x y Δx)
-      = (constantMeanInvariant (![x + Δx, y - swapOutput x y Δx] : Fin 2 → ℝ)
-          ![1 / 2, 1 / 2]) ^ 2 :=
-        (constantMeanInvariant_two_sq_eq _ _ (by linarith) hy').symm
-    _ = (constantMeanInvariant (![x, y] : Fin 2 → ℝ) ![1 / 2, 1 / 2]) ^ 2 := by rw [hpres']
-    _ = x * y := constantMeanInvariant_two_sq_eq x y hx hy
+  unfold swapOutput
+  have h_sum_pos : 0 < x + Δx := by linarith
+  field_simp
+  ring
 
 /-- **Swap output is strictly positive** when input is positive (and
 reserves are positive). -/

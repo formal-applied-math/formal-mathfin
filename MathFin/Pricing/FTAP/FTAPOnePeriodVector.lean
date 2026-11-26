@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Martingales.EquivMeasure
+public import MathFin.Probability.Martingales.TimeChange
 public import MathFin.Pricing.FTAP.FTAP
 public import MathFin.Pricing.NoArbitrageCore
 public import Mathlib.Algebra.Order.Star.Real
@@ -117,33 +118,6 @@ structure IsCentringMeasure (Q : Measure Ω) : Prop extends IsEquivProbMeasure P
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
-/-- **The two-step filtration**: trivial at date `0`, everything known from date `1` on. It is the
-information of a one-period market with trivial initial information. -/
-def twoStep (m : MeasurableSpace Ω) : Filtration ℕ m where
-  seq n := if n = 0 then ⊥ else m
-  mono' a b hab := by
-    show (if a = 0 then ⊥ else m) ≤ (if b = 0 then ⊥ else m)
-    split_ifs with ha hb hb
-    · exact le_rfl
-    · exact bot_le
-    · exact absurd (Nat.le_zero.mp (hb ▸ hab)) ha
-    · exact le_rfl
-  le' n := by
-    show (if n = 0 then ⊥ else m) ≤ m
-    split_ifs
-    · exact bot_le
-    · exact le_rfl
-
-/-- Nothing is known at date `0`. -/
-theorem twoStep_zero {m : MeasurableSpace Ω} : twoStep m 0 = ⊥ := by
-  show (if (0 : ℕ) = 0 then (⊥ : MeasurableSpace Ω) else m) = ⊥
-  simp
-
-/-- Everything is known from date `1`. -/
-theorem twoStep_of_ne_zero {m : MeasurableSpace Ω} {n : ℕ} (hn : n ≠ 0) : twoStep m n = m := by
-  show (if n = 0 then (⊥ : MeasurableSpace Ω) else m) = m
-  simp [hn]
-
 omit [MeasurableSpace F] [BorelSpace F] [IsProbabilityMeasure P] in
 /-- **At horizon `1` the discrete-time EMM is the vector one-period EMM.** On a general sample
 space, with `𝓕 0 = ⊥` and an `F`-valued price `S` adapted, `Q` is an equivalent martingale measure
@@ -192,9 +166,9 @@ theorem noArbitrage_of_isEMM (hY : Measurable Y) {Q : Measure Ω} (hQ : IsCentri
     NoArbitrage P Y := by
   have := hQ.isProb
   intro θ hpos
-  let 𝓕 := twoStep mΩ
-  have h0 : 𝓕 0 = ⊥ := twoStep_zero
-  have h1 (n : ℕ) (hn : n ≠ 0) : 𝓕 n = mΩ := twoStep_of_ne_zero hn
+  let 𝓕 := Filtration.twoStep Ω
+  have h0 : 𝓕 0 = ⊥ := Filtration.twoStep_zero Ω
+  have h1 (n : ℕ) (hn : n ≠ 0) : 𝓕 n = mΩ := Filtration.twoStep_of_ne_zero hn
   let S : ℕ → Ω → F := fun n ω ↦ if n = 0 then 0 else Y ω
   have hS0 : S 0 = 0 := funext fun ω ↦ ite_eq_left rfl
   have hS1 : S 1 = Y := funext fun ω ↦ ite_eq_right one_ne_zero

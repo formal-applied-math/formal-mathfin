@@ -25,6 +25,8 @@ binomial tree become markets indexed by `ℝ≥0` this way (`Pricing/DiscreteMar
 ## Main definitions
 
 * `MeasureTheory.Filtration.comp`: the filtration `t ↦ 𝓕 (φ t)` along a monotone `φ`.
+* `MeasureTheory.Filtration.twoStep`: trivial at date `0`, everything from date `1` on; a
+  one-period market's information, which a one-date market reads along its date step.
 
 ## Main results
 
@@ -81,5 +83,39 @@ theorem Martingale.of_comp {𝓕 : Filtration ι m} {f : ι → Ω → E} {φ : 
     beta_reduce at h
     rw [Filtration.comp_apply, hφψ, hφψ] at h
     exact h
+
+/-- **The two-step filtration** of `ℕ`: nothing is known at date `0`, everything from date `1`
+on. It is the information of a one-period market with trivial initial information. -/
+def Filtration.twoStep (Ω : Type*) [mΩ : MeasurableSpace Ω] : Filtration ℕ mΩ where
+  seq n := if n = 0 then ⊥ else mΩ
+  mono' a b hab := by
+    dsimp only
+    split_ifs with ha hb hb
+    · exact le_rfl
+    · exact bot_le
+    · exact absurd (Nat.le_zero.mp (hb ▸ hab)) ha
+    · exact le_rfl
+  le' n := by
+    dsimp only
+    split_ifs
+    · exact bot_le
+    · exact le_rfl
+
+section TwoStep
+
+variable (Ω : Type*) [mΩ : MeasurableSpace Ω]
+
+/-- Nothing is known at date `0`. -/
+theorem Filtration.twoStep_zero : Filtration.twoStep Ω 0 = ⊥ := rfl
+
+/-- Everything is known at date `1`. -/
+theorem Filtration.twoStep_one : Filtration.twoStep Ω 1 = mΩ := rfl
+
+variable {Ω} in
+/-- Everything is known from date `1` on. -/
+theorem Filtration.twoStep_of_ne_zero {n : ℕ} (hn : n ≠ 0) : Filtration.twoStep Ω n = mΩ :=
+  if_neg hn
+
+end TwoStep
 
 end MeasureTheory

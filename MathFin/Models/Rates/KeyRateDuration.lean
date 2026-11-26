@@ -37,9 +37,10 @@ computes.
 
 * `TenorGrid`: the hat functions of the nodes, summing to `1`; `TenorGrid.rate` the interpolated
   rate and `TenorGrid.price` the price at it.
-* `TenorGrid.piecewiseLinear`: linear interpolation between adjacent nodes, flat beyond the ends,
-  with the hats built from clamped ramps (`TenorGrid.ramp`); `piecewiseLinear_rate_node` says the
-  curve passes through the node rates.
+* `TenorGrid.piecewiseLinear`: the grid whose hats are built from clamped linear ramps
+  (`TenorGrid.ramp`), so linear between adjacent nodes and flat beyond the ends by construction;
+  `piecewiseLinear_rate_node` proves the curve passes through the node rates (linearity between
+  the nodes is not stated as a theorem).
 * `TenorGrid.keyRateDuration`, `TenorGrid.effectiveDuration`: `-(1/P) ∂P/∂kⱼ` along the bump of node
   `j`, and `-(1/P) dP/dε` along the parallel shift of the nodes.
 

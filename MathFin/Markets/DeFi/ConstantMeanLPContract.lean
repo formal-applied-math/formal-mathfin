@@ -33,6 +33,8 @@ the pool's own spot price it is `y / (1-w)`, the whitepaper's constant value dis
   payoff is worth exactly its reserves `x P + y`.
 * `price_constantMeanPayoff`: paying the position at `T` is worth the discounted expectation
   of the closed-form mark, in any market with a positive price of X in Y at `T`.
+* `price_constantMeanPayoff_eq_hodl`: in a market whose price of X in Y at `T` is the pool's spot
+  price, the position is priced as its reserves `x P_T + y`.
 * `constantMeanPayoff_one_half_eq_constantProductPayoff`: the equal-weight position *is* the
   constant-product payoff of invariant `V²`, tying the constant-mean line to the
   `thm:impermanent-loss` pricing line of `LPContract.lean`.

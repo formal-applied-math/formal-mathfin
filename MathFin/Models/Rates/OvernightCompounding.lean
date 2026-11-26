@@ -148,7 +148,7 @@ theorem integral_onDamping_sq (hq : 0 < q) (hτ : τ₀ < τ₁) (hτ1 : 0 < τ�
     have h2q : 0 < 2 * q := by linarith
     have hs' : 0 ≤ τ₁ - s := by linarith
     have := intervalIntegral.integral_comp_sub_left
-      (fun u : ℝ => (u / L) ^ (2 * q)) (a := s) (b := τ₁) τ₁
+      (fun u : ℝ ↦ (u / L) ^ (2 * q)) (a := s) (b := τ₁) τ₁
     simp only [sub_self] at this
     rw [this, integral_div_rpow hL hs' h2q, Real.div_rpow hs' hL.le,
       Real.rpow_add_one (sub_pos.2 hs).ne']
