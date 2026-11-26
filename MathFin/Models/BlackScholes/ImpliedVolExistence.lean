@@ -33,6 +33,11 @@ packaged as the function `impliedVol` with its defining equation
 The threshold bisection of `BisectionStraddle.lean` specializes to the
 Black–Scholes price: at a threshold volatility inside the bracket, the
 estimates converge to it and it prices the option (`bsV_bisect_threshold_root`).
+`BisectionIV.lean`'s `impliedVol_bisection_converges` already converges the
+estimates on a straddled bracket with `C < bsV K r σ_hi S T` through strict
+monotonicity; the threshold form adds the endpoint case `σ = σ_hi` and the
+equation `bsV K r σ S T = C` at the named threshold, which the plain threshold
+theorem does not give.
 
 ## Main definitions
 
@@ -43,12 +48,12 @@ estimates converge to it and it prices the option (`bsV_bisect_threshold_root`).
 
 * `tendsto_bsV_sigma_zero`: the call price tends to `(S − K·e^{−rT})⁺` as
   `σ → 0⁺`.
-* `bsV_lt_S_of_pos`: a positive volatility prices strictly below the spot.
+* `bsV_lt_S`: the price sits strictly below the spot, for `K, S > 0` and any `σ, r, T`.
 * `exists_impliedVol_of_lt`: every price in the no-arbitrage range has a unique
   positive implied volatility.
 * `impliedVol_defining_eq`: the defining equation of `impliedVol`.
 * `impliedVol_eq_zero_iff`: `impliedVol` vanishes exactly when no positive
-  volatility prices to `C`.
+  volatility both prices to `C` and is the only one.
 * `bsV_bisect_threshold_root`: bisection on the Black–Scholes price converges
   to an interior threshold and the threshold prices the option.
 * `tendsto_marketCallPrice_sigma_zero`, `impliedVol_eq_model_vol`,
@@ -281,7 +286,10 @@ noncomputable def impliedVol (K r : ℝ) (S T C : ℝ) : ℝ :=
     h.choose
   else 0
 
-/-- `impliedVol` is the junk `0` exactly where no positive volatility prices to `C`. -/
+/-- `impliedVol` is the junk `0` exactly where no positive volatility both prices to `C` and
+is the only one: the iff quantifies over the function's whole domain, including degenerate
+inputs (a strike of `0` makes the price non-injective in `σ`), so the uniqueness clause is
+part of what is characterized. -/
 lemma impliedVol_eq_zero_iff (K r : ℝ) (S T C : ℝ) :
     impliedVol K r S T C = 0 ↔
       ¬∃ σ, 0 < σ ∧ bsV K r σ S T = C ∧ ∀ σ' > 0, bsV K r σ' S T = C → σ' = σ := by

@@ -356,7 +356,7 @@
     {
       "id": "mf-implied-vol-exists-above-reference",
       "name": "Implied Volatility Exists Above a Reference Volatility",
-      "description": "For K, S, T > 0, any rate r and a volatility σ₀ > 0, a call price C strictly between the Black–Scholes price at σ₀ and the spot, bsV K r σ₀ S T < C < S, has an implied volatility σ > σ₀ (bsV K r σ S T = C), and every positive σ' with bsV K r σ' S T = C equals σ. The Black–Scholes price is continuous and strictly increasing in the volatility and tends to S as σ → ∞, so the intermediate value theorem applies. A volatility σ₀ with bsV(σ₀) < C is a hypothesis: existence for every price in the no-arbitrage range ((S − Ke^{−rT})⁺, S) would also need the σ → 0 limit, which is not proved.",
+      "description": "For K, S, T > 0, any rate r and a volatility σ₀ > 0, a call price C strictly between the Black–Scholes price at σ₀ and the spot, bsV K r σ₀ S T < C < S, has an implied volatility σ > σ₀ (bsV K r σ S T = C), and every positive σ' with bsV K r σ' S T = C equals σ. The Black–Scholes price is continuous and strictly increasing in the volatility and tends to S as σ → ∞, so the intermediate value theorem applies. A volatility σ₀ with bsV(σ₀) < C is a hypothesis: existence for every price in the no-arbitrage range ((S − Ke^{−rT})⁺, S) needs in addition the σ → 0 limit, which this entry does not prove — it is mf-bsV-sigma-zero-limit, and with it every price in the range has an implied volatility (mf-implied-vol-existence).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Models.BlackScholes.ImpliedVolatility\n\n/-- **Implied volatility above a reference volatility.** A price strictly between the\nBlack–Scholes price at `σ₀ > 0` and the spot has an implied volatility above `σ₀`, and it is the\nonly positive one. -/\ntheorem implied_vol_exists_above_reference_thm {K r T S σ₀ C : ℝ} (hK : 0 < K) (hT : 0 < T)\n    (hS : 0 < S) (hσ₀ : 0 < σ₀) (hlo : MathFin.bsV K r σ₀ S T < C) (hhi : C < S) :\n    ∃ σ, σ₀ < σ ∧ MathFin.bsV K r σ S T = C ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S T = C → σ' = σ :=\n  MathFin.exists_impliedVol_gt_of_bsV_lt hK hT hS hσ₀ hlo hhi\n"
@@ -374,7 +374,7 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The limit σ → ∞ (tendsto_bsV_sigma_atTop) gives σ₁ > σ₀ with C < bsV(σ₁); the intermediate value theorem on [σ₀, σ₁] (intermediate_value_Ioo, with bsV_continuousOn_sigma) gives σ ∈ (σ₀, σ₁) with bsV(σ) = C, and strict monotonicity in σ (implied_volatility_unique) makes it the only positive solution (exists_impliedVol_gt_of_bsV_lt). The σ → 0 limit, which would remove the hypothesis on σ₀, is not proved. Lives in MathFin/Models/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The limit σ → ∞ (tendsto_bsV_sigma_atTop) gives σ₁ > σ₀ with C < bsV(σ₁); the intermediate value theorem on [σ₀, σ₁] (intermediate_value_Ioo, with bsV_continuousOn_sigma) gives σ ∈ (σ₀, σ₁) with bsV(σ) = C, and strict monotonicity in σ (implied_volatility_unique) makes it the only positive solution (exists_impliedVol_gt_of_bsV_lt). The σ → 0 limit, which would remove the hypothesis on σ₀, is not proved here; it is mf-bsV-sigma-zero-limit. Lives in MathFin/Models/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
       }
     },
     {

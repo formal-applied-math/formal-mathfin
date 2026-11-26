@@ -2361,8 +2361,11 @@ two acceptance criteria. (1) **The `σ → 0⁺` limit** (`mf-bsV-sigma-zero-lim
 `log(S/K) + rT` — positive (both `Φ` terms tend to 1), negative (both tend to
 0), zero (both tend to `1/2`, and the price vanishes with the forward). This is
 the missing piece the module docstring of `ImpliedVolatility.lean` and the
-`mf-implied-vol-exists-above-reference` entry named as unproved; both now point
-here. (2) **Existence on the whole range** (`mf-implied-vol-existence`,
+`mf-implied-vol-exists-above-reference` entry named as unproved; both now scope
+the sentence to themselves and point here. `BisectionIV.lean`'s
+`impliedVol_bisection_converges` already converged the estimates on a straddled
+bracket through strict monotonicity; the threshold form adds the endpoint case
+`σ = σ_hi` and the root equation at the named threshold. (2) **Existence on the whole range** (`mf-implied-vol-existence`,
 `MathFin.exists_impliedVol_of_lt`, the function `MathFin.impliedVol` with its
 defining equation `impliedVol_defining_eq` and the junk disclosure
 `impliedVol_eq_zero_iff`): every price in `((S − K·e^{−rT})⁺, S)` has a unique
