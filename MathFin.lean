@@ -92,6 +92,7 @@ public import MathFin.Probability.Brownian.BrownianQuadraticVariation
 public import MathFin.Probability.Brownian.UnifPart
 public import MathFin.Probability.Brownian.QuadraticVariationL2
 public import MathFin.Probability.Laws.ExpMin
+public import MathFin.Probability.Laws.ExponentialMGF
 public import MathFin.Probability.Discrete.OptionalSamplingInequality
 public import MathFin.Probability.Martingales.LpContinuousMartingaleConvergence
 public import MathFin.Probability.Martingales.MartingaleSetIntegral
