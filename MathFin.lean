@@ -344,6 +344,7 @@ public import MathFin.Contracts.Adapted
 public import MathFin.Contracts.Instruments.Options
 public import MathFin.Contracts.StaticHedge
 public import MathFin.Contracts.Instruments.FixedIncome
+public import MathFin.Contracts.Instruments.Autocall
 public import MathFin.Contracts.Instruments.Credit
 public import MathFin.Risk.Credit.TrancheLeg
 
@@ -406,6 +407,7 @@ public import MathFin.Pricing.AmericanPrice
 public import MathFin.Pricing.OneDateMarket
 public import MathFin.Pricing.Parity
 public import MathFin.Pricing.StaticHedge
+public import MathFin.Pricing.AutocallValue
 public import MathFin.Pricing.DiscreteMarket
 -- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
 public import MathFin.Pricing.WienerIntegralForwardMeasure

@@ -167,6 +167,20 @@ Absent by design, each with the case that would force it:
   next rung — but it earns its place only once a callable instrument is in the
   corpus, and none is today.
 
+*Amended 2026-11-27.* The first autocall is in the corpus
+(`Contracts/Instruments/Autocall.lean`), and it did **not** force `ifThen` or the lifecycle layer.
+"The first observation date at which `S ≥ B`" is a product of indicators that the earlier
+observations were below `B` (`survivalPayoff`, from `indicatorLt` and `mul`), so the note is a
+`payFlows` schedule whose `k`-th payoff is survival × redemption × `1{S_{tₖ} ≥ B}`, plus one `pay`
+at maturity with the protection barrier as another indicator. It is at fixed dates, so
+`FixedDated`, the measurability and law-invariance theorems and `Contract.value` apply unchanged.
+Termination is a theorem about each scenario (`cashflows_autocallUnit_of_firstAbove`: every
+amount but the redemption at the first autocall date is `0`), not a structural fact. What the
+encoding cannot say, and a constructor would, is a note whose *later dates are absent* from the
+contract (the lifecycle layer proper), a branch on an event that is not a payoff comparison, or
+an observation schedule that depends on the path. None is needed for a discretely observed
+autocall, so `ifThen` and the lifecycle layer stay absent, forced by a case that needs them.
+
 This is the source's own METHODOLOGY §4 discipline ("extended only when a case
 requires it"), applied to the source.
 

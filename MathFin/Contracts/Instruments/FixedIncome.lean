@@ -25,6 +25,8 @@ a pricing measure: the value of a schedule in every model is `value_fixedFlows_d
 ## Main results
 
 * `pathPV_payFlows`, `pathPV_fixedFlows` — what a schedule pays along a scenario.
+* `cashflows_payFlows`, `payFlows_fixedDated` — the cash flow list of a schedule, and that it
+  pays at fixed dates.
 
 ## Source
 
@@ -74,6 +76,21 @@ theorem pathPV_payFlows (D : ℝ≥0 → ℝ) (s : Scenario ι) (t : ℕ → ℝ
   | succ n ih =>
     rw [payFlows, Contract.pathPV_both, ih, Finset.sum_range_succ]
     simp [Contract.pathPV, Contract.cashflows]
+
+/-- Along every scenario, the cash flows of a schedule of payments are the list of its `n`
+payments `(tᵢ, aᵢ)`. -/
+theorem cashflows_payFlows (s : Scenario ι) (t : ℕ → ℝ≥0) (a : ℕ → Payoff ι) (n : ℕ) :
+    (payFlows t a n).cashflows s = (List.range n).map fun i ↦ (t i, (a i).eval s) := by
+  induction n with
+  | zero => simp [payFlows, Contract.cashflows]
+  | succ n ih => simp [payFlows, Contract.cashflows, ih, List.range_succ]
+
+/-- A schedule of payments pays at fixed dates. -/
+theorem payFlows_fixedDated (t : ℕ → ℝ≥0) (a : ℕ → Payoff ι) (n : ℕ) :
+    (payFlows t a n).FixedDated := by
+  induction n with
+  | zero => trivial
+  | succ n ih => simp [payFlows, Contract.FixedDated, ih]
 
 /-- A **schedule of fixed cash flows**: for each `i < n`, pay `c i` at time `t i`. -/
 noncomputable def fixedFlows (t : ℕ → ℝ≥0) (c : ℕ → ℝ) (n : ℕ) : Contract ι :=
