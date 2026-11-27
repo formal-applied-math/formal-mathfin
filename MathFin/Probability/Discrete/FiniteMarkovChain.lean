@@ -5,7 +5,8 @@ Authors: Raphael Coelho
 -/
 module
 
-public import MathFin.Init
+public import MathFin.Probability.Discrete.MarkovPathSpace
+public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 public import Mathlib.LinearAlgebra.Matrix.Stochastic
 public import Mathlib.NumberTheory.FrobeniusNumber
 public import Mathlib.Analysis.SpecificLimits.Basic
@@ -17,8 +18,12 @@ public import Mathlib.Topology.MetricSpace.Cauchy
 
 The one-step law of a Markov chain on a finite state space `S` is a row-stochastic matrix
 `P : Matrix S S ℝ` (Mathlib's `Matrix.rowStochastic`), and `(P ^ n) i j` is the `n`-step transition
-probability. This file proves the two classical results on the long-run behaviour of such a chain
-(Saporito, ch. 1, §1.4) from first principles:
+probability. For the chain with one-step laws `K : S → PMF S`, whose law on trajectories is
+`chainLaw K i` (`MarkovPathSpace.lean`), the matrix is `transitionMatrix K`, and
+`chainLaw_visit_toReal_eq_pow` identifies `(P ^ n) i j` with `ℙ_i(X_n = j)`. This file proves the
+two classical results on the long-run behaviour of such a chain
+(Saporito, ch. 1, §1.4) from first principles, for every row-stochastic matrix (they are linear
+algebra), and states them for the chain as one-line corollaries:
 
 * an irreducible chain has at most one stationary distribution, and at least one (so exactly one);
 * an irreducible aperiodic chain converges: `(P ^ n) i j → π j` for the stationary distribution `π`.
@@ -35,8 +40,10 @@ the lazy chain `(I + P) / 2`, which has the same stationary vectors and is primi
 
 ## Main definitions
 
-* `MathFin.FiniteMarkov.IsStationary`: `π` is a probability vector with `π ᵥ* P = π`.
+* `MathFin.FiniteMarkov.IsStationary`: `π`, a point of Mathlib's standard simplex
+  `Convexity.StdSimplex ℝ S` (a probability vector), satisfies `π ᵥ* P = π`.
 * `MathFin.FiniteMarkov.IsIrreducible`: every state reaches every state, `0 < (P ^ n) i j` for
+  some `n`; for a chain, `isIrreducible_transitionMatrix_iff` says this is `0 < ℙ_i(X_n = j)` for
   some `n`.
 * `MathFin.FiniteMarkov.IsAperiodic`: the only natural number dividing every return time
   `n ≥ 1` with `0 < (P ^ n) i i` of a state `i` is `1` (the gcd of the return times is `1`).
@@ -56,15 +63,19 @@ the lazy chain `(I + P) / 2`, which has the same stationary vectors and is primi
   matrix has a stationary distribution `π` with `(P ^ n) i j → π j` for all `i j`.
 * `MathFin.FiniteMarkov.tendsto_pow_of_isStationary`: for an irreducible aperiodic stochastic
   matrix and any stationary distribution `π`, `(P ^ n) i j → π j` (Saporito Theorem 1.4.40).
+* `MathFin.FiniteMarkov.isIrreducible_transitionMatrix_iff`,
+  `MathFin.FiniteMarkov.IsStationary.sum_mul_chainLaw` and
+  `MathFin.FiniteMarkov.tendsto_chainLaw_visit`: the same notions and the convergence theorem for
+  the chain `chainLaw K i`.
 
 ## Implementation notes
 
-The state space is finite, so positive recurrence is automatic and is not a hypothesis. The
-matrix `P` is the one-step law as a real matrix; it is not tied here to the path measure
-`MathFin.markovPathMeasure` of `MathFin.Probability.Discrete.MarkovPathMeasure`, which is built
-from `PMF`-valued kernels on a countable state space. Aperiodicity is stated as a condition on
-return times, which is the textbook definition; no rate of convergence is part of the statements
-(the proof does give a geometric one).
+The state space is finite, so positive recurrence is automatic and is not a hypothesis. The matrix
+theorems are stated for any row-stochastic matrix, because the argument is linear algebra; the
+chain statements at the end of the file instantiate them at `transitionMatrix K`, the real matrix
+of the one-step laws `K : S → PMF S` of `markovPathMeasure`. Aperiodicity is stated as a condition
+on return times, which is the textbook definition; no rate of convergence is part of the
+statements (the proof does give a geometric one).
 
 ## References
 
@@ -98,28 +109,28 @@ def IsAperiodic (P : Matrix S S ℝ) : Prop :=
 def IsPrimitive (P : Matrix S S ℝ) : Prop :=
   ∃ m : ℕ, 0 < m ∧ ∀ i j, 0 < (P ^ m) i j
 
-/-- `π` is a stationary distribution for `P`: a probability vector with `π ᵥ* P = π`. -/
-structure IsStationary (P : Matrix S S ℝ) (π : S → ℝ) : Prop where
-  /-- The entries of `π` are nonnegative. -/
-  nonneg : ∀ i, 0 ≤ π i
-  /-- The entries of `π` sum to one. -/
-  sum_eq_one : ∑ i, π i = 1
-  /-- `π` is invariant under the transition matrix. -/
-  vecMul_eq : π ᵥ* P = π
+/-- `π` is a stationary distribution for `P`: a probability vector (a point of Mathlib's standard
+simplex) with `π ᵥ* P = π`. -/
+def IsStationary (P : Matrix S S ℝ) (π : Convexity.StdSimplex ℝ S) : Prop :=
+  (⇑π.weights) ᵥ* P = ⇑π.weights
 
 /-- The lazy chain `(I + P) / 2`: stay put with probability `1/2`, otherwise move by `P`. -/
 noncomputable def lazyChain (P : Matrix S S ℝ) : Matrix S S ℝ :=
   (1 / 2 : ℝ) • (1 : Matrix S S ℝ) + (1 / 2 : ℝ) • P
 
-lemma IsStationary.sum_mul {π : S → ℝ} (h : IsStationary P π) (j : S) :
-    ∑ i, π i * P i j = π j :=
-  congrFun h.vecMul_eq j
+lemma IsStationary.sum_mul {π : Convexity.StdSimplex ℝ S} (h : IsStationary P π) (j : S) :
+    ∑ i, π.weights i * P i j = π.weights j :=
+  congrFun h j
 
-lemma IsStationary.nonempty {π : S → ℝ} (h : IsStationary P π) : Nonempty S := by
-  by_contra hS
-  have h1 := h.sum_eq_one
-  rw [not_nonempty_iff] at hS
-  simp at h1
+/-- A nonnegative vector on a finite type with sum one is the weight vector of a point of the
+standard simplex. -/
+lemma exists_stdSimplex_eq {u : S → ℝ} (h0 : ∀ i, 0 ≤ u i) (h1 : ∑ i, u i = 1) :
+    ∃ π : Convexity.StdSimplex ℝ S, ⇑π.weights = u := by
+  have hu : u ∈ Set.range (fun t : Convexity.StdSimplex ℝ S ↦ ⇑t.weights) := by
+    rw [Convexity.StdSimplex.range_toFun_comp_weights]
+    exact ⟨Set.mem_iInter.2 h0, h1⟩
+  obtain ⟨π, hπ⟩ := hu
+  exact ⟨π, hπ⟩
 
 lemma IsPrimitive.isIrreducible (h : IsPrimitive P) : IsIrreducible P :=
   fun i j => by
@@ -196,43 +207,49 @@ lemma pos_pair (hP : P ∈ rowStochastic ℝ S) (hirr : IsIrreducible P) {u v : 
 /-- **Uniqueness of the stationary distribution** (Saporito Theorem 1.4.25): an irreducible
 stochastic matrix has at most one stationary distribution. -/
 theorem IsStationary.eq_of_isIrreducible (hP : P ∈ rowStochastic ℝ S) (hirr : IsIrreducible P)
-    {π ν : S → ℝ} (hπ : IsStationary P π) (hν : IsStationary P ν) : ν = π := by
-  have hd : ∀ j, ∑ i, (ν i - π i) * P i j = ν j - π j := fun j => by
-    simp only [sub_mul, Finset.sum_sub_distrib, hν.sum_mul j, hπ.sum_mul j]
-  have he : ∀ j, ∑ i, (π i - ν i) * P i j = π j - ν j := fun j => by
-    simp only [sub_mul, Finset.sum_sub_distrib, hν.sum_mul j, hπ.sum_mul j]
-  have hu : ∀ j, ∑ i, max (ν i - π i) 0 * P i j = max (ν j - π j) 0 :=
-    posPart_sum hP (w := fun i => ν i - π i) hd
-  have hv : ∀ j, ∑ i, max (π i - ν i) 0 * P i j = max (π j - ν j) 0 :=
-    posPart_sum hP (w := fun i => π i - ν i) he
-  have key : ∀ j, max (ν j - π j) 0 - max (π j - ν j) 0 = ν j - π j := fun j => by
-    rcases le_total (ν j) (π j) with h | h
-    · rw [max_eq_right (show ν j - π j ≤ 0 by linarith),
-        max_eq_left (show 0 ≤ π j - ν j by linarith)]
+    {π ν : Convexity.StdSimplex ℝ S} (hπ : IsStationary P π) (hν : IsStationary P ν) : ν = π := by
+  have hd : ∀ j, ∑ i, (ν.weights i - π.weights i) * P i j = ν.weights j - π.weights j :=
+    fun j => by simp only [sub_mul, Finset.sum_sub_distrib, hν.sum_mul j, hπ.sum_mul j]
+  have he : ∀ j, ∑ i, (π.weights i - ν.weights i) * P i j = π.weights j - ν.weights j :=
+    fun j => by simp only [sub_mul, Finset.sum_sub_distrib, hν.sum_mul j, hπ.sum_mul j]
+  have hu : ∀ j, ∑ i, max (ν.weights i - π.weights i) 0 * P i j
+      = max (ν.weights j - π.weights j) 0 :=
+    posPart_sum hP (w := fun i => ν.weights i - π.weights i) hd
+  have hv : ∀ j, ∑ i, max (π.weights i - ν.weights i) 0 * P i j
+      = max (π.weights j - ν.weights j) 0 :=
+    posPart_sum hP (w := fun i => π.weights i - ν.weights i) he
+  have key : ∀ j, max (ν.weights j - π.weights j) 0 - max (π.weights j - ν.weights j) 0
+      = ν.weights j - π.weights j := fun j => by
+    rcases le_total (ν.weights j) (π.weights j) with h | h
+    · rw [max_eq_right (show ν.weights j - π.weights j ≤ 0 by linarith),
+        max_eq_left (show 0 ≤ π.weights j - ν.weights j by linarith)]
       ring
-    · rw [max_eq_left (show 0 ≤ ν j - π j by linarith),
-        max_eq_right (show π j - ν j ≤ 0 by linarith)]
+    · rw [max_eq_left (show 0 ≤ ν.weights j - π.weights j by linarith),
+        max_eq_right (show π.weights j - ν.weights j ≤ 0 by linarith)]
       ring
-  have hsum : ∑ j, max (ν j - π j) 0 = ∑ j, max (π j - ν j) 0 := by
-    have h1 : ∑ j, max (ν j - π j) 0 - ∑ j, max (π j - ν j) 0 = ∑ j, ν j - ∑ j, π j := by
+  have hsum : ∑ j, max (ν.weights j - π.weights j) 0 = ∑ j, max (π.weights j - ν.weights j) 0 := by
+    have h1 : ∑ j, max (ν.weights j - π.weights j) 0 - ∑ j, max (π.weights j - ν.weights j) 0
+        = ∑ j, ν.weights j - ∑ j, π.weights j := by
       rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
       exact Finset.sum_congr rfl fun j _ => key j
-    rw [hν.sum_eq_one, hπ.sum_eq_one] at h1
+    rw [ν.total_of_fintype, π.total_of_fintype] at h1
     linarith
-  by_contra hne
-  obtain ⟨j₀, hj₀⟩ := Function.ne_iff.1 hne
+  refine Convexity.StdSimplex.ext (Finsupp.ext fun j₀ => ?_)
+  by_contra hj₀
   rcases lt_or_gt_of_ne hj₀ with h | h
-  · have hvpos : 0 < max (π j₀ - ν j₀) 0 := lt_max_of_lt_left (by linarith)
-    have h2 : 0 < max (ν j₀ - π j₀) 0 := (pos_pair hP hirr (u := fun j => max (π j - ν j) 0)
-      (v := fun j => max (ν j - π j) 0) (fun i => le_max_right _ _) (fun i => le_max_right _ _)
-      hv hu hsum.symm hvpos j₀).2
-    rw [max_eq_right (show ν j₀ - π j₀ ≤ 0 by linarith)] at h2
+  · have hvpos : 0 < max (π.weights j₀ - ν.weights j₀) 0 := lt_max_of_lt_left (by linarith)
+    have h2 : 0 < max (ν.weights j₀ - π.weights j₀) 0 :=
+      (pos_pair hP hirr (u := fun j => max (π.weights j - ν.weights j) 0)
+        (v := fun j => max (ν.weights j - π.weights j) 0) (fun i => le_max_right _ _)
+        (fun i => le_max_right _ _) hv hu hsum.symm hvpos j₀).2
+    rw [max_eq_right (show ν.weights j₀ - π.weights j₀ ≤ 0 by linarith)] at h2
     exact lt_irrefl _ h2
-  · have hupos : 0 < max (ν j₀ - π j₀) 0 := lt_max_of_lt_left (by linarith)
-    have h2 : 0 < max (π j₀ - ν j₀) 0 := (pos_pair hP hirr (u := fun j => max (ν j - π j) 0)
-      (v := fun j => max (π j - ν j) 0) (fun i => le_max_right _ _) (fun i => le_max_right _ _)
-      hu hv hsum hupos j₀).2
-    rw [max_eq_right (show π j₀ - ν j₀ ≤ 0 by linarith)] at h2
+  · have hupos : 0 < max (ν.weights j₀ - π.weights j₀) 0 := lt_max_of_lt_left (by linarith)
+    have h2 : 0 < max (π.weights j₀ - ν.weights j₀) 0 :=
+      (pos_pair hP hirr (u := fun j => max (ν.weights j - π.weights j) 0)
+        (v := fun j => max (π.weights j - ν.weights j) 0) (fun i => le_max_right _ _)
+        (fun i => le_max_right _ _) hu hv hsum hupos j₀).2
+    rw [max_eq_right (show π.weights j₀ - ν.weights j₀ ≤ 0 by linarith)] at h2
     exact lt_irrefl _ h2
 
 /-! ### Doeblin's contraction -/
@@ -368,8 +385,8 @@ lemma exists_tendsto_col [Nonempty S] (hP : P ∈ rowStochastic ℝ S) {m : ℕ}
 space has a stationary distribution `π`, and `(P ^ n) i j → π j` for every `i` and `j`. -/
 theorem exists_isStationary_tendsto_pow_of_isPrimitive [Nonempty S]
     (hP : P ∈ rowStochastic ℝ S) (hprim : IsPrimitive P) :
-    ∃ π : S → ℝ, IsStationary P π ∧
-      ∀ i j, Tendsto (fun n : ℕ => (P ^ n) i j) atTop (𝓝 (π j)) := by
+    ∃ π : Convexity.StdSimplex ℝ S, IsStationary P π ∧
+      ∀ i j, Tendsto (fun n : ℕ => (P ^ n) i j) atTop (𝓝 (π.weights j)) := by
   obtain ⟨m, hm, hpos⟩ := hprim
   obtain ⟨p, -, hp⟩ := Finset.exists_min_image (Finset.univ : Finset (S × S))
     (fun p => (P ^ m) p.1 p.2) ⟨(Classical.arbitrary S, Classical.arbitrary S), Finset.mem_univ _⟩
@@ -377,15 +394,20 @@ theorem exists_isStationary_tendsto_pow_of_isPrimitive [Nonempty S]
   have hε : ∀ i j, (P ^ m) p.1 p.2 ≤ (P ^ m) i j := fun i j => hp (i, j) (Finset.mem_univ _)
   choose L hL using fun j => exists_tendsto_col hP hm hε0 hε j
   have i₀ : S := Classical.arbitrary S
-  refine ⟨L, ⟨fun j => ge_of_tendsto' (hL j i₀) fun n =>
-    nonneg_of_mem_rowStochastic (pow_mem hP n), ?_, ?_⟩, fun i j => hL j i⟩
-  · have h1 : Tendsto (fun n : ℕ => ∑ j, (P ^ n) i₀ j) atTop (𝓝 (∑ j, L j)) :=
+  have hL0 : ∀ j, 0 ≤ L j := fun j => ge_of_tendsto' (hL j i₀) fun n =>
+    nonneg_of_mem_rowStochastic (pow_mem hP n)
+  have hL1 : ∑ j, L j = 1 := by
+    have h1 : Tendsto (fun n : ℕ => ∑ j, (P ^ n) i₀ j) atTop (𝓝 (∑ j, L j)) :=
       tendsto_finsetSum _ fun j _ => hL j i₀
     have h2 : (fun n : ℕ => ∑ j, (P ^ n) i₀ j) = fun _ => 1 :=
       funext fun n => sum_row_of_mem_rowStochastic (pow_mem hP n) i₀
     rw [h2] at h1
     exact (tendsto_nhds_unique tendsto_const_nhds h1).symm
-  · funext j
+  obtain ⟨π, hπ⟩ := exists_stdSimplex_eq hL0 hL1
+  refine ⟨π, ?_, fun i j => by rw [congrFun hπ j]; exact hL j i⟩
+  · show (⇑π.weights) ᵥ* P = ⇑π.weights
+    rw [hπ]
+    funext j
     rw [Matrix.vecMul_apply_eq_sum]
     have h1 : Tendsto (fun n : ℕ => (P ^ (n + 1)) i₀ j) atTop (𝓝 (L j)) :=
       (hL j i₀).comp (tendsto_add_atTop_nat 1)
@@ -486,7 +508,7 @@ lemma lazyChain_pow_pos (hP : P ∈ rowStochastic ℝ S) :
 /-- **Existence of a stationary distribution** for an irreducible stochastic matrix on a nonempty
 finite state space. -/
 theorem exists_isStationary_of_isIrreducible [Nonempty S] (hP : P ∈ rowStochastic ℝ S)
-    (hirr : IsIrreducible P) : ∃ π : S → ℝ, IsStationary P π := by
+    (hirr : IsIrreducible P) : ∃ π : Convexity.StdSimplex ℝ S, IsStationary P π := by
   choose a ha using (hirr : ∀ i j, ∃ n : ℕ, 0 < (P ^ n) i j)
   obtain ⟨A, hA⟩ : ∃ A : ℕ, ∀ i j, a i j ≤ A :=
     ⟨Finset.univ.sup fun p : S × S => a p.1 p.2, fun i j =>
@@ -495,10 +517,11 @@ theorem exists_isStationary_of_isIrreducible [Nonempty S] (hP : P ∈ rowStochas
     ⟨A + 1, Nat.succ_pos A, fun i j =>
       lazyChain_pow_pos hP (A + 1) (a i j) (by have := hA i j; omega) i j (ha i j)⟩
   obtain ⟨π, hπ, -⟩ := exists_isStationary_tendsto_pow_of_isPrimitive (lazyChain_mem hP) hprim
-  refine ⟨π, hπ.nonneg, hπ.sum_eq_one, ?_⟩
-  have h := hπ.vecMul_eq
+  refine ⟨π, ?_⟩
+  have h : (⇑π.weights) ᵥ* lazyChain P = ⇑π.weights := hπ
   simp only [lazyChain] at h
   rw [Matrix.vecMul_add, Matrix.vecMul_smul, Matrix.vecMul_smul, Matrix.vecMul_one] at h
+  show (⇑π.weights) ᵥ* P = ⇑π.weights
   funext j
   have hj := congrFun h j
   simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul] at hj
@@ -507,7 +530,7 @@ theorem exists_isStationary_of_isIrreducible [Nonempty S] (hP : P ∈ rowStochas
 /-- An irreducible stochastic matrix on a nonempty finite state space has exactly one stationary
 distribution (Saporito Theorem 1.4.25). -/
 theorem existsUnique_isStationary_of_isIrreducible [Nonempty S] (hP : P ∈ rowStochastic ℝ S)
-    (hirr : IsIrreducible P) : ∃! π : S → ℝ, IsStationary P π :=
+    (hirr : IsIrreducible P) : ∃! π : Convexity.StdSimplex ℝ S, IsStationary P π :=
   let ⟨π, hπ⟩ := exists_isStationary_of_isIrreducible hP hirr
   ⟨π, hπ, fun _ hν => hπ.eq_of_isIrreducible hP hirr hν⟩
 
@@ -515,12 +538,47 @@ theorem existsUnique_isStationary_of_isIrreducible [Nonempty S] (hP : P ∈ rowS
 aperiodic stochastic matrix and a stationary distribution `π`, `(P ^ n) i j → π j` for all `i`
 and `j`. -/
 theorem tendsto_pow_of_isStationary (hP : P ∈ rowStochastic ℝ S) (hirr : IsIrreducible P)
-    (hap : IsAperiodic P) {π : S → ℝ} (hπ : IsStationary P π) (i j : S) :
-    Tendsto (fun n : ℕ => (P ^ n) i j) atTop (𝓝 (π j)) := by
-  haveI := hπ.nonempty
+    (hap : IsAperiodic P) {π : Convexity.StdSimplex ℝ S} (hπ : IsStationary P π) (i j : S) :
+    Tendsto (fun n : ℕ => (P ^ n) i j) atTop (𝓝 (π.weights j)) := by
+  haveI := π.nonempty
   obtain ⟨π', hπ', hlim⟩ := exists_isStationary_tendsto_pow_of_isPrimitive hP
     (isPrimitive_of_isIrreducible_of_isAperiodic hP hirr hap)
   rw [hπ'.eq_of_isIrreducible hP hirr hπ]
   exact hlim i j
+
+/-! ### The chain `chainLaw K i` -/
+
+section Chain
+
+variable [MeasurableSpace S] [MeasurableSingletonClass S] (K : S → PMF S)
+
+/-- **Irreducibility of a chain**: the transition matrix of the one-step laws `K` is irreducible
+exactly when every state is reached from every state with positive probability, `0 < ℙ_i(X_n = j)`
+for some `n`. -/
+theorem isIrreducible_transitionMatrix_iff :
+    IsIrreducible (transitionMatrix K) ↔ ∀ i j, ∃ n : ℕ, 0 < chainLaw K i {ω | ω n = j} := by
+  refine forall₂_congr fun i j => exists_congr fun n => ?_
+  rw [← chainLaw_visit_toReal_eq_pow, ENNReal.toReal_pos_iff]
+  exact (and_iff_left (MeasureTheory.measure_lt_top _ _)).symm
+
+/-- **Stationarity of a chain**: if `π` is stationary for the transition matrix of `K`, the
+chain started from `π` has marginal `π` at every time, `∑ᵢ πᵢ ℙ_i(X_n = j) = π j`. -/
+theorem IsStationary.sum_mul_chainLaw {π : Convexity.StdSimplex ℝ S}
+    (h : IsStationary (transitionMatrix K) π) (j : S) (n : ℕ) :
+    ∑ i, π.weights i * (chainLaw K i {ω | ω n = j}).toReal = π.weights j := by
+  have h1 := congrFun (vecMul_pow_eq (u := ⇑π.weights) h n) j
+  rw [Matrix.vecMul_apply_eq_sum] at h1
+  simpa only [chainLaw_visit_toReal_eq_pow K] using h1
+
+/-- **Convergence to equilibrium for a chain** (Saporito Theorem 1.4.40): if the transition matrix
+of `K` is irreducible and aperiodic and `π` is stationary, then `ℙ_i(X_n = j) → π j`. -/
+theorem tendsto_chainLaw_visit (hirr : IsIrreducible (transitionMatrix K))
+    (hap : IsAperiodic (transitionMatrix K)) {π : Convexity.StdSimplex ℝ S}
+    (hπ : IsStationary (transitionMatrix K) π) (i j : S) :
+    Tendsto (fun n : ℕ => (chainLaw K i {ω | ω n = j}).toReal) atTop (𝓝 (π.weights j)) := by
+  simp only [chainLaw_visit_toReal_eq_pow K]
+  exact tendsto_pow_of_isStationary (transitionMatrix_mem_rowStochastic K) hirr hap hπ i j
+
+end Chain
 
 end MathFin.FiniteMarkov
