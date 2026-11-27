@@ -81,22 +81,19 @@ derivative at `κ` — so its spanning identity has no cash or forward leg. The 
 meant at `x > 0`; at `x ≤ 0` the value is junk (the logarithm is out of its domain). -/
 noncomputable def gammaSwapPayoff (κ x : ℝ) : ℝ := x * Real.log (x / κ) - x + κ
 
-/-- Second derivative of the replication payoff: `φ″(x) = x⁻¹`, the `1/K` strip weight,
-carried as the derivative of `φ′(x) = log(x/κ)`. -/
-private theorem hasDerivAt_gammaSwapPayoff' {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x) :
-    HasDerivAt (fun y : ℝ ↦ Real.log (y / κ)) x⁻¹ x := by
+/-- The first two derivatives of the replication payoff: `φ′(x) = log(x/κ)` (whose value
+at `κ` is `0`) and `φ″(x) = x⁻¹`, the `1/K` weight of the gamma swap's strip. -/
+private theorem gammaSwapPayoff_derivs {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x) :
+    HasDerivAt (gammaSwapPayoff κ) (Real.log (x / κ)) x
+      ∧ HasDerivAt (fun y : ℝ ↦ Real.log (y / κ)) x⁻¹ x := by
   have hdiv : HasDerivAt (fun y : ℝ ↦ y / κ) (1 / κ) x := (hasDerivAt_id' x).div_const κ
-  have h : HasDerivAt (Real.log ∘ fun y : ℝ ↦ y / κ) ((x / κ)⁻¹ * (1 / κ)) x :=
-    (Real.hasDerivAt_log (show x / κ ≠ 0 by positivity)).comp x hdiv
-  convert h using 1
-  · simp [Function.comp_def]
-  · field_simp
-
-/-- First derivative of the replication payoff: `φ′(x) = log(x/κ)`, whose value at `κ`
-is `0`. -/
-private theorem hasDerivAt_gammaSwapPayoff {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x) :
-    HasDerivAt (gammaSwapPayoff κ) (Real.log (x / κ)) x := by
-  have hlog := hasDerivAt_gammaSwapPayoff' hκ hx
+  have hlog : HasDerivAt (fun y : ℝ ↦ Real.log (y / κ)) x⁻¹ x := by
+    have h : HasDerivAt (Real.log ∘ fun y : ℝ ↦ y / κ) ((x / κ)⁻¹ * (1 / κ)) x :=
+      (Real.hasDerivAt_log (show x / κ ≠ 0 by positivity)).comp x hdiv
+    convert h using 1
+    · simp [Function.comp_def]
+    · field_simp
+  refine ⟨?_, hlog⟩
   have h1 : HasDerivAt (fun y : ℝ ↦ y * Real.log (y / κ))
       (Real.log (x / κ) + x * x⁻¹) x := by
     convert (hasDerivAt_id' x).mul hlog using 1
@@ -122,8 +119,8 @@ theorem gammaSwapPayoff_eq_strip {L U κ S : ℝ} (hL : 0 < L) (hLκ : L ≤ κ)
   have hκ : κ ≠ 0 := hκpos.ne'
   have h := carrMadan_spanning (f := gammaSwapPayoff κ) (f' := fun t ↦ Real.log (t / κ))
     (f'' := fun K ↦ K⁻¹) hLκ hκU hS
-    (fun t ht ↦ hasDerivAt_gammaSwapPayoff hκpos (hpos t ht))
-    (fun t ht ↦ hasDerivAt_gammaSwapPayoff' hκpos (hpos t ht))
+    (fun t ht ↦ (gammaSwapPayoff_derivs hκpos (hpos t ht)).1)
+    (fun t ht ↦ (gammaSwapPayoff_derivs hκpos (hpos t ht)).2)
     (continuousOn_id.inv₀ fun K hK ↦ (hpos K hK).ne')
   have hzero : gammaSwapPayoff κ κ = 0 := by simp [gammaSwapPayoff, div_self hκ]
   have hlogzero : Real.log (κ / κ) = 0 := by rw [div_self hκ, Real.log_one]
@@ -159,8 +156,8 @@ theorem IsPricingMeasure.integral_eq_gammaSwap {M : Market Unit Ω} {T : ℝ≥0
   have hκpos : 0 < κ := hpos κ ⟨hLκ, hκU⟩
   have hκ : κ ≠ 0 := hκpos.ne'
   have h := hQ.integral_eq_carrMadan hN hLκ hκU hS
-    (fun t ht ↦ hasDerivAt_gammaSwapPayoff hκpos (hpos t ht))
-    (fun t ht ↦ hasDerivAt_gammaSwapPayoff' hκpos (hpos t ht))
+    (fun t ht ↦ (gammaSwapPayoff_derivs hκpos (hpos t ht)).1)
+    (fun t ht ↦ (gammaSwapPayoff_derivs hκpos (hpos t ht)).2)
     (continuousOn_id.inv₀ fun K hK ↦ (hpos K hK).ne')
   have hzero : gammaSwapPayoff κ κ = 0 := by simp [gammaSwapPayoff, div_self hκ]
   have hlogzero : Real.log (κ / κ) = 0 := by rw [div_self hκ, Real.log_one]

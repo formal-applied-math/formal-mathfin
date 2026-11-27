@@ -564,6 +564,20 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.carrMadan_log_spanning
 
+/-! ## Gamma swap replication and fair strike -/
+
+/-- info: 'MathFin.gammaSwapPayoff_eq_strip' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.gammaSwapPayoff_eq_strip
+
+/-- info: 'MathFin.Market.IsPricingMeasure.integral_eq_gammaSwap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.integral_eq_gammaSwap
+
+/-- info: 'MathFin.Market.IsPricingMeasure.gammaSwapFairStrike_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Market.IsPricingMeasure.gammaSwapFairStrike_eq_integral
+
 /-! ## Binomial martingale representation (market completeness) -/
 
 /-- info: 'MathFin.binomial_martingale_representation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
