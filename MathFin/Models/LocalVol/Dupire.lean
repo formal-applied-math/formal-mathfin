@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -9,6 +9,7 @@ public import MathFin.Models.ModelFree.CarrMadan
 public import MathFin.Probability.Brownian.SDE.GyongyMimicry
 public import MathFin.Models.ModelFree.CallSpreadDigital
 public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
+public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
 
 /-!
@@ -32,13 +33,36 @@ function `f_ψ` (its double primitive) which *is* the static call book
 * `call_spanning_compactSupport` — the test-function factory `ψ ↦ f_ψ`.
 * `integral_payoff_eq_integral_call` — Fubini: `𝔼[∫ψ(K)(X_s − K)⁺dK] = ∫ψ(K)C(s, K)dK`.
 * `breedenLitzenberger_weak` — `∫ ψ''(K) C(s, K) dK = 𝔼ψ(X_s)` for any integrable law.
-* `forward_eq_weak_zeroRate` — `GyongyMimicry.marginal_flow_weak_equation_fn_constructed` at
-  `β = 0`, drift term erased (the weak form of the (t, x) forward equation).
-* **`dupire_weak`** (headline) — `d/dT ∫ψ(K)C(T, K)dK = ½·𝔼[ψ(X_T)·b̂²(T, X_T)]`.
+* `driftTail` — `𝔼[a(X_T)·1{X_T > K}]`, the drift's contribution to the call surface.
+* `integral_tailPrimitive_mul` — Fubini: `𝔼[(∫_{(-∞, Y)} ψ)·g(Y)] = ∫ψ(K)·𝔼[g(Y)1{Y > K}]dK`.
+* **`dupire_weak_drift`** (headline) — for `X = c + ∫β + M` with bounded adapted `β`, `δ`,
+  `d/dT ∫ψ(K)C(T, K)dK = ∫ψ(K)·𝔼[â(T, X_T)1{X_T > K}]dK + ½·𝔼[ψ(X_T)·b̂²(T, X_T)]`.
+* `dupire_weak` — the same at `β = 0`: `d/dT ∫ψ(K)C(T, K)dK = ½·𝔼[ψ(X_T)·b̂²(T, X_T)]`.
 
 Together, `dupire_weak` and `breedenLitzenberger_weak` say `∂_T C = ½·b̂²(T, ·)·∂²_K C` in
 `D'(ℝ_K)`, `b̂² = 𝔼[δ_T² | X_T = ·]` the Gyöngy coefficient: Thm 9.5 ∘ Thm 9.7 in
-distributional form, with no density, no Tanaka formula, and no regularity hypothesis.
+distributional form, with no density, no Tanaka formula, and no regularity hypothesis. With
+a drift, `dupire_weak_drift` adds the tail term `K ↦ 𝔼[â(T, X_T)1{X_T > K}]` to the right side.
+
+## What the formalization revealed
+
+The classical derivation of Dupire's equation tests the forward (Fokker–Planck) equation
+against the call payoff `(x − K)⁺` and integrates by parts twice, using `(x − K)⁺'' = δ_K`.
+The weak forward equation available here
+(`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`) holds for `C²` test functions
+with bounded `f'`, `f''`, `f'''`; `(x − K)⁺` is not `C²`, so the classical test function is
+outside its class. The library smears the strike instead (Carr–Madan): for a smooth compactly
+supported density `ψ`, the double primitive `f_ψ` is an admissible test function and *is* the
+static call book `∫ ψ(K)(x − K)⁺ dK`; Fubini turns `𝔼[f_ψ(X_T)]` into `∫ ψ(K) C(T, K) dK`.
+The result is an identity in `D'(ℝ_K)`, with no regularity hypothesis on the call surface.
+With a drift, the same device shows where the drift enters. The first derivative of the
+smeared payoff is the smeared digital, `f_ψ'(x) = ∫ ψ(K) 1{x > K} dK`, so the drift
+contributes `∫ ψ(K) 𝔼[a(T, X_T) 1{X_T > K}] dK`: the tail `∫_K^∞ a(T, x) p(x) dx`, which
+involves the law of `X_T` at every level above `K`, not only near `K`. The pointwise form
+(`dupire_pointwise_drift`) therefore needs, besides regularity of the call surface,
+continuity of this tail on the strike window as a hypothesis. For a drift proportional to the
+state the tail is `m·(C − K ∂_K C)` (`dupire_pointwise_linearDrift`). All of this is proved for
+bounded drift and bounded diffusion coefficients; the lognormal model is outside that class.
 
 ## Not claimed here
 
@@ -46,9 +70,12 @@ distributional form, with no density, no Tanaka formula, and no regularity hypot
   in the second half of this file (`dupire_pointwise`) carries C²-in-`K` / C¹-in-`T`
   regularity of the call surface (with continuous `C_KK`, jointly continuous `C_T`) plus a
   continuous version of `b̂²` as hypotheses.
-* Nonzero rates / lognormal `δ = σ_loc·S`: the process class has bounded drift and
-  diffusion (`GyongyMimicry.BoundedCoeffData`); the lognormal flat-vol check (Ex. 9.2) is
-  therefore outside this module's bounded-coefficient class.
+* Lognormal `δ = σ_loc·S`, and the textbook rates form for the discounted surface: the process
+  class has bounded drift rate and bounded diffusion (`GyongyMimicry.BoundedCoeffData`); the
+  lognormal flat-vol check (Ex. 9.2) is therefore outside this module's bounded-coefficient
+  class (removing boundedness by localization is not done). Nonzero drift is covered inside
+  that class (`dupire_weak_drift`, `dupire_pointwise_drift`, `dupire_pointwise_linearDrift`),
+  for the *undiscounted* call surface `𝔼[(X_T − K)⁺]`.
 * Existence of the local-vol diffusion that reproduces `C` (`GyongyMimicry.gyongy_mimicry_gated`).
 
 ## Main definitions
@@ -66,20 +93,27 @@ distributional form, with no density, no Tanaka formula, and no regularity hypot
   compactly supported `ψ`, `𝔼[∫ ψ(K) (X_{s⁺} − K)⁺ dK] = ∫ ψ(K) C(s, K) dK`.
 * `breedenLitzenberger_weak`: for an integrable marginal and a smooth compactly supported `ψ`,
   `∫ ψ''(K) C(s, K) dK = 𝔼[ψ(X_{s⁺})]`.
-* `forward_eq_weak_zeroRate`: for the driftless Itô process `X = c + M` with a bounded adapted
-  `δ`, the weak forward equation `d/dt 𝔼[f(X_{t⁺})] = ½ 𝔼[f''(X_{t⁺}) b̂²(t, X_{t⁺})]` on
-  `(0, T)` for test functions `f`, with `b̂²` a Borel version of `𝔼[δ_t² | X_t]`.
-* `dupire_weak`: for the same process and smooth compactly supported `ψ`,
-  `d/dT ∫ ψ(K) C(T, K) dK = ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)`.
+* `dupire_weak_drift`: for `X = c + ∫β + M` with bounded adapted `β`, `δ` and smooth compactly
+  supported `ψ`, `d/dT ∫ ψ(K) C(T, K) dK = ∫ ψ(K) 𝔼[â(T, X_T) 1{X_T > K}] dK +
+  ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)`, `â`, `b̂²` Borel versions of `𝔼[β_T | X_T]`, `𝔼[δ_T² | X_T]`.
+* `dupire_weak`: for the driftless process `X = c + M` and smooth compactly supported `ψ`,
+  `d/dT ∫ ψ(K) C(T, K) dK = ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)` (`β = 0` of the above).
+* `dupire_pointwise_drift`: with drift, at every strike of the window with `C_KK > 0`,
+  `σloc(K)² = 2 (C_T − 𝔼[â(t, X_t) 1{X_t > K}]) / (K² C_KK)`, under the regularity hypotheses of
+  `dupire_pointwise` and continuity of the drift tail on the window.
+* `driftTail_linear`, `dupire_pointwise_linearDrift`: for `â(x) = m x` on the window and above,
+  `𝔼[â(X) 1{X > K}] = m (C + K P(X > K))`, hence
+  `σloc(K)² = 2 (C_T − m (C − K C_K)) / (K² C_KK)` (undiscounted `C`).
 * `strikeDeriv_callSurface_eq_neg_tail`: where `K ↦ C(s, K)` has derivative `d` at `K`,
   `d = −P(X_s > K)`.
 * `law_restrict_eq_withDensity`: on a window where `C` has strike derivatives `C_K`, `C_KK` with
   `C_KK` continuous, the restricted law of `X_s` has density `C_KK` with respect to Lebesgue
   measure.
-* `dupire_ae`: under regularity hypotheses on `C_K`, `C_KK`, `C_T` on a window `Ioo a b`,
-  `𝔼[δ_t² | X_t] = 2 C_T(t, X_t) / C_KK(X_t)` almost everywhere on `{X_t ∈ Ioo a b}`.
+* `dupire_ae`: under regularity hypotheses on `C_K`, `C_KK`, `C_T` on a window `Ioo a b` (and
+  continuity of the drift tail), `𝔼[δ_t² | X_t] = 2 (C_T(t, X_t) − D(X_t)) / C_KK(X_t)` almost everywhere on `{X_t ∈ Ioo a b}`,
+  `D(K) = 𝔼[â(t, X_t) 1{X_t > K}]` the drift tail (`driftTail`); at zero drift `D = 0`.
 * `dupire_pointwise_coeff`: a continuous version `v2` of `𝔼[δ_t² | X_t = ·]` on the window
-  equals `2 C_T(t, K) / C_KK(K)` at every strike with `C_KK > 0`.
+  equals `2 (C_T(t, K) − driftTail(K)) / C_KK(K)` at every strike with `C_KK > 0`.
 * `dupire_pointwise`: for a continuous `σloc` with `σloc(K)² K²` a version of
   `𝔼[δ_t² | X_t = K]` on a window in `K ≥ 0`, `σloc(K)² = 2 C_T(t, K) / (K² C_KK(K))` at every
   strike with `C_KK > 0`.
@@ -119,6 +153,14 @@ defined surface; no theorem takes a call surface as a hypothesis). -/
 noncomputable def callSurface {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
     (X : ℝ≥0 → Ω → ℝ) (s K : ℝ) : ℝ :=
   ∫ ω, max (X (Real.toNNReal s) ω - K) 0 ∂μ
+
+/-- **The drift tail** `𝔼[a(X_{t⁺}) · 1{X_{t⁺} > K}]` of a state-dependent drift coefficient
+`a`: the part of the Gyöngy drift `a(t, x) = 𝔼[β_t | X_t = x]` that sits above the strike `K`.
+It equals `∫_K^∞ a(x) law(X_t)(dx)`; where the law has a density `p` it is `∫_K^∞ a(x) p(x) dx`.
+A *definition*, never a free variable of a theorem below. -/
+noncomputable def driftTail {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
+    (X : ℝ≥0 → Ω → ℝ) (a : ℝ → ℝ) (t K : ℝ) : ℝ :=
+  ∫ ω, (if K < X (Real.toNNReal t) ω then a (X (Real.toNNReal t) ω) else 0) ∂μ
 
 section Spanning
 
@@ -207,6 +249,49 @@ theorem integral_payoff_eq_integral_call [IsFiniteMeasure μ] {X : ℝ≥0 → �
   simp only [callSurface]
   exact integral_const_mul (ψ K) _
 
+/-- **Fubini for a strike-smeared digital book against a state function.** For a measurable
+`Y`, a measurable `g` with `g(Y)` integrable, and a continuous compactly supported strike density
+`ψ`,
+
+  `𝔼[(∫_{(-∞, Y)} ψ) · g(Y)] = ∫ ψ(K) · 𝔼[g(Y) 1{Y > K}] dK`.
+
+Domination: `|ψ K · g(Y ω) 1{K < Y ω}| ≤ |g(Y ω)| · |ψ K|`, integrable on `μ ⊗ dK`
+(`Integrable.mul_prod`); then `integral_integral_swap`. -/
+theorem integral_tailPrimitive_mul [IsFiniteMeasure μ] {Y : Ω → ℝ} (hY : Measurable Y)
+    {g : ℝ → ℝ} (hg : Measurable g) (hgi : Integrable (fun ω => g (Y ω)) μ) {ψ : ℝ → ℝ}
+    (hψ : Continuous ψ) (hψc : HasCompactSupport ψ) :
+    ∫ ω, (∫ K in Set.Iio (Y ω), ψ K) * g (Y ω) ∂μ
+      = ∫ K, ψ K * ∫ ω, (if K < Y ω then g (Y ω) else 0) ∂μ := by
+  have hψi : Integrable ψ := hψ.integrable_of_hasCompactSupport hψc
+  have hdom : Integrable (fun p : Ω × ℝ => |g (Y p.1)| * |ψ p.2|) (μ.prod volume) :=
+    hgi.abs.mul_prod hψi.abs
+  have hint : Integrable (Function.uncurry fun ω K => ψ K * (if K < Y ω then g (Y ω) else 0))
+      (μ.prod volume) := by
+    refine hdom.mono' ?_ (Eventually.of_forall fun p => ?_)
+    · have hset : MeasurableSet {p : Ω × ℝ | p.2 < Y p.1} :=
+        measurableSet_lt measurable_snd (hY.comp measurable_fst)
+      have hm : Measurable (fun p : Ω × ℝ => ψ p.2 * (if p.2 < Y p.1 then g (Y p.1) else 0)) :=
+        (hψ.measurable.comp measurable_snd).mul
+          (Measurable.ite hset (hg.comp (hY.comp measurable_fst)) measurable_const)
+      exact hm.aestronglyMeasurable
+    · obtain ⟨ω, K⟩ := p
+      by_cases h : K < Y ω
+      · simp only [Function.uncurry_apply_pair, if_pos h, Real.norm_eq_abs, abs_mul]
+        exact (mul_comm _ _).le
+      · simp only [Function.uncurry_apply_pair, if_neg h, mul_zero, norm_zero]
+        positivity
+  have hL (ω : Ω) : (∫ K in Set.Iio (Y ω), ψ K) * g (Y ω)
+      = ∫ K, ψ K * (if K < Y ω then g (Y ω) else 0) := by
+    rw [← integral_indicator measurableSet_Iio, ← integral_mul_const]
+    refine integral_congr_ae (Eventually.of_forall fun K => ?_)
+    by_cases h : K < Y ω <;> simp [Set.indicator, h]
+  calc ∫ ω, (∫ K in Set.Iio (Y ω), ψ K) * g (Y ω) ∂μ
+      = ∫ ω, ∫ K, ψ K * (if K < Y ω then g (Y ω) else 0) ∂μ :=
+        integral_congr_ae (Eventually.of_forall hL)
+    _ = ∫ K, ∫ ω, ψ K * (if K < Y ω then g (Y ω) else 0) ∂μ := integral_integral_swap hint
+    _ = ∫ K, ψ K * ∫ ω, (if K < Y ω then g (Y ω) else 0) ∂μ :=
+        integral_congr_ae (Eventually.of_forall fun K => integral_const_mul _ _)
+
 end Fubini
 
 section TestFunction
@@ -217,14 +302,16 @@ left of `supp ψ`) is a test function of the weak forward equation
 (`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`) —
 `f_ψ'' = ψ`, `C²`, bounded `f_ψ'`, `ψ`, `f_ψ''' = ψ'` — *and* it is the payoff of the static
 call book with strike density `ψ`: `f_ψ S = ∫ K, ψ K · (S − K)⁺ dK` for every `S`
-(`span_of_vanish_left`, i.e. `MathFin.carrMadan_spanning`). Note `f_ψ` itself is unbounded
+(`span_of_vanish_left`, i.e. `MathFin.carrMadan_spanning`). Its first derivative is the
+strike-density mass below the spot, `f_ψ' x = ∫_{(-∞, x)} ψ` (the digital book
+`∫ ψ(K) 1{x > K} dK`), which is what the drift term of the forward equation tests against. Note `f_ψ` itself is unbounded
 (affine right of `supp ψ`); the weak equation needs no bound on `f`. -/
 theorem call_spanning_compactSupport {ψ : ℝ → ℝ} (hψ : ContDiff ℝ ∞ ψ)
     (hψc : HasCompactSupport ψ) :
     ∃ f f' f''' : ℝ → ℝ, (∀ x, HasDerivAt f (f' x) x) ∧ (∀ x, HasDerivAt f' (ψ x) x) ∧
       ContDiff ℝ 2 f ∧ (∀ x, HasDerivAt ψ (f''' x) x) ∧
       (∃ C1, ∀ x, |f' x| ≤ C1) ∧ (∃ C2, ∀ x, |ψ x| ≤ C2) ∧ (∃ C3, ∀ x, |f''' x| ≤ C3) ∧
-      ∀ S, f S = ∫ K, ψ K * max (S - K) 0 := by
+      (∀ S, f S = ∫ K, ψ K * max (S - K) 0) ∧ ∀ x, f' x = ∫ K in Set.Iio x, ψ K := by
   obtain ⟨L, hL⟩ := exists_le_notMem_tsupport hψc
   have hψcont : Continuous ψ := hψ.continuous
   set f' : ℝ → ℝ := fun x => ∫ K in L..x, ψ K with hf'def
@@ -247,16 +334,24 @@ theorem call_spanning_compactSupport {ψ : ℝ → ℝ} (hψ : ContDiff ℝ ∞ 
   obtain ⟨C2, hC2⟩ := hψcont.bounded_above_of_compact_support hψc
   obtain ⟨C3, hC3⟩ := (hψ.continuous_deriv (by simp)).bounded_above_of_compact_support
     hψc.deriv
+  have hψi : Integrable ψ := hψcont.integrable_of_hasCompactSupport hψc
   refine ⟨f, f', deriv ψ, hf, hf', h2, hψd, ⟨∫ K, |ψ K|, fun x => ?_⟩, ⟨C2, hC2⟩, ⟨C3, hC3⟩,
-    fun S => ?_⟩
-  · have hψi : Integrable ψ := hψcont.integrable_of_hasCompactSupport hψc
-    calc |f' x| = ‖∫ K in L..x, ψ K‖ := rfl
+    fun S => ?_, fun x => ?_⟩
+  · calc |f' x| = ‖∫ K in L..x, ψ K‖ := rfl
       _ ≤ ∫ K in Ι L x, ‖ψ K‖ := intervalIntegral.norm_integral_le_integral_norm_uIoc
       _ ≤ ∫ K, ‖ψ K‖ :=
           setIntegral_le_integral hψi.norm (Eventually.of_forall fun _ => norm_nonneg _)
       _ = ∫ K, |ψ K| := rfl
   · exact span_of_vanish_left hψcont (fun K hK => image_eq_zero_of_notMem_tsupport (hL K hK))
       hf hf' (by simp [hfdef]) (by simp [hf'def]) S
+  · -- `f' x = ∫_L^x ψ = ∫_{(-∞, x]} ψ − ∫_{(-∞, L]} ψ`, and `ψ` vanishes on `(-∞, L]`
+    have hzero : ∫ K in Set.Iic L, ψ K = 0 :=
+      setIntegral_eq_zero_of_forall_eq_zero fun K hK =>
+        image_eq_zero_of_notMem_tsupport (hL K hK)
+    have hsub := intervalIntegral.integral_Iic_sub_Iic (a := L) (b := x)
+      hψi.integrableOn hψi.integrableOn
+    rw [hzero, sub_zero] at hsub
+    exact hsub.symm.trans (integral_Iic_eq_integral_Iio)
 
 end TestFunction
 
@@ -298,59 +393,145 @@ section Dupire
 
 open MathFin.GyongyMimicry
 
-/-- **The weak forward (Fokker–Planck) equation at zero rates**, in weak form:
-`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`,
-specialized to the driftless process `X = c + M` (`β := 0`, with `M` a hypothesized adapted
-process equal a.e. at each `t` (`hD.ae_eq`) to the CLM Itô integral of the bounded adapted `δ`),
-with the drift term erased. For every test function `f` of the
-class (`C²`, bounded `f', f'', f'''`),
-
-  `d/dt 𝔼[f(X_{t⁺})] = ½ · 𝔼[f''(X_{t⁺}) · b̂²(t, X_{t⁺})]`  on `(0, ↑T)`,
-
-where `b̂²(t, ·)` is any Borel representation (`hbfn`) of the Gyöngy coefficient
-`𝔼[δ_t² | X_t]`. The drift coefficient `𝔼[β_t | X_t] = 𝔼[0 | X_t]` is literally `0`
-(`condExp_zero`), and `∫β = 0` (`AdaptedDrift.driftPath` of `0`), so the β-side
-hypotheses of the general form are discharged here, not carried. -/
-theorem forward_eq_weak_zeroRate
+/-- The constructed process has integrable marginals: `X_s = c + ∫₀ˢ β + M_s`, the drift path is
+bounded by `|Db|·s` (`AdaptedDrift.abs_driftPath_sub_le`) and `M_s` is an `L²(μ)` class. -/
+private theorem integrable_marginal_drift
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ}
+    (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    (s : ℝ≥0) : Integrable (X s) μ := by
+  have hdp : Integrable (AdaptedDrift.driftPath β s) μ :=
+    Integrable.of_bound
+      ((AdaptedDrift.stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
+        s).measurable.mono ((natFiltration hBmeas).le s) le_rfl).aestronglyMeasurable
+      (Db * s) (ae_of_all _ fun ω => by
+        have h := AdaptedDrift.abs_driftPath_sub_le hβcont hβbdd (zero_le s) ω
+        have h0 : AdaptedDrift.driftPath β 0 ω = 0 := by simp [AdaptedDrift.driftPath]
+        rw [h0, sub_zero] at h
+        simpa using h)
+  rw [hXrel s]
+  exact ((integrable_const c).add hdp).add
+    ((ItoDriftConditional.memLp_M hB hBmeas hD s).integrable one_le_two)
+
+/-- The constructed process is measurable at every time. -/
+private theorem measurable_marginal_drift
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ} {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ}
+    (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    (s : ℝ≥0) : Measurable (X s) :=
+  (stronglyMeasurable_X_hXrel hBmeas hβadap hβcont hβbdd hD.adaptedM c hXrel
+    s).measurable.mono ((natFiltration hBmeas).le s) le_rfl
+
+/-- The zero drift, in the constructed process's `ℝ≥0`-indexed form: `X = c + M` is
+`X = c + ∫₀ β + M` at `β = 0`. -/
+private theorem zeroDrift_hXrel {Ω : Type*} {X M : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω) :
+    ∀ t : ℝ≥0, X t = fun ω : Ω ↦
+      c + AdaptedDrift.driftPath (fun _ _ => (0 : ℝ)) t ω + M t ω := by
+  intro t; rw [hXrel t]; funext ω; simp [AdaptedDrift.driftPath]
+
+/-- The Gyöngy drift coefficient `𝔼[0 | X_s]` of the zero drift is represented by the zero
+function, pointwise (`condExp_zero`). -/
+private theorem zeroDrift_hafn {Ω : Type*} {mΩ : MeasurableSpace Ω} (μ : Measure Ω)
+    (X : ℝ≥0 → Ω → ℝ) :
+    ∀ s : ℝ, Measurable (fun _ : ℝ => (0 : ℝ)) ∧ ∀ ω,
+      driftCoeff μ (reindexed X) (reindexed (fun _ _ => (0 : ℝ))) s ω
+        = (fun _ : ℝ => (0 : ℝ)) (X (Real.toNNReal s) ω) :=
+  fun s => ⟨measurable_const, fun ω => by
+    change μ[(0 : Ω → ℝ) | sigmaGen (reindexed X) s] ω = 0
+    rw [condExp_zero]; rfl⟩
+
+/-- The drift tail of the zero drift is `0`. -/
+private theorem driftTail_zero_fun {Ω : Type*} {mΩ : MeasurableSpace Ω} (μ : Measure Ω)
+    (X : ℝ≥0 → Ω → ℝ) (t : ℝ) : driftTail μ X (fun _ => (0 : ℝ)) t = fun _ => 0 :=
+  funext fun K => by simp [driftTail]
+
+/-- **Dupire's formula with drift, distributional form (the headline of the drift case).**
+For the Itô process `X = c + ∫₀ β + M` — `β` a bounded, path-continuous, Brownian-adapted drift
+rate, `M` a hypothesized adapted process equal a.e. at each `t` (`hD.ae_eq`) to the CLM Itô
+integral `∫δ dB` of the bounded adapted `δ` — and every smooth compactly supported strike
+density `ψ`, the `ψ`-pairing of the *defined* call surface `C(s, K) = 𝔼[(X_{s⁺} − K)⁺]` is
+differentiable in maturity on `(0, ↑T)`, with
+
+  `d/dT ∫ ψ(K) C(T, K) dK = ∫ ψ(K) · 𝔼[â(T, X_T) 1{X_T > K}] dK + ½ · 𝔼[ψ(X_T) · b̂²(T, X_T)]`,
+
+where `â(T, ·)`, `b̂²(T, ·)` are Borel versions of the Gyöngy coefficients
+`𝔼[β_T | X_T = ·]`, `𝔼[δ_T² | X_T = ·]` (`hafn`, `hbfn`) and the first integrand is
+`driftTail`. With `breedenLitzenberger_weak` (`∫ ψ'' C = 𝔼 ψ(X_T)`) this is
+`∂_T C = (K ↦ 𝔼[â(T, X_T) 1{X_T > K}]) + ½ · b̂² · ∂²_K C` in `D'(ℝ_K)`: no density, no Tanaka
+formula, no regularity hypothesis on `C`.
+
+Proof: the strike-smeared payoff `f_ψ` is an admissible test function of the weak forward equation
+(`GyongyMimicry.marginal_flow_weak_equation_fn_constructed`) and is the static call book
+(`call_spanning_compactSupport`); the forward equation's drift term `𝔼[f_ψ'(X_T) â(T, X_T)]` is
+turned into the strike pairing of `driftTail` by Fubini (`integral_tailPrimitive_mul`), using
+`f_ψ' x = ∫_{(-∞, x)} ψ`.
+
+**Boundedness.** `β` and `δ` are bounded by constants (`Db`, `Dd`). The lognormal model
+`dX = μX dt + σX dB` has neither bounded drift nor bounded diffusion, so it is *not* covered. -/
+theorem dupire_weak_drift
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
     {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
-    {bfn : ℝ → ℝ → ℝ}
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn bfn : ℝ → ℝ → ℝ}
+    (hafn : ∀ s, Measurable (afn s) ∧ ∀ ω, driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
     (hbfn : ∀ s, Measurable (bfn s) ∧ ∀ ω, diffCoeffSq μ (reindexed X) (reindexed δ) s ω
       = bfn s (X (Real.toNNReal s) ω))
-    {f f' f'' : ℝ → ℝ}
-    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
-    (h2 : ContDiff ℝ 2 f)
-    {f''' : ℝ → ℝ} (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
-    {C1 C2 C3 : ℝ} (hg1 : ∀ x, |f' x| ≤ C1) (hg2 : ∀ x, |f'' x| ≤ C2)
-    (hg3 : ∀ x, |f''' x| ≤ C3)
+    {ψ : ℝ → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψc : HasCompactSupport ψ)
     (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T) :
-    HasDerivAt (fun s : ℝ => ∫ ω, f (X (Real.toNNReal s) ω) ∂μ)
-      (1 / 2 * ∫ ω, f'' (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω) ∂μ) t := by
-  -- the zero drift, in the constructed process's `ℝ≥0`-indexed form
-  set β0 : ℝ≥0 → Ω → ℝ := fun _ _ => 0 with hβ0
-  have hXrel0 : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β0 t ω + M t ω := by
-    intro t; rw [hXrel t]; funext ω; simp [hβ0, AdaptedDrift.driftPath]
-  -- its Gyöngy coefficient `𝔼[0 | X_s]` is represented by the zero function, pointwise
-  have hafn : ∀ s : ℝ, Measurable (fun _ : ℝ => (0 : ℝ)) ∧ ∀ ω,
-      driftCoeff μ (reindexed X) (reindexed β0) s ω
-        = (fun _ : ℝ => (0 : ℝ)) (X (Real.toNNReal s) ω) :=
-    fun s => ⟨measurable_const, fun ω => by
-      change μ[(0 : Ω → ℝ) | sigmaGen (reindexed X) s] ω = 0
-      rw [condExp_zero]; rfl⟩
-  have key := marginal_flow_weak_equation_fn_constructed (β := β0) (Db := 0)
-    (afn := fun _ _ => 0)
-    hB hBmeas (fun _ => stronglyMeasurable_const) (fun _ => continuous_const) (by simp [hβ0])
-    hD c hXcont hXrel0 hafn hbfn hf hf' h2 hf'' hg1 hg2 hg3
-    t ht htT
-  simpa using key
+    HasDerivAt (fun s : ℝ => ∫ K, ψ K * callSurface μ X s K)
+      ((∫ K, ψ K * driftTail μ X (afn t) t K)
+        + (1 / 2) * ∫ ω, ψ (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω) ∂μ) t := by
+  obtain ⟨f, f', f''', hf, hf', h2, hf'', ⟨C1, hg1⟩, ⟨C2, hg2⟩, ⟨C3, hg3⟩, hspan, htail⟩ :=
+    call_spanning_compactSupport hψ hψc
+  have hXint := integrable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel
+  have hXm := measurable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel
+  have hfun : (fun s : ℝ => ∫ K, ψ K * callSurface μ X s K)
+      = fun s : ℝ => ∫ ω, f (X (Real.toNNReal s) ω) ∂μ := by
+    funext s
+    rw [← integral_payoff_eq_integral_call (hXint _) hψ.continuous hψc]
+    exact integral_congr_ae (Eventually.of_forall fun ω => (hspan _).symm)
+  -- the drift term of the forward equation, as a strike pairing of the drift tail
+  have hai : Integrable (driftCoeff μ (reindexed X) (reindexed β) t) μ := integrable_condExp
+  have hai' : Integrable (fun ω => afn t (X (Real.toNNReal t) ω)) μ :=
+    hai.congr (ae_of_all _ fun ω => (hafn t).2 ω)
+  have hdrift : ∫ ω, f' (X (Real.toNNReal t) ω) * afn t (X (Real.toNNReal t) ω) ∂μ
+      = ∫ K, ψ K * driftTail μ X (afn t) t K := by
+    have e : ∫ ω, f' (X (Real.toNNReal t) ω) * afn t (X (Real.toNNReal t) ω) ∂μ
+        = ∫ ω, (∫ K in Set.Iio (X (Real.toNNReal t) ω), ψ K)
+            * afn t (X (Real.toNNReal t) ω) ∂μ := by
+      simp only [htail]
+    rw [e]
+    exact integral_tailPrimitive_mul (hXm (Real.toNNReal t)) (hafn t).1 hai' hψ.continuous hψc
+  rw [hfun, ← hdrift]
+  exact marginal_flow_weak_equation_fn_constructed hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel
+    hafn hbfn hf hf' h2 hf'' hg1 hg2 hg3 t ht htT
 
 /-- **Dupire's formula, distributional form (Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, zero rates) —
-the headline of the distributional half.** For the driftless Itô process `X = c + M` (`M` a
+the zero-drift case.** For the driftless Itô process `X = c + M` (`M` a
 hypothesized adapted process equal a.e. at
 each `t` (`hD.ae_eq`) to the CLM Itô integral `∫δ dB` of the bounded adapted `δ`) and every smooth
 compactly supported strike density `ψ`, the `ψ`-pairing of the
@@ -364,10 +545,11 @@ compactly supported strike density `ψ`, the `ψ`-pairing of the
 `∂_T C = ½ · b̂²(T, ·) · ∂²_K C` **as an identity of distributions in `K`** — with no density,
 no Tanaka formula and no regularity hypothesis on `C`: the call payoff `(x − K)⁺` (not `C²`) is
 never tested directly; it is smeared against `ψ` first (`call_spanning_compactSupport`), and
-the smeared payoff `f_ψ` is a legitimate test function of `forward_eq_weak_zeroRate`. The
-pointwise ratio `σ²_loc = 2∂_T C / (K² ∂²_K C)` at a single strike is proved in the pointwise
-half of this file (`dupire_pointwise`), under carried regularity hypotheses on the call
-surface. -/
+the smeared payoff `f_ψ` is an admissible test function of the weak forward equation.
+This is `dupire_weak_drift` at `β = 0`, where the drift term vanishes (`driftTail` of the zero
+coefficient). The pointwise ratio `σ²_loc = 2∂_T C / (K² ∂²_K C)` at a single strike is proved
+in the pointwise half of this file (`dupire_pointwise`), under carried regularity hypotheses on
+the call surface. -/
 theorem dupire_weak
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
@@ -383,21 +565,11 @@ theorem dupire_weak
     (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T) :
     HasDerivAt (fun s : ℝ => ∫ K, ψ K * callSurface μ X s K)
       ((1 / 2) * ∫ ω, ψ (X (Real.toNNReal t) ω) * bfn t (X (Real.toNNReal t) ω) ∂μ) t := by
-  obtain ⟨f, f', f''', hf, hf', h2, hf'', ⟨C1, hg1⟩, ⟨C2, hg2⟩, ⟨C3, hg3⟩, hspan⟩ :=
-    call_spanning_compactSupport hψ hψc
-  -- every marginal is integrable: `X_s = c + M_s`, `M_s` an `L²(μ)` class
-  have hXint : ∀ s : ℝ≥0, Integrable (X s) μ := fun s => by
-    rw [hXrel s]
-    exact (integrable_const c).add
-      ((ItoDriftConditional.memLp_M hB hBmeas hD s).integrable one_le_two)
-  have hfun : (fun s : ℝ => ∫ K, ψ K * callSurface μ X s K)
-      = fun s : ℝ => ∫ ω, f (X (Real.toNNReal s) ω) ∂μ := by
-    funext s
-    rw [← integral_payoff_eq_integral_call (hXint _) hψ.continuous hψc]
-    exact integral_congr_ae (Eventually.of_forall fun ω => (hspan _).symm)
-  rw [hfun]
-  exact forward_eq_weak_zeroRate hB hBmeas hD c hXcont hXrel
-    hbfn hf hf' h2 hf'' hg1 hg2 hg3 t ht htT
+  have key := dupire_weak_drift hB hBmeas (β := fun _ _ => (0 : ℝ))
+    (fun _ => stronglyMeasurable_const) (fun _ => continuous_const) (Db := 0)
+    (fun t ω => by simp) hD c hXcont (zeroDrift_hXrel c hXrel)
+    (afn := fun _ _ => (0 : ℝ)) (zeroDrift_hafn μ X) hbfn hψ hψc t ht htT
+  simpa [driftTail] using key
 
 end Dupire
 
@@ -418,11 +590,14 @@ On a strike window `Ioo a b` and a time window `Ioo (t − ε) (t + ε)`:
 * `hCK`, `hCKK`, `hCKKc` — `K ↦ C(t, K)` is twice differentiable on the window with `C_KK`
   continuous there;
 * `hCt`, `hCtc` — `s ↦ C(s, K)` is differentiable on the time window with `(s, K) ↦ C_T(s, K)`
-  jointly continuous on the rectangle.
+  jointly continuous on the rectangle;
+* `hDrc` (drift case only) — the drift tail `K ↦ 𝔼[â(t, X_t) 1{X_t > K}]` is continuous on the
+  strike window. At zero drift it is identically `0` and the hypothesis is discharged.
 
 Each derivative (`CK`, `CKK`, `Ct`) is pinned to the defined `callSurface` by its own
 `HasDerivAt` hypothesis. **No hypothesis relates `Ct` to `CKK`**: the relation
-`2·C_T = b̂²·C_KK` is the conclusion, derived from `dupire_weak`, not hypothesized.
+`2·(C_T − D) = b̂²·C_KK` (`D` the drift tail, `0` without drift) is the conclusion, derived from
+`dupire_weak_drift`, not hypothesized.
 Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of them, with
 `C_T = ½δ₀²φ_t(K)`, `C_KK = φ_t(K) > 0`, `b̂² ≡ δ₀²` (no Lean witness here).
 
@@ -439,7 +614,11 @@ Non-vacuity: Bachelier (`δ ≡ δ₀ > 0`, `X = c + δ₀B`) satisfies all of t
 * `hasDerivAt_integral_mul_callSurface` — `d/ds ∫ψ C(s, ·) = ∫ψ C_T(t, ·)` (dominated
   differentiation under the integral).
 * `dupire_ae_window`, **`dupire_ae`** — a.e. on `{X_t ∈ window}`,
-  `b̂²(t, X_t) = 2·C_T(t, X_t) / C_KK(X_t)`: the Dupire ratio is a version of `𝔼[δ_t² | X_t]`.
+  `b̂²(t, X_t) = 2·(C_T(t, X_t) − D(X_t)) / C_KK(X_t)`, `D` the drift tail (`0` at zero drift):
+  the Dupire ratio is a version of `𝔼[δ_t² | X_t]`. These two and `dupire_pointwise_coeff`
+  are stated with drift; `dupire_pointwise` and `dupire_localVol` are their zero-drift cases.
+* **`dupire_pointwise_drift`**, `driftTail_linear`, **`dupire_pointwise_linearDrift`** — the
+  pointwise formula with drift, and with a drift proportional to the state.
 * **`dupire_pointwise_coeff`**, **`dupire_pointwise`** (Thm 9.5 proper) — for any version of
   `b̂²(t, ·)` continuous on the window, the identity holds at *every* strike with `C_KK > 0`.
 * **`dupire_localVol`** — Def 9.4's Markov case `δ_s = v(s, X_s)` (carried as `hδloc`;
@@ -637,23 +816,31 @@ open scoped ENNReal
 
 /-- **On a sub-window (the analytic core of `dupire_ae`).** For `a < p ≤ q < b`, a.e. on
 `{X_t ∈ Ioo p q}` the Borel version `b̂²(t, ·) = bfn t` of the Gyöngy coefficient equals the
-Dupire ratio `2·C_T(t, ·)/C_KK` at `X_t`. Proof (steps a–d):
+Dupire ratio `2·(C_T(t, ·) − D)/C_KK` at `X_t`, `D = driftTail` the drift tail (the zero function
+without drift). Proof (steps a–d):
 (a) `law(X_t) = C_KK · Leb` on `Ioc p q` (`law_restrict_eq_withDensity`);
-(b) for every test `ψ` supported in `Ioo p q`, `∫ψ C_T(t, ·) = ½𝔼[ψ(X_t) b̂²(t, X_t)]` by
-`HasDerivAt.unique` between `hasDerivAt_integral_mul_callSurface` and `dupire_weak`;
-(c) hence `2C_T − C_KK·b̂² = 0` Lebesgue-a.e. on `Ioo p q`
+(b) for every test `ψ` supported in `Ioo p q`,
+`∫ψ C_T(t, ·) = ∫ψ D + ½𝔼[ψ(X_t) b̂²(t, X_t)]` by
+`HasDerivAt.unique` between `hasDerivAt_integral_mul_callSurface` and `dupire_weak_drift`;
+(c) hence `2(C_T − D) − C_KK·b̂² = 0` Lebesgue-a.e. on `Ioo p q`
 (`IsOpen.ae_eq_zero_of_integral_contDiff_smul_eq_zero`);
 (d) transfer to `law(X_t)` (`withDensity_absolutelyContinuous`), which charges only
 `{C_KK > 0}` (`ae_withDensity_iff`), and divide. -/
 theorem dupire_ae_window
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
     {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
-    {bfn : ℝ → ℝ → ℝ}
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn bfn : ℝ → ℝ → ℝ}
+    (hafn : ∀ s, Measurable (afn s) ∧ ∀ ω, driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
     (hbfn : ∀ s, Measurable (bfn s) ∧ ∀ ω, diffCoeffSq μ (reindexed X) (reindexed δ) s ω
       = bfn s (X (Real.toNNReal s) ω))
     (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)
@@ -664,17 +851,16 @@ theorem dupire_ae_window
     (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,
       HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)
     (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
+    (hDrc : ContinuousOn (driftTail μ X (afn t) t) (Ioo a b))
     {p q : ℝ} (hap : a < p) (hpq : p ≤ q) (hqb : q < b) :
     ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo p q →
       bfn t (X (Real.toNNReal t) ω)
-        = 2 * Ct t (X (Real.toNNReal t) ω) / CKK (X (Real.toNNReal t) ω) := by
-  have hXint : ∀ s : ℝ≥0, Integrable (X s) μ := fun s => by
-    rw [hXrel s]
-    exact (integrable_const c).add
-      ((ItoDriftConditional.memLp_M hB hBmeas hD s).integrable one_le_two)
-  have hXm : Measurable (X (Real.toNNReal t)) := by
-    rw [hXrel]
-    exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
+        = 2 * (Ct t (X (Real.toNNReal t) ω)
+          - driftTail μ X (afn t) t (X (Real.toNNReal t) ω)) / CKK (X (Real.toNNReal t) ω) := by
+  have hXint : ∀ s : ℝ≥0, Integrable (X s) μ :=
+    integrable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel
+  have hXm : Measurable (X (Real.toNNReal t)) :=
+    measurable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel _
   set Xt := X (Real.toNNReal t) with hXt
   set ν := μ.map Xt with hν
   set bt := bfn t with hbdef
@@ -710,8 +896,12 @@ theorem dupire_ae_window
       fun K hK => ⟨⟨by linarith, by linarith⟩, hIccU hK⟩
   have hCtint : Integrable (Ct t) (volume.restrict (Ioc p q)) :=
     (hCtK.integrableOn_compact isCompact_Icc).mono_set Ioc_subset_Icc_self
-  set f : ℝ → ℝ := fun K => 2 * Ct t K - (ρ K : ℝ) * bt K with hf
-  have hfint : Integrable f (volume.restrict (Ioc p q)) := (hCtint.const_mul 2).sub hρb
+  have hDrint : Integrable (driftTail μ X (afn t) t) (volume.restrict (Ioc p q)) :=
+    ((hDrc.mono hIccU).integrableOn_compact isCompact_Icc).mono_set Ioc_subset_Icc_self
+  set f : ℝ → ℝ := fun K => 2 * (Ct t K - driftTail μ X (afn t) t K) - (ρ K : ℝ) * bt K
+    with hf
+  have hfint : Integrable f (volume.restrict (Ioc p q)) :=
+    ((hCtint.sub hDrint).const_mul 2).sub hρb
   -- (c) localization: `f` vanishes Lebesgue-a.e. on `Ioo p q`
   have h0 : ∀ᵐ K ∂(volume.restrict (Ioc p q)), K ∈ Ioo p q → f K = 0 := by
     refine isOpen_Ioo.ae_eq_zero_of_integral_contDiff_smul_eq_zero
@@ -725,7 +915,7 @@ theorem dupire_ae_window
     -- (b) the maturity derivative of the `ψ`-pairing, computed two ways
     have huniq := (hasDerivAt_integral_mul_callSurface hXint hε hCt hCtc hψ.continuous hψc
       (hψU.trans (Ioo_subset_Ioo hap.le hqb.le))).unique
-      (dupire_weak hB hBmeas hD c hXcont hXrel hbfn hψ hψc
+      (dupire_weak_drift hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hafn hbfn hψ hψc
         t ht htT)
     -- (a) its right side, through `law(X_t) = C_KK · Leb` on the window
     have hlawint : ∫ ω, ψ (Xt ω) * bt (Xt ω) ∂μ = ∫ K in Ioc p q, ψ K * ((ρ K : ℝ) * bt K) := by
@@ -738,21 +928,32 @@ theorem dupire_ae_window
       simp only [NNReal.smul_def, smul_eq_mul]; ring
     have hleft : ∫ K, ψ K * Ct t K = ∫ K in Ioc p q, ψ K * Ct t K :=
       (setIntegral_eq_integral_of_forall_compl_eq_zero fun K hK => by simp [hψ0 K hK]).symm
+    have hleftD : ∫ K, ψ K * driftTail μ X (afn t) t K
+        = ∫ K in Ioc p q, ψ K * driftTail μ X (afn t) t K :=
+      (setIntegral_eq_integral_of_forall_compl_eq_zero fun K hK => by simp [hψ0 K hK]).symm
     have hsplit : ∫ K in Ioc p q, ψ K • f K
-        = 2 * (∫ K in Ioc p q, ψ K * Ct t K) - ∫ K in Ioc p q, ψ K * ((ρ K : ℝ) * bt K) := by
+        = 2 * (∫ K in Ioc p q, ψ K * Ct t K)
+          - 2 * (∫ K in Ioc p q, ψ K * driftTail μ X (afn t) t K)
+          - ∫ K in Ioc p q, ψ K * ((ρ K : ℝ) * bt K) := by
       have hpt : (fun K => ψ K • f K)
-          = fun K => 2 * (ψ K * Ct t K) - ψ K * ((ρ K : ℝ) * bt K) := by
+          = fun K => 2 * (ψ K * Ct t K) - 2 * (ψ K * driftTail μ X (afn t) t K)
+              - ψ K * ((ρ K : ℝ) * bt K) := by
         funext K; simp only [hf, smul_eq_mul]; ring
-      rw [hpt, integral_sub ((hCtint.bdd_mul hψm hψb).const_mul 2) (hρb.bdd_mul hψm hψb),
-        integral_const_mul]
-    have huniq' : ∫ K, ψ K * Ct t K = 1 / 2 * ∫ ω, ψ (Xt ω) * bt (Xt ω) ∂μ := huniq
-    rw [hsplit]; linarith [hleft, hlawint, huniq']
+      rw [hpt, integral_sub (((hCtint.bdd_mul hψm hψb).const_mul 2).sub
+          ((hDrint.bdd_mul hψm hψb).const_mul 2)) (hρb.bdd_mul hψm hψb),
+        integral_sub ((hCtint.bdd_mul hψm hψb).const_mul 2)
+          ((hDrint.bdd_mul hψm hψb).const_mul 2),
+        integral_const_mul, integral_const_mul]
+    have huniq' : ∫ K, ψ K * Ct t K
+        = (∫ K, ψ K * driftTail μ X (afn t) t K)
+          + 1 / 2 * ∫ ω, ψ (Xt ω) * bt (Xt ω) ∂μ := huniq
+    rw [hsplit]; linarith [hleft, hleftD, hlawint, huniq']
   -- (d) transfer to `law(X_t)` (`≪ Leb` on the window), which charges only `{C_KK > 0}`
   have h1 : ∀ᵐ K ∂(ν.restrict (Ioc p q)), K ∈ Ioo p q → f K = 0 := by
     rw [hlaw]; exact (withDensity_absolutelyContinuous _ _).ae_le h0
   have h2 : ∀ᵐ K ∂(ν.restrict (Ioc p q)), (ρ K : ℝ≥0∞) ≠ 0 := by
     rw [hlaw]; exact (ae_withDensity_iff hρm.coe_nnreal_ennreal).2 (ae_of_all _ fun _ h => h)
-  have h3 : ∀ᵐ K ∂ν, K ∈ Ioc p q → K ∈ Ioo p q → bt K = 2 * Ct t K / CKK K := by
+  have h3 : ∀ᵐ K ∂ν, K ∈ Ioc p q → K ∈ Ioo p q → bt K = 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K := by
     refine (ae_restrict_iff' measurableSet_Ioc).1 ?_
     filter_upwards [h1, h2] with K hK1 hK2 hK
     have hρK := hρeq K (Ioo_subset_Icc_self hK)
@@ -776,26 +977,38 @@ section Pointwise
 open Set MathFin.GyongyMimicry
 
 /-- **`dupire_ae`: the Dupire ratio is a version of `𝔼[δ_t² | X_t]` on the window**
-(Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, pointwise modulo a null set, zero rates). For the driftless
-hypothesized Itô process `X = c + M`, with `M` a version of `∫δ dB` as in `dupire_weak`, and
+(Bagaria ch. 9 Thm 9.5 ∘ Thm 9.7, pointwise modulo a null set). For the hypothesized Itô process
+`X = c + ∫β + M` of `dupire_weak_drift` (bounded `β`, `δ`; `β = 0` is the zero-rate case), and
 a call surface carrying the regularity hypotheses `hCK`, `hCKK`,
 `hCKKc`, `hCt`, `hCtc` on `Ioo a b` (each derivative pinned to the *defined* `callSurface` on its
-own; none relates `Ct` to `CKK`),
+own; none relates `Ct` to `CKK`), and continuity of the drift tail on the window (`hDrc`),
 
-  `𝔼[δ_t² | X_t](ω) = 2·C_T(t, X_t(ω)) / C_KK(X_t(ω))`  for a.e. `ω` with `X_t(ω) ∈ Ioo a b`.
+  `𝔼[δ_t² | X_t](ω) = 2·(C_T(t, X_t(ω)) − D(X_t(ω))) / C_KK(X_t(ω))`
+    for a.e. `ω` with `X_t(ω) ∈ Ioo a b`,
 
-With `σ²_loc(t, K) := b̂²(t, K)/K²` this is eq. 9.4 at `r = q = 0`. The conclusion is about the
+`D(K) = 𝔼[â(t, X_t) 1{X_t > K}]` (`driftTail`) for the Borel version `â` of `𝔼[β_t | X_t = ·]`
+given by `hafn`.
+With `σ²_loc(t, K) := b̂²(t, K)/K²` and `D = 0` this is eq. 9.4 at `r = q = 0`. The conclusion is about the
 conditional expectation `diffCoeffSq` itself, not a free `b̂²`: a Borel version is chosen
 internally (Doob–Dynkin, `StronglyMeasurable.exists_eq_measurable_comp`), and the windows
-`Ioo p q` (`p, q` rational) of `dupire_ae_window` exhaust `Ioo a b`. -/
+`Ioo p q` (`p, q` rational) of `dupire_ae_window` exhaust `Ioo a b`. The drift version is not
+used at zero drift by name: the zero-drift consumers go through the private
+`dupire_pointwise_coeff_zeroRate`. -/
 theorem dupire_ae
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
     {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn : ℝ → ℝ → ℝ}
+    (hafn : ∀ s, Measurable (afn s) ∧ ∀ ω, driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
     (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)
     {a b ε : ℝ} (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}
     (hCK : ∀ K ∈ Ioo a b, HasDerivAt (callSurface μ X t) (CK K) K)
@@ -803,10 +1016,12 @@ theorem dupire_ae
     (hCKKc : ContinuousOn CKK (Ioo a b))
     (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,
       HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)
-    (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b)) :
+    (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
+    (hDrc : ContinuousOn (driftTail μ X (afn t) t) (Ioo a b)) :
     ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo a b →
       diffCoeffSq μ (reindexed X) (reindexed δ) t ω
-        = 2 * Ct t (X (Real.toNNReal t) ω) / CKK (X (Real.toNNReal t) ω) := by
+        = 2 * (Ct t (X (Real.toNNReal t) ω)
+          - driftTail μ X (afn t) t (X (Real.toNNReal t) ω)) / CKK (X (Real.toNNReal t) ω) := by
   -- a Borel version `b̂²(s, ·)` of the Gyöngy coefficient at every time (Doob–Dynkin)
   have hex : ∀ s : ℝ, ∃ g : ℝ → ℝ, Measurable g ∧ ∀ ω,
       diffCoeffSq μ (reindexed X) (reindexed δ) s ω = g (X (Real.toNNReal s) ω) := fun s => by
@@ -817,10 +1032,12 @@ theorem dupire_ae
   have hwin : ∀ pq : ℚ × ℚ, ∀ᵐ ω ∂μ, (a < pq.1 ∧ (pq.1 : ℝ) ≤ pq.2 ∧ (pq.2 : ℝ) < b) →
       X (Real.toNNReal t) ω ∈ Ioo (pq.1 : ℝ) pq.2 →
       bfn t (X (Real.toNNReal t) ω)
-        = 2 * Ct t (X (Real.toNNReal t) ω) / CKK (X (Real.toNNReal t) ω) := fun pq => by
+        = 2 * (Ct t (X (Real.toNNReal t) ω)
+          - driftTail μ X (afn t) t (X (Real.toNNReal t) ω)) / CKK (X (Real.toNNReal t) ω) := fun pq => by
     by_cases h : a < (pq.1 : ℝ) ∧ (pq.1 : ℝ) ≤ pq.2 ∧ (pq.2 : ℝ) < b
-    · filter_upwards [dupire_ae_window hB hBmeas hD c hXcont hXrel
-        (fun s => ⟨hbfm s, hbfeq s⟩) t ht htT hε hCK hCKK hCKKc hCt hCtc h.1 h.2.1 h.2.2]
+    · filter_upwards [dupire_ae_window hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel
+        hafn (fun s => ⟨hbfm s, hbfeq s⟩) t ht htT hε hCK hCKK hCKKc hCt hCtc hDrc
+        h.1 h.2.1 h.2.2]
         with ω hω _ using hω
     · exact ae_of_all _ fun ω h' => absurd h' h
   filter_upwards [ae_all_iff.2 hwin] with ω hω hmem
@@ -842,11 +1059,18 @@ them agree a.e. on `{X_t ∈ window}`. -/
 theorem dupire_pointwise_coeff
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
-    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
     {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
     {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
     (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
-    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn : ℝ → ℝ → ℝ}
+    (hafn : ∀ s, Measurable (afn s) ∧ ∀ ω, driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
     (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)
     {a b ε : ℝ} (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}
     (hCK : ∀ K ∈ Ioo a b, HasDerivAt (callSurface μ X t) (CK K) K)
@@ -855,38 +1079,37 @@ theorem dupire_pointwise_coeff
     (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,
       HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)
     (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
+    (hDrc : ContinuousOn (driftTail μ X (afn t) t) (Ioo a b))
     {v2 : ℝ → ℝ} (hv2c : ContinuousOn v2 (Ioo a b))
     (hv2rep : ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo a b →
       diffCoeffSq μ (reindexed X) (reindexed δ) t ω = v2 (X (Real.toNNReal t) ω)) :
-    ∀ K ∈ Ioo a b, 0 < CKK K → v2 K = 2 * Ct t K / CKK K := by
+    ∀ K ∈ Ioo a b, 0 < CKK K → v2 K = 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K := by
   intro K₀ hK₀ hpos
   by_contra hne
-  have hXint : Integrable (X (Real.toNNReal t)) μ := by
-    rw [hXrel]
-    exact (integrable_const c).add
-      ((ItoDriftConditional.memLp_M hB hBmeas hD _).integrable one_le_two)
-  have hXm : Measurable (X (Real.toNNReal t)) := by
-    rw [hXrel]
-    exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
+  have hXint : Integrable (X (Real.toNNReal t)) μ :=
+    integrable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel _
+  have hXm : Measurable (X (Real.toNNReal t)) :=
+    measurable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel _
   set Xt := X (Real.toNNReal t)
-  have hae : ∀ᵐ ω ∂μ, Xt ω ∈ Ioo a b → v2 (Xt ω) = 2 * Ct t (Xt ω) / CKK (Xt ω) := by
-    filter_upwards [dupire_ae hB hBmeas hD c hXcont hXrel t ht htT
-      hε hCK hCKK hCKKc hCt hCtc, hv2rep] with ω h1 h2 hmem
+  have hae : ∀ᵐ ω ∂μ, Xt ω ∈ Ioo a b → v2 (Xt ω) = 2 * (Ct t (Xt ω) - driftTail μ X (afn t) t (Xt ω)) / CKK (Xt ω) := by
+    filter_upwards [dupire_ae hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hafn t ht htT
+      hε hCK hCKK hCKKc hCt hCtc hDrc, hv2rep] with ω h1 h2 hmem
     rw [← h2 hmem, h1 hmem]
   -- the two sides differ, and `C_KK > 0`, on a whole neighbourhood of `K₀`
   have hU : Ioo a b ∈ 𝓝 K₀ := Ioo_mem_nhds hK₀.1 hK₀.2
   have hCtK : ContinuousAt (Ct t) K₀ :=
     (hCtc.continuousAt (prod_mem_nhds (Ioo_mem_nhds (by linarith) (by linarith)) hU)).comp
       (continuous_const.prodMk continuous_id).continuousAt (x := K₀)
-  have hR : ContinuousAt (fun K => v2 K - 2 * Ct t K / CKK K) K₀ :=
+  have hR : ContinuousAt (fun K => v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K) K₀ :=
     (hv2c.continuousAt hU).sub
-      ((continuousAt_const.mul hCtK).div (hCKKc.continuousAt hU) hpos.ne')
-  have hev : ∀ᶠ K in 𝓝 K₀, (v2 K - 2 * Ct t K / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K :=
+      ((continuousAt_const.mul (hCtK.sub (hDrc.continuousAt hU))).div
+      (hCKKc.continuousAt hU) hpos.ne')
+  have hev : ∀ᶠ K in 𝓝 K₀, (v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K :=
     ((hR.eventually_ne (sub_ne_zero.2 hne)).and hU).and
       ((hCKKc.continuousAt hU).eventually (lt_mem_nhds hpos))
   obtain ⟨r, hr, hball⟩ := Metric.eventually_nhds_iff.1 hev
   have hIcc : ∀ K ∈ Icc (K₀ - r / 2) (K₀ + r / 2),
-      (v2 K - 2 * Ct t K / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K := fun K hK =>
+      (v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K := fun K hK =>
     hball (by rw [Real.dist_eq, abs_lt]; constructor <;> linarith [hK.1, hK.2])
   have hc := (hIcc (K₀ - r / 2) ⟨le_rfl, by linarith⟩).1.2
   have hd := (hIcc (K₀ + r / 2) ⟨by linarith, le_rfl⟩).1.2
@@ -905,6 +1128,201 @@ theorem dupire_pointwise_coeff
     exact hP.1.1 (sub_eq_zero.2 (h hP.1.2))
   rw [Measure.map_apply hXm measurableSet_Ioc, hnull] at hmass
   exact (ENNReal.ofReal_pos.2 hint_pos).ne' hmass.symm
+
+/-- **`dupire_pointwise_coeff` at zero drift** (private specialisation): for the driftless process
+`X = c + M`, a version `v2` of `b̂²(t, ·)` that is continuous on the window equals
+`2·C_T(t, K) / C_KK(K)` at every strike with `C_KK > 0`. This is `dupire_pointwise_coeff` at
+`β = 0`, where the drift tail vanishes (`driftTail_zero_fun`). -/
+private theorem dupire_pointwise_coeff_zeroRate
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {δ : ℝ≥0 → Ω → ℝ}
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + M t ω)
+    (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)
+    {a b ε : ℝ} (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}
+    (hCK : ∀ K ∈ Ioo a b, HasDerivAt (callSurface μ X t) (CK K) K)
+    (hCKK : ∀ K ∈ Ioo a b, HasDerivAt CK (CKK K) K)
+    (hCKKc : ContinuousOn CKK (Ioo a b))
+    (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,
+      HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)
+    (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
+    {v2 : ℝ → ℝ} (hv2c : ContinuousOn v2 (Ioo a b))
+    (hv2rep : ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo a b →
+      diffCoeffSq μ (reindexed X) (reindexed δ) t ω = v2 (X (Real.toNNReal t) ω)) :
+    ∀ K ∈ Ioo a b, 0 < CKK K → v2 K = 2 * Ct t K / CKK K := by
+  intro K hK hpos
+  have hDr : ContinuousOn (driftTail μ X (fun _ => (0 : ℝ)) t) (Ioo a b) := by
+    rw [driftTail_zero_fun]; exact continuousOn_const
+  have h := dupire_pointwise_coeff hB hBmeas (β := fun _ _ => (0 : ℝ))
+    (fun _ => stronglyMeasurable_const) (fun _ => continuous_const) (Db := 0)
+    (fun t ω => by simp) hD c hXcont (zeroDrift_hXrel c hXrel)
+    (afn := fun _ _ => (0 : ℝ)) (zeroDrift_hafn μ X) t ht htT hε hCK hCKK hCKKc hCt hCtc hDr
+    hv2c hv2rep K hK hpos
+  simpa [driftTail] using h
+
+/-- **`dupire_pointwise_drift`: Dupire's formula with drift, pointwise in the strike.** For the
+Itô process `X = c + ∫₀ β + M` with bounded drift and diffusion (the setting of
+`dupire_weak_drift`), a local volatility `σloc` in the lognormal convention
+(`σloc(K)²·K²` a continuous version of `𝔼[δ_t² | X_t = K]` on a window in `K ≥ 0`), and a call
+surface carrying the regularity hypotheses of `dupire_pointwise` — plus continuity of the drift tail
+`K ↦ 𝔼[â(t, X_t) 1{X_t > K}]` on the window (`hDrc`) — at every strike of the window with
+`C_KK > 0`
+
+  `σloc(K)² = 2 · (∂_T C(t, K) − 𝔼[â(t, X_t) 1{X_t > K}]) / (K² · ∂²_K C(t, K))`,
+
+where `â(t, ·)` is the Gyöngy drift `𝔼[β_t | X_t = ·]` (`hafn`) and
+`𝔼[â(t, X_t) 1{X_t > K}] = ∫_K^∞ â(t, x) law(X_t)(dx)` (`driftTail`); on the window the law is
+`C_KK · Leb` (`law_restrict_eq_withDensity`), but the tail integral runs to `+∞`, past the window,
+which is why it is carried as the defined `driftTail` rather than rewritten in `C_KK` alone.
+At `β = 0` this is `dupire_pointwise`. Corollary of `dupire_pointwise_coeff`; `C_T`, `C_KK` are
+pinned to the defined `callSurface` as in `dupire_pointwise`. The boundedness caveat of
+`dupire_weak_drift` applies: the lognormal model is outside this class. -/
+theorem dupire_pointwise_drift
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn : ℝ → ℝ → ℝ}
+    (hafn : ∀ s, Measurable (afn s) ∧ ∀ ω, driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
+    (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)
+    {a b ε : ℝ} (ha : 0 ≤ a) (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}
+    (hCK : ∀ K ∈ Ioo a b, HasDerivAt (callSurface μ X t) (CK K) K)
+    (hCKK : ∀ K ∈ Ioo a b, HasDerivAt CK (CKK K) K)
+    (hCKKc : ContinuousOn CKK (Ioo a b))
+    (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,
+      HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)
+    (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
+    (hDrc : ContinuousOn (driftTail μ X (afn t) t) (Ioo a b))
+    {σloc : ℝ → ℝ} (hσc : ContinuousOn σloc (Ioo a b))
+    (hσrep : ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo a b →
+      diffCoeffSq μ (reindexed X) (reindexed δ) t ω
+        = σloc (X (Real.toNNReal t) ω) ^ 2 * X (Real.toNNReal t) ω ^ 2) :
+    ∀ K ∈ Ioo a b, 0 < CKK K →
+      σloc K ^ 2 = 2 * (Ct t K - driftTail μ X (afn t) t K) / (K ^ 2 * CKK K) := by
+  intro K hK hpos
+  have h := dupire_pointwise_coeff hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hafn t ht
+    htT hε hCK hCKK hCKKc hCt hCtc hDrc (v2 := fun K => σloc K ^ 2 * K ^ 2)
+    ((hσc.pow 2).mul (continuousOn_id.pow 2)) hσrep K hK hpos
+  have hK2 : K ^ 2 ≠ 0 := pow_ne_zero 2 (by linarith [hK.1])
+  rw [mul_comm (K ^ 2), ← div_div, ← h, mul_div_assoc, div_self hK2, mul_one]
+
+/-- **The drift tail of a drift proportional to the state.** If the Gyöngy drift is linear,
+`â(x) = m·x`, for `x > a`, then for every strike `K ≥ a`
+
+  `𝔼[â(X_t) 1{X_t > K}] = m · (C(t, K) + K · P(X_t > K))`,
+
+since `x · 1{x > K} = (x − K)⁺ + K · 1{x > K}`. -/
+theorem driftTail_linear {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ]
+    {X : ℝ≥0 → Ω → ℝ} {t : ℝ} (hXm : Measurable (X (Real.toNNReal t)))
+    (hX : Integrable (X (Real.toNNReal t)) μ) {afn : ℝ → ℝ} {m a : ℝ}
+    (hlin : ∀ x, a < x → afn x = m * x) {K : ℝ} (hK : a ≤ K) :
+    driftTail μ X afn t K
+      = m * (callSurface μ X t K + K * μ.real {ω | K < X (Real.toNNReal t) ω}) := by
+  set Y := X (Real.toNNReal t) with hY
+  have h1 (ω : Ω) : (if K < Y ω then afn (Y ω) else 0)
+      = m * (max (Y ω - K) 0 + K * (if K < Y ω then (1 : ℝ) else 0)) := by
+    by_cases h : K < Y ω
+    · simp only [if_pos h]
+      rw [hlin _ (lt_of_le_of_lt hK h), max_eq_left (by linarith)]
+      ring
+    · simp only [if_neg h]
+      rw [max_eq_right (by linarith [not_lt.1 h])]
+      ring
+  have hset : MeasurableSet {ω | K < Y ω} := measurableSet_lt measurable_const hXm
+  have hc : Integrable (fun ω => max (Y ω - K) 0) μ := (hX.sub (integrable_const K)).pos_part
+  have hi : Integrable (fun ω => (if K < Y ω then (1 : ℝ) else 0)) μ :=
+    Integrable.of_bound
+      (Measurable.ite hset measurable_const measurable_const).aestronglyMeasurable 1
+      (ae_of_all _ fun ω => by split_ifs <;> simp)
+  have hind : ∫ ω, (if K < Y ω then (1 : ℝ) else 0) ∂μ = μ.real {ω | K < Y ω} := by
+    have : (fun ω => (if K < Y ω then (1 : ℝ) else 0))
+        = Set.indicator {ω | K < Y ω} (fun _ => (1 : ℝ)) := by
+      funext ω; simp [Set.indicator]
+    rw [this, integral_indicator_const _ hset, smul_eq_mul, mul_one]
+  calc driftTail μ X afn t K
+      = ∫ ω, m * (max (Y ω - K) 0 + K * (if K < Y ω then (1 : ℝ) else 0)) ∂μ :=
+        integral_congr_ae (Eventually.of_forall h1)
+    _ = m * (∫ ω, max (Y ω - K) 0 ∂μ + K * ∫ ω, (if K < Y ω then (1 : ℝ) else 0) ∂μ) := by
+        rw [integral_const_mul, integral_add hc (hi.const_mul K), integral_const_mul]
+    _ = m * (callSurface μ X t K + K * μ.real {ω | K < Y ω}) := by rw [hind]; rfl
+
+/-- **`dupire_pointwise_linearDrift`: Dupire's formula with a drift proportional to the state —
+the rates form.** In the setting of `dupire_pointwise_drift`, suppose in addition that the Gyöngy
+drift is `â(t, x) = m·x` for all `x > a`, `a` the left end of the strike window (for the
+`(r − q)`-drift of a spot with rate `r` and dividend yield `q`, `m = r − q`). Then at every strike
+of the window with `C_KK > 0`
+
+  `σloc(K)² = 2 · (∂_T C(t, K) − m · (C(t, K) − K · ∂_K C(t, K))) / (K² · ∂²_K C(t, K))`,
+
+i.e. `∂_T C = ½ σloc² K² ∂²_K C + m · (C − K ∂_K C)`, with `C = 𝔼[(X_t − K)⁺]` the *undiscounted*
+call surface (the defined `callSurface`). For the discounted surface `C̃ = e^{-rT} C` with `m = r`
+this is the textbook `∂_T C̃ = ½ σ² K² ∂²_K C̃ − r K ∂_K C̃`; that last algebraic step is not
+formalised here. Proof: `dupire_pointwise_drift`, then `driftTail_linear` and
+`strikeDeriv_callSurface_eq_neg_tail` (`∂_K C = −P(X_t > K)`).
+
+**Scope.** The class is that of `dupire_weak_drift` (bounded drift rate `β` and bounded `δ`). The
+lognormal model `dX = μX dt + σX dB` has `β = μX` and `δ = σX`, neither bounded, so it is *not*
+in this class: this theorem says nothing about the Black–Scholes surface, and the textbook formula
+for lognormal models is not proved here. -/
+theorem dupire_pointwise_linearDrift
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
+    {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
+    (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
+    (hβcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ β s ω)
+    {Db : ℝ} (hβbdd : ∀ t ω, |β t ω| ≤ Db)
+    {δ : ℝ≥0 → Ω → ℝ}
+    {Dd : ℝ} {M : ℝ≥0 → Ω → ℝ} (hD : ItoDriftConditional.IsAdaptedItoDrift hB hBmeas T δ Dd M)
+    {X : ℝ≥0 → Ω → ℝ} (c : ℝ)
+    (hXcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ X s ω)
+    (hXrel : ∀ t : ℝ≥0, X t = fun ω : Ω ↦ c + AdaptedDrift.driftPath β t ω + M t ω)
+    {afn : ℝ → ℝ → ℝ}
+    (hafn : ∀ s, Measurable (afn s) ∧ ∀ ω, driftCoeff μ (reindexed X) (reindexed β) s ω
+      = afn s (X (Real.toNNReal s) ω))
+    (t : ℝ) (ht : 0 < t) (htT : Real.toNNReal t < T)
+    {a b ε : ℝ} (ha : 0 ≤ a) (hε : 0 < ε) {CK CKK : ℝ → ℝ} {Ct : ℝ → ℝ → ℝ}
+    (hCK : ∀ K ∈ Ioo a b, HasDerivAt (callSurface μ X t) (CK K) K)
+    (hCKK : ∀ K ∈ Ioo a b, HasDerivAt CK (CKK K) K)
+    (hCKKc : ContinuousOn CKK (Ioo a b))
+    (hCt : ∀ s ∈ Ioo (t - ε) (t + ε), ∀ K ∈ Ioo a b,
+      HasDerivAt (fun s' => callSurface μ X s' K) (Ct s K) s)
+    (hCtc : ContinuousOn (Function.uncurry Ct) (Ioo (t - ε) (t + ε) ×ˢ Ioo a b))
+    {m : ℝ} (hlin : ∀ x, a < x → afn t x = m * x)
+    {σloc : ℝ → ℝ} (hσc : ContinuousOn σloc (Ioo a b))
+    (hσrep : ∀ᵐ ω ∂μ, X (Real.toNNReal t) ω ∈ Ioo a b →
+      diffCoeffSq μ (reindexed X) (reindexed δ) t ω
+        = σloc (X (Real.toNNReal t) ω) ^ 2 * X (Real.toNNReal t) ω ^ 2) :
+    ∀ K ∈ Ioo a b, 0 < CKK K →
+      σloc K ^ 2 = 2 * (Ct t K - m * (callSurface μ X t K - K * CK K)) / (K ^ 2 * CKK K) := by
+  have hXint := integrable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel
+  have hXm := measurable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel
+  have hDe (K : ℝ) (hK : K ∈ Ioo a b) :
+      driftTail μ X (afn t) t K = m * (callSurface μ X t K - K * CK K) := by
+    rw [driftTail_linear (hXm (Real.toNNReal t)) (hXint (Real.toNNReal t)) hlin hK.1.le,
+      strikeDeriv_callSurface_eq_neg_tail (hXm (Real.toNNReal t)) (hXint (Real.toNNReal t))
+        (hCK K hK)]
+    ring
+  -- the drift tail is continuous on the window: it is `m (C − K C_K)`, `C` and `C_K` continuous
+  have hcont : ContinuousOn (fun K => m * (callSurface μ X t K - K * CK K)) (Ioo a b) :=
+    continuousOn_const.mul ((continuous_callSurface (s := t) (hXint (Real.toNNReal t))).continuousOn.sub
+      (continuousOn_id.mul fun K hK => (hCKK K hK).continuousAt.continuousWithinAt))
+  have hDrc : ContinuousOn (driftTail μ X (afn t) t) (Ioo a b) :=
+    hcont.congr fun K hK => hDe K hK
+  intro K hK hpos
+  have h := dupire_pointwise_drift hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hafn t ht htT
+    ha hε hCK hCKK hCKKc hCt hCtc hDrc hσc hσrep K hK hpos
+  rwa [hDe K hK] at h
 
 /-- **`dupire_pointwise` (Bagaria ch. 9 Thm 9.5 proper, zero rates).** If `σloc` is a local
 volatility in the lognormal convention, i.e. `σloc(K)²·K²` is a version of `𝔼[δ_t² | X_t = K]`
@@ -937,7 +1355,7 @@ theorem dupire_pointwise
         = σloc (X (Real.toNNReal t) ω) ^ 2 * X (Real.toNNReal t) ω ^ 2) :
     ∀ K ∈ Ioo a b, 0 < CKK K → σloc K ^ 2 = 2 * Ct t K / (K ^ 2 * CKK K) := by
   intro K hK hpos
-  have h := dupire_pointwise_coeff hB hBmeas hD c hXcont hXrel t ht
+  have h := dupire_pointwise_coeff_zeroRate hB hBmeas hD c hXcont hXrel t ht
     htT hε hCK hCKK hCKKc hCt hCtc (v2 := fun K => σloc K ^ 2 * K ^ 2)
     ((hσc.pow 2).mul (continuousOn_id.pow 2)) hσrep K hK hpos
   have hK2 : K ^ 2 ≠ 0 := pow_ne_zero 2 (by linarith [hK.1])
@@ -978,7 +1396,7 @@ theorem dupire_localVol
   have hXm : Measurable (X (Real.toNNReal t)) := by
     rw [hXrel]
     exact ((hD.adaptedM _).measurable.mono ((natFiltration hBmeas).le _) le_rfl).const_add c
-  refine dupire_pointwise_coeff hB hBmeas hD c hXcont hXrel t ht
+  refine dupire_pointwise_coeff_zeroRate hB hBmeas hD c hXcont hXrel t ht
     htT hε hCK hCKK hCKKc hCt hCtc (v2 := fun K => v t K ^ 2) (hvc.pow 2)
     (ae_of_all _ fun ω _ => ?_)
   -- `δ_t² = v(t, X_t)²` is `σ(X_t)`-measurable, so it is its own conditional expectation
