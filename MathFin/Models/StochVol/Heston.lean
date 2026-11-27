@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
@@ -41,7 +41,8 @@ maturity time `τ = T − t` the `Bv`-equation is the constant-forced Riccati
 the Calc 14.6 ψ-equation `ψ' = bψ + ½dψ²` plus the constant `½(u² − u)` produced by the x-row of the
 drift (the coupling `−v/2` of variance into log-spot); `â' = ru + κθ b̂` (`hasDerivAt_hestonA`). The
 real moment `M(u) = E[e^{u log S_T}]` is the transform at real `u`; the characteristic function is
-the same system at `iu` — the complex route is out of scope here.
+the same system at `iu`; that complex route is taken in `Models/StochVol/HestonCharacteristic`,
+which also uses `hestonGenerator` on complex-valued test functions.
 
 The closed forms are the Möbius members
 
@@ -235,16 +236,19 @@ theorem deriv_expAffine2_xv (A Bx Bv x : ℝ) :
 /-- The **Heston generator** on test functions `f : ℝ → ℝ → ℝ` (x = log-spot,
 v = variance):
 `Lf = (r − v/2) ∂_x f + κ(θ − v) ∂_v f + (v/2) ∂_xx f + ρξv ∂_xv f + (ξ²v/2) ∂_vv f`
+(the test functions take values in any real normed space `F`, scalars acting by `•`; `F = ℝ` is the
+case of this file, `F = ℂ` that of `Models/StochVol/HestonCharacteristic`)
 — the correlated 2D generator of `dx = (r − v/2)dt + √v dW¹`,
 `dv = κ(θ − v)dt + ξ√v dW²`, `d⟨W¹,W²⟩ = ρdt` (the covariance matrix is
 `v · [[1, ρξ], [ρξ, ξ²]]`, so the mixed generator term is `a₁₂ = ρξv`). -/
-noncomputable def hestonGenerator (r κ θ ξ ρ : ℝ) (f : ℝ → ℝ → ℝ) : ℝ → ℝ → ℝ :=
+noncomputable def hestonGenerator {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (r κ θ ξ ρ : ℝ) (f : ℝ → ℝ → F) : ℝ → ℝ → F :=
   fun x v =>
-    (r - v / 2) * deriv (fun y => f y v) x
-    + κ * (θ - v) * deriv (f x) v
-    + v / 2 * deriv (deriv (fun y => f y v)) x
-    + ρ * ξ * v * deriv (fun w => deriv (fun y => f y w) x) v
-    + ξ ^ 2 * v / 2 * deriv (deriv (f x)) v
+    (r - v / 2) • deriv (fun y => f y v) x
+    + (κ * (θ - v)) • deriv (f x) v
+    + (v / 2) • deriv (deriv (fun y => f y v)) x
+    + (ρ * ξ * v) • deriv (fun w => deriv (fun y => f y w) x) v
+    + (ξ ^ 2 * v / 2) • deriv (deriv (f x)) v
 
 /-- **The generator on the 2D family.** The Heston generator applied to a member of the 2D
 exponential-affine family is an affine-in-`v` bracket times the function itself:
@@ -261,7 +265,7 @@ theorem hestonGenerator_expAffine2 (r κ θ ξ ρ A Bx Bv : ℝ) :
           + (Bx ^ 2 / 2 + ρ * ξ * Bx * Bv + ξ ^ 2 / 2 * Bv ^ 2 - κ * Bv - Bx / 2) * v)
           * Real.exp (A + Bx * x + Bv * v) := by
   funext x v
-  simp only [hestonGenerator]
+  simp only [hestonGenerator, smul_eq_mul]
   rw [deriv_deriv_expAffine2_x A Bx Bv v, deriv_deriv_expAffine2_v A Bx Bv x,
     deriv_expAffine2_xv A Bx Bv x, deriv_expAffine2_x A Bx Bv v,
     deriv_expAffine2_v A Bx Bv x]
@@ -354,7 +358,8 @@ noncomputable def hestonA (r κ θ ξ ρ u τ : ℝ) : ℝ :=
 
 /-! #### γ-plumbing (private) -/
 
-private theorem hestonGamma_sq (κ ξ ρ u : ℝ) (hu1 : 0 < u) (hu2 : u < 1) :
+/-- The defining relation of the root: `γ² = (κ − ρξu)² + ξ²(u − u²)` on the strip. -/
+theorem hestonGamma_sq (κ ξ ρ u : ℝ) (hu1 : 0 < u) (hu2 : u < 1) :
     hestonGamma κ ξ ρ u ^ 2 = (κ - ρ * ξ * u) ^ 2 + ξ ^ 2 * (u - u ^ 2) := by
   have hpos : 0 < u * (1 - u) := mul_pos hu1 (by linarith)
   have h1 : 0 < u - u ^ 2 := by nlinarith [hpos]
@@ -363,7 +368,8 @@ private theorem hestonGamma_sq (κ ξ ρ u : ℝ) (hu1 : 0 < u) (hu2 : u < 1) :
     linarith [sq_nonneg (κ - ρ * ξ * u), h3]
   rw [pow_two, hestonGamma, Real.mul_self_sqrt hnng]
 
-private theorem hestonGamma_pos (κ ξ ρ u : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1) :
+/-- The root is positive on the strip `0 < u < 1`, `ξ ≠ 0`. -/
+theorem hestonGamma_pos (κ ξ ρ u : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1) :
     0 < hestonGamma κ ξ ρ u := by
   refine Real.sqrt_pos.mpr ?_
   have hpos : 0 < u * (1 - u) := mul_pos hu1 (by linarith)
@@ -377,7 +383,8 @@ private theorem hestonGamma_ne_zero (κ ξ ρ u : ℝ) (hξ : ξ ≠ 0) (hu1 : 0
     hestonGamma κ ξ ρ u ≠ 0 :=
   ne_of_gt (hestonGamma_pos κ ξ ρ u hξ hu1 hu2)
 
-private theorem hestonGamma_abs_lt (κ ξ ρ u : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1) :
+/-- On the strip the root dominates `|κ − ρξu|`. -/
+theorem hestonGamma_abs_lt (κ ξ ρ u : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 < u) (hu2 : u < 1) :
     κ - ρ * ξ * u < hestonGamma κ ξ ρ u ∧ -(κ - ρ * ξ * u) < hestonGamma κ ξ ρ u := by
   have hγpos : 0 < hestonGamma κ ξ ρ u := hestonGamma_pos κ ξ ρ u hξ hu1 hu2
   have hsq : (κ - ρ * ξ * u) ^ 2 < hestonGamma κ ξ ρ u ^ 2 := by

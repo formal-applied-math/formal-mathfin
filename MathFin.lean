@@ -548,6 +548,10 @@ public import MathFin.Models.StochVol.Heston
 -- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
 -- deterministic variance
 public import MathFin.Models.StochVol.HestonSmallVolOfVol
+-- The Heston Riccati system at complex u in the little-Heston-trap branch (D, C and the PDE for
+-- the characteristic-function transform), and its agreement with the real Möbius closed forms
+public import MathFin.Models.StochVol.HestonCharacteristic
+public import MathFin.Models.StochVol.HestonCharacteristicReal
 -- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
 -- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 public import MathFin.Models.BlackScholes.Lookback
