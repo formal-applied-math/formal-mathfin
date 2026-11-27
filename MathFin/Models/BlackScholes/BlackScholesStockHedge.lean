@@ -35,10 +35,11 @@ Brownian motion with volatility `σ S̃`, so its price in the sense of `pricePat
 ## Scope
 
 The wealth is in discounted units, as in `Pricing/ContractHedge.lean`, and the contract is on the
-stock `pathAssets S₀ r σ B` with the deterministic discount `e^{−ru}`. The holding `ψ` is **not**
-identified with the delta `Φ(d₁)` of `europeanCall_deltaHedge`: that theorem is stated with
-`predItoIntegral` against `B` on `[0, T']`, `T' < T`, and its integrand is the delta times `σ S̃`;
-equating the two holdings needs the passage `T' → T` in `L²`, which is not done.
+stock `pathAssets S₀ r σ B` with the deterministic discount `e^{−ru}`. The statements here do not
+say what the holding `ψ` is: it is an `L²` class, given by the representation theorem. That it is
+the delta `Φ(d₁)` of `europeanCall_deltaHedge` is `europeanCall_hedge_in_stock_eq_delta`
+(`BlackScholesStockDelta`), which passes from that theorem's localised integral on `[0, T']`,
+`T' < T`, to the `L²` integral on `[0, T]`.
 Square-integrability of the cash flows is a hypothesis (`hL2`), discharged for the call.
 
 ## Main definitions
@@ -50,7 +51,8 @@ Square-integrability of the cash flows is a hypothesis (`hL2`), discharged for t
 * `BlackScholes.memLp_two_diffusion_pathAssets`: `σ S` is square-integrable on `(0, T] × Ω`.
 * `BlackScholes.pricePath_stockVol_ae_eq`: the price with volatility `stockVol` is the
   discounted stock.
-* `BlackScholes.exists_unique_hedge_in_stock`, `BlackScholes.europeanCall_hedge_in_stock`.
+* `BlackScholes.exists_unique_hedge_in_stock`, `BlackScholes.europeanCall_hedge_in_stock`; the
+  holding of the call is the delta in `BlackScholesStockDelta`.
 
 ## References
 
@@ -212,7 +214,8 @@ square-integrable. Then
 * there is a **unique** holding `ψ` in it with `c.pathPV = c.value + ∫₀ᵀ ψ dS̃` almost surely.
 
 So the contract's value is the initial cost of replicating it in the stock. The wealth is in
-discounted units, and `ψ` is not identified with a closed-form delta. -/
+discounted units, and this statement does not identify `ψ` (for the call it is the delta,
+`europeanCall_hedge_in_stock_eq_delta`). -/
 theorem exists_unique_hedge_in_stock (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)
     {S_0 r σ : ℝ} (hS₀ : 0 < S_0) (hσ : σ ≠ 0) {c : Contract Unit} (hc : c.FixedDated)
@@ -237,7 +240,7 @@ theorem exists_unique_hedge_in_stock (hB : IsPreBrownianReal B μ)
 /-- **The Black–Scholes call is replicated by a unique holding in the stock, at the Black–Scholes
 price.** The discounted payoff of `europeanCall K T` on the stock is `bsV K r σ S₀ T + ∫₀ᵀ ψ dS̃`
 almost surely for a unique holding `ψ` in the price `S₀ + (stockVol●B)`, which is the discounted
-stock at every `t ≤ T`. `ψ` is not shown to be the delta `Φ(d₁)`. -/
+stock at every `t ≤ T`. That `ψ` is the delta `Φ(d₁)` is `europeanCall_hedge_in_stock_eq_delta`. -/
 theorem europeanCall_hedge_in_stock (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {T : ℝ≥0}
     (hT : 0 < (T : ℝ)) {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :
