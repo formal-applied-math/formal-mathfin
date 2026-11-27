@@ -26,6 +26,7 @@ function, is `exists_market_of_isNormalizedCallPrice` (`RoperConverse.lean`).
 
 * `isNormalizedCallPrice_integral_call`: for a positive integrable `X` of mean one under a
   probability measure, `k ↦ 𝔼[(X − k)⁺]` is a normalised call price function.
+* `Market.IsPricingMeasure.price_obs_pos`: the forward of a positive asset is positive.
 * `Market.IsPricingMeasure.isNormalizedCallPrice`: the same for the calls of a market with unit
   numéraire and a positive asset under a pricing measure, in units of the forward.
 
@@ -81,6 +82,23 @@ namespace Market
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω}
 
+/-- **The forward of a positive asset is positive.** With unit numéraire and a positive asset, the
+price under a pricing measure of the claim that delivers the asset at `T` is positive: it is the
+mean of a positive integrable variable. -/
+theorem IsPricingMeasure.price_obs_pos (hQ : M.IsPricingMeasure T Q)
+    (hN : ∀ t ω, M.numeraire t ω = 1) (hpos : ∀ ω, 0 < M.asset () T ω) :
+    0 < M.price Q (.pay T (.obs () T)) := by
+  have := hQ.isProb
+  have hint := hQ.integrable_asset hN
+  have hF : M.price Q (.pay T (.obs () T)) = ∫ ω, M.asset () T ω ∂Q := by
+    simp [price, Contract.value_pay, Payoff.eval, scenarioAt, deflator, hN]
+  rw [hF]
+  refine (integral_pos_iff_support_of_nonneg (fun ω ↦ (hpos ω).le) hint).2 ?_
+  have hsupp : Function.support (M.asset () T) = univ :=
+    eq_univ_of_forall fun ω ↦ (hpos ω).ne'
+  rw [hsupp, measure_univ]
+  exact one_pos
+
 /-- **A pricing measure gives a normalised call price function.** In a market with unit numéraire
 and a positive asset, priced at `T` by `Q`, the forward `F` of the asset is its price, and the
 calls at the strikes `k F` priced in units of `F` are a normalised call price function: convex,
@@ -96,12 +114,8 @@ theorem IsPricingMeasure.isNormalizedCallPrice (hQ : M.IsPricingMeasure T Q)
   have hF' : F = ∫ ω, M.asset () T ω ∂Q := by
     simp [hF, price, Contract.value_pay, Payoff.eval, scenarioAt, deflator, hN]
   have hFpos : 0 < F := by
-    rw [hF']
-    refine (integral_pos_iff_support_of_nonneg (fun ω ↦ (hpos ω).le) hint).2 ?_
-    have hsupp : Function.support (M.asset () T) = univ :=
-      eq_univ_of_forall fun ω ↦ (hpos ω).ne'
-    rw [hsupp, measure_univ]
-    exact one_pos
+    rw [hF]
+    exact hQ.price_obs_pos hN hpos
   have key := isNormalizedCallPrice_integral_call (μ := Q) (X := fun ω ↦ M.asset () T ω / F)
     (hint.div_const F) (fun ω ↦ div_pos (hpos ω) hFpos)
     (by rw [integral_div, ← hF', div_self hFpos.ne'])
