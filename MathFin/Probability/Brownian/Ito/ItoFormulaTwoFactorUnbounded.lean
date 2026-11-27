@@ -34,8 +34,9 @@ probability of the Riemann–Stieltjes sums at each `t ≤ T`
 `predItoIntegral` (`tendstoInMeasure_riemannStieltjes_localItoIntegral`), which gives the identity
 at each time; both sides have continuous paths, so it holds at all times at once.
 
-The one-factor theorem is the case of this one with `f` independent of `y`, `τ = 0`, `c = 0`
-(`ito_formula_adapted_unbounded_process_of_two_factor`).
+The one-factor theorem `ito_formula_adapted_unbounded_process` has the same hypotheses on `σ`,
+`b` and `f`; it is not restated here as a corollary, since the duplicate statement would be the
+parallel copy the library avoids.
 
 Not here: a random starting point, `T = ∞`, a vector Brownian driver (neither this library nor
 BrownianMotion at the pinned version defines a multi-dimensional Brownian motion: two *independent*
@@ -51,8 +52,6 @@ for two factors.
 * `ito_formula_adapted_two_factor_unbounded_le`: for `t ≤ T` the Riemann–Stieltjes sums of
   `f_x(·, X, Y)` against `M^σ` plus those of `f_y(·, X, Y)` against `M^τ` converge in measure to
   `f(t, X_t, Y_t) − f(0, x₀, y₀) − ∫₀ᵗ ito2Drift ds`.
-* `ito_formula_adapted_unbounded_process_of_two_factor`: the one-factor identity of processes
-  `ito_formula_adapted_unbounded_process`, derived from the two-factor one.
 * `continuous_uncurry_three_of_continuous_partials`: a function with jointly continuous partials
   `g_t`, `g_x`, `g_y` is jointly continuous.
 
@@ -366,7 +365,9 @@ theorem ito_formula_adapted_two_factor_process :
       predItoIntegral (μ := μ) T hBmeas hθ t =ᵐ[μ] fun ω ↦ f t (X t ω) (Y t ω) - f 0 x₀ y₀
         - ∫ s in Ioc 0 t, ito2Drift f_t f_x f_y f_xx f_xy f_yy (b s ω) (c s ω) (σ s ω) (τ s ω) s
             (X s ω) (Y s ω) ∂timeMeasure :=
-    ((hsplit.mono fun ω h ↦ h t ht).trans
+    ((show predItoIntegral (μ := μ) T hBmeas hθ t =ᵐ[μ] fun ω ↦ predItoIntegral (μ := μ) T hBmeas
+        hθ₁ t ω + predItoIntegral (μ := μ) T hBmeas hθ₂ t ω from
+      hsplit.mono fun ω h ↦ h t ht).trans
       (tendstoInMeasure_ae_unique
         ((tendstoInMeasure_riemannStieltjes_localItoIntegral hB T hBmeas hBcont hσa hσc hpx hwx
           ht.2).add
@@ -393,62 +394,6 @@ theorem ito_formula_adapted_two_factor_process :
   linarith [h t ht]
 
 end Unbounded
-
-/-! ### The one-factor formula as the case `f(t, x)`, `τ = 0` -/
-
-section OneFactor
-
-variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-  (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) {σ : ℝ≥0 → Ω → ℝ}
-  (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (σ t))
-  (hcont : ∀ ω, Continuous (fun t : ℝ≥0 ↦ σ t ω)) {b : ℝ≥0 → Ω → ℝ}
-  (hb_adap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (b t))
-  (hb_cont : ∀ ω, Continuous fun s ↦ b s ω) (x₀ : ℝ)
-  {f f_t f_x f_xx : ℝ → ℝ → ℝ}
-  (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
-  (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
-  (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
-  (hf_t_cont : Continuous fun p : ℝ × ℝ ↦ f_t p.1 p.2)
-  (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
-  (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
-
-include hB hBcont hb_adap hb_cont hf_t hf_x hf_xx hf_t_cont hf_x_cont hf_xx_cont in
-/-- **The one-factor Itô formula, from the two-factor one.** The statement of
-`ito_formula_adapted_unbounded_process`, with the same hypotheses, derived from
-`ito_formula_adapted_two_factor_process` for `F(t, x, y) = f(t, x)`, `τ = 0`, `c = 0`, `y₀ = 0`:
-the partials of `F` in `y` vanish, the drift `ito2Drift` reduces to `f_t + f_x b + ½ f_xx σ²`, and
-the integrand `F_x σ + F_y τ` to `f_x σ`. The hypotheses line up one for one: continuous adapted
-`σ`, `b`, no bound on them or on `f` and its partials. -/
-theorem ito_formula_adapted_unbounded_process_of_two_factor :
-    ∀ᵐ ω ∂μ, ∀ t ∈ Icc 0 T,
-      f t (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b t ω) = f 0 x₀
-        + ∫ (s : ℝ≥0) in Ioc 0 t, (f_t s (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b s ω)
-            + f_x s (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b s ω) * b s ω
-            + 1 / 2 * (f_xx s (localItoProcess (μ := μ) T hBmeas hadap hcont x₀ b s ω)
-              * σ s ω ^ 2)) ∂timeMeasure
-        + predItoIntegral (μ := μ) T hBmeas (itoIntegrand_isStronglyPredictable hB T hBmeas hBcont
-            hadap hcont hb_adap hb_cont x₀ hf_x_cont) t ω := by
-  filter_upwards [ito_formula_adapted_two_factor_process hB T hBmeas hBcont (σ := σ)
-    (τ := fun _ _ ↦ 0) hadap hcont (fun _ ↦ stronglyMeasurable_const) (fun _ ↦ continuous_const)
-    (b := b) (c := fun _ _ ↦ 0) hb_adap hb_cont (fun _ ↦ stronglyMeasurable_const)
-    (fun _ ↦ continuous_const) x₀ 0 (f := fun t x _ ↦ f t x) (f_t := fun t x _ ↦ f_t t x)
-    (f_x := fun t x _ ↦ f_x t x) (f_y := fun _ _ _ ↦ 0) (f_xx := fun t x _ ↦ f_xx t x)
-    (f_xy := fun _ _ _ ↦ 0) (f_yy := fun _ _ _ ↦ 0) (fun t x _ ↦ hf_t t x)
-    (fun t x _ ↦ hf_x t x) (fun t x y ↦ hasDerivAt_const y (f t x)) (fun t x _ ↦ hf_xx t x)
-    (fun t x y ↦ hasDerivAt_const y (f_x t x)) (fun _ _ y ↦ hasDerivAt_const y (0 : ℝ))
-    (hf_t_cont.comp (continuous_fst.prodMk continuous_snd.fst))
-    (hf_x_cont.comp (continuous_fst.prodMk continuous_snd.fst)) continuous_const
-    (hf_xx_cont.comp (continuous_fst.prodMk continuous_snd.fst)) continuous_const
-    continuous_const] with ω hω t ht
-  refine (hω t ht).trans ?_
-  refine congrArg₂ (· + ·) (congrArg₂ (· + ·) rfl ?_) ?_
-  · exact setIntegral_congr_fun measurableSet_Ioc fun s _ ↦ by
-      simp only [ito2Drift]
-      ring
-  · exact predItoIntegral_congr (μ := μ) T hBmeas (by funext s ω; simp) _ _ t ω
-
-end OneFactor
 
 end ItoFormulaAdapted
 
