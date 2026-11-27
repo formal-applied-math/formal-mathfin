@@ -332,6 +332,7 @@ public import MathFin.Contracts.Instruments.CallPayoff
 public import MathFin.Contracts.Core
 public import MathFin.Contracts.Adapted
 public import MathFin.Contracts.Instruments.Options
+public import MathFin.Contracts.StaticHedge
 public import MathFin.Contracts.Instruments.FixedIncome
 public import MathFin.Contracts.Instruments.Credit
 public import MathFin.Risk.Credit.TrancheLeg
@@ -393,6 +394,7 @@ public import MathFin.Pricing.BondPrice
 public import MathFin.Pricing.AmericanPrice
 public import MathFin.Pricing.OneDateMarket
 public import MathFin.Pricing.Parity
+public import MathFin.Pricing.StaticHedge
 public import MathFin.Pricing.DiscreteMarket
 -- The law of a Wiener-represented rate under the forward measure of a Wiener-represented account
 public import MathFin.Pricing.WienerIntegralForwardMeasure
@@ -570,6 +572,7 @@ public import MathFin.Models.BlackScholes.SpotConvexity
 public import MathFin.Models.ModelFree.PriceBounds
 public import MathFin.Models.ModelFree.CallPriceFunction
 public import MathFin.Models.ModelFree.MarketCallPrice
+public import MathFin.Models.ModelFree.StaticHedgeMarket
 public import MathFin.Models.ModelFree.RoperConverse
 -- Phase 13 additions:
 -- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
