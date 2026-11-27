@@ -12,8 +12,8 @@ hypothesis is stated and every step is checked by Lean's kernel. It covers stoch
 no-arbitrage theory, derivative pricing, fixed income, portfolio choice, risk measures and
 actuarial mathematics.
 
-The [corpus](docs/glossary.md#corpus) records 933 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 887 are proved in
+The [corpus](docs/glossary.md#corpus) records 934 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 888 are proved in
 full, 18 restate a lemma from Mathlib or BrownianMotion, and 28 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after,
 and say so. The library contains no `sorry`, and a build-time audit checks that every library
@@ -55,7 +55,7 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   path with a nonnegative price, so a market with a pricing measure prices it from its call
   prices. In Black–Scholes, every contract paying at fixed dates up to T with square-integrable
   cash flows is replicated by a unique holding in the stock, at a cost
-  equal to its value. The autocallable note is written in the language and proved to redeem once.
+  equal to its value; for the call, that holding is the delta Φ(d₁). The autocallable note is written in the language and proved to redeem once.
 - **Trees and the limit.** Cox–Ross–Rubinstein converges to Black–Scholes.
 - **The smile.** An exact polynomial-sign certificate for butterfly-free raw SVI; calendar
   arbitrage as monotone total variance; Dupire's equation in the sense of distributions, with no
@@ -78,9 +78,10 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   Six assume a structure whose fields include the textbook conclusion, seven rest on a named
   hypothesis that is not proved, and fifteen prove a special case. Each is listed in
   [`docs/coverage.md`](docs/coverage.md).
-- **Known gaps.** Girsanov is proved for bounded θ only, and Novikov's condition is not. In the
-  Brownian market only completeness ⇒ uniqueness of the pricing measure is proved, and the hedge
-  in the stock is not identified with the delta (Clark–Ocone, [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
+- **Known gaps.** Girsanov is proved for bounded θ only; under Novikov's condition only
+  E[Z_T] = 1 is proved. In the Brownian market only completeness ⇒ uniqueness of the pricing
+  measure is proved, and the hedge of a general claim is not identified with a formula
+  (Clark–Ocone, [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
   Itô's formula in two dimensions is proved for processes driven by one Brownian motion; there is
   no multi-dimensional Brownian motion yet.
 - **Prose against statement.** The failure this library has actually met is prose that claims
