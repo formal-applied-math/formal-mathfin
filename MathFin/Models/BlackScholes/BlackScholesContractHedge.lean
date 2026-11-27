@@ -24,10 +24,11 @@ is square-integrable, because the lognormal terminal price is (`memLp_two_bsTerm
 The price `S` in which the hedge is held is the Itô price `S₀ + (vol●B)` for **any** volatility
 `vol` square-integrable against `dt ⊗ μ` and almost everywhere nonzero; here it is not shown to be
 the discounted Black–Scholes stock. That identification, for `vol = σ e^{−ru}S_u`, is
-`BlackScholesStockHedge`. The holding `ψ` is **not** identified with the delta `Φ(d₁)` of
+`BlackScholesStockHedge`. Nothing here identifies the holding `ψ` with the delta `Φ(d₁)` of
 `europeanCall_deltaHedge`, which integrates the delta-hedge integrand against `B` on `[0, T']`,
-`T' < T`. What both hedges share is the capital they start from, the contract's value
-`bsV K r σ S₀ T`.
+`T' < T`; for the stock's own volatility that is `europeanCall_hedge_in_stock_eq_delta`
+(`BlackScholesStockDelta`). What both hedges share is the capital they start from, the contract's
+value `bsV K r σ S₀ T`.
 
 ## Main results
 
