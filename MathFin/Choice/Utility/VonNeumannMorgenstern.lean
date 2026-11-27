@@ -73,20 +73,12 @@ functional the same way and leaves the induced preference **exactly**
 unchanged. This is why utility is "cardinal up to origin and scale", and why no
 economic content may be attached to the units of `u`.
 
-## What is *not* in this file
+## The representation theorem
 
-The **representation theorem itself** — the converse direction, that any
-preference satisfying the four axioms *is* `prefersEU s u` for some `u`. That
-proof calibrates each outcome against a best/worst pair, and needs a
-strict-monotonicity lemma for `mix` along `α` plus the Archimedean axiom to
-extract the calibrating scalar. It is a substantially longer development and is
-deliberately left for its own module; this file is its prerequisite layer, and
-supplies the soundness half (`prefersEU` satisfies the axioms) against which
-that construction will be checked.
-
-Likewise the converse of `prefersEU_affine_invariant` — that two utilities
-representing the same preference *must* differ by a positive affine map — needs
-the same calibration argument and belongs with it.
+The converse direction, that any preference satisfying the four axioms *is* `prefersEU s u` for
+some `u`, and that `u` is unique up to a positive affine map, is proved in
+`Choice.Utility.VonNeumannMorgensternRepresentation` for lotteries over a finite type. That module
+calibrates each outcome against a best and a worst lottery and is built on this one.
 
 ## Main definitions
 
