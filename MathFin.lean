@@ -951,6 +951,7 @@ public import MathFin.Choice.Performance.PurgedCV
 -- the mixture, and the vNM axioms verified for the induced preference (the soundness half,
 -- plus invariance of the preference under positive affine rescaling of the utility)
 public import MathFin.Choice.Utility.VonNeumannMorgenstern
+public import MathFin.Choice.Utility.VonNeumannMorgensternRepresentation
 public import MathFin.Choice.Utility.StatePriceDensity
 public import MathFin.Choice.Utility.MarketMarginalUtility
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
