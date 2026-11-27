@@ -28,18 +28,26 @@ law of the post-`k` process `ω ↦ (ω (k + m))ₘ` on `{X_k = j}` is the law o
 natural filtration `Filtration.piLE` gives the strong Markov property
 (`markovPathMeasure_strong_markov`), for every initial law.
 
-**The recurrence criterion** (Saporito Theorem 1.3.12). On a finite state space the chain returns
-to `i` with probability one if and only if `∑ₙ Pⁿ(i,i) = ∞` (`chainLaw_return_eq_one_iff`). The
-proof is the first-passage decomposition of the `n`-step return probability, proved from the
-Markov property at the first return time, and a renewal argument on sequences. The `n`-step
-return probability `chainLaw P i {X_n = i}` is identified with the matrix power
-`(Pⁿ) i i` over `ℝ≥0∞` (`chainLaw_visit_eq_pow`). In the summable case the first Borel–Cantelli
-lemma gives that the chain visits `i` infinitely often with probability zero
-(`chainLaw_visits_infinitely_often_null`).
+**The recurrence criterion** (Saporito Theorem 1.3.12). On a countable state space the chain
+returns to `i` with probability one if and only if `∑ₙ ℙ_i(X_n = i) = ∞`
+(`chainLaw_return_eq_one_iff_tsum_eq_top`). The proof is the first-passage decomposition of the
+`n`-step return probability, proved from the Markov property at the first return time, and a
+renewal argument on sequences. On a finite state space `ℙ_i(X_n = i)` is the matrix power
+`(Pⁿ) i i` over `ℝ≥0∞` (`chainLaw_visit_eq_pow`, `chainLaw_return_eq_one_iff`).
 
-What is not proved here: that a state with `∑ₙ Pⁿ(i,i) = ∞` is visited infinitely often almost
-surely (the return probability is one; the step from one return to infinitely many needs the strong
-Markov property at the successive return times), and the ergodic theorem.
+**The 0–1 law for visits** (`chainLaw_visits_infinitely_often_eq_one_iff`). The first Borel–Cantelli
+lemma gives that a state with `∑ₙ ℙ_i(X_n = i) < ∞` is visited infinitely often with probability
+zero. If instead the return probability `f` is one, the number of returns is geometric,
+`ℙ_i(at least k + 1 returns) = f · ℙ_i(at least k returns)` (the Markov property at the first
+return time, applied to the shifted trajectory), so all these probabilities are one and the state
+is visited infinitely often almost surely.
+
+**Relation to `FiniteMarkovChain.lean`** (another branch): there the transition matrix is
+real-valued and row-stochastic. Here the transition law is `P : ι → PMF ι` (the convention of
+`MarkovPathMeasure.lean`) and the matrix is `Matrix.of fun a b ↦ P a b` over `ℝ≥0∞`. The
+identification of the two is not yet made.
+
+The ergodic theorem is not proved here.
 
 ## Main definitions
 
@@ -58,9 +66,12 @@ Markov property at the successive return times), and the ergodic theorem.
 * `chainLaw_visit_eq_pow`: `ℙ_i(X_n = j) = (Pⁿ) i j`.
 * `chainLaw_visit_succ`: the first-passage decomposition `ℙ_i(X_{n+1} = i)
   = ∑_{k ≤ n} ℙ_i(τ_i⁺ = k + 1) ℙ_i(X_{n-k} = i)`.
-* `chainLaw_return_eq_one_iff`: `ℙ_i(τ_i⁺ < ∞) = 1 ↔ ∑ₙ (Pⁿ) i i = ∞` (Theorem 1.3.12).
-* `chainLaw_visits_infinitely_often_null`: `∑ₙ (Pⁿ) i i < ∞` implies `ℙ_i(X_n = i` infinitely
-  often`) = 0`.
+* `chainLaw_return_eq_one_iff_tsum_eq_top`: `ℙ_i(τ_i⁺ < ∞) = 1 ↔ ∑ₙ ℙ_i(X_n = i) = ∞`
+  (Theorem 1.3.12, countable state space); `chainLaw_return_eq_one_iff` is the matrix-power form
+  for a finite state space.
+* `chainLaw_visits_infinitely_often_null`, `chainLaw_visits_infinitely_often_eq_one`,
+  `chainLaw_visits_infinitely_often_eq_one_iff`: `ℙ_i(X_n = i` infinitely often`)` is one if
+  `∑ₙ ℙ_i(X_n = i) = ∞` and zero otherwise.
 
 ## References
 
@@ -673,43 +684,141 @@ theorem tsum_eq_one_iff_tsum_eq_top_of_renewal (g p : ℕ → ℝ≥0∞) (hg : 
 
 /-! ### The recurrence criterion -/
 
-/-- **The recurrence criterion** (Saporito Theorem 1.3.12). For a finite state space `ι`, a
-transition law `P` and a state `i`: the chain started at `i` returns to `i` at some time `n > 0`
-with probability one if and only if `∑ₙ (Pⁿ) i i = ∞`. Here `Pⁿ` is the matrix power of the
-one-step probabilities over `ℝ≥0∞`. -/
-theorem chainLaw_return_eq_one_iff [Fintype ι] [DecidableEq ι] (P : ι → PMF ι) (i : ι) :
-    chainLaw P i {ω | ∃ n, 0 < n ∧ ω n = i} = 1 ↔
-      ∑' n, ((Matrix.of fun a b ↦ P a b) ^ n) i i = ∞ := by
-  have hret : chainLaw P i {ω | ∃ n, 0 < n ∧ ω n = i}
+/-- The return probability is the sum of the first-return probabilities. -/
+lemma chainLaw_return_eq_tsum (P : ι → PMF ι) (i : ι) :
+    chainLaw P i {ω | ∃ n, 0 < n ∧ ω n = i}
       = ∑' k, chainLaw P i (firstReturnAt i (k + 1)) := by
-    rw [setOf_return_eq_iUnion]
-    exact measure_iUnion
-      (fun k k' hne ↦
-        firstReturnAt_disjoint i (k := k + 1) (k' := k' + 1) (by omega) (by omega) (by omega))
-      fun k ↦ measurableSet_firstReturnAt i (k + 1)
+  rw [setOf_return_eq_iUnion]
+  exact measure_iUnion
+    (fun k k' hne ↦
+      firstReturnAt_disjoint i (k := k + 1) (k' := k' + 1) (by omega) (by omega) (by omega))
+    fun k ↦ measurableSet_firstReturnAt i (k + 1)
+
+/-- **The recurrence criterion** (Saporito Theorem 1.3.12), for a countable state space. The chain
+started at `i` returns to `i` at some time `n > 0` with probability one if and only if its
+`n`-step return probabilities `ℙ_i(X_n = i)` have infinite sum. -/
+theorem chainLaw_return_eq_one_iff_tsum_eq_top (P : ι → PMF ι) (i : ι) :
+    chainLaw P i {ω | ∃ n, 0 < n ∧ ω n = i} = 1 ↔
+      ∑' n, chainLaw P i {ω | ω n = i} = ∞ := by
+  classical
   have hg : ∑' k, chainLaw P i (firstReturnAt i (k + 1)) ≤ 1 := by
-    rw [← hret]
+    rw [← chainLaw_return_eq_tsum]
     exact prob_le_one
   have hp0 : chainLaw P i {ω | ω 0 = i} = 1 := by
     rw [chainLaw_visit_zero, if_pos rfl]
-  have hsum : ∑' n, ((Matrix.of fun a b ↦ P a b) ^ n) i i
-      = ∑' n, chainLaw P i {ω | ω n = i} :=
-    tsum_congr fun n ↦ (chainLaw_visit_eq_pow P i n i).symm
-  rw [hsum, hret]
+  rw [chainLaw_return_eq_tsum]
   exact tsum_eq_one_iff_tsum_eq_top_of_renewal
     (fun k ↦ chainLaw P i (firstReturnAt i (k + 1))) (fun n ↦ chainLaw P i {ω | ω n = i})
     hg hp0 (fun n ↦ prob_le_one) (chainLaw_visit_succ P i)
 
-/-- **The transient half of the dichotomy.** If `∑ₙ (Pⁿ) i i < ∞`, the chain started at `i`
+/-- The recurrence criterion on a finite state space, with the `n`-step return probabilities
+written as matrix powers: `ℙ_i(τ_i⁺ < ∞) = 1 ↔ ∑ₙ (Pⁿ) i i = ∞`. -/
+theorem chainLaw_return_eq_one_iff [Fintype ι] [DecidableEq ι] (P : ι → PMF ι) (i : ι) :
+    chainLaw P i {ω | ∃ n, 0 < n ∧ ω n = i} = 1 ↔
+      ∑' n, ((Matrix.of fun a b ↦ P a b) ^ n) i i = ∞ := by
+  have hsum : ∑' n, ((Matrix.of fun a b ↦ P a b) ^ n) i i
+      = ∑' n, chainLaw P i {ω | ω n = i} :=
+    tsum_congr fun n ↦ (chainLaw_visit_eq_pow P i n i).symm
+  rw [hsum]
+  exact chainLaw_return_eq_one_iff_tsum_eq_top P i
+
+/-- **The transient half of the dichotomy.** If `∑ₙ ℙ_i(X_n = i) < ∞`, the chain started at `i`
 visits `i` infinitely often with probability zero (the first Borel–Cantelli lemma). -/
-theorem chainLaw_visits_infinitely_often_null [Fintype ι] [DecidableEq ι] (P : ι → PMF ι)
-    (i : ι) (h : ∑' n, ((Matrix.of fun a b ↦ P a b) ^ n) i i ≠ ∞) :
-    chainLaw P i (Filter.limsup (fun n ↦ {ω : ℕ → ι | ω n = i}) Filter.atTop) = 0 := by
-  refine measure_limsup_atTop_eq_zero ?_
-  have e : ∑' n, chainLaw P i {ω | ω n = i}
-      = ∑' n, ((Matrix.of fun a b ↦ P a b) ^ n) i i :=
-    tsum_congr fun n ↦ chainLaw_visit_eq_pow P i n i
-  rw [← e] at h
-  exact h
+theorem chainLaw_visits_infinitely_often_null (P : ι → PMF ι) (i : ι)
+    (h : ∑' n, chainLaw P i {ω | ω n = i} ≠ ∞) :
+    chainLaw P i (Filter.limsup (fun n ↦ {ω : ℕ → ι | ω n = i}) Filter.atTop) = 0 :=
+  measure_limsup_atTop_eq_zero h
+
+/-! ### The recurrent half: the number of returns -/
+
+/-- The trajectories with at least `k` returns to `i`: after the first return at time `m + 1`, the
+shifted trajectory has at least `k - 1` returns. -/
+def returnsAtLeast (i : ι) : ℕ → Set (ℕ → ι)
+  | 0 => Set.univ
+  | k + 1 => ⋃ m : ℕ, firstReturnAt i (m + 1) ∩ shiftBy (m + 1) ⁻¹' returnsAtLeast i k
+
+omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
+lemma returnsAtLeast_succ (i : ι) (k : ℕ) :
+    returnsAtLeast i (k + 1)
+      = ⋃ m : ℕ, firstReturnAt i (m + 1) ∩ shiftBy (m + 1) ⁻¹' returnsAtLeast i k := rfl
+
+lemma measurableSet_returnsAtLeast (i : ι) (k : ℕ) : MeasurableSet (returnsAtLeast i k) := by
+  induction k with
+  | zero => exact MeasurableSet.univ
+  | succ k ih =>
+    rw [returnsAtLeast_succ]
+    exact MeasurableSet.iUnion fun m ↦
+      (measurableSet_firstReturnAt i (m + 1)).inter (measurable_shiftBy (m + 1) ih)
+
+/-- **The number of returns is geometric** (strong Markov at the first return time, in its
+fixed-time form): `ℙ_i(at least k + 1 returns) = f · ℙ_i(at least k returns)`, where
+`f = ∑ₘ ℙ_i(τ_i⁺ = m + 1)` is the return probability. -/
+lemma chainLaw_returnsAtLeast_succ (P : ι → PMF ι) (i : ι) (k : ℕ) :
+    chainLaw P i (returnsAtLeast i (k + 1))
+      = (∑' m, chainLaw P i (firstReturnAt i (m + 1))) * chainLaw P i (returnsAtLeast i k) := by
+  rw [returnsAtLeast_succ, measure_iUnion
+    (fun m m' hne ↦ Disjoint.mono Set.inter_subset_left Set.inter_subset_left
+      (firstReturnAt_disjoint i (k := m + 1) (k' := m' + 1) (by omega) (by omega) (by omega)))
+    fun m ↦ (measurableSet_firstReturnAt i (m + 1)).inter
+      (measurable_shiftBy (m + 1) (measurableSet_returnsAtLeast i k)),
+    ← ENNReal.tsum_mul_right]
+  exact tsum_congr fun m ↦
+    markovPathMeasure_inter_shift (PMF.pure i) P (m + 1) (firstReturnHist i (m + 1))
+      (fun h hh ↦ hh.1) (measurableSet_returnsAtLeast i k)
+
+omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
+lemma exists_ge_of_mem_returnsAtLeast {i : ι} {k : ℕ} {ω : ℕ → ι}
+    (h : ω ∈ returnsAtLeast i k) : ∃ n, k ≤ n ∧ (0 < k → ω n = i) := by
+  induction k generalizing ω with
+  | zero => exact ⟨0, le_rfl, fun h0 ↦ absurd h0 (lt_irrefl 0)⟩
+  | succ k ih =>
+    rw [returnsAtLeast_succ] at h
+    obtain ⟨m, hfr, hsh⟩ := Set.mem_iUnion.1 h
+    obtain ⟨n', hn', hk'⟩ := ih hsh
+    rcases Nat.eq_zero_or_pos k with rfl | hk0
+    · exact ⟨m + 1, by omega, fun _ ↦ ((mem_firstReturnAt i (m + 1) ω).1 hfr).1⟩
+    · exact ⟨m + 1 + n', by omega, fun _ ↦ hk' hk0⟩
+
+/-- **The recurrent half of the dichotomy.** If the chain started at `i` returns to `i` with
+probability one, it visits `i` infinitely often with probability one. -/
+theorem chainLaw_visits_infinitely_often_eq_one (P : ι → PMF ι) (i : ι)
+    (hret : chainLaw P i {ω | ∃ n, 0 < n ∧ ω n = i} = 1) :
+    chainLaw P i (Filter.limsup (fun n ↦ {ω : ℕ → ι | ω n = i}) Filter.atTop) = 1 := by
+  have hk : ∀ k, chainLaw P i (returnsAtLeast i k) = 1 := by
+    intro k
+    induction k with
+    | zero => exact measure_univ
+    | succ k ih =>
+      rw [chainLaw_returnsAtLeast_succ, ← chainLaw_return_eq_tsum, hret, ih, one_mul]
+  have hmeas : MeasurableSet (⋂ k : ℕ, returnsAtLeast i (k + 1)) :=
+    MeasurableSet.iInter fun k ↦ measurableSet_returnsAtLeast i (k + 1)
+  have h1 : chainLaw P i (⋂ k : ℕ, returnsAtLeast i (k + 1)) = 1 := by
+    refine (prob_compl_eq_zero_iff hmeas).1 ?_
+    rw [Set.compl_iInter]
+    exact measure_iUnion_null fun k ↦
+      (prob_compl_eq_zero_iff (measurableSet_returnsAtLeast i (k + 1))).2 (hk (k + 1))
+  have hsub : (⋂ k : ℕ, returnsAtLeast i (k + 1))
+      ⊆ Filter.limsup (fun n ↦ {ω : ℕ → ι | ω n = i}) Filter.atTop := by
+    intro ω hω
+    rw [Filter.mem_limsup_iff_frequently_mem, Filter.frequently_atTop]
+    intro N
+    obtain ⟨n, hn, hωn⟩ := exists_ge_of_mem_returnsAtLeast (Set.mem_iInter.1 hω N)
+    exact ⟨n, by omega, hωn (Nat.succ_pos N)⟩
+  exact le_antisymm prob_le_one (h1.symm.le.trans (measure_mono hsub))
+
+/-- **The 0–1 law for visits to a state.** The chain started at `i` visits `i` infinitely often
+with probability one if `∑ₙ ℙ_i(X_n = i) = ∞`, and with probability zero otherwise. -/
+theorem chainLaw_visits_infinitely_often_eq_one_iff (P : ι → PMF ι) (i : ι) :
+    chainLaw P i (Filter.limsup (fun n ↦ {ω : ℕ → ι | ω n = i}) Filter.atTop) = 1 ↔
+      ∑' n, chainLaw P i {ω | ω n = i} = ∞ := by
+  constructor
+  · intro h
+    by_contra hS
+    have := chainLaw_visits_infinitely_often_null P i hS
+    rw [this] at h
+    exact zero_ne_one h
+  · intro hS
+    exact chainLaw_visits_infinitely_often_eq_one P i
+      ((chainLaw_return_eq_one_iff_tsum_eq_top P i).2 hS)
 
 end MathFin
