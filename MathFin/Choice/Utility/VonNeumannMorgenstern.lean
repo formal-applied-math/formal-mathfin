@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import MathFin.Probability.Analysis.StdSimplexMix
 public import MathFin.Probability.Laws.FiniteWeights
 public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Basic.Real.Basic
@@ -22,29 +23,20 @@ agent through `expectedUtility` and shows that a concave utility makes it convex
 an increasing one makes it closed under adding cash. Such a set need not be a cone,
 so it need not be the acceptance set of a coherent risk measure
 (`not_exists_isCoherentRiskMeasure_log_acceptance`). This file supplies the layer
-underneath: the mixture algebra of lotteries, the affinity of expected utility in
-that mixture, and the verification that an expected-utility preference satisfies
-the von Neumann–Morgenstern axioms.
+underneath: the affinity of expected utility in the mixture of lotteries and the
+verification that an expected-utility preference satisfies the von Neumann–Morgenstern axioms.
 
 ## Setup
 
-A **lottery** over a finite outcome index `ι` is a probability vector
-`p : ι → ℝ` supported on a `Finset ι` — nonnegative, summing to one. Following
-the house convention in `UtilityDerivation`, the two conditions travel as
-explicit hypotheses rather than in a bundled subtype: every theorem below states
-exactly the conditions its proof consumes, and most of the mixture algebra needs
-neither.
+A **lottery** over a finite outcome type `ι` is a point of Mathlib's standard simplex
+`Convexity.StdSimplex ℝ ι`, the library's probability vector on a finite type. Its mixture
+`StdSimplex.mix α h₀ h₁ p q = α p + (1 − α) q` at a weight `α ∈ [0, 1]` and the algebra of
+mixtures (`mix_one`, `mix_zero`, `mix_self`, `mix_comm`, `mix_compound`) are in
+`Probability.Analysis.StdSimplexMix`. A mixture of lotteries is a lottery by construction.
 
-* `mix α p q` — the compound lottery `α p + (1 − α) q`.
-* `expectedUtility s u p` — `∑ i ∈ s, p i * u i`.
-* `prefersEU s u p q` — `p` is weakly preferred to `q`, i.e. `EU q ≤ EU p`.
-
-## The mixture algebra
-
-`mix_one`, `mix_zero`, `mix_self`, `mix_comm` and `mix_compound` are the
-"fundamental claims about mixture lotteries" that any vNM development needs
-before the axioms can even be stated. `mix_nonneg` and `sum_mix` are the
-closure facts: a mixture of lotteries is a lottery.
+* `expectedUtility s u p` — `∑ i ∈ s, p i * u i`, the weighted sum of the utilities `u` against
+  any weight function `p` over the support `s`.
+* `prefersEU u p q` — the lottery `p` is weakly preferred to `q`, i.e. `EU q ≤ EU p`.
 
 ## The pivot
 
@@ -55,6 +47,8 @@ Everything else in this file is a corollary of that single identity. It is the
 formal content of the claim that expected utility "respects compounding", and it
 is precisely what fails for the non-linear functionals (rank-dependent utility,
 prospect theory) that were invented to explain the Allais paradox.
+`expectedUtility_smul_add_smul` is the identity for arbitrary weight functions, which needs no
+hypothesis at all: it is linearity of the finite sum.
 
 ## The axioms, verified
 
@@ -75,17 +69,16 @@ economic content may be attached to the units of `u`.
 
 ## The representation theorem
 
-The converse direction, that any preference satisfying the four axioms *is* `prefersEU s u` for
+The converse direction, that any preference satisfying the four axioms *is* `prefersEU u` for
 some `u`, and that `u` is unique up to a positive affine map, is proved in
 `Choice.Utility.VonNeumannMorgensternRepresentation` for lotteries over a finite type. That module
 calibrates each outcome against a best and a worst lottery and is built on this one.
 
 ## Main definitions
 
-* `mix`: the compound lottery `α p + (1 − α) q`.
-* `expectedUtility`: the expected utility `∑ i ∈ s, p i * u i` of the lottery `p` over the support
-  `s`.
-* `prefersEU`: `p` is weakly preferred to `q` when `EU(q) ≤ EU(p)`.
+* `expectedUtility`: the expected utility `∑ i ∈ s, p i * u i` of the weights `p` over the
+  support `s`.
+* `prefersEU`: the lottery `p` is weakly preferred to `q` when `EU(q) ≤ EU(p)`.
 
 ## Main results
 
@@ -96,11 +89,12 @@ calibrates each outcome against a best and a worst lottery and is built on this 
 * `prefersEU_total`, `prefersEU_trans`, `prefersEU_refl`: the expected-utility preference is
   complete, transitive and reflexive.
 * `prefersEU_independence`, `prefersEU_strict_independence`: mixing a common lottery into both
-  sides preserves a weak preference at any weight `α ≥ 0`, and a strict one at any `α > 0`.
+  sides preserves a weak preference at any weight `α ∈ [0, 1]`, and a strict one at any
+  `α ∈ (0, 1]`.
 * `prefersEU_continuity`: if `p ≻ q ≻ r` some strict mixture of `p` and `r` has the same
   expected utility as `q`.
-* `prefersEU_affine_invariant`: for probability vectors the preference is unchanged by a
-  positive affine rescaling `a u + b` of the utility.
+* `prefersEU_affine_invariant`: the preference is unchanged by a positive affine rescaling
+  `a u + b` of the utility.
 
 ## References
 
@@ -118,14 +112,12 @@ utility uniqueness, preference axioms, MSC 91B16, MSC 91B06, JEL D81
 
 namespace MathFin
 
+open Convexity
+
 variable {ι : Type*}
 
-/-- The **compound lottery** `α p + (1 − α) q`: with probability `α` you face
-lottery `p`, otherwise `q`. -/
-def mix (α : ℝ) (p q : ι → ℝ) : ι → ℝ := fun i ↦ α * p i + (1 - α) * q i
-
-/-- **Expected utility** of the lottery `p` under the utility `u`, over the
-support `s`. -/
+/-- **Expected utility** of the weights `p` under the utility `u`, over the support `s`. For a
+lottery `p : StdSimplex ℝ ι` it is `expectedUtility Finset.univ u p.weights`. -/
 def expectedUtility (s : Finset ι) (u : ι → ℝ) (p : ι → ℝ) : ℝ :=
   ∑ i ∈ s, p i * u i
 
@@ -146,116 +138,75 @@ theorem expectedUtility_univ_real_eq_integral [Fintype ι] [MeasurableSpace ι]
   rw [expectedUtility_eq_integral _ fun i _ ↦ measureReal_nonneg,
     Measure.ofWeights_univ_real_singleton]
 
-/-- `p` is **weakly preferred** to `q` under expected utility. -/
-def prefersEU (s : Finset ι) (u : ι → ℝ) (p q : ι → ℝ) : Prop :=
-  expectedUtility s u q ≤ expectedUtility s u p
-
-/-! ### The mixture algebra -/
-
-/-- Mixing with certainty on the first lottery returns it. -/
-theorem mix_one (p q : ι → ℝ) : mix 1 p q = p := by
-  funext i
-  simp [mix]
-
-/-- Mixing with certainty on the second lottery returns it. -/
-theorem mix_zero (p q : ι → ℝ) : mix 0 p q = q := by
-  funext i
-  simp [mix]
-
-/-- Mixing a lottery with itself is a no-op, at any weight. -/
-theorem mix_self (α : ℝ) (p : ι → ℝ) : mix α p p = p := by
-  funext i
-  change α * p i + (1 - α) * p i = p i
-  ring
-
-/-- Swapping the two lotteries complements the weight. -/
-theorem mix_comm (α : ℝ) (p q : ι → ℝ) : mix α p q = mix (1 - α) q p := by
-  funext i
-  change α * p i + (1 - α) * q i = (1 - α) * q i + (1 - (1 - α)) * p i
-  ring
-
-/-- **Reduction of compound lotteries**: mixing `q` into a mixture of `p` and
-`q` just rescales the weight on `p`. The formal content of the "only the
-resulting distribution matters" assumption. -/
-theorem mix_compound (α β : ℝ) (p q : ι → ℝ) :
-    mix α (mix β p q) q = mix (α * β) p q := by
-  funext i
-  change α * (β * p i + (1 - β) * q i) + (1 - α) * q i
-      = α * β * p i + (1 - α * β) * q i
-  ring
-
-/-- A mixture of nonnegative vectors at a weight in `[0, 1]` is nonnegative. -/
-theorem mix_nonneg {α : ℝ} (hα : 0 ≤ α) (hα1 : α ≤ 1) {p q : ι → ℝ}
-    (hp : ∀ i, 0 ≤ p i) (hq : ∀ i, 0 ≤ q i) (i : ι) :
-    0 ≤ mix α p q i := by
-  change 0 ≤ α * p i + (1 - α) * q i
-  exact add_nonneg (mul_nonneg hα (hp i)) (mul_nonneg (by linarith) (hq i))
-
-/-- A mixture of probability vectors is a probability vector. Together with
-`mix_nonneg`, this is the closure of lotteries under mixing. -/
-theorem sum_mix (s : Finset ι) (α : ℝ) {p q : ι → ℝ}
-    (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :
-    ∑ i ∈ s, mix α p q i = 1 := by
-  have hsplit : ∑ i ∈ s, mix α p q i
-      = α * (∑ i ∈ s, p i) + (1 - α) * ∑ i ∈ s, q i := by
-    simp only [mix]
-    rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
-  rw [hsplit, hp, hq]
-  ring
-
 /-! ### The pivot: expected utility is affine in the mixture -/
+
+/-- **Expected utility is affine in the weights**:
+`EU(α p + (1 − α) q) = α EU(p) + (1 − α) EU(q)`.
+
+Note it needs *no* hypothesis on `p`, `q` or `α` — it is linearity of the sum, not a fact
+about probabilities. -/
+theorem expectedUtility_smul_add_smul (s : Finset ι) (u : ι → ℝ) (α : ℝ) (p q : ι → ℝ) :
+    expectedUtility s u (α • p + (1 - α) • q)
+      = α * expectedUtility s u p + (1 - α) * expectedUtility s u q := by
+  simp only [expectedUtility, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+  rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+  exact Finset.sum_congr rfl (fun i _ ↦ by ring)
+
+variable [Fintype ι]
+
+/-- `p` is **weakly preferred** to `q` under expected utility. -/
+def prefersEU (u : ι → ℝ) (p q : StdSimplex ℝ ι) : Prop :=
+  expectedUtility Finset.univ u q.weights ≤ expectedUtility Finset.univ u p.weights
 
 /-- **Expected utility is affine in the mixture**:
 `EU(α p + (1 − α) q) = α EU(p) + (1 − α) EU(q)`.
 
-Every axiom verified below is a corollary of this one identity. Note it needs
-*no* hypothesis on `p`, `q` or `α` — it is linearity of the sum, not a fact
-about probabilities. -/
-theorem expectedUtility_mix (s : Finset ι) (u : ι → ℝ) (α : ℝ) (p q : ι → ℝ) :
-    expectedUtility s u (mix α p q)
-      = α * expectedUtility s u p + (1 - α) * expectedUtility s u q := by
-  simp only [expectedUtility, mix]
-  rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
-  exact Finset.sum_congr rfl (fun i _ ↦ by ring)
+Every axiom verified below is a corollary of this one identity. -/
+theorem expectedUtility_mix (u : ι → ℝ) (α : ℝ) (h₀ : 0 ≤ α) (h₁ : α ≤ 1)
+    (p q : StdSimplex ℝ ι) :
+    expectedUtility Finset.univ u (StdSimplex.mix α h₀ h₁ p q).weights
+      = α * expectedUtility Finset.univ u p.weights
+        + (1 - α) * expectedUtility Finset.univ u q.weights := by
+  rw [StdSimplex.coe_weights_mix, expectedUtility_smul_add_smul]
 
 /-! ### The von Neumann–Morgenstern axioms, verified for `prefersEU` -/
 
 /-- **Completeness**: any two lotteries are comparable. -/
-theorem prefersEU_total (s : Finset ι) (u : ι → ℝ) (p q : ι → ℝ) :
-    prefersEU s u p q ∨ prefersEU s u q p :=
+theorem prefersEU_total (u : ι → ℝ) (p q : StdSimplex ℝ ι) :
+    prefersEU u p q ∨ prefersEU u q p :=
   le_total _ _
 
 /-- **Transitivity**. -/
-theorem prefersEU_trans (s : Finset ι) (u : ι → ℝ) {p q r : ι → ℝ}
-    (hpq : prefersEU s u p q) (hqr : prefersEU s u q r) : prefersEU s u p r :=
+theorem prefersEU_trans (u : ι → ℝ) {p q r : StdSimplex ℝ ι}
+    (hpq : prefersEU u p q) (hqr : prefersEU u q r) : prefersEU u p r :=
   le_trans hqr hpq
 
 /-- **Reflexivity**. -/
-theorem prefersEU_refl (s : Finset ι) (u : ι → ℝ) (p : ι → ℝ) :
-    prefersEU s u p p :=
+theorem prefersEU_refl (u : ι → ℝ) (p : StdSimplex ℝ ι) : prefersEU u p p :=
   le_refl _
 
 /-- **Independence**: mixing a common lottery `r` into both sides preserves the
-preference, at any nonnegative weight.
+preference, at any weight `α ∈ [0, 1]`.
 
 This is the axiom the Allais paradox violates, and the one that forces the
 expected-utility form. It is immediate from `expectedUtility_mix`: the `r`
 term enters both sides identically and cancels. -/
-theorem prefersEU_independence (s : Finset ι) (u : ι → ℝ) {α : ℝ} (hα : 0 ≤ α)
-    {p q r : ι → ℝ} (h : prefersEU s u p q) :
-    prefersEU s u (mix α p r) (mix α q r) := by
+theorem prefersEU_independence (u : ι → ℝ) {α : ℝ} (h₀ : 0 ≤ α) (h₁ : α ≤ 1)
+    {p q r : StdSimplex ℝ ι} (h : prefersEU u p q) :
+    prefersEU u (StdSimplex.mix α h₀ h₁ p r) (StdSimplex.mix α h₀ h₁ q r) := by
   unfold prefersEU at h ⊢
   rw [expectedUtility_mix, expectedUtility_mix]
-  exact add_le_add (mul_le_mul_of_nonneg_left h hα) le_rfl
+  exact add_le_add (mul_le_mul_of_nonneg_left h h₀) le_rfl
 
 /-- **Strict independence**: a strict preference survives mixing with a common
 lottery, at any *positive* weight. -/
-theorem prefersEU_strict_independence (s : Finset ι) (u : ι → ℝ) {α : ℝ}
-    (hα : 0 < α) {p q r : ι → ℝ}
-    (h : expectedUtility s u q < expectedUtility s u p) :
-    expectedUtility s u (mix α q r) < expectedUtility s u (mix α p r) := by
+theorem prefersEU_strict_independence (u : ι → ℝ) {α : ℝ} (h₀ : 0 < α) (h₁ : α ≤ 1)
+    {p q r : StdSimplex ℝ ι}
+    (h : expectedUtility Finset.univ u q.weights < expectedUtility Finset.univ u p.weights) :
+    expectedUtility Finset.univ u (StdSimplex.mix α h₀.le h₁ q r).weights
+      < expectedUtility Finset.univ u (StdSimplex.mix α h₀.le h₁ p r).weights := by
   rw [expectedUtility_mix, expectedUtility_mix]
-  exact add_lt_add_of_lt_of_le (mul_lt_mul_of_pos_left h hα) le_rfl
+  exact add_lt_add_of_lt_of_le (mul_lt_mul_of_pos_left h h₀) le_rfl
 
 /-- The scalar behind the Archimedean axiom: for reals `R < Q < P` there is a
 strict convex weight placing `Q` between `R` and `P`, namely `Q`'s position on
@@ -278,18 +229,18 @@ of the best and worst is exactly indifferent to the middle lottery.
 The witness is exhibited rather than obtained from a limit: the indifference
 weight is the position of `q` on the utility interval `[EU r, EU p]`, which is
 the calibration scalar the full representation theorem will read off. -/
-theorem prefersEU_continuity (s : Finset ι) (u : ι → ℝ) {p q r : ι → ℝ}
-    (hpq : expectedUtility s u q < expectedUtility s u p)
-    (hqr : expectedUtility s u r < expectedUtility s u q) :
-    ∃ α : ℝ, 0 < α ∧ α < 1 ∧
-      expectedUtility s u (mix α p r) = expectedUtility s u q := by
-  obtain ⟨α, hα0, hα1, hα⟩ := exists_mix_weight hpq hqr
-  refine ⟨α, hα0, hα1, ?_⟩
-  rw [expectedUtility_mix]
-  exact hα
+theorem prefersEU_continuity (u : ι → ℝ) {p q r : StdSimplex ℝ ι}
+    (hpq : expectedUtility Finset.univ u q.weights < expectedUtility Finset.univ u p.weights)
+    (hqr : expectedUtility Finset.univ u r.weights < expectedUtility Finset.univ u q.weights) :
+    ∃ (α : ℝ) (h₀ : 0 < α) (h₁ : α < 1),
+      expectedUtility Finset.univ u (StdSimplex.mix α h₀.le h₁.le p r).weights
+        = expectedUtility Finset.univ u q.weights := by
+  obtain ⟨α, hα₀, hα₁, hα⟩ := exists_mix_weight hpq hqr
+  exact ⟨α, hα₀, hα₁, by rw [expectedUtility_mix]; exact hα⟩
 
 /-! ### Uniqueness up to a positive affine transformation -/
 
+omit [Fintype ι] in
 /-- A positive affine transformation of the utility transforms expected utility
 the same way: `EU_{a u + b}(p) = a EU_u(p) + b`.
 
@@ -314,12 +265,12 @@ The vNM utility is cardinal only up to origin and scale: `u` and `a·u + b` with
 `a > 0` induce the *same* preference relation, so no economic meaning attaches
 to the units of `u`. (Comparisons of utility *differences* do survive, which is
 what distinguishes vNM utility from the ordinal utility of consumer theory.) -/
-theorem prefersEU_affine_invariant (s : Finset ι) (u : ι → ℝ) {a b : ℝ}
-    (ha : 0 < a) {p q : ι → ℝ}
-    (hp : ∑ i ∈ s, p i = 1) (hq : ∑ i ∈ s, q i = 1) :
-    prefersEU s (fun i ↦ a * u i + b) p q ↔ prefersEU s u p q := by
+theorem prefersEU_affine_invariant (u : ι → ℝ) {a b : ℝ} (ha : 0 < a)
+    (p q : StdSimplex ℝ ι) :
+    prefersEU (fun i ↦ a * u i + b) p q ↔ prefersEU u p q := by
   unfold prefersEU
-  rw [expectedUtility_affine s u a b hp, expectedUtility_affine s u a b hq,
+  rw [expectedUtility_affine Finset.univ u a b (p := p.weights) p.total_of_fintype,
+    expectedUtility_affine Finset.univ u a b (p := q.weights) q.total_of_fintype,
     add_le_add_iff_right, mul_le_mul_iff_of_pos_left ha]
 
 end MathFin

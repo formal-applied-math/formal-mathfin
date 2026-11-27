@@ -40,7 +40,7 @@ The von Neumann–Morgenstern layer gives two more facts about acceptance:
 * it depends on `u` only up to a positive affine map (`acceptableUnderUtility_affine_iff`, from
   `expectedUtility_affine`);
 * a position acceptable under each of two probability vectors is acceptable under every mixture
-  of them (`acceptableUnderUtility_mix`, from `expectedUtility_mix`).
+  of them (`acceptableUnderUtility_mix`, from `expectedUtility_smul_add_smul`).
 
 Log utility at unit wealth is the Kelly criterion: a binary bet of fraction `f` at odds `b` is
 acceptable exactly when its expected log-growth `kellyGrowth p b f`
@@ -151,14 +151,15 @@ theorem acceptableUnderUtility_affine_iff {ι : Type*} (s : Finset ι) {p : ι �
     mul_le_mul_iff_of_pos_left ha]
 
 /-- **Acceptance survives mixing the probability vectors**: a position acceptable under each of
-the probability vectors `p` and `q` is acceptable under every mixture `mix α p q` with
-`α ∈ [0, 1]`, because expected utility is affine in the mixture (`expectedUtility_mix`). -/
+the probability vectors `p` and `q` is acceptable under every mixture `α • p + (1 - α) • q` with
+`α ∈ [0, 1]`, because expected utility is affine in the mixture
+(`expectedUtility_smul_add_smul`). -/
 theorem acceptableUnderUtility_mix {ι : Type*} (s : Finset ι) {p q : ι → ℝ} (u : ℝ → ℝ)
     (W : ℝ) {X : ι → ℝ} {α : ℝ} (hα : 0 ≤ α) (hα1 : α ≤ 1)
     (hp : acceptableUnderUtility s p u W X) (hq : acceptableUnderUtility s q u W X) :
-    acceptableUnderUtility s (mix α p q) u W X := by
+    acceptableUnderUtility s (α • p + (1 - α) • q) u W X := by
   unfold acceptableUnderUtility at *
-  rw [expectedUtility_mix]
+  rw [expectedUtility_smul_add_smul]
   linarith [mul_le_mul_of_nonneg_left hp hα, mul_le_mul_of_nonneg_left hq (sub_nonneg.2 hα1)]
 
 /-! ### Log utility and the Kelly criterion -/

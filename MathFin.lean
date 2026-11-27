@@ -174,6 +174,7 @@ public import MathFin.Probability.Brownian.Ito.ItoProcessPredictable
 -- Predictability of the assembled drift process (SDE-existence keystone II)
 -- Cauchy–Schwarz on a finite measure (shared by the drift L² bound and SDE uniqueness)
 public import MathFin.Probability.Analysis.FiniteMeasureCauchySchwarz
+public import MathFin.Probability.Analysis.StdSimplexMix
 public import MathFin.Probability.Analysis.StdSimplexProd
 public import MathFin.Probability.Brownian.Ito.DriftProcessPredictable
 -- σ-realization: a bounded adapted continuous process as an Itô-integrand L² class (α4 gap)

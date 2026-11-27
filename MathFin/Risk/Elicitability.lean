@@ -22,7 +22,8 @@ are ranked by their average realized scores (QRM Exercise Book, Exercises 9.5 an
 * **Elicitable functionals have convex level sets** (`StrictlyElicits.apply_mixture`). If
   `T μ = T ν`, then `T` takes the same value on every mixture of `μ` and `ν` in the class. The
   expected score is affine along a mixture of laws (`integral_mixture`), the property
-  `expectedUtility_mix` of `Choice/Utility/VonNeumannMorgenstern.lean` records for expected utility.
+  `expectedUtility_smul_add_smul` of `Choice/Utility/VonNeumannMorgenstern.lean` records for
+  expected utility.
   So the common minimizer of the two expected scores also minimizes their mixture.
 * **VaR is elicitable** (`strictlyElicits_pinballLoss`). The pinball loss
   `S_α(x, y) = (𝟙{y ≤ x} − α)(x − y)` elicits the `α`-quantile on the laws with finite mean whose
