@@ -92,6 +92,18 @@ def compoundSum {Ω : Type*} (N : Ω → ℕ) (X : ℕ → Ω → ℝ) (ω : Ω)
 theorem compoundSum_apply {Ω : Type*} (N : Ω → ℕ) (X : ℕ → Ω → ℝ) (ω : Ω) :
     compoundSum N X ω = ∑ i ∈ Finset.range (N ω), X i ω := rfl
 
+/-- **A block of claims has the MGF of the common claim MGF to the block's size.** For i.i.d.
+claim sizes `X`, the MGF of the aggregate `∑_{i∈S} Xᵢ` over any finite set `S` of claims is
+`M_X(t)^{|S|}`. -/
+lemma mgf_finset_sum_of_iid (t : ℝ) (X : ℕ → Ω → ℝ)
+    (hindep : iIndepFun X μ)
+    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (S : Finset ℕ) :
+    mgf (fun ω ↦ ∑ i ∈ S, X i ω) μ t = (mgf (X 0) μ t) ^ S.card := by
+  have hsum : (fun ω ↦ ∑ i ∈ S, X i ω) = ∑ i ∈ S, X i := by
+    funext ω; rw [Finset.sum_apply]
+  rw [hsum, hindep.mgf_sum₀ (fun i ↦ (hident i).aemeasurable_fst) S,
+      Finset.prod_eq_pow_card fun i _ ↦ mgf_congr_of_identDistrib _ _ (hident i) t]
+
 /-- **The `n`-claim aggregate MGF is the `n`-th power of the common claim MGF.** For i.i.d.
 claim sizes `X` (independent, identically distributed), the MGF of the `n`-claim aggregate
 `∑_{i<n} Xᵢ` is `M_X(t)ⁿ`. -/
@@ -99,11 +111,7 @@ lemma mgf_range_sum_of_iid (t : ℝ) (X : ℕ → Ω → ℝ)
     (hindep : iIndepFun X μ)
     (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) (n : ℕ) :
     mgf (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) μ t = (mgf (X 0) μ t) ^ n := by
-  have hsum : (fun ω ↦ ∑ i ∈ Finset.range n, X i ω) = ∑ i ∈ Finset.range n, X i := by
-    funext ω; rw [Finset.sum_apply]
-  rw [hsum, hindep.mgf_sum₀ (fun i ↦ (hident i).aemeasurable_fst) (Finset.range n),
-      Finset.prod_eq_pow_card fun i _ ↦
-    mgf_congr_of_identDistrib _ _ (hident i) t, Finset.card_range]
+  rw [mgf_finset_sum_of_iid t X hindep hident, Finset.card_range]
 
 /-- **The compound-Poisson aggregate-loss MGF, in mixture form.** For i.i.d. claim sizes `Xᵢ`,
 the MGF of the `n`-claim sum integrated against the Poisson(λ) law of `n` is
