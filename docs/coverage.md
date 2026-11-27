@@ -45,7 +45,7 @@ backlog merges (#646, #650–#652).
   gap `(1 − ρ)·∑ wᵢ²σᵢ²/(∑ wᵢσᵢ)²` over the common correlation at a nonzero squared
   weighted-volatility sum (`bossuProxy_eq_add_gap`), the proxy sitting between the correlation
   and one at nonnegative weights and volatilities with `ρ ≤ 1` (`bossuProxy_between`), and the
-  Jensen lower bound for the variance-denominated variant `V/∑ wᵢσᵢ²` at nonnegative weights
+  variance-denominated variant `V/∑ wᵢσᵢ²` as a Jensen lower bound at nonnegative weights
   summing to one, nonnegative volatilities and a nonnegative observed variance
   (`jensenProxy_le_bossuProxy`). The dispersion P&L
   identity `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`), the flat-weight index variance
