@@ -46,8 +46,8 @@ assembled.
   logarithm is out of its domain and the value is junk).
 * `Market.gammaSwapFairStrike M T Q κ L U`: twice the market price of the `1/K` strip
   per `κ·T`; it is the fair strike under `0 < κ`, `0 < T` and `0 < L ≤ κ ≤ U`. The
-  division is junk at `κ ≤ 0` or `T = 0`; outside the ordering it is well defined but
-  is not a fair strike.
+  division is junk at `κ = 0` or `T = 0`; at `κ < 0` or outside the ordering it is well
+  defined but is not a fair strike.
 
 ## Main results
 
@@ -81,8 +81,8 @@ open MeasureTheory Set MathFin.Contracts
 function `φ = e^{−rT}f` with `f(F_t) = e^{rt}(F_t log(F_t/F₀) − F_t + F₀)`). Its convexity
 is `x ↦ x⁻¹`, the `1/K` weight of the gamma swap's strip, and it vanishes with its first
 derivative at `κ` — so its spanning identity has no cash or forward leg. The payoff and
-the convexity are meant at `x > 0` with `κ > 0`; outside that quadrant the logarithm is
-out of its domain and the value is junk (at `κ ≤ 0` with `x > 0` it reads `−x + κ`). -/
+the convexity are meant at `x > 0` with `κ > 0`; outside that quadrant the value carries
+no financial meaning (at `κ = 0` the division totalizes and the value reads `−x`). -/
 noncomputable def gammaSwapPayoff (κ x : ℝ) : ℝ := x * Real.log (x / κ) - x + κ
 
 /-- The first two derivatives of the replication payoff: `φ′(x) = log(x/κ)` (whose value
@@ -175,7 +175,8 @@ maturity `T`. This is Jacquier–Slaoui's `K_Γ^{0,T} = (2e^{2rT}/(T S₀))[∫�
 factor is `2`; the reference level `κ` in the `S₀` slot, at the at-the-money forward
 `κ = F₀`); the unbounded strip of the source is cut to the compact range. The value is
 the fair strike under `0 < κ`, `0 < T` and `0 < L ≤ κ ≤ U`; the division is junk at
-`κ ≤ 0` or `T = 0`, and outside the ordering it is well defined but is not a fair strike. -/
+`κ = 0` or `T = 0`, and at `κ < 0` or outside the ordering it is well defined but is not
+a fair strike. -/
 noncomputable def gammaSwapFairStrike (M : Market Unit Ω) (T : ℝ≥0) (Q : Measure Ω)
     (κ L U : ℝ) : ℝ :=
   2 / (κ * (T : ℝ)) *
@@ -184,9 +185,10 @@ noncomputable def gammaSwapFairStrike (M : Market Unit Ω) (T : ℝ≥0) (Q : Me
 
 /-- **Fair strike equals the expected replication payoff.** Under the hypotheses of
 `IsPricingMeasure.integral_eq_gammaSwap`, twice the expected replication payoff per `κ·T`
-is the fair strike: `K_Γ = 2𝔼_Q[φ(S_T)]/(κT)`. Under the Itô dynamics of the source's §2
-this is the level its floating leg `T⁻¹𝔼[∫₀ᵀ σ_t²·(S_t/κ) dt]` reads at; the dynamics step
-is the source's, not proved here (this module has no process). -/
+is the fair strike: `K_Γ = 2𝔼_Q[φ(S_T)]/(κT)`. Under the Itô dynamics of the source's §2,
+at the at-the-money-forward instance `κ = F₀`, this is the level its floating leg
+`T⁻¹𝔼[∫₀ᵀ σ_t²·(S_t/κ) dt]` reads at; the dynamics step is the source's, not proved here
+(this module has no process). -/
 theorem IsPricingMeasure.gammaSwapFairStrike_eq_integral {M : Market Unit Ω} {T : ℝ≥0}
     {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t x, M.numeraire t x = 1)
     {L U κ : ℝ} (hL : 0 < L) (hLκ : L ≤ κ) (hκU : κ ≤ U)
