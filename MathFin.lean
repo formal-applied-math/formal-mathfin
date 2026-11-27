@@ -752,6 +752,8 @@ public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PricingMeasureUnique
 -- The Black–Scholes delta hedge is self-financing: the product rule with the factor e^{rt}
 public import MathFin.Models.BlackScholes.BlackScholesSelfFinancing
+-- The replicating holding in the stock is the delta
+public import MathFin.Models.BlackScholes.BlackScholesStockDelta
 public import MathFin.Models.Binomial.Binomial
 public import MathFin.Models.Binomial.BinomialCompleteMarket
 public import MathFin.Models.Binomial.BinomialLimit

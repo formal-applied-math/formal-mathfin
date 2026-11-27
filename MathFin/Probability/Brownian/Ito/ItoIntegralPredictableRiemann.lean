@@ -16,9 +16,11 @@ continuous on `[0, T]` only almost surely. A continuous function of an Itô proc
 integrand: the continuous version of the Itô integral is predictable
 (`itoContinuousMod_isStronglyPredictable`), but has continuous paths only almost surely.
 
-* `itoProcessCLM_processToLpPredictable`: the `L²` Itô process at time `t` of a bounded predictable
-  integrand, built at horizon `T ≥ t`, is its Itô integral at horizon `t`. The band truncation of
-  `itoProcessCLM_consist`, whose only use of path continuity was predictability.
+* `itoProcessCLM_toLp_eq_itoIntegralCLM`: the `L²` Itô process at time `t` of a predictable
+  integrand that is square-integrable at the horizons `T ≥ t` and `t`, built at horizon `T`, is its
+  Itô integral at horizon `t`. The band truncation of `itoProcessCLM_consist`, whose only use of
+  path continuity was predictability.
+* `itoProcessCLM_processToLpPredictable`: its case of a bounded integrand.
 * `tendstoInMeasure_riemannStieltjes_itoContinuousMod`: for `M` a version of `∫ σ dB` (`σ` bounded,
   adapted, path-continuous) and `w` bounded predictable with almost surely continuous paths, the
   sums `∑ w(tₖ)(M_{tₖ₊₁} − M_{tₖ})` on the uniform partitions of `[0, t]` converge in probability
@@ -30,8 +32,9 @@ integrand: the continuous version of the Itô integral is predictable
 
 ## Main results
 
-* `itoProcessCLM_processToLpPredictable`: the Itô process of a bounded predictable integrand does
-  not depend on the horizon, at time `t ≤ T` the horizon-`T` and horizon-`t` integrals agree.
+* `itoProcessCLM_toLp_eq_itoIntegralCLM`, `itoProcessCLM_processToLpPredictable`: the Itô process
+  of a square-integrable (in particular a bounded) predictable integrand does not depend on the
+  horizon, at time `t ≤ T` the horizon-`T` and horizon-`t` integrals agree.
 * `tendstoInMeasure_riemannStieltjes_itoContinuousMod`: Riemann–Stieltjes sums of a predictable
   weight against an Itô integral converge in probability to the Itô integral of the product.
 * `riemannσ_one`: the Riemann sums of the constant `1` telescope to `B_t − B_0`.
@@ -63,60 +66,59 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilit
 
 /-! ### The horizon -/
 
-/-- The band truncation `𝟙_{[0, t]} θ` of a bounded predictable integrand is `L²` at every
-horizon. -/
-theorem memLp_indicator_Iic_prod {θ : ℝ≥0 → Ω → ℝ}
-    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C)
-    (t : ℝ≥0) :
-    MemLp ((Iic t ×ˢ (univ : Set Ω)).indicator (Function.uncurry θ)) 2
-      (trimMeasure (μ := μ) T hBmeas) := by
-  refine MemLp.of_bound (hpred.indicator (measurableSet_predictable_Iic_prod
-    (𝓕 := natFiltration (mΩ := mΩ) hBmeas) (i := t) MeasurableSet.univ)).aestronglyMeasurable C
-    (ae_of_all _ fun z ↦ ?_)
-  by_cases hz : z ∈ Iic t ×ˢ (univ : Set Ω)
-  · rw [indicator_of_mem hz, Real.norm_eq_abs]
-    exact hbdd z.1 z.2
-  · rw [indicator_of_notMem hz, norm_zero]
-    exact (abs_nonneg _).trans (hbdd 0 z.2)
-
 include hB in
-/-- **The Itô process of a bounded predictable integrand does not depend on the horizon**: built
-at horizon `T ≥ t`, at time `t` it is the Itô integral built at horizon `t`. The value at `t` sees
-only the band `(0, t]` of the integrand (`itoProcessCLM_eq_zero_of_vanishes_before`,
+/-- **The `L²` Itô process of a square-integrable predictable integrand does not depend on the
+horizon**: built at horizon `T ≥ t`, at time `t` it is the Itô integral built at horizon `t`. The
+integrand is a predictable `θ` that is square-integrable for both trimmed measures. The value at
+`t` sees only the band `(0, t]` of the integrand (`itoProcessCLM_eq_zero_of_vanishes_before`,
 `itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after`), whose integral is the same at every
 horizon (`itoIntegralCLM_cross_horizon`). -/
-theorem itoProcessCLM_processToLpPredictable {t : ℝ≥0} (htT : t ≤ T) {θ : ℝ≥0 → Ω → ℝ}
-    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
-    itoProcessCLM hB T t hBmeas (processToLpPredictable T hBmeas hpred hbdd)
-      = itoIntegralCLM hB t hBmeas (processToLpPredictable t hBmeas hpred hbdd) := by
+theorem itoProcessCLM_toLp_eq_itoIntegralCLM {t : ℝ≥0} (htT : t ≤ T) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ)
+    (hθT : MemLp (Function.uncurry θ) 2 (trimMeasure (μ := μ) T hBmeas))
+    (hθt : MemLp (Function.uncurry θ) 2 (trimMeasure (μ := μ) t hBmeas)) :
+    itoProcessCLM hB T t hBmeas (hθT.toLp _) = itoIntegralCLM hB t hBmeas (hθt.toLp _) := by
   set g := (Iic t ×ˢ (univ : Set Ω)).indicator (Function.uncurry θ)
-  have hg (S : ℝ≥0) : MemLp g 2 (trimMeasure (μ := μ) S hBmeas) :=
-    memLp_indicator_Iic_prod S hBmeas hpred hbdd t
+  have hg {S : ℝ≥0} (hS : MemLp (Function.uncurry θ) 2 (trimMeasure (μ := μ) S hBmeas)) :
+      MemLp g 2 (trimMeasure (μ := μ) S hBmeas) :=
+    hS.of_le (hpred.indicator (measurableSet_predictable_Iic_prod
+      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) (i := t) MeasurableSet.univ)).aestronglyMeasurable
+      (ae_of_all _ fun z ↦ norm_indicator_le_norm_self _ _)
   have hgle {z : ℝ≥0 × Ω} (hz : z.1 ≤ t) : g z = Function.uncurry θ z :=
     indicator_of_mem (mem_prod.2 ⟨hz, mem_univ _⟩) _
   have hggt {z : ℝ≥0 × Ω} (hz : t < z.1) : g z = 0 :=
     indicator_of_notMem (fun h ↦ (not_le.2 hz) (mem_prod.1 h).1) _
-  have hband (S : ℝ≥0) (hS : t ≤ S) :
-      itoProcessCLM hB S t hBmeas (processToLpPredictable S hBmeas hpred hbdd)
-        = itoIntegralCLM hB S hBmeas ((hg S).toLp g) := by
-    have hzero : itoProcessCLM hB S t hBmeas
-        (processToLpPredictable S hBmeas hpred hbdd - (hg S).toLp g) = 0 := by
-      refine itoProcessCLM_eq_zero_of_vanishes_before hB S t hS hBmeas _ ?_
-      filter_upwards [processToLpPredictable_coeFn (μ := μ) S hBmeas hpred hbdd,
-        Lp.coeFn_sub (processToLpPredictable S hBmeas hpred hbdd) ((hg S).toLp g),
-        (hg S).coeFn_toLp] with p hp1 hp2 hp3 hp4
+  have hband : itoProcessCLM hB T t hBmeas (hθT.toLp _)
+      = itoIntegralCLM hB T hBmeas ((hg hθT).toLp g) := by
+    have hzero : itoProcessCLM hB T t hBmeas (hθT.toLp _ - (hg hθT).toLp g) = 0 := by
+      refine itoProcessCLM_eq_zero_of_vanishes_before hB T t htT hBmeas _ ?_
+      filter_upwards [hθT.coeFn_toLp, Lp.coeFn_sub (hθT.toLp _) ((hg hθT).toLp g),
+        (hg hθT).coeFn_toLp] with p hp1 hp2 hp3 hp4
       rw [hp2, Pi.sub_apply, hp1, hp3, hgle hp4, sub_self]
     rw [map_sub, sub_eq_zero] at hzero
     rw [hzero]
-    refine (itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after hB S t hS hBmeas _ ?_).symm
-    filter_upwards [(hg S).coeFn_toLp] with p hp hpt
+    refine (itoIntegralCLM_eq_itoProcessCLM_of_vanishes_after hB T t htT hBmeas _ ?_).symm
+    filter_upwards [(hg hθT).coeFn_toLp] with p hp hpt
     rw [hp, hggt hpt]
-  have hLp : (hg t).toLp g = processToLpPredictable t hBmeas hpred hbdd := by
+  have hLp : (hg hθt).toLp g = hθt.toLp _ := by
     refine (MemLp.toLp_eq_toLp_iff _ _).2 ?_
     filter_upwards [ae_fst_mem_Ioc_trimMeasure (μ := μ) t hBmeas] with z hz
     exact hgle hz.2
-  rw [hband T htT, ← itoIntegralCLM_cross_horizon hB hBmeas htT (fun z hz ↦ hggt hz) (hg t) (hg T),
+  rw [hband, ← itoIntegralCLM_cross_horizon hB hBmeas htT (fun z hz ↦ hggt hz) (hg hθt) (hg hθT),
     hLp]
+
+include hB in
+/-- **The Itô process of a bounded predictable integrand does not depend on the horizon**: built
+at horizon `T ≥ t`, at time `t` it is the Itô integral built at horizon `t`
+(`itoProcessCLM_toLp_eq_itoIntegralCLM`, a bounded integrand being square-integrable at every
+horizon). -/
+theorem itoProcessCLM_processToLpPredictable {t : ℝ≥0} (htT : t ≤ T) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
+    itoProcessCLM hB T t hBmeas (processToLpPredictable T hBmeas hpred hbdd)
+      = itoIntegralCLM hB t hBmeas (processToLpPredictable t hBmeas hpred hbdd) :=
+  itoProcessCLM_toLp_eq_itoIntegralCLM hB T hBmeas htT hpred
+    (memLp_uncurry_of_bdd_predictable T hBmeas hpred hbdd)
+    (memLp_uncurry_of_bdd_predictable t hBmeas hpred hbdd)
 
 /-! ### Riemann–Stieltjes sums against an Itô integral -/
 

@@ -2913,7 +2913,7 @@
     {
       "id": "mf-bs-european-call-hedge-in-stock",
       "name": "The Black–Scholes Call Is Replicated by a Holding in the Stock, at Cost bsV",
-      "description": "For a continuous-path Brownian motion B and S0, K, σ, T > 0: the price S0 + (stockVol·B), with stockVol the L2 class of σ times the discounted stock, is almost surely the discounted Black–Scholes stock e^{−rt} S_t at every t ≤ T, and the discounted payoff of europeanCall K T on the Black–Scholes path equals bsV K r σ S0 T + ∫_0^T ψ dS̃ almost surely for a unique holding ψ in that price. The holding is not identified with the delta Φ(d1); wealth is in discounted units.",
+      "description": "For a continuous-path Brownian motion B and S0, K, σ, T > 0: the price S0 + (stockVol·B), with stockVol the L2 class of σ times the discounted stock, is almost surely the discounted Black–Scholes stock e^{−rt} S_t at every t ≤ T, and the discounted payoff of europeanCall K T on the Black–Scholes path equals bsV K r σ S0 T + ∫_0^T ψ dS̃ almost surely for a unique holding ψ in that price. This entry does not identify the holding; mf-bs-european-call-hedge-is-delta shows it is the delta Φ(d1). Wealth is in discounted units.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Models.BlackScholes.BlackScholesStockHedge\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin MathFin.Contracts MathFin.Contracts.BlackScholes MathFin.ItoIntegralCLM\n  MathFin.ItoIntegralAgainstMartingale MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised\nopen scoped NNReal\n\n/-- In Black–Scholes, the price `S₀ + (stockVol●B)` is the discounted stock up to `T`, and the\ndiscounted call payoff is `bsV` plus the gains of a unique holding in it. -/\ntheorem europeanCall_hedge_in_stock' {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {T : ℝ≥0}\n    (hT : 0 < (T : ℝ)) {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :\n    (∀ t : ℝ≥0, t ≤ T →\n      MarketCompletenessInPrice.pricePath hB T hBmeas S_0 (stockVol hB hBmeas hBcont T S_0 σ) t\n        =ᵐ[μ] fun ω ↦ Real.exp (-r * t) * pathAssets S_0 r σ B () t ω) ∧\n    ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas (stockVol hB hBmeas hBcont T S_0 σ)),\n      (fun ω ↦ (europeanCall K T).pathPV (fun u ↦ Real.exp (-r * u))\n          (scenarioAt (pathAssets S_0 r σ B) ω)) =ᵐ[μ]\n        fun ω ↦ bsV K r σ S_0 T\n          + (itoIntegralAgainstCLM hB T hBmeas (stockVol hB hBmeas hBcont T S_0 σ) ψ :\n              Ω → ℝ) ω :=\n  europeanCall_hedge_in_stock hB hBmeas hBcont hT hS₀ hK hσ\n"
@@ -2935,7 +2935,35 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the statement as written: BlackScholes.europeanCall_hedge_in_stock in MathFin/Models/BlackScholes/BlackScholesStockHedge.lean. The bridge is ae_predItoIntegral_eq_itoProcessCLM (MathFin/Probability/Brownian/Ito/ItoIntegralPredictableL2.lean): the localised and the L2 Itô integrals agree for a predictable, path-continuous, square-integrable integrand, so pathAssets_solves_sde at r = 0 identifies the price S0 + (stockVol·B) with the discounted stock. Then Contract.exists_unique_hedge_in_price applies to the call. Not proved: that ψ is the delta Φ(d1) of europeanCall_deltaHedge. Wealth in discounted units. Not a legal instrument."
+        "formalization_scope": "Full formal proof of the statement as written: BlackScholes.europeanCall_hedge_in_stock in MathFin/Models/BlackScholes/BlackScholesStockHedge.lean. The bridge is ae_predItoIntegral_eq_itoProcessCLM (MathFin/Probability/Brownian/Ito/ItoIntegralPredictableL2.lean): the localised and the L2 Itô integrals agree for a predictable, path-continuous, square-integrable integrand, so pathAssets_solves_sde at r = 0 identifies the price S0 + (stockVol·B) with the discounted stock. Then Contract.exists_unique_hedge_in_price applies to the call. Not claimed by this statement: that ψ is the delta Φ(d1); that is BlackScholes.europeanCall_hedge_in_stock_eq_delta, the entry mf-bs-european-call-hedge-is-delta. Wealth in discounted units. Not a legal instrument."
+      }
+    },
+    {
+      "id": "mf-bs-european-call-hedge-is-delta",
+      "name": "The Replicating Holding of the Black–Scholes Call in the Stock Is the Delta Φ(d1)",
+      "description": "For a continuous-path Brownian motion B and S0, K, σ, T > 0: there is a unique holding ψ in the price S0 + (stockVol·B), the discounted Black–Scholes stock, with the discounted payoff of europeanCall K T equal to bsV K r σ S0 T + ∫_0^T ψ dS̃ almost surely, and ψ is the delta Φ(d1(S_t, T − t)) almost everywhere for the bracket measure of the stock, the predictable measure weighted by (σ S̃)². The identification is as classes of L2 for that measure, not pathwise; wealth is in discounted units.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.BlackScholesStockDelta\n\nopen MeasureTheory ProbabilityTheory Set\nopen MathFin MathFin.Contracts MathFin.Contracts.BlackScholes MathFin.ItoIntegralCLM\n  MathFin.ItoIntegralAgainstMartingale MathFin.ItoIntegralL2 MathFin.ItoIntegralLocalised\nopen scoped NNReal\n\n/-- In Black–Scholes, the call is replicated by a unique holding in the discounted stock, and the\nholding is the delta `Φ(d₁(S_t, T − t))` almost everywhere for the bracket measure of the stock. -/\ntheorem europeanCall_hedge_in_stock_eq_delta' {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}\n    [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) {T : ℝ≥0}\n    (hT : 0 < (T : ℝ)) {S_0 K r σ : ℝ} (hS₀ : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) :\n    ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas (stockVol hB hBmeas hBcont T S_0 σ)),\n      (fun ω ↦ (europeanCall K T).pathPV (fun u ↦ Real.exp (-r * u))\n          (scenarioAt (pathAssets S_0 r σ B) ω)) =ᵐ[μ]\n        (fun ω ↦ bsV K r σ S_0 T\n          + (itoIntegralAgainstCLM hB T hBmeas (stockVol hB hBmeas hBcont T S_0 σ) ψ :\n              Ω → ℝ) ω) ∧\n      ⇑ψ =ᵐ[bracketMeasure (μ := μ) T hBmeas (stockVol hB hBmeas hBcont T S_0 σ)]\n        fun z ↦ hedgeDelta K r σ S_0 T B z.1 z.2 :=\n  europeanCall_hedge_in_stock_eq_delta hB hBmeas hBcont hT hS₀ hK hσ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black and Scholes (1973); delta hedging after Shreve, Stochastic Calculus for Finance II, §4.5 and §5.4. Contract-reification framing after P. Bilokon (2026); no code copied.",
+        "citations": [
+          {
+            "key": "BlackScholes1973"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "§4.5"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written: BlackScholes.europeanCall_hedge_in_stock_eq_delta in MathFin/Models/BlackScholes/BlackScholesStockDelta.lean. It joins the two hedging theorems of the library. europeanCall_deltaHedge (localised Itô integral, up to every T' < T) becomes an identity in the L2 Itô process of the class of the delta hedge integrand through ae_predItoIntegral_eq_itoProcessCLM and the horizon consistency itoProcessCLM_toLp_eq_itoIntegralCLM; the passage T' → T combines the almost sure limit tendsto_hedge_europeanCall_payoff with the L2 continuity of the Itô process in time (limits in measure agree), giving payoff = bsV + terminal L2 integral of the delta hedge integrand. A holding ψ with the same terminal wealth then has ψ·stockVol equal to that class (the Itô isometry is injective), hence ψ = Φ(d1) wherever stockVol ≠ 0. The identification holds almost everywhere for the bracket measure, not at every (t, ω); the delta is the hedgeDelta process of BlackScholesSelfFinancing. Wealth in discounted units. Not a legal instrument."
       }
     }
   ]
