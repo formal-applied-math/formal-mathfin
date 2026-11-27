@@ -238,6 +238,7 @@ public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedUnbounded
 public import MathFin.Probability.Brownian.Ito.ItoIntegralPredictableRiemann
 -- The Itô integral of a predictable integrand with almost surely continuous paths
 public import MathFin.Probability.Brownian.Ito.ItoIntegralLocalisedPredictable
+public import MathFin.Probability.Brownian.Ito.ItoIntegralPredictableL2
 -- Itô's formula as an identity of processes; its stochastic term is a local martingale
 public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 -- The product rule for two Itô processes driven by one Brownian motion
@@ -727,6 +728,7 @@ public import MathFin.Models.BlackScholes.BlackScholesSDE
 public import MathFin.Models.BlackScholes.BlackScholesChooser
 public import MathFin.Models.BlackScholes.BlackScholesHedge
 public import MathFin.Models.BlackScholes.BlackScholesContractHedge
+public import MathFin.Models.BlackScholes.BlackScholesStockHedge
 public import MathFin.Models.BlackScholes.BlackScholesPhysical
 public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PricingMeasureUnique

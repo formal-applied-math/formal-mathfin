@@ -274,10 +274,18 @@ Stated here so no downstream prose outruns it:
    square-integrable by `memLp_two_bsTerminal`). What it does **not** say, and the ceiling stands
    there: the wealth is in discounted units, with cash paid before `T` read as held in the
    numéraire (not modelled as a strategy); the price `S₀ + (vol●B)` is any a.e.-nonzero
-   `L²` volatility and is **not** identified with the contract's own underlying (for Black–Scholes,
-   the bridge from `pathAssets_solves_sde`'s `predItoIntegral` to the `L²` integral behind
-   `pricePath` is open), so `ψ` is not identified with the delta of `europeanCall_deltaHedge`.
+   `L²` volatility; in that statement it is **not** identified with the contract's own underlying.
    Contracts with `payAtHit` are outside it.
+
+   *Amended 2026-11-27, the bridge written (not yet built by CI).*
+   `ItoIntegralLocalised.ae_predItoIntegral_eq_itoProcessCLM` shows, for a predictable integrand
+   with almost surely continuous paths that is square-integrable on `(0, T] × Ω`, that
+   `predItoIntegral` is `itoProcessCLM` of its class at every `t ≤ T`. With the volatility
+   `BlackScholes.stockVol` (the class of `σ S̃`; square-integrable by the lognormal second moment),
+   `pricePath_stockVol_ae_eq` makes the price the discounted stock, and
+   `BlackScholes.exists_unique_hedge_in_stock` and `europeanCall_hedge_in_stock` replicate a
+   contract on the stock by a unique holding in the stock. `ψ` is still not identified with the
+   delta `Φ(d₁)` of `europeanCall_deltaHedge` (that needs `T' → T` in `L²`).
 3. **Rung (c) is single-asset.** `bs_call_formula` and friends are stated under
    `BSCallHyp` at `ι = Unit`. Multi-asset instances need a joint law we do not
    have.
