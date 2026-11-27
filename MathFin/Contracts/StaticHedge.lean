@@ -13,60 +13,70 @@ public import MathFin.Contracts.Instruments.Options
 
 A European payoff that is a continuous piecewise-linear function of the terminal price is a
 *static portfolio*: an amount of zero-coupon bond, an amount of the underlying, and finitely many
-calls, one at each kink of the payoff, weighted by the change of slope there. This file proves
-that, for the payoffs written in the payoff language of `Contracts/Core.lean`, and compiles them.
+calls, one at each kink of the payoff, weighted by the change of slope there. This file compiles the
+payoffs of the language of `Contracts/Core.lean` that are such functions, by structural recursion on
+the payoff, and proves the compiler correct.
 
 The fragment `Payoff.IsPiecewiseLinear T` is what the language builds from constants, the
 observation `obs () T`, `add`, `sub`, `max`, `min` and the product with a constant. The portfolio
-`StaticHedge` is data: a bond amount, a forward amount and a list of `(strike, weight)` pairs.
-`Payoff.staticHedge` sends a payoff to its portfolio, and `StaticHedge.contract` reads the
-portfolio back as a `Contract Unit` built from `pay T (const 1)`, `pay T (obs () T)` and
-`europeanCall K T`.
+`StaticHedge` is data: a bond amount `a`, a forward amount `b` and a list of `(strike, weight)`
+pairs, standing for the function `S ↦ a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`. `Payoff.staticHedge` sends a
+payoff to its portfolio, and `StaticHedge.contract` reads the portfolio back as a `Contract Unit`
+built from `pay T (const 1)`, `pay T (obs () T)` and `europeanCall K T`.
 
 The correctness theorem is pathwise and holds for every discount function: along any scenario
 with a nonnegative observation at `T`, the compiled contract has the same present value as
 `pay T e` (`Payoff.IsPiecewiseLinear.pathPV_staticHedge`). The restriction to nonnegative
-observations is the true condition: below zero a call at a nonnegative strike pays nothing, and
-the identity `e S = a + b S + ∑ wⱼ (S − Kⱼ)⁺` is an identity of functions on `S ≥ 0`. The values
-of the two contracts in every model, and the prices of the pieces by the call price function of a
-market, are in `Pricing/StaticHedge.lean` and `Models/ModelFree/StaticHedgeMarket.lean`.
+observations is the true condition: the identity is one of functions on `S ≥ 0`, and a strike below
+zero is folded into the affine part there. The values of the two contracts in every model, and the
+prices of the pieces by the call price function of a market, are in `Pricing/StaticHedge.lean` and
+`Models/ModelFree/StaticHedgeMarket.lean`.
 
 ## Implementation notes
 
-`Payoff.staticHedge` is defined by choice: the existence of a portfolio is the theorem
-(`Payoff.IsPiecewiseLinear.exists_hedge`), and the definition picks one. It is therefore not an
-algorithm, and nothing here says which portfolio it picks, only that every portfolio it can pick
-reproduces the payoff on `S ≥ 0`. Outside the fragment the definition returns the empty
-portfolio, and no theorem about it applies.
+The compiler is explicit. Each connective of the payoff language has an operation on portfolios
+that is correct for the function the portfolio stands for:
+* `add`, `sub` and `smul` concatenate the call lists and combine the amounts;
+* `posPart` computes the positive part `h⁺` of `h = a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`. It sorts the kinks
+  (`sortKinks`) and scans them from the left, keeping the first kink `K` and the rest `R`. A kink
+  below zero is affine on `S ≥ 0` and is folded into `a` and `b`. Otherwise `h⁺` is the positive
+  part of the affine function `a + b S` left of `K`, and right of `K` the positive part of the
+  portfolio of `R` with `a − w K` and `b + w`, computed recursively. The two are joined at `K`:
+  their difference, which vanishes at `K`, is cut off below `K` by `tail`, whose single new call at
+  `K` carries the slope the difference has there. The zero crossings of the pieces enter through
+  `affinePos`, the positive part of an affine function, which is `b (S − r)⁺` for `b > 0` and
+  `(a + b S) + (−b)(S − r)⁺` for `b < 0`, with `r = −a / b`;
+* `sup` is `f + (g − f)⁺` and `inf` is `f + g − max f g`.
 
-The existence proof runs through the class `IsCallSpanned` of real functions that equal
-`a + b S + ∑ wⱼ (S − Kⱼ)⁺` on `S ≥ 0`. It contains the constants and the identity and is closed
-under sums, scalings, `max` and `min`. Closure under `max` is the one step with content: it
-reduces to the positive part `h⁺` of a member `h`, which is shown to belong to the class by
-induction on the number of kinks of `h`, splitting at the smallest kink `K`. Left of `K` the
-function `h` is affine, right of `K` it is a member with one kink fewer, and the two positive
-parts are glued at `K` (`IsCallSpanned.glue`).
+`Payoff.staticHedge` is the recursion on the syntax: constants and `obs () T` to the affine
+portfolios, `add`, `sub`, `max`, `min` to the operations, a product with a constant to `smul`, and
+anything else (and `obs` at another date) to the empty portfolio. The list `calls` is not reduced:
+it may hold calls of weight zero and calls at one strike twice, which is the same function.
+Outside the fragment the compiler returns a portfolio that no theorem relates to the payoff.
 
 ## Main definitions
 
 * `callSum`: the sum `∑ⱼ wⱼ (S − Kⱼ)⁺` of a list of `(Kⱼ, wⱼ)`.
-* `IsCallSpanned`: a function that is `a + b S + callSum L S` on `S ≥ 0`.
-* `Payoff.IsPiecewiseLinear`: the payoffs of one terminal observation built from constants,
-  `obs () T`, `add`, `sub`, `max`, `min` and the product with a constant.
 * `StaticHedge`: a bond amount, a forward amount and a list of `(strike, weight)` calls, with its
   `eval` as a function of the terminal price and its `contract` at a date `T`.
-* `Payoff.staticHedge`: the compiler, a portfolio for each payoff.
+* `StaticHedge.add`, `StaticHedge.sub`, `StaticHedge.smul`, `StaticHedge.posPart`,
+  `StaticHedge.sup`, `StaticHedge.inf`: the operations the compiler is built from.
+* `Payoff.IsPiecewiseLinear`: the payoffs of one terminal observation built from constants,
+  `obs () T`, `add`, `sub`, `max`, `min` and the product with a constant.
+* `Payoff.staticHedge`: the compiler.
 
 ## Main results
 
-* `IsCallSpanned.max`, `IsCallSpanned.min`: the class is closed under `max` and `min`.
-* `Payoff.IsPiecewiseLinear.exists_hedge`: every payoff of the fragment equals the value of some
-  portfolio at the terminal price, for every scenario with nonnegative terminal observation.
+* `StaticHedge.eval_posPart`: on `S ≥ 0`, the portfolio `H.posPart` is worth `max (H.eval S) 0`.
+* `Payoff.IsPiecewiseLinear.eval_staticHedge`: on a scenario with nonnegative terminal observation,
+  a payoff of the fragment is worth its compiled portfolio at the terminal price.
+* `Payoff.IsPiecewiseLinear.exists_hedge`: every payoff of the fragment is a static portfolio.
 * `StaticHedge.pathPV_contract`: the present value of the compiled contract along a scenario is
   the discount factor times the portfolio's value at the terminal price.
 * `Payoff.IsPiecewiseLinear.pathPV_staticHedge`: the compiled contract and `pay T e` have the same
   present value along every scenario with nonnegative terminal observation, for every discount
   function.
+* `staticHedge_europeanCallPayoff`: the compiler maps the call payoff to the one call at its strike.
 
 ## References
 
@@ -86,7 +96,7 @@ open scoped NNReal
 
 namespace MathFin.Contracts
 
-/-! ### Call sums and the class they span -/
+/-! ### Call sums -/
 
 /-- The sum `∑ⱼ wⱼ (S − Kⱼ)⁺` over a list of `(Kⱼ, wⱼ)`: the payoff, at the price `S`, of calls
 at the strikes `Kⱼ` held in the amounts `wⱼ`. -/
@@ -129,75 +139,6 @@ theorem callSum_eq_zero_of_le {K S : ℝ} (hS : S ≤ K) {R : List (ℝ × ℝ)}
     rw [callSum_cons, h1, ih fun r hr ↦ h r (List.mem_cons_of_mem _ hr)]
     ring
 
-/-- A real function **spanned by calls** on the nonnegative reals: on `S ≥ 0` it equals a constant,
-plus a multiple of `S`, plus a call sum. The values at negative `S` are not constrained, since a
-price is not negative. -/
-def IsCallSpanned (f : ℝ → ℝ) : Prop :=
-  ∃ (a b : ℝ) (L : List (ℝ × ℝ)), ∀ S, 0 ≤ S → f S = a + b * S + callSum L S
-
-/-- A function that agrees on `S ≥ 0` with a spanned one is spanned. -/
-theorem IsCallSpanned.congr {f g : ℝ → ℝ} (hg : IsCallSpanned g)
-    (h : ∀ S, 0 ≤ S → f S = g S) : IsCallSpanned f := by
-  obtain ⟨a, b, L, hL⟩ := hg
-  exact ⟨a, b, L, fun S hS ↦ (h S hS).trans (hL S hS)⟩
-
-/-- A constant is spanned by calls. -/
-theorem isCallSpanned_const (c : ℝ) : IsCallSpanned fun _ ↦ c :=
-  ⟨c, 0, [], fun S _ ↦ by simp⟩
-
-/-- The identity is spanned by calls: it is the forward. -/
-theorem isCallSpanned_id : IsCallSpanned fun S ↦ S :=
-  ⟨0, 1, [], fun S _ ↦ by simp⟩
-
-/-- Spanned functions are closed under sums. -/
-theorem IsCallSpanned.add {f g : ℝ → ℝ} (hf : IsCallSpanned f) (hg : IsCallSpanned g) :
-    IsCallSpanned fun S ↦ f S + g S := by
-  obtain ⟨a, b, L, hL⟩ := hf
-  obtain ⟨a', b', L', hL'⟩ := hg
-  exact ⟨a + a', b + b', L ++ L', fun S hS ↦ by
-    rw [hL S hS, hL' S hS, callSum_append]
-    ring⟩
-
-/-- Spanned functions are closed under scaling. -/
-theorem IsCallSpanned.smul {f : ℝ → ℝ} (c : ℝ) (hf : IsCallSpanned f) :
-    IsCallSpanned fun S ↦ c * f S := by
-  obtain ⟨a, b, L, hL⟩ := hf
-  exact ⟨c * a, c * b, L.map fun p ↦ (p.1, c * p.2), fun S hS ↦ by
-    rw [hL S hS, callSum_smul]
-    ring⟩
-
-/-- Spanned functions are closed under differences. -/
-theorem IsCallSpanned.sub {f g : ℝ → ℝ} (hf : IsCallSpanned f) (hg : IsCallSpanned g) :
-    IsCallSpanned fun S ↦ f S - g S :=
-  (hf.add (hg.smul (-1))).congr fun S _ ↦ by
-    show f S - g S = f S + -1 * g S
-    ring
-
-/-! ### The positive part of a spanned function is spanned -/
-
-/-- The positive part of an affine function is spanned: with root `r`, it is `b (S − r)⁺` for
-`b > 0` and `(a + b S) + (−b)(S − r)⁺` for `b < 0`. -/
-theorem isCallSpanned_max_affine (a b : ℝ) : IsCallSpanned fun S ↦ max (a + b * S) 0 := by
-  rcases lt_trichotomy b 0 with hb | rfl | hb
-  · obtain ⟨r, hr⟩ : ∃ r, b * r = -a := ⟨-a / b, mul_div_cancel₀ _ hb.ne⟩
-    refine ⟨a, b, [(r, -b)], fun S _ ↦ ?_⟩
-    have e : a + b * S = b * (S - r) := by linear_combination hr
-    simp only [callSum_cons, callSum_nil, add_zero, e]
-    rcases le_total (S - r) 0 with h | h
-    · rw [max_eq_left (by nlinarith : 0 ≤ b * (S - r)), max_eq_right h]
-      ring
-    · rw [max_eq_right (by nlinarith : b * (S - r) ≤ 0), max_eq_left h]
-      ring
-  · exact ⟨max a 0, 0, [], fun S _ ↦ by simp⟩
-  · obtain ⟨r, hr⟩ : ∃ r, b * r = -a := ⟨-a / b, mul_div_cancel₀ _ hb.ne'⟩
-    refine ⟨0, 0, [(r, b)], fun S _ ↦ ?_⟩
-    have e : a + b * S = b * (S - r) := by linear_combination hr
-    simp only [callSum_cons, callSum_nil, add_zero, zero_add, zero_mul, e]
-    rcases le_total (S - r) 0 with h | h
-    · rw [max_eq_right (by nlinarith : b * (S - r) ≤ 0), max_eq_right h]
-      ring
-    · rw [max_eq_left (by nlinarith : 0 ≤ b * (S - r)), max_eq_left h]
-
 /-- Splitting a call sum at a level `K`, on `S ≥ K`: the calls struck below `K` are affine in `S`
 there, and the calls struck at or above `K` are kept, the others carrying weight zero. -/
 theorem callSum_split (K : ℝ) (L : List (ℝ × ℝ)) (S : ℝ) (hS : K ≤ S) :
@@ -227,121 +168,260 @@ theorem callSum_split_eq_zero (K : ℝ) (L : List (ℝ × ℝ)) (S : ℝ) (hS : 
     · have h1 : max (S - p.1) 0 = 0 := max_eq_right (by linarith [not_lt.1 hp])
       simp [if_neg hp, h1]
 
-/-- **A spanned function that vanishes at `K ≥ 0`, cut off below `K`, is spanned.** Right of `K`
-the function is a call sum plus an affine function that vanishes at `K`, that is `β (S − K)`, a
-call at `K`; the calls struck below `K` are absorbed into `β`. -/
-theorem IsCallSpanned.tail {d : ℝ → ℝ} {K : ℝ} (hd : IsCallSpanned d) (hK : 0 ≤ K)
-    (h0 : d K = 0) : IsCallSpanned fun S ↦ if S < K then 0 else d S := by
-  obtain ⟨a, b, L, hL⟩ := hd
-  refine ⟨0, 0, (K, b + (L.map fun p ↦ if p.1 < K then p.2 else 0).sum) ::
-      L.map (fun p ↦ (p.1, if p.1 < K then 0 else p.2)), fun S hS ↦ ?_⟩
-  have hK0 := hL K hK
-  rw [h0, callSum_split K L K le_rfl, callSum_split_eq_zero K L K le_rfl] at hK0
+/-! ### Portfolios and their operations -/
+
+/-- **A static hedge**: an amount of the zero-coupon bond paying `1` at the date, an amount of the
+underlying delivered at the date, and calls at the date, each a pair `(strike, weight)`. -/
+structure StaticHedge where
+  /-- The amount of the bond paying `1`. -/
+  bondAmount : ℝ
+  /-- The amount of the underlying delivered. -/
+  forwardAmount : ℝ
+  /-- The calls, as `(strike, weight)` pairs. -/
+  calls : List (ℝ × ℝ)
+
+namespace StaticHedge
+
+/-- The value of the portfolio at the terminal price `S`: `a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`. -/
+noncomputable def eval (H : StaticHedge) (S : ℝ) : ℝ :=
+  H.bondAmount + H.forwardAmount * S + callSum H.calls S
+
+/-- The sum of two portfolios: the amounts add and the call lists concatenate. -/
+noncomputable def add (H H' : StaticHedge) : StaticHedge :=
+  ⟨H.bondAmount + H'.bondAmount, H.forwardAmount + H'.forwardAmount, H.calls ++ H'.calls⟩
+
+/-- A portfolio scaled by `c`: the amounts and the weights are multiplied by `c`. -/
+noncomputable def smul (c : ℝ) (H : StaticHedge) : StaticHedge :=
+  ⟨c * H.bondAmount, c * H.forwardAmount, H.calls.map fun p ↦ (p.1, c * p.2)⟩
+
+/-- The difference of two portfolios. -/
+noncomputable def sub (H H' : StaticHedge) : StaticHedge :=
+  H.add (H'.smul (-1))
+
+/-- The value of a sum is the sum of the values. -/
+theorem eval_add (H H' : StaticHedge) (S : ℝ) : (H.add H').eval S = H.eval S + H'.eval S := by
+  simp only [eval, StaticHedge.add, callSum_append]
+  ring
+
+/-- The value of a scaled portfolio is the scaled value. -/
+theorem eval_smul (c : ℝ) (H : StaticHedge) (S : ℝ) : (H.smul c).eval S = c * H.eval S := by
+  simp only [eval, StaticHedge.smul, callSum_smul]
+  ring
+
+/-- The value of a difference is the difference of the values. -/
+theorem eval_sub (H H' : StaticHedge) (S : ℝ) : (H.sub H').eval S = H.eval S - H'.eval S := by
+  simp only [StaticHedge.sub, eval_add, eval_smul]
+  ring
+
+/-- The portfolio of the positive part of the affine function `a + b S`. For `b < 0` it is
+`(a + b S) + (−b)(S − r)⁺` and for `b > 0` it is `b (S − r)⁺`, where `r = −a / b` is the root; for
+`b = 0` it is the constant `max a 0`. -/
+noncomputable def affinePos (a b : ℝ) : StaticHedge :=
+  if b < 0 then ⟨a, b, [(-a / b, -b)]⟩
+  else if 0 < b then ⟨0, 0, [(-a / b, b)]⟩
+  else ⟨max a 0, 0, []⟩
+
+/-- **The positive part of an affine function**, for every price. -/
+theorem eval_affinePos (a b S : ℝ) : (affinePos a b).eval S = max (a + b * S) 0 := by
+  by_cases hb : b < 0
+  · have hr : b * (-a / b) = -a := mul_div_cancel₀ _ hb.ne
+    rw [affinePos, if_pos hb]
+    simp only [eval, callSum_cons, callSum_nil, add_zero]
+    generalize -a / b = r at hr ⊢
+    have e : a + b * S = b * (S - r) := by linear_combination hr
+    rw [e]
+    rcases le_total (S - r) 0 with h | h
+    · rw [max_eq_right h, max_eq_left (show 0 ≤ b * (S - r) by nlinarith)]
+      ring
+    · rw [max_eq_left h, max_eq_right (show b * (S - r) ≤ 0 by nlinarith)]
+      ring
+  · by_cases hb' : 0 < b
+    · have hr : b * (-a / b) = -a := mul_div_cancel₀ _ hb'.ne'
+      rw [affinePos, if_neg hb, if_pos hb']
+      simp only [eval, callSum_cons, callSum_nil, add_zero, zero_add, zero_mul]
+      generalize -a / b = r at hr ⊢
+      have e : a + b * S = b * (S - r) := by linear_combination hr
+      rw [e]
+      rcases le_total (S - r) 0 with h | h
+      · rw [max_eq_right h, max_eq_right (show b * (S - r) ≤ 0 by nlinarith)]
+        ring
+      · rw [max_eq_left h, max_eq_left (show 0 ≤ b * (S - r) by nlinarith)]
+    · have hb0 : b = 0 := le_antisymm (not_lt.1 hb') (not_lt.1 hb)
+      rw [affinePos, if_neg hb, if_neg hb']
+      simp [eval, hb0]
+
+/-- **A portfolio cut off below `K`**: the portfolio that is worth `0` below `K` and, from `K` on,
+what `H` is worth, provided `H` is worth `0` at `K`. Its calls are those of `H` struck at or above
+`K`, the others carrying weight zero, and one more call at `K` whose weight is the slope of `H`
+right of `K` (the forward amount of `H` plus the weights of its calls struck below `K`). -/
+noncomputable def tail (K : ℝ) (H : StaticHedge) : StaticHedge :=
+  ⟨0, 0, (K, H.forwardAmount + (H.calls.map fun p ↦ if p.1 < K then p.2 else 0).sum) ::
+    H.calls.map fun p ↦ (p.1, if p.1 < K then 0 else p.2)⟩
+
+/-- **`tail` cuts a portfolio off below `K`.** If `H` is worth `0` at `K`, then `tail K H` is worth
+`0` below `K` and what `H` is worth from `K` on. -/
+theorem eval_tail (K : ℝ) (H : StaticHedge) (h0 : H.eval K = 0) (S : ℝ) :
+    (tail K H).eval S = if S < K then 0 else H.eval S := by
+  unfold eval at h0
+  rw [callSum_split K H.calls K le_rfl, callSum_split_eq_zero K H.calls K le_rfl] at h0
   by_cases hlt : S < K
   · have h1 : max (S - K) 0 = 0 := max_eq_right (by linarith)
-    simp only [if_pos hlt, callSum_cons, h1, callSum_split_eq_zero K L S hlt.le]
+    simp only [eval, tail, if_pos hlt, callSum_cons, h1,
+      callSum_split_eq_zero K H.calls S hlt.le]
     ring
   · have hKS : K ≤ S := not_lt.1 hlt
     have h1 : max (S - K) 0 = S - K := max_eq_left (by linarith)
-    simp only [if_neg hlt, callSum_cons, h1]
-    rw [hL S hS, callSum_split K L S hKS]
-    linear_combination (-1 : ℝ) * hK0
+    simp only [eval, tail, if_neg hlt, callSum_cons, h1]
+    rw [callSum_split K H.calls S hKS]
+    linear_combination (-1 : ℝ) * h0
 
-/-- **Gluing two spanned functions at a point where they agree.** If `u` and `v` are spanned and
-agree at `K ≥ 0`, the function that is `u` left of `K` and `v` from `K` on is spanned. -/
-theorem IsCallSpanned.glue {u v : ℝ → ℝ} {K : ℝ} (hu : IsCallSpanned u) (hv : IsCallSpanned v)
-    (hK : 0 ≤ K) (huv : u K = v K) : IsCallSpanned fun S ↦ if S < K then u S else v S :=
-  (hu.add ((hv.sub hu).tail hK (sub_eq_zero.2 huv.symm))).congr fun S _ ↦ by
-    show (if S < K then u S else v S) = u S + (if S < K then 0 else v S - u S)
-    split_ifs <;> ring
+/-- The order on `(strike, weight)` pairs by strike. -/
+def kinkLE (p q : ℝ × ℝ) : Prop := p.1 ≤ q.1
 
-/-- The positive part of a call-sum function with `n` calls is spanned, by induction on `n`. -/
-theorem isCallSpanned_max_zero_aux (n : ℕ) :
-    ∀ (a b : ℝ) (L : List (ℝ × ℝ)), L.length = n →
-      IsCallSpanned fun S ↦ max (a + b * S + callSum L S) 0 := by
-  induction n with
-  | zero =>
-    intro a b L hL
-    cases L with
-    | nil => simpa using isCallSpanned_max_affine a b
-    | cons p L => exact absurd hL (Nat.succ_ne_zero _)
-  | succ n ih =>
-    intro a b L hL
-    obtain ⟨p0, hp0⟩ : ∃ p, p ∈ L := by
-      cases L with
-      | nil => exact absurd hL.symm (Nat.succ_ne_zero n)
-      | cons p L => exact ⟨p, List.mem_cons_self⟩
-    -- the smallest strike `K`, with weight `w`
-    obtain ⟨⟨K, w⟩, hpL, hmin⟩ :=
-      Finset.exists_min_image L.toFinset Prod.fst ⟨p0, List.mem_toFinset.2 hp0⟩
-    obtain ⟨R, hperm⟩ : ∃ R, L.Perm ((K, w) :: R) :=
-      ⟨_, List.perm_cons_erase (List.mem_toFinset.1 hpL)⟩
-    have hlen : R.length = n := by
-      have := hperm.length_eq
-      simp only [List.length_cons] at this
-      omega
-    have hK : ∀ q ∈ R, K ≤ q.1 := fun q hq ↦
-      hmin q (List.mem_toFinset.2 (hperm.mem_iff.2 (List.mem_cons_of_mem _ hq)))
-    have hcs (S : ℝ) : callSum L S = w * max (S - K) 0 + callSum R S := by
-      simp only [callSum_perm hperm, callSum_cons]
-    rcases lt_or_ge K 0 with hK0 | hK0
-    · -- a kink left of `0` is affine on `S ≥ 0`: fold it into the affine part
-      refine (ih (a - w * K) (b + w) R hlen).congr fun S hS ↦ ?_
-      have h1 : max (S - K) 0 = S - K := max_eq_left (by linarith)
-      simp only [hcs, h1]
+noncomputable instance : DecidableRel kinkLE := fun p q ↦ inferInstanceAs (Decidable (p.1 ≤ q.1))
+
+instance : Std.Total kinkLE := ⟨fun p q ↦ le_total p.1 q.1⟩
+
+instance : IsTrans (ℝ × ℝ) kinkLE := ⟨fun _ _ _ h h' ↦ le_trans h h'⟩
+
+/-- The calls sorted by increasing strike. -/
+noncomputable def sortKinks (L : List (ℝ × ℝ)) : List (ℝ × ℝ) :=
+  L.mergeSort (kinkLE · ·)
+
+/-- The sorted calls are sorted. -/
+theorem pairwise_sortKinks (L : List (ℝ × ℝ)) : (sortKinks L).Pairwise kinkLE :=
+  List.pairwise_mergeSort' kinkLE L
+
+/-- Sorting permutes the calls. -/
+theorem sortKinks_perm (L : List (ℝ × ℝ)) : (sortKinks L).Perm L :=
+  List.mergeSort_perm L _
+
+/-- The positive part of `a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺` for kinks sorted by increasing strike, by
+recursion on the kinks. With the smallest kink `K` of weight `w` and the rest `R`:
+* if `K < 0`, the call is affine on `S ≥ 0` and is folded into `a − w K` and `b + w`;
+* otherwise the function is `a + b S` left of `K` and the portfolio of `R` with `a − w K` and
+  `b + w` right of it. The positive parts `u` and `v` of the two agree at `K`, and the result is
+  `u + tail K (v − u)`. -/
+noncomputable def posAux : ℝ → ℝ → List (ℝ × ℝ) → StaticHedge
+  | a, b, [] => affinePos a b
+  | a, b, (K, w) :: R =>
+    if K < 0 then posAux (a - w * K) (b + w) R
+    else (affinePos a b).add (tail K ((posAux (a - w * K) (b + w) R).sub (affinePos a b)))
+
+/-- **The positive part of a portfolio**: the portfolio, with the kinks sorted, that is worth
+`max (H.eval S) 0` at every price `S ≥ 0` (`eval_posPart`). -/
+noncomputable def posPart (H : StaticHedge) : StaticHedge :=
+  posAux H.bondAmount H.forwardAmount (sortKinks H.calls)
+
+/-- The positive part of a portfolio with sorted kinks, on `S ≥ 0`. -/
+theorem eval_posAux (R : List (ℝ × ℝ)) :
+    ∀ (a b : ℝ), R.Pairwise kinkLE → ∀ S, 0 ≤ S →
+      (posAux a b R).eval S = max (a + b * S + callSum R S) 0 := by
+  induction R with
+  | nil =>
+    intro a b _ S _
+    rw [posAux, eval_affinePos]
+    simp
+  | cons p R ih =>
+    obtain ⟨K, w⟩ := p
+    intro a b hs S hS
+    have hK : ∀ q ∈ R, K ≤ q.1 := (List.pairwise_cons.1 hs).1
+    have hR : R.Pairwise kinkLE := (List.pairwise_cons.1 hs).2
+    by_cases hK0 : K < 0
+    · have h1 : max (S - K) 0 = S - K := max_eq_left (by linarith)
+      rw [posAux, if_pos hK0, ih (a - w * K) (b + w) hR S hS]
+      simp only [callSum_cons, h1]
       congr 1
       ring
-    · -- left of `K` the function is `a + b S`, right of `K` it has one kink fewer
-      have hu := isCallSpanned_max_affine a b
-      have hv := ih (a - w * K) (b + w) R hlen
-      have huv : max (a + b * K) 0 = max (a - w * K + (b + w) * K + callSum R K) 0 := by
-        rw [callSum_eq_zero_of_le le_rfl hK]
-        congr 1
-        ring
-      refine (hu.glue hv hK0 huv).congr fun S hS ↦ ?_
-      show max (a + b * S + callSum L S) 0 = if S < K then max (a + b * S) 0
-        else max (a - w * K + (b + w) * S + callSum R S) 0
-      rw [hcs]
-      split_ifs with hlt
+    · have hK0' : 0 ≤ K := not_lt.1 hK0
+      have hv (S' : ℝ) (h : 0 ≤ S') : (posAux (a - w * K) (b + w) R).eval S'
+          = max (a - w * K + (b + w) * S' + callSum R S') 0 := ih _ _ hR S' h
+      have hvK : ((posAux (a - w * K) (b + w) R).sub (affinePos a b)).eval K = 0 := by
+        rw [eval_sub, hv K hK0', eval_affinePos, callSum_eq_zero_of_le le_rfl hK,
+          show a - w * K + (b + w) * K + 0 = a + b * K by ring, sub_self]
+      rw [posAux, if_neg hK0, eval_add, eval_tail K _ hvK, eval_sub, eval_affinePos]
+      by_cases hlt : S < K
       · have h1 : max (S - K) 0 = 0 := max_eq_right (by linarith)
-        rw [callSum_eq_zero_of_le hlt.le hK, h1]
+        simp only [if_pos hlt, callSum_cons, h1, callSum_eq_zero_of_le hlt.le hK]
         simp
       · have h1 : max (S - K) 0 = S - K := max_eq_left (by linarith [not_lt.1 hlt])
-        rw [h1]
-        congr 1
+        rw [if_neg hlt, hv S hS]
+        simp only [callSum_cons, h1]
+        rw [show a + b * S + (w * (S - K) + callSum R S)
+          = a - w * K + (b + w) * S + callSum R S by ring]
         ring
 
-/-- **The positive part of a spanned function is spanned.** -/
-theorem IsCallSpanned.max_zero {f : ℝ → ℝ} (hf : IsCallSpanned f) :
-    IsCallSpanned fun S ↦ max (f S) 0 := by
-  obtain ⟨a, b, L, hL⟩ := hf
-  refine (isCallSpanned_max_zero_aux _ a b L rfl).congr fun S hS ↦ ?_
-  show max (f S) 0 = max (a + b * S + callSum L S) 0
-  rw [hL S hS]
+/-- **The positive part of a portfolio is worth the positive part of its value**, on `S ≥ 0`. -/
+theorem eval_posPart (H : StaticHedge) (S : ℝ) (hS : 0 ≤ S) :
+    H.posPart.eval S = max (H.eval S) 0 := by
+  have h := eval_posAux (sortKinks H.calls) H.bondAmount H.forwardAmount
+    (pairwise_sortKinks _) S hS
+  rw [callSum_perm (sortKinks_perm H.calls) S] at h
+  exact h
 
-/-- **Spanned functions are closed under `max`**: `max f g = f + (g − f)⁺`. -/
-theorem IsCallSpanned.max {f g : ℝ → ℝ} (hf : IsCallSpanned f) (hg : IsCallSpanned g) :
-    IsCallSpanned fun S ↦ max (f S) (g S) :=
-  (hf.add (hg.sub hf).max_zero).congr fun S _ ↦ by
-    show max (f S) (g S) = f S + max (g S - f S) 0
-    rcases le_total (f S) (g S) with h | h
-    · rw [max_eq_right h, max_eq_left (sub_nonneg.2 h)]
-      ring
-    · rw [max_eq_left h, max_eq_right (sub_nonpos.2 h)]
-      ring
+/-- The larger of two portfolios, as `f + (g − f)⁺`. -/
+noncomputable def sup (H H' : StaticHedge) : StaticHedge :=
+  H.add ((H'.sub H).posPart)
 
-/-- **Spanned functions are closed under `min`**: `min f g = f + g − max f g`. -/
-theorem IsCallSpanned.min {f g : ℝ → ℝ} (hf : IsCallSpanned f) (hg : IsCallSpanned g) :
-    IsCallSpanned fun S ↦ min (f S) (g S) :=
-  ((hf.add hg).sub (hf.max hg)).congr fun S _ ↦ by
-    show min (f S) (g S) = f S + g S - max (f S) (g S)
-    rcases le_total (f S) (g S) with h | h
-    · rw [min_eq_left h, max_eq_right h]
-      ring
-    · rw [min_eq_right h, max_eq_left h]
-      ring
+/-- The smaller of two portfolios, as `f + g − max f g`. -/
+noncomputable def inf (H H' : StaticHedge) : StaticHedge :=
+  (H.add H').sub (H.sup H')
+
+/-- **The larger of two portfolios is worth the larger of the values**, on `S ≥ 0`. -/
+theorem eval_sup (H H' : StaticHedge) (S : ℝ) (hS : 0 ≤ S) :
+    (H.sup H').eval S = max (H.eval S) (H'.eval S) := by
+  rw [sup, eval_add, eval_posPart _ _ hS, eval_sub]
+  rcases le_total (H.eval S) (H'.eval S) with h | h
+  · rw [max_eq_right h, max_eq_left (sub_nonneg.2 h)]
+    ring
+  · rw [max_eq_left h, max_eq_right (sub_nonpos.2 h)]
+    ring
+
+/-- **The smaller of two portfolios is worth the smaller of the values**, on `S ≥ 0`. -/
+theorem eval_inf (H H' : StaticHedge) (S : ℝ) (hS : 0 ≤ S) :
+    (H.inf H').eval S = min (H.eval S) (H'.eval S) := by
+  rw [inf, eval_sub, eval_add, eval_sup _ _ _ hS]
+  rcases le_total (H.eval S) (H'.eval S) with h | h
+  · rw [min_eq_left h, max_eq_right h]
+    ring
+  · rw [min_eq_right h, max_eq_left h]
+    ring
+
+end StaticHedge
 
 /-! ### The fragment and its compiler -/
+
+/-- The constant a payoff is, if it is one. -/
+def Payoff.constOf {ι : Type*} : Payoff ι → Option ℝ
+  | .const c => some c
+  | _ => none
+
+/-- A payoff with a constant value is that constant. -/
+theorem Payoff.eq_const_of_constOf {ι : Type*} {a : Payoff ι} {d : ℝ} (h : a.constOf = some d) :
+    a = .const d := by
+  cases a <;> simp [Payoff.constOf] at h <;> simp [h]
+
+/-- **The static-hedge compiler**, by recursion on the payoff: the portfolio of a constant, of
+`obs () T`, and of a sum, difference, `max`, `min` or product with a constant, from the portfolios
+of the parts. Any other payoff, and `obs` at another date, compiles to the empty portfolio. On the
+fragment `Payoff.IsPiecewiseLinear` the portfolio reproduces the payoff on the nonnegative reals
+(`Payoff.IsPiecewiseLinear.eval_staticHedge`). -/
+noncomputable def Payoff.staticHedge (T : ℝ≥0) : Payoff Unit → StaticHedge
+  | .const c => ⟨c, 0, []⟩
+  | .obs _ t => if t = T then ⟨0, 1, []⟩ else ⟨0, 0, []⟩
+  | .add a b => (Payoff.staticHedge T a).add (Payoff.staticHedge T b)
+  | .sub a b => (Payoff.staticHedge T a).sub (Payoff.staticHedge T b)
+  | .max a b => (Payoff.staticHedge T a).sup (Payoff.staticHedge T b)
+  | .min a b => (Payoff.staticHedge T a).inf (Payoff.staticHedge T b)
+  | .mul a b =>
+    match a.constOf with
+    | some c => (Payoff.staticHedge T b).smul c
+    | none =>
+      match b.constOf with
+      | some c => (Payoff.staticHedge T a).smul c
+      | none => ⟨0, 0, []⟩
+  | .indicatorLt _ _ => ⟨0, 0, []⟩
+  | .rpow _ _ => ⟨0, 0, []⟩
 
 /-- **The piecewise-linear fragment** of the payoff language, at the observation `obs () T`: the
 payoffs built from constants, the observation at `T` alone, sums, differences, `max`, `min` and
@@ -364,20 +444,6 @@ inductive Payoff.IsPiecewiseLinear (T : ℝ≥0) : Payoff Unit → Prop
   | mulConst {a : Payoff Unit} (c : ℝ) :
       IsPiecewiseLinear T a → IsPiecewiseLinear T (.mul a (.const c))
 
-/-- **A static hedge**: an amount of the zero-coupon bond paying `1` at the date, an amount of the
-underlying delivered at the date, and calls at the date, each a pair `(strike, weight)`. -/
-structure StaticHedge where
-  /-- The amount of the bond paying `1`. -/
-  bondAmount : ℝ
-  /-- The amount of the underlying delivered. -/
-  forwardAmount : ℝ
-  /-- The calls, as `(strike, weight)` pairs. -/
-  calls : List (ℝ × ℝ)
-
-/-- The value of the portfolio at the terminal price `S`: `a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`. -/
-noncomputable def StaticHedge.eval (H : StaticHedge) (S : ℝ) : ℝ :=
-  H.bondAmount + H.forwardAmount * S + callSum H.calls S
-
 /-- The contract holding the calls `(Kⱼ, wⱼ)` at the date `T`: the weighted `europeanCall Kⱼ T`
 combined with `both`. -/
 noncomputable def callPortfolio (T : ℝ≥0) : List (ℝ × ℝ) → Contract Unit
@@ -390,63 +456,40 @@ noncomputable def StaticHedge.contract (H : StaticHedge) (T : ℝ≥0) : Contrac
   .both (.scale H.bondAmount (.pay T (.const 1)))
     (.both (.scale H.forwardAmount (.pay T (.obs () T))) (callPortfolio T H.calls))
 
-/-- **Every payoff of the fragment is spanned by calls**: a function of the terminal price that is
-spanned by calls on `S ≥ 0` and evaluates the payoff on every scenario. -/
-theorem Payoff.IsPiecewiseLinear.exists_eval {T : ℝ≥0} {e : Payoff Unit}
-    (h : e.IsPiecewiseLinear T) :
-    ∃ f : ℝ → ℝ, IsCallSpanned f ∧ ∀ s : Scenario Unit, e.eval s = f (s () T) := by
-  induction h with
-  | const c => exact ⟨fun _ ↦ c, isCallSpanned_const c, fun s ↦ rfl⟩
-  | obs => exact ⟨fun S ↦ S, isCallSpanned_id, fun s ↦ rfl⟩
-  | add _ _ iha ihb =>
-    obtain ⟨f, hf, hfe⟩ := iha
-    obtain ⟨g, hg, hge⟩ := ihb
-    exact ⟨_, hf.add hg, fun s ↦ by simp only [Payoff.eval, hfe, hge]⟩
-  | sub _ _ iha ihb =>
-    obtain ⟨f, hf, hfe⟩ := iha
-    obtain ⟨g, hg, hge⟩ := ihb
-    exact ⟨_, hf.sub hg, fun s ↦ by simp only [Payoff.eval, hfe, hge]⟩
-  | max _ _ iha ihb =>
-    obtain ⟨f, hf, hfe⟩ := iha
-    obtain ⟨g, hg, hge⟩ := ihb
-    exact ⟨_, hf.max hg, fun s ↦ by simp only [Payoff.eval, hfe, hge]⟩
-  | min _ _ iha ihb =>
-    obtain ⟨f, hf, hfe⟩ := iha
-    obtain ⟨g, hg, hge⟩ := ihb
-    exact ⟨_, hf.min hg, fun s ↦ by simp only [Payoff.eval, hfe, hge]⟩
-  | constMul c _ iha =>
-    obtain ⟨f, hf, hfe⟩ := iha
-    exact ⟨_, hf.smul c, fun s ↦ by simp only [Payoff.eval, hfe]⟩
-  | mulConst c _ iha =>
-    obtain ⟨f, hf, hfe⟩ := iha
-    exact ⟨fun S ↦ f S * c, (hf.smul c).congr fun S _ ↦ mul_comm _ _,
-      fun s ↦ by simp only [Payoff.eval, hfe]⟩
-
-/-- **A portfolio exists for every payoff of the fragment**: its value at the terminal price is the
-payoff, on every scenario with nonnegative terminal observation. -/
-theorem Payoff.IsPiecewiseLinear.exists_hedge {T : ℝ≥0} {e : Payoff Unit}
-    (h : e.IsPiecewiseLinear T) :
-    ∃ H : StaticHedge, ∀ s : Scenario Unit, 0 ≤ s () T → e.eval s = H.eval (s () T) := by
-  obtain ⟨f, ⟨a, b, L, hL⟩, hfe⟩ := h.exists_eval
-  exact ⟨⟨a, b, L⟩, fun s hs ↦ (hfe s).trans (hL _ hs)⟩
-
-open scoped Classical in
-/-- **The static-hedge compiler**: a portfolio for each payoff, chosen among those that reproduce
-the payoff on the nonnegative reals when the payoff is in the fragment
-(`Payoff.IsPiecewiseLinear.exists_hedge`), and the empty portfolio otherwise. The choice is not
-constructive, and the correctness theorems carry the hypothesis that the payoff is in the
-fragment, which the definition does not need. -/
-noncomputable def Payoff.staticHedge (T : ℝ≥0) (e : Payoff Unit) : StaticHedge :=
-  if h : e.IsPiecewiseLinear T then h.exists_hedge.choose else ⟨0, 0, []⟩
-
 /-- **The compiler is correct on the fragment**: the payoff is the value of its portfolio at the
 terminal price, on every scenario with nonnegative terminal observation. -/
 theorem Payoff.IsPiecewiseLinear.eval_staticHedge {T : ℝ≥0} {e : Payoff Unit}
     (h : e.IsPiecewiseLinear T) (s : Scenario Unit) (hs : 0 ≤ s () T) :
     e.eval s = (e.staticHedge T).eval (s () T) := by
-  unfold Payoff.staticHedge
-  rw [dif_pos h]
-  exact h.exists_hedge.choose_spec s hs
+  induction h with
+  | const c => simp [Payoff.staticHedge, Payoff.eval, StaticHedge.eval]
+  | obs => simp [Payoff.staticHedge, Payoff.eval, StaticHedge.eval]
+  | add _ _ iha ihb =>
+    simp only [Payoff.eval, Payoff.staticHedge, StaticHedge.eval_add, ← iha, ← ihb]
+  | sub _ _ iha ihb =>
+    simp only [Payoff.eval, Payoff.staticHedge, StaticHedge.eval_sub, ← iha, ← ihb]
+  | max _ _ iha ihb =>
+    simp only [Payoff.eval, Payoff.staticHedge, StaticHedge.eval_sup _ _ _ hs, ← iha, ← ihb]
+  | min _ _ iha ihb =>
+    simp only [Payoff.eval, Payoff.staticHedge, StaticHedge.eval_inf _ _ _ hs, ← iha, ← ihb]
+  | constMul c _ iha =>
+    simp only [Payoff.eval, Payoff.staticHedge, Payoff.constOf, StaticHedge.eval_smul, ← iha]
+  | @mulConst a c _ iha =>
+    rcases hc : a.constOf with _ | d
+    · simp only [Payoff.eval, Payoff.staticHedge, hc, Payoff.constOf, StaticHedge.eval_smul,
+        ← iha]
+      ring
+    · have ha : a = .const d := Payoff.eq_const_of_constOf hc
+      subst ha
+      simp [Payoff.staticHedge, Payoff.constOf, StaticHedge.eval_smul, Payoff.eval,
+        StaticHedge.eval]
+
+/-- **A static portfolio exists for every payoff of the fragment**: its value at the terminal price
+is the payoff, on every scenario with nonnegative terminal observation. -/
+theorem Payoff.IsPiecewiseLinear.exists_hedge {T : ℝ≥0} {e : Payoff Unit}
+    (h : e.IsPiecewiseLinear T) :
+    ∃ H : StaticHedge, ∀ s : Scenario Unit, 0 ≤ s () T → e.eval s = H.eval (s () T) :=
+  ⟨e.staticHedge T, fun s hs ↦ h.eval_staticHedge s hs⟩
 
 /-! ### What the compiled contract pays -/
 
@@ -490,5 +533,15 @@ theorem Payoff.IsPiecewiseLinear.pathPV_staticHedge {T : ℝ≥0} {e : Payoff Un
     (h : e.IsPiecewiseLinear T) (D : ℝ≥0 → ℝ) (s : Scenario Unit) (hs : 0 ≤ s () T) :
     ((e.staticHedge T).contract T).pathPV D s = (Contract.pay T e).pathPV D s := by
   rw [StaticHedge.pathPV_contract, Contract.pathPV_pay, h.eval_staticHedge s hs]
+
+/-! ### A worked example -/
+
+/-- **The compiler on a call**: the payoff `max (S_T − K) 0` compiles to no bond, no forward, and
+the one call struck at `K` with weight `1`. -/
+theorem staticHedge_europeanCallPayoff (K : ℝ) (T : ℝ≥0) :
+    (europeanCallPayoff K T).staticHedge T = ⟨0, 0, [(K, 1)]⟩ := by
+  norm_num [europeanCallPayoff, Payoff.staticHedge, StaticHedge.sup, StaticHedge.inf,
+    StaticHedge.sub, StaticHedge.add, StaticHedge.smul, StaticHedge.posPart,
+    StaticHedge.sortKinks, List.mergeSort_nil, StaticHedge.posAux, StaticHedge.affinePos]
 
 end MathFin.Contracts
