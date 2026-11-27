@@ -29,9 +29,9 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ### Implied correlation and dispersion (2026-11-26)
 
 One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 924 → 925 on the
-merged tree (877 full before, 878 after; 895 → 896 delivery-ready) — the branch was cut before
-main's 2026-11-25 contributed wave and the 2026-11-26 atlas and backlog waves landed and
-carries them in its merges.
+merged tree (877 full before, 878 after; 895 → 896 delivery-ready) — the delta is measured
+after main's 2026-11-25 contributed merge (#558, #577–#586) and the 2026-11-26 atlas and
+backlog merges (#646, #650–#652).
 
 - **`mf-implied-correlation-dispersion`** (MathFin/Choice/Portfolio/Dispersion.lean): the
   dispersion identities of an index over its components, read off the equicorrelation quadratic
