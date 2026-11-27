@@ -42,12 +42,13 @@ zero. If instead the return probability `f` is one, the number of returns is geo
 return time, applied to the shifted trajectory), so all these probabilities are one and the state
 is visited infinitely often almost surely.
 
-**Relation to `FiniteMarkovChain.lean`** (another branch): there the transition matrix is
-real-valued and row-stochastic. Here the transition law is `P : ι → PMF ι` (the convention of
-`MarkovPathMeasure.lean`) and the matrix is `Matrix.of fun a b ↦ P a b` over `ℝ≥0∞`. The
-identification of the two is not yet made.
+**The real transition matrix.** The transition law is `P : ι → PMF ι` (the convention of
+`MarkovPathMeasure.lean`). Its real matrix `transitionMatrix P` is row-stochastic, and its powers
+are the `n`-step probabilities (`chainLaw_visit_toReal_eq_pow`), so the matrix theory of
+`FiniteMarkovChain.lean` (irreducibility, stationary distributions, convergence) is a statement
+about the chain.
 
-The ergodic theorem is not proved here.
+The ergodic theorem is not proved here (see `MarkovErgodic.lean`).
 
 ## Main definitions
 
@@ -64,6 +65,9 @@ The ergodic theorem is not proved here.
   natural filtration, `C ∈ 𝓕_τ` and an event `A` of trajectories,
   `ℙ(C ∩ {τ < ∞, X_τ = j, θ_τ X ∈ A}) = ℙ(C ∩ {τ < ∞, X_τ = j}) · ℙ_j(A)`.
 * `chainLaw_visit_eq_pow`: `ℙ_i(X_n = j) = (Pⁿ) i j`.
+* `transitionMatrix`, `transitionMatrix_mem_rowStochastic`, `chainLaw_visit_toReal_eq_pow`: the
+  real transition matrix `(P a b).toReal`, its row-stochasticity, and `(ℙ_i(X_n = j)).toReal`
+  as its `n`-th power entry.
 * `chainLaw_visit_succ`: the first-passage decomposition `ℙ_i(X_{n+1} = i)
   = ∑_{k ≤ n} ℙ_i(τ_i⁺ = k + 1) ℙ_i(X_{n-k} = i)`.
 * `chainLaw_return_eq_one_iff_tsum_eq_top`: `ℙ_i(τ_i⁺ < ∞) = 1 ↔ ∑ₙ ℙ_i(X_n = i) = ∞`
@@ -579,6 +583,42 @@ theorem chainLaw_visit_eq_pow [Fintype ι] [DecidableEq ι] (P : ι → PMF ι) 
   | succ n ih =>
     rw [chainLaw_visit_succ_apply, pow_succ, Matrix.mul_apply]
     exact Finset.sum_congr rfl fun k _ ↦ by rw [ih k, Matrix.of_apply]
+
+/-! ### The real transition matrix -/
+
+/-- The transition matrix of the one-step laws `P` as a real matrix, `(P a b).toReal`: the
+matrix to which the linear algebra of `FiniteMarkovChain.lean` applies. -/
+noncomputable def transitionMatrix [Fintype ι] (P : ι → PMF ι) : Matrix ι ι ℝ :=
+  Matrix.of fun a b ↦ (P a b).toReal
+
+lemma transitionMatrix_apply [Fintype ι] (P : ι → PMF ι) (a b : ι) :
+    transitionMatrix P a b = (P a b).toReal := rfl
+
+/-- The transition matrix of one-step laws is row-stochastic. -/
+lemma transitionMatrix_mem_rowStochastic [Fintype ι] [DecidableEq ι] (P : ι → PMF ι) :
+    transitionMatrix P ∈ Matrix.rowStochastic ℝ ι := by
+  refine Matrix.mem_rowStochastic_iff_sum.2 ⟨fun a b ↦ ENNReal.toReal_nonneg, fun a ↦ ?_⟩
+  simp only [transitionMatrix_apply]
+  have h : ∑ b, P a b = 1 := by simpa [tsum_fintype] using PMF.tsum_coe (P a)
+  rw [← ENNReal.toReal_sum fun b _ ↦ PMF.apply_ne_top (P a) b, h, ENNReal.toReal_one]
+
+/-- **The `n`-step transition probabilities, as real matrix powers:**
+`(ℙ_i(X_n = j)).toReal = (Pⁿ) i j` for the real transition matrix, derived from
+`chainLaw_visit_eq_pow` by pushing the `ℝ≥0∞` matrix power through the ring homomorphisms
+`ℝ≥0 → ℝ≥0∞` and `ℝ≥0 → ℝ`. -/
+theorem chainLaw_visit_toReal_eq_pow [Fintype ι] [DecidableEq ι] (P : ι → PMF ι) (i : ι) (n : ℕ)
+    (j : ι) :
+    (chainLaw P i {ω | ω n = j}).toReal = (transitionMatrix P ^ n) i j := by
+  let N : Matrix ι ι NNReal := Matrix.of fun a b ↦ (P a b).toNNReal
+  have h1 : (Matrix.of fun a b ↦ P a b : Matrix ι ι ℝ≥0∞) = ENNReal.ofNNRealHom.mapMatrix N := by
+    ext a b
+    simp [N, ENNReal.coe_toNNReal (PMF.apply_ne_top (P a) b)]
+  have h2 : transitionMatrix P = NNReal.toRealHom.mapMatrix N := by
+    ext a b
+    simp [N, transitionMatrix]
+  rw [chainLaw_visit_eq_pow, h1, h2, ← map_pow ENNReal.ofNNRealHom.mapMatrix,
+    ← map_pow NNReal.toRealHom.mapMatrix]
+  simp
 
 /-! ### Renewal sequences -/
 
