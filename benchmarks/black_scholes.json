@@ -2198,6 +2198,32 @@
       }
     },
     {
+      "id": "mf-mc-greeks-euler-step",
+      "name": "Monte Carlo Greeks for the European Call and the Euler Step for GBM",
+      "domain": "mathematical_finance",
+      "description": "In the lognormal setting (Z ~ N(0,1), S_T = S0 e^{(r-sigma^2/2)T + sigma sqrt(T) Z}), the two delta estimators of Monte Carlo sensitivity analysis have mean equal to the Black-Scholes delta Phi(d1): the pathwise estimator e^{-rT} E[1{S_T>K} S_T/S0] (pathwiseDeltaPayoff_mean) and the likelihood-ratio estimator e^{-rT} E[(S_T-K)^+ (log(S_T/S0)-(r-sigma^2/2)T)/(S0 sigma^2 T)] (likelihoodRatioDeltaPayoff_mean); the discounted expected payoff is differentiable in the spot with the pathwise estimator's mean as its derivative (pathwiseDelta_deriv); the Black-Scholes market price of the call under the Girsanov pricing measure is differentiable in the initial spot with derivative Phi(d1) (hasDerivAt_marketPrice_S); and the one-step Euler-Maruyama terminal S0(1 + r dt + sigma sqrt(dt) Z) has mean S0(1 + r dt) and variance sigma^2 S0^2 dt, underestimating the exact GBM step's mean S0 e^{r dt} (eulerGbmStep_mean_le_exact) and its variance S0^2 e^{2 r dt}(e^{sigma^2 dt} - 1) for 0 <= r dt (eulerGbmStep_variance_le_exact). The two Euler moment equalities are module-internal lemmas; the entry certifies the two comparisons.",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.MonteCarloGreeks\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Monte Carlo Greeks and the Euler step.** Both delta estimators' means are the\nBlack-Scholes delta, the spot-derivative of the discounted expected payoff is the pathwise\nestimator's mean, and the one-step Euler-Maruyama terminal underestimates the exact GBM\nstep's mean. -/\ntheorem mc_greeks_euler_step {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω}\n    [IsProbabilityMeasure Q] {S K r σ T Δ : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S K r σ T Z) (hZ : HasLaw Z (gaussianReal 0 1) Q)\n    (hS : 0 ≤ S) (hΔ : 0 ≤ Δ) :\n    (∫ ω, pathwiseDeltaPayoff S K r σ T (Z ω) ∂Q = Phi (bsd1 S K r σ T)) ∧\n      (∫ ω, likelihoodRatioDeltaPayoff S K r σ T (Z ω) ∂Q = Phi (bsd1 S K r σ T)) ∧\n      (HasDerivAt (fun S' : ℝ ↦ ∫ ω, Real.exp (-r * T) *\n          max (bsTerminal S' r σ T (Z ω) - K) 0 ∂Q)\n        (∫ ω, pathwiseDeltaPayoff S K r σ T (Z ω) ∂Q) S) ∧\n      (∫ ω, eulerGbmStep S r σ Δ (Z ω) ∂Q ≤ ∫ ω, bsTerminal S r σ Δ (Z ω) ∂Q) :=\n  ⟨pathwiseDeltaPayoff_mean h, likelihoodRatioDeltaPayoff_mean h, pathwiseDelta_deriv h,\n    eulerGbmStep_mean_le_exact hZ hS hΔ⟩"
+      },
+      "metadata": {
+        "chapter": 21,
+        "reference": "J. C. Hull, Options, Futures, and Other Derivatives, 11th ed. (2021), ch. 21; S. Burgos and M. B. Giles, The computation of Greeks with multilevel Monte Carlo, arXiv:1102.1348 (2010), sections 1.2 and 2.1",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "ch. 21"
+          },
+          {
+            "key": "BurgosGiles2010",
+            "locator": "sections 1.2 and 2.1"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The two estimator means are computed by transferring to the standard-normal integral and reading the tails off the truncated-moment atoms (the library's Gaussian partial moments, plus the exp-weighted and shifted truncated first moments proved module-internally); the likelihood-ratio residual vanishes by the magic identity bs_identity. The pathwise derivative headline identifies the spot-derivative of the discounted expected payoff with the pathwise estimator's mean; the market bridge (hasDerivAt_marketPrice_S) computes the derivative of the market price through the pricing theorem price_europeanCall_constGirsanovMeasure and hasDerivAt_bsV_S. The Euler section delivers the step's mean and variance as module-internal lemmas and certifies the two public comparisons against the exact GBM step; the variance comparison takes 0 <= r*dt and the mean comparison 0 <= S. SCOPE: delta only (not vega, gamma or the other Greeks); one Euler step (no scheme convergence); the likelihood-ratio score is the lognormal density's score (no Malliavin weights)."
+      }
+    },
+    {
       "id": "mf-dupire-tilted-smile-local-skew",
       "name": "First-Order Local-Volatility Skew of a Tilted Smile and the Rule of Two",
       "domain": "mathematical_finance",

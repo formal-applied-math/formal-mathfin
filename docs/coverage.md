@@ -35,6 +35,38 @@ request added. The backlog pass then split `mf-bgk-discrete-barrier-shift` into 
 scaling of `ptDownOutCall` (`mf-barrier-down-out-image-form`) and the BGK shift and limit (918
 entries, 29 reduced cores).
 
+### Monte Carlo Greeks and the Euler step (2026-11-28)
+
+One `full` entry in `benchmarks/black_scholes.json`. It adds one entry to
+the corpus.
+
+- **`mf-mc-greeks-euler-step`** (MathFin/Models/BlackScholes/MonteCarloGreeks.lean): in the
+  lognormal setting `BSCallHyp`, the two delta estimators of Monte Carlo sensitivity analysis
+  have mean equal to the Black–Scholes delta `Φ(d₁)`. The pathwise estimator
+  `e^{-rT}·𝔼[1{S_T>K}·S_T/S₀]` (`pathwiseDeltaPayoff_mean`) is the completing-the-square tail
+  integral on the exercise region; the likelihood-ratio estimator
+  `e^{-rT}·𝔼[(S_T−K)⁺·(log(S_T/S₀)−(r−σ²/2)T)/(S₀σ²T)]` (`likelihoodRatioDeltaPayoff_mean`)
+  reduces through the exp-weighted and centered truncated first moments of the standard normal
+  (`integral_exp_mul_gaussianPDFReal_id_Ioi`, `integral_sub_id_mul_gaussianPDFReal_Ioi`, proved
+  module-internally as shifted siblings of the library's Gaussian partial moments) to `Φ(d₁)`
+  plus the residual `(S₀ϕ(d₁) − Ke^{-rT}ϕ(d₂))/(S₀σ√T)`, which vanishes by the magic identity
+  `bs_identity`. The derivative-under-the-expectation headline `pathwiseDelta_deriv` states the
+  discounted expected payoff as differentiable in the spot with the pathwise estimator's mean as
+  its derivative. The market bridge `hasDerivAt_marketPrice_S` computes the spot-derivative of
+  the Black–Scholes market's call price through the pricing theorem
+  `price_europeanCall_constGirsanovMeasure` and `hasDerivAt_bsV_S`. The Euler part defines the
+  one-step Euler–Maruyama terminal `eulerGbmStep S₀ r σ Δ z = S₀(1 + rΔ + σ√Δ·z)` and proves the
+  comparisons `eulerGbmStep_mean_le_exact` (the Euler mean `S₀(1 + rΔ)`, the linearization of the
+  exact step's mean `S₀e^{rΔ}`, underestimates it) and `eulerGbmStep_variance_le_exact` (the
+  Euler variance `σ²S₀²Δ` is at most the exact step's `S₀²e^{2rΔ}(e^{σ²Δ} − 1)` for `0 ≤ rΔ`),
+  with the two moment equalities module-internal. Cited: Hull 11th ed. ch. 21 (the discrete
+  step and the bump-and-revalue recipe with common random streams); Burgos & Giles,
+  arXiv:1102.1348, §1.2 (the pathwise and likelihood-ratio methods) and §2.1 (the GBM one-step
+  scheme). Disclosed out of scope: delta only (not vega, gamma or the other Greeks); one Euler
+  step (no scheme convergence); the likelihood-ratio score is the lognormal density's score (no
+  Malliavin weights); the two Euler moment equalities are module-internal lemmas and the entry
+  certifies the two comparisons. Axioms-clean, `full`.
+
 ### The Ho–Lee bond price (2026-11-24)
 
 One `full` entry in `benchmarks/interest_rates.json`. It adds one

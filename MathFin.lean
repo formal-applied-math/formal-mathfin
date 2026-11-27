@@ -419,6 +419,7 @@ public import MathFin.Models.Rates.HullWhiteCalibration
 public import MathFin.Models.Rates.HullWhiteBondPriceAt
 public import MathFin.Models.Rates.HoLeeBondPrice
 public import MathFin.Models.BlackScholes.MonteCarloPricer
+public import MathFin.Models.BlackScholes.MonteCarloGreeks
 -- Phase 45: Variance swap log-payoff and QV-limit form equivalence
 public import MathFin.Models.ModelFree.VarianceSwapEquivalence
 public import MathFin.Models.BlackScholes.Call
