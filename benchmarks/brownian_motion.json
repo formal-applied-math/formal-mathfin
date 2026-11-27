@@ -54,10 +54,10 @@
     {
       "id": "bm-thm-5.1.7",
       "name": "Reflection Principle",
-      "description": "Theorem 5.1.7, STRUCTURE SPECIFICATION: a structure records the Brownian axioms for B (zero start, Gaussian independent increments, a.s. continuous paths) together with the reflection identity μ(B_s ≥ a for some s ∈ [0,t]) = 2·μ(B_t ≥ a), for t ≥ 0 and a > 0, as a field; the theorem reads that field off by projection. The reflection principle is not derived from the Brownian axioms here.",
+      "description": "Theorem 5.1.7: for a Brownian motion B (IsBrownianReal: Brownian finite-dimensional laws and almost surely continuous paths), a time t and a level a > 0, P(B_s ≥ a for some s ∈ [0,t]) = 2·P(B_t ≥ a). Derived from the independence and Gaussianity of the increments, not assumed.",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Statement-level specification for Theorem 5.1.7: the Brownian axioms for\n    `B` together with the reflection identity — for every `t ≥ 0` and `a > 0`,\n    `μ(∃ s ∈ [0, t], B_s ≥ a) = 2 · μ(B_t ≥ a)` — as a field. The reflection\n    principle is not derived here. -/\nstructure BrownianReflection {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : HasIndepIncrements B μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- The textbook conclusion, assumed: μ(the path reaches `a` on `[0, t]`) =\n      2 · μ(B_t ≥ a). -/\n  reflection_identity : ∀ ⦃t a : ℝ⦄, 0 ≤ t → 0 < a →\n    μ {ω | ∃ s ∈ Set.Icc (0 : ℝ) t, a ≤ B s ω} = 2 * μ {ω | a ≤ B t ω}\n\n/-- Theorem 5.1.7, read off the structure: the reflection identity, by\n    projection — not derived. -/\ntheorem BrownianReflection.reflection_principle\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianReflection μ B) {t a : ℝ} (ht : 0 ≤ t) (ha : 0 < a) :\n    μ {ω | ∃ s ∈ Set.Icc (0 : ℝ) t, a ≤ B s ω} = 2 * μ {ω | a ≤ B t ω} :=\n  hB.reflection_identity ht ha\n"
+        "lean": "import MathFin.Probability.Brownian.ReflectionPrinciple\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Theorem 5.1.7 (reflection principle): for a Brownian motion `B`, a time `t` and a level\n    `a > 0`, `P(B_s ≥ a for some s ∈ [0, t]) = 2 · P(B_t ≥ a)`. -/\ntheorem brownian_reflection_principle_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsBrownianReal B P) {t : ℝ≥0} {a : ℝ}\n    (ha : 0 < a) :\n    P {ω | ∃ s : ℝ≥0, s ≤ t ∧ a ≤ B s ω} = 2 * P {ω | a ≤ B t ω} :=\n  hB.reflection_principle ha\n"
       },
       "metadata": {
         "chapter": 5,
@@ -69,8 +69,8 @@
           }
         ],
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
+        "formalization_status": "full",
+        "formalization_scope": "Derived in MathFin.Probability.Brownian.ReflectionPrinciple for every IsBrownianReal process (Mathlib's Brownian motion, indexed by ℝ≥0), for every t ≥ 0 and a > 0, as an equality of (outer) measures of the event {∃ s ≤ t, a ≤ B_s} and 2·P(a ≤ B_t). The proof is the reflection argument on a grid of mesh t/n: first passage of a decomposes the grid event into disjoint events measurable for the natural σ-algebra at the passage time, the weak Markov property at fixed times (shift_indep_natural) and the symmetry of the Gaussian law reflect the future increment, a fourth-moment Markov bound controls the overshoot, and path continuity with the absence of atoms of B_t pass to the limit n → ∞. No strong Markov property is used. The previous structure encoded the identity as a field."
       }
     },
     {
@@ -105,10 +105,10 @@
     {
       "id": "bm-cor-5.3.4",
       "name": "Nowhere Differentiability",
-      "description": "Corollary 5.3.4, STRUCTURE SPECIFICATION: a structure records the Brownian axioms for B (zero start, Gaussian independent increments, a.s. continuous paths) together with almost-sure nowhere differentiability of the paths as a field; the theorem reads that field off by projection. Nowhere differentiability is not derived from the Brownian axioms here.",
+      "description": "Corollary 5.3.4: for a Brownian motion B, almost surely the path is differentiable at no x ≥ 0 (for the extension t ↦ B(max(t,0)) to ℝ); the proof shows that almost surely there is not even a right derivative at any x ≥ 0. Derived from the independent Gaussian increments (Paley–Wiener–Zygmund), not assumed.",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Statement-level specification for Corollary 5.3.4: the Brownian axioms for\n    `B` together with almost-sure nowhere differentiability of its paths, as a\n    field. Nowhere differentiability is not derived here. -/\nstructure BrownianNowhereDifferentiable {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : HasIndepIncrements B μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- The textbook conclusion, assumed: almost every path is nowhere\n      differentiable. -/\n  almost_sure_nowhere_diff : ∀ᵐ ω ∂μ,\n    ∀ x : ℝ, ¬ DifferentiableAt ℝ (fun t : ℝ => B t ω) x\n\n/-- Corollary 5.3.4, read off the structure: almost-sure nowhere\n    differentiability, by projection — not derived. -/\ntheorem BrownianNowhereDifferentiable.paths_almost_surely_nowhere_differentiable\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianNowhereDifferentiable μ B) :\n    ∀ᵐ ω ∂μ, ∀ x : ℝ, ¬ DifferentiableAt ℝ (fun t : ℝ => B t ω) x :=\n  hB.almost_sure_nowhere_diff\n"
+        "lean": "import MathFin.Probability.Brownian.NowhereDifferentiable\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Corollary 5.3.4 (nowhere differentiability): almost surely, the path of a Brownian motion is\n    differentiable at no `x ≥ 0` (for the extension `t ↦ B (max t 0)` to the real line). -/\ntheorem brownian_nowhere_differentiable_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsBrownianReal B P) :\n    ∀ᵐ ω ∂P, ∀ x : ℝ≥0, ¬ DifferentiableAt ℝ (fun t : ℝ ↦ B t.toNNReal ω) x :=\n  hB.toIsPreBrownianReal.ae_not_differentiableAt\n"
       },
       "metadata": {
         "chapter": 5,
@@ -120,8 +120,8 @@
           }
         ],
         "difficulty": "advanced",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
+        "formalization_status": "full",
+        "formalization_scope": "Derived in MathFin.Probability.Brownian.NowhereDifferentiable for every pre-Brownian motion (IsPreBrownianReal, so in particular IsBrownianReal): almost surely no x ≥ 0 admits a right derivative (hence no derivative) of t ↦ B(max(t,0)). Paley–Wiener–Zygmund: a right derivative at x ≤ N forces three consecutive grid increments of size ≤ M/n for all large n; by independence and the Gaussian small-ball bound the probability that some k ≤ nN has this is ≤ (N+1)M²·M/√n → 0. The statement is for the extension to ℝ because the textbook's differentiability is two-sided; the right-derivative version proved is stronger. The previous structure encoded the conclusion as a field."
       }
     },
     {
