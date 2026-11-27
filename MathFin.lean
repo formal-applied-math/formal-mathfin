@@ -32,6 +32,7 @@ public import MathFin.Probability.Brownian.BrownianMarkov
 -- kernels (Saporito 1.1.2)
 public import MathFin.Probability.Discrete.MarkovPathMeasure
 public import MathFin.Probability.Discrete.FiniteMarkovChain
+public import MathFin.Probability.Discrete.MarkovPathSpace
 public import MathFin.Probability.Laws.ErlangSum
 -- Poisson-process theory: superposition, thinning, marginal-from-arrivals,
 -- first-interarrival law (Saporito 3.3.5/3.3.6/3.3.9/3.3.10)
