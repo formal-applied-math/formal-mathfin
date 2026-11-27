@@ -39,6 +39,8 @@ needs no path regularity.
 * `tendsto_itoIntegralAgainst_stepσ` — the same convergence, as `L²(μ)` classes of step integrals.
 * `itoIntegralAgainst_stepσ` — the `n`-th step integral is the Riemann–Stieltjes sum, almost
   surely.
+* `weightLp_eq_integrandLp`, `coe_itoIntegralAgainstCLM_weightLp` — `weightLp` is the
+  characterisation's `integrandLp`, so the limit is `sIntegral` of the weight.
 * `coeFn_mulLI_weightLp`, `itoIntegralAgainst_weightLp` — the limit is `∫ χ dB`, where `χ` is the
   class of `φ·w`; and any predictable `L²` class equal to `φ·w` almost everywhere will do.
 
@@ -218,6 +220,52 @@ theorem itoIntegralAgainst_weightLp (χ : Lp ℝ 2 (trimMeasure (μ := μ) T hBm
   rw [itoIntegralAgainstCLM_apply]
   congr 1
   exact Lp.ext ((coeFn_mulLI_weightLp T hBmeas φ hw_pred hw_bdd).trans hχ.symm)
+
+omit [IsProbabilityMeasure μ] in
+include hw_pred hw_bdd in
+/-- A bounded predictable weight is its own predictable square-integrable version. -/
+theorem isPredictableVersion_self : IsPredictableVersion T hBmeas φ w w :=
+  ⟨hw_pred.measurable, memLp_uncurry_bracketMeasure T hBmeas φ hw_pred hw_bdd,
+    Filter.Eventually.of_forall fun _ _ ↦ rfl⟩
+
+/-- **The two constructors agree**: the class of a bounded predictable weight in `L²(⟨M⟩)` is
+the class `integrandLp` reads off its predictable version (`integrandLp_eq`). -/
+theorem weightLp_eq_integrandLp :
+    weightLp T hBmeas φ hw_pred hw_bdd = integrandLp T hBmeas φ w :=
+  (integrandLp_eq (isPredictableVersion_self T hBmeas φ hw_pred hw_bdd)).symm
+
+/-- **The limit is the characterised integral**: `∫ w dM`, the limit of the Riemann–Stieltjes
+sums, is `sIntegral` of the weight. -/
+theorem coe_itoIntegralAgainstCLM_weightLp :
+    ⇑(itoIntegralAgainstCLM hB T hBmeas φ (weightLp T hBmeas φ hw_pred hw_bdd))
+      = sIntegral T hBmeas φ hB w := by
+  rw [sIntegral, weightLp_eq_integrandLp T hBmeas φ hw_pred hw_bdd]
+
+/-- **Riemann–Stieltjes sums against `M = φ●B` converge in measure** to the integral against
+`M`, for any process `M` that agrees with the Itô integral process almost surely at each time
+of `[0, T]`: the mean-square convergence `tendsto_itoIntegralAgainst_stepσ`, read on the
+sums. -/
+theorem tendstoInMeasure_riemannStieltjes (φ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))
+    {M : ℝ≥0 → Ω → ℝ} (hM : ∀ t ≤ T, M t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ)
+    {w : ℝ≥0 → Ω → ℝ} (hw_pred : IsStronglyPredictable (natFiltration hBmeas) w)
+    (hw_cont : ∀ᵐ ω ∂μ, ContinuousOn (fun s ↦ w s ω) (Set.Icc 0 T)) {Cw : ℝ}
+    (hw_bdd : ∀ s ω, |w s ω| ≤ Cw) :
+    TendstoInMeasure μ (fun n ω ↦ ∑ k ∈ Finset.range n, w (unifPart T n k) ω
+        * (M (unifPart T n (k + 1)) ω - M (unifPart T n k) ω)) atTop
+      (itoIntegralAgainstCLM hB T hBmeas φ (weightLp T hBmeas φ hw_pred hw_bdd)) := by
+  refine (tendstoInMeasure_of_tendsto_Lp
+    (tendsto_itoIntegralAgainst_stepσ hB T hBmeas φ hw_pred hw_cont hw_bdd)).congr
+    (fun n ↦ (itoIntegralAgainst_stepσ hB T hBmeas φ hw_pred hw_bdd n).trans ?_)
+    (Filter.EventuallyEq.refl _ _)
+  have hMn : ∀ᵐ ω ∂μ, ∀ j : ℕ, j ≤ n →
+      M (unifPart T n j) ω = itoProcessCLM hB T (unifPart T n j) hBmeas φ ω := by
+    refine ae_all_iff.2 fun j ↦ ?_
+    by_cases hj : j ≤ n
+    · filter_upwards [hM _ (unifPart_le_T hj)] with ω hω _ using hω
+    · exact ae_of_all _ fun ω h ↦ absurd h hj
+  filter_upwards [hMn] with ω hω
+  exact Finset.sum_congr rfl fun k hk ↦ by
+    rw [hω (k + 1) (Finset.mem_range.mp hk), hω k (Finset.mem_range.mp hk).le]
 
 end AdaptedRiemannStieltjes
 

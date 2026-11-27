@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: default correlation in a credit portfolio
@@ -25,7 +26,9 @@ systematic factor `F` and the idiosyncratic terms `εᵢ` are independent standa
 4. computes the default correlation `ρ_D = (π₂ − π²)/(π − π²)` of two distinct obligors as
    `Var(Q)/(π(1 − π))`, and proves it nonnegative (`IsModel.defaultCorrelation_eq_and_nonneg`).
    Since `π(1 − π) > 0`, this says that two defaults together are never less likely than they
-   would be if the obligors were independent;
+   would be if the obligors were independent. For `ρ > 0` it is strictly positive
+   (`IsModel.defaultCorrelation_pos`), and in closed form it is `(N₂(z, z; ρ) − π²)/(π − π²)`
+   with `z = Φ⁻¹(π)` (`IsModel.defaultCorrelation_eq_bivariateNormal`);
 5. exhibits a realization of the model, the coordinates of a product of standard normal laws
    (`isModel_stdNormalFactors`), so the statements are not vacuous;
 6. states all this for an illustrative pool of `100` obligors with `π = 2%` and `ρ = 0.2`.
@@ -53,10 +56,9 @@ exhibits, it holds for every realization of the model, on any probability space:
 
 The model has one factor, the same default probability and asset correlation for every obligor,
 and one horizon. It says nothing about recoveries, exposures or the timing of defaults, and the
-parameters are taken as known. The joint default probabilities stay integrals: no numerical value
-of `π₂` or of the default correlation is proved here, only that the correlation is nonnegative.
-The numbers `π = 2%` and `ρ = 0.2` enter the check only through the model: nonnegativity holds in
-every Bernoulli mixture, and the strict positivity of the correlation for `ρ > 0` is not proved.
+parameters are taken as known. No numerical value of `π₂` or of the default correlation is
+proved here: they are given by the bivariate normal CDF `N₂`, which this file does not evaluate.
+The numbers `π = 2%` and `ρ = 0.2` enter the check only through the model and through `ρ > 0`.
 
 ## Source
 
@@ -78,7 +80,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
 /-- A pool of loans in the one-factor Gaussian threshold model: the number of obligors, the
 default probability of each, and the correlation of their asset values, with where the numbers
 come from and what the model leaves out. -/
-structure Pool where
+structure Pool extends Provenance String where
   /-- The number of obligors. -/
   size : ℕ
   /-- The default probability of each obligor over the horizon. -/
@@ -87,10 +89,6 @@ structure Pool where
   assetCorr : ℝ
   pd_mem : pd ∈ Ioo 0 1
   assetCorr_mem : assetCorr ∈ Ico 0 1
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the model leaves out. -/
-  unmodelled : List String
 
 namespace Pool
 
@@ -149,6 +147,29 @@ theorem IsModel.defaultCorrelation_eq_and_nonneg (h : c.IsModel P F ε) {i j : F
   exact ⟨rfl, div_nonneg (variance_nonneg _ _)
     (mul_nonneg c.pd_mem.1.le (sub_nonneg.2 c.pd_mem.2.le))⟩
 
+/-- **The default correlation is strictly positive when the asset correlation is**: for `ρ > 0`,
+two distinct obligors default together strictly more often than independent ones, because the
+mixing variable `p(F)` is not constant (`variance_oneFactorPD_pos`). -/
+theorem IsModel.defaultCorrelation_pos (h : c.IsModel P F ε) (hρ : 0 < c.assetCorr)
+    {i j : Fin c.size} (hij : i ≠ j) :
+    0 < (P.real (c.Default F ε i ∩ c.Default F ε j) - c.pd ^ 2) / (c.pd - c.pd ^ 2) := by
+  rw [(h.defaultCorrelation_eq_and_nonneg hij).1]
+  exact div_pos (variance_oneFactorPD_pos c.pd ⟨hρ, c.assetCorr_mem.2⟩ h.factor)
+    (mul_pos c.pd_mem.1 (sub_pos.2 c.pd_mem.2))
+
+/-- **The default correlation in closed form**: `ρ_D = (N₂(z, z; ρ) − π²)/(π − π²)` with
+`z = Φ⁻¹(π)` and `N₂` the bivariate normal CDF with correlation `ρ`
+(`oneFactor_measureReal_inter_default`). -/
+theorem IsModel.defaultCorrelation_eq_bivariateNormal (h : c.IsModel P F ε) {i j : Fin c.size}
+    (hij : i ≠ j) :
+    (P.real (c.Default F ε i ∩ c.Default F ε j) - c.pd ^ 2) / (c.pd - c.pd ^ 2) =
+      (bivariateNormalCDF (PhiInv c.pd) (PhiInv c.pd) c.assetCorr - c.pd ^ 2) /
+        (c.pd - c.pd ^ 2) := by
+  rw [show P.real (c.Default F ε i ∩ c.Default F ε j) =
+    bivariateNormalCDF (PhiInv c.pd) (PhiInv c.pd) c.assetCorr from
+      oneFactor_measureReal_inter_default h.factor h.idio h.indep h.indep_factor
+        c.assetCorr_mem.1 c.assetCorr_mem.2 hij]
+
 /-- **The model has a realization**: on the factor space `stdNormalFactors n`, a standard normal
 times `n` independent standard normals, the coordinates are a factor and idiosyncratic terms
 that are independent standard normals. -/
@@ -180,7 +201,8 @@ realization of the model, with `F` and the `εᵢ` independent standard normals 
 (and one such realization exists, on `stdNormalFactors 100`):
 - each of the `100` obligors defaults with probability `0.02`;
 - every group of `k` obligors defaults jointly with probability `E[Q^k]`;
-- two distinct obligors have default correlation `Var(Q)/(0.02 · 0.98)`, which is nonnegative. -/
+- two distinct obligors have default correlation `Var(Q)/(0.02 · 0.98)`, which is strictly
+  positive (`ρ = 0.2 > 0`) and equals `(N₂(z, z; 0.2) − 0.02²)/(0.02 − 0.02²)`, `z = Φ⁻¹(0.02)`. -/
 theorem sample_checked :
     sample.IsModel (stdNormalFactors 100) Prod.fst (fun i z ↦ z.2 i) ∧
     ∀ {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω) [IsProbabilityMeasure P] (F : Ω → ℝ)
@@ -191,11 +213,16 @@ theorem sample_checked :
       ∀ i j : Fin 100, i ≠ j →
         (P.real (sample.Default F ε i ∩ sample.Default F ε j) - 0.02 ^ 2) / (0.02 - 0.02 ^ 2) =
             Var[sample.mixing F; P] / (0.02 * (1 - 0.02)) ∧
-          0 ≤ (P.real (sample.Default F ε i ∩ sample.Default F ε j) - 0.02 ^ 2) /
-            (0.02 - 0.02 ^ 2) := by
+          0 < (P.real (sample.Default F ε i ∩ sample.Default F ε j) - 0.02 ^ 2) /
+            (0.02 - 0.02 ^ 2) ∧
+          (P.real (sample.Default F ε i ∩ sample.Default F ε j) - 0.02 ^ 2) / (0.02 - 0.02 ^ 2) =
+            (bivariateNormalCDF (PhiInv 0.02) (PhiInv 0.02) 0.2 - 0.02 ^ 2) /
+              (0.02 - 0.02 ^ 2) := by
   refine ⟨sample.isModel_stdNormalFactors, ?_⟩
   intro Ω _ P _ F ε h
   exact ⟨h.measureReal_default, h.measureReal_iInter_default,
-    fun _ _ hij ↦ h.defaultCorrelation_eq_and_nonneg hij⟩
+    fun _ _ hij ↦ ⟨(h.defaultCorrelation_eq_and_nonneg hij).1,
+      h.defaultCorrelation_pos (by norm_num [sample]) hij,
+      h.defaultCorrelation_eq_bivariateNormal hij⟩⟩
 
 end MathFin.Examples.CreditCorrelation

@@ -42,7 +42,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .corpus import iter_entries
-from . import chain_reach, taxonomy
+from . import atlas, chain_reach, taxonomy
 from .decl_index import DeclIndex
 from .mathfin_index import cited_constants, declaration_index
 
@@ -299,6 +299,7 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
             n["j"] = joint_of[n["l"]]
         n.pop("area", None)
         n.pop("family", None)
+    node_cells = [(n["p"] + ("/" + n["b"] if n["b"] else ""), n["s"]) for n in out_nodes]
     # the measure: heights, towers, islands, phantoms
     records = chain_reach.records(idx)
     reach = chain_reach.compute(records)
@@ -331,7 +332,16 @@ def tree_data(idx: DeclIndex, nodes: list[dict], frontier: list[dict],
         by_cell[p.cell][p.kind] += 1
         if p.kind == "off-map":
             off[p.cell].append([p.entry, p.name[:90]])
+    field = atlas.load()
+    lit = field and atlas.literature(
+        field, Counter(p.cell for p in places),
+        Counter(c for c, st in node_cells if st == "proved"),
+        Counter(c for c, st in node_cells if st == "frontier"),
+        Counter(taxonomy.cell_of(m) for m in {r["module"] for r in records}))
     return dict(nodes=out_nodes, areas={a: dict(c) for a, c in by_cell.items()},
+                literature=lit and dict(cells=lit, corpus=field["corpus"],
+                                        classifier=field["classifier"],
+                                        generated=field["generated"], limits=field["limits"]),
                 off=dict(off), issues=issues is not None, corpus=len(places),
                 parts=crown_order(taxonomy.parts()),
                 cellName={k: taxonomy.label(k) for k in taxonomy.cells()} | {UPSTREAM: UPSTREAM},

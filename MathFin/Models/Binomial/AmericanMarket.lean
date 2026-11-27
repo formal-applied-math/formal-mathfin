@@ -66,8 +66,8 @@ theorem exerciseValue_market_europeanPutPayoff (P : Measure (ℕ → Bool)) (S�
     (market P S₀ u d ρ hh).exerciseValue (europeanPutPayoff K) = fun (t : ℝ≥0) ω ↦
       Real.exp (-ρ * ⌊(t : ℝ) / h⌋₊) * max (K - spotPath S₀ u d ⌊(t : ℝ) / h⌋₊ ω) 0 := by
   funext t ω
-  simp [Market.exerciseValue, Market.deflator, market, europeanPutPayoff, Payoff.eval,
-    scenarioAt, assets, div_eq_mul_inv, ← Real.exp_neg]
+  simp [Market.exerciseValue, Market.deflator, market, DiscreteMarket.ofTimeChange,
+    europeanPutPayoff, Payoff.eval, scenarioAt, assets, div_eq_mul_inv, ← Real.exp_neg]
 
 /-- **The binomial American put is the market's American put.** For a step `h > 0` and the
 risk-neutral probability `q = crrUpProb u d ρ`, the American price of the put

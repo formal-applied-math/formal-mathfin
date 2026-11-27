@@ -45,27 +45,27 @@ noncomputable def matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) : �
   (sigPos M.toQuadraticForm' : ℤ) - (sigNeg M.toQuadraticForm' : ℤ)
 
 /-- The quadratic form of a matrix evaluates as `x ⬝ᵥ M *ᵥ x`. -/
-theorem toQuadraticForm'_apply {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (x : Fin n → ℝ) :
+theorem matrixQuadraticForm_apply {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (x : Fin n → ℝ) :
     M.toQuadraticForm' x = dotProduct x (M *ᵥ x) := by
   simp [Matrix.toQuadraticForm', Matrix.toLinearMap₂'_apply']
 
 /-- The quadratic form of a diagonal matrix is the weighted sum of squares. -/
-theorem toQuadraticForm'_diagonal {n : ℕ} (w : Fin n → ℝ) :
+theorem matrixQuadraticForm_diagonal {n : ℕ} (w : Fin n → ℝ) :
     (diagonal w).toQuadraticForm' = QuadraticMap.weightedSumSquares ℝ w := by
   ext x
-  simp only [toQuadraticForm'_apply, dotProduct, mulVec_diagonal,
+  simp only [matrixQuadraticForm_apply, dotProduct, mulVec_diagonal,
     QuadraticMap.weightedSumSquares_apply, smul_eq_mul]
   apply Finset.sum_congr rfl
   intro i hi
   ring
 
 /-- The quadratic form of `Uᴴ * M * U` is that of `M` composed with `U`. -/
-theorem toQuadraticForm'_conj_unitary {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
+theorem matrixQuadraticForm_conj_unitary {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
     (U : Matrix.unitaryGroup (Fin n) ℝ) :
     ((star (U : Matrix (Fin n) (Fin n) ℝ)) * M * (U : Matrix (Fin n) (Fin n) ℝ)).toQuadraticForm' =
       M.toQuadraticForm'.comp ((Matrix.UnitaryGroup.toLinearEquiv U).toLinearMap) := by
   ext x
-  simp only [QuadraticMap.comp_apply, toQuadraticForm'_apply]
+  simp only [QuadraticMap.comp_apply, matrixQuadraticForm_apply]
   change dotProduct x
       ((star (U : Matrix (Fin n) (Fin n) ℝ) * M * (U : Matrix (Fin n) (Fin n) ℝ)) *ᵥ x) =
     dotProduct ((U : Matrix (Fin n) (Fin n) ℝ) *ᵥ x)
@@ -83,13 +83,13 @@ theorem signatureTest_eq_matrixSignature {n : ℕ} (M : Matrix (Fin n) (Fin n) �
   have heq : (diagonal hh.eigenvalues).toQuadraticForm' =
       M.toQuadraticForm'.comp
           (Matrix.UnitaryGroup.toLinearEquiv hh.eigenvectorUnitary).toLinearMap := by
-    rw [← toQuadraticForm'_conj_unitary]
+    rw [← matrixQuadraticForm_conj_unitary]
     have hdiag := hh.conjStarAlgAut_star_eigenvectorUnitary
     simpa [Unitary.conjStarAlgAut_star_apply, Function.comp_def] using
       congrArg Matrix.toQuadraticForm' hdiag.symm
   have he : QuadraticMap.Equivalent M.toQuadraticForm'
       (QuadraticMap.weightedSumSquares ℝ hh.eigenvalues) := by
-    rw [← toQuadraticForm'_diagonal, heq]
+    rw [← matrixQuadraticForm_diagonal, heq]
     exact ⟨QuadraticMap.isometryEquivOfCompLinearEquiv _ _⟩
   unfold signatureTest matrixSignature
   rw [signatureTest_eq_root_counts M hM, he.sigPos_eq, he.sigNeg_eq,
@@ -123,10 +123,10 @@ theorem sigNeg_smul_of_pos {n : ℕ} (Q : QuadraticForm ℝ (Fin n → ℝ))
   rw [← sigPos_neg, he, sigPos_smul_of_pos _ c hc, sigPos_neg]
 
 /-- The quadratic form of a scalar multiple of a matrix is the scalar multiple. -/
-theorem toQuadraticForm'_smul {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (c : ℝ) :
+theorem matrixQuadraticForm_smul {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ) (c : ℝ) :
     (c • M).toQuadraticForm' = c • M.toQuadraticForm' := by
   ext x
-  simp [toQuadraticForm'_apply, Matrix.smul_mulVec, dotProduct_smul]
+  simp [matrixQuadraticForm_apply, Matrix.smul_mulVec, dotProduct_smul]
 
 /-- A positive common denominator does not change the sign certificate. -/
 theorem signatureTest_smul_pos {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
@@ -136,7 +136,7 @@ theorem signatureTest_smul_pos {n : ℕ} (M : Matrix (Fin n) (Fin n) ℝ)
     simpa using congrArg (c * ·) (congrFun (congrFun hM i) j)
   rw [signatureTest_eq_matrixSignature _ hcs, signatureTest_eq_matrixSignature _ hM]
   unfold matrixSignature
-  rw [toQuadraticForm'_smul, sigPos_smul_of_pos _ c hc, sigNeg_smul_of_pos _ c hc]
+  rw [matrixQuadraticForm_smul, sigPos_smul_of_pos _ c hc, sigNeg_smul_of_pos _ c hc]
 
 end SVI
 end MathFin

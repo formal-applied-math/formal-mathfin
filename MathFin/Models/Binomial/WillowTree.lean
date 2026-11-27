@@ -72,8 +72,8 @@ rows above.
   `WillowMomentConstraints.bivariateNormal_moments` — **feasibility**: an
   honest (non-negative, summing-to-one) transition row forces `β k ^ 2 ≤ 1`, the
   lattice-side analogue of `sq_le_one_of_covariance_unit` for a correlated Gaussian
-  pair; and for such a coefficient the standard bivariate normal law
-  `bivariateNormalLaw (β k)` has unit variances and covariance `β k`.
+  pair; and for such a coefficient `bivariateNormalLaw (β k)` is a coupling of two standard
+  normals with covariance `β k`.
 
 Nothing here touches the linear program that *finds* such a matrix (feasibility of the
 full system, the objective, sparsity): the statements are unconditional in the matrix
@@ -398,18 +398,21 @@ theorem WillowMomentConstraints.sq_le_one (hP : WillowMomentConstraints z β P) 
   linarith
 
 /-- **The willow coefficient is a valid correlation, and the bivariate normal law at
-it is standard**: an honest transition row forces `β k ^ 2 ≤ 1`, and for a coefficient
-in that range the standard bivariate normal law `bivariateNormalLaw (β k)` has unit
+it couples two standard normals**: an honest transition row forces `β k ^ 2 ≤ 1`, and for a
+coefficient in that range `bivariateNormalLaw (β k)` has both marginals `N(0, 1)`, unit
 variances and covariance `β k`. (The chain's own moments matching that law's is proved
 separately, entrywise: `willowMarginal_crossMoment` gives the cross moment `β k`.) -/
 theorem WillowMomentConstraints.bivariateNormal_moments (hP : WillowMomentConstraints z β P) (k : ℕ)
     (i : Fin n) (hrow : ∀ j, 0 ≤ P k i j) :
     β k ^ 2 ≤ 1
+      ∧ (bivariateNormalLaw (β k)).map Prod.fst = gaussianReal 0 1
+      ∧ (bivariateNormalLaw (β k)).map Prod.snd = gaussianReal 0 1
       ∧ Var[(Prod.fst : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
       ∧ Var[(Prod.snd : ℝ × ℝ → ℝ); bivariateNormalLaw (β k)] = 1
       ∧ cov[Prod.fst, Prod.snd; bivariateNormalLaw (β k)] = β k :=
   have h := hP.sq_le_one k i hrow
-  ⟨h, variance_fst_bivariateNormalLaw h, variance_snd_bivariateNormalLaw _,
+  ⟨h, map_fst_bivariateNormalLaw h, map_snd_bivariateNormalLaw _,
+    variance_fst_bivariateNormalLaw h, variance_snd_bivariateNormalLaw _,
     covariance_fst_snd_bivariateNormalLaw _⟩
 
 /-! ### The chain against a Brownian motion

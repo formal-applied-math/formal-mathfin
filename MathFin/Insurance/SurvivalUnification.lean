@@ -51,8 +51,10 @@ the survival probability is the mixture `E[exp(−Λ_t)]` (`Cox.cox_mixing_survi
 * `survivalFunction_eq_hazardSurvival`: if a measurable lifetime `τ` has
   `P(τ ≤ a) = 1 - hazardSurvival h a` for `a ≥ 0` with `h ≥ 0`, its actuarial survival function
   equals `hazardSurvival h` for `t ≥ 0`.
-* `survivalFunction_div_eq_survivalProbability`, `survive_eq_survivalProbability`: for an
-  exponential lifetime of rate `h₀`, the ratio `S_τ(T) / S_τ(t)` is the credit layer's
+* `measure_le_of_hasLaw_expMeasure`: a lifetime with law `expMeasure h₀`, `h₀ > 0`, has
+  `P(τ ≤ a) = 1 − e^{−h₀ a}` for `a ≥ 0`.
+* `survivalFunction_div_eq_survivalProbability`, `survive_eq_survivalProbability`: for a lifetime
+  with law `expMeasure h₀`, `h₀ > 0`, the ratio `S_τ(T) / S_τ(t)` is the credit layer's
   `survivalProbability h₀ t T` for `t, T ≥ 0`, and for `0 ≤ t ≤ T` it is `_{T−t}p_t`.
 * `survive_eq_exp_neg_integral`: under those hypotheses and `h` continuous, `ₜpₓ` of `τ` is
   `exp (-∫ s in x..x + t, h s)` for `x, t ≥ 0`.
@@ -120,22 +122,33 @@ theorem survivalFunction_eq_hazardSurvival (hnn : ∀ s, 0 ≤ h s) (hτ : Measu
     hcdf t ht, ENNReal.sub_sub_cancel ENNReal.one_ne_top (ENNReal.ofReal_le_one.2 hQ),
     ENNReal.toReal_ofReal (hazardSurvival_pos h t).le]
 
+omit [IsProbabilityMeasure P] in
+/-- **The exponential law has the constant-hazard distribution function**: a lifetime `τ` with law
+`expMeasure h₀`, `h₀ > 0`, has `P(τ ≤ a) = 1 − e^{−h₀ a}` for `a ≥ 0`
+(`expMeasure_Ioi`, the survival function). -/
+theorem measure_le_of_hasLaw_expMeasure {h₀ : ℝ} (hh : 0 < h₀) (hlaw : HasLaw τ (expMeasure h₀) P)
+    {a : ℝ} (ha : 0 ≤ a) :
+    P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (Real.exp (-(h₀ * a))) := by
+  have := isProbabilityMeasure_expMeasure hh
+  rw [← expMeasure_Ioi h₀ hh ha, ← prob_compl_eq_one_sub measurableSet_Ioi, Set.compl_Ioi,
+    ← hlaw.map_eq]
+  exact (Measure.map_apply_of_aemeasurable hlaw.aemeasurable measurableSet_Iic).symm
+
 /-- **The constant-hazard survival curve is the survival ratio of an exponential lifetime**
-(memorylessness): if a measurable lifetime `τ` has `P(τ ≤ a) = 1 − e^{−h₀ a}` for `a ≥ 0`, with
-`h₀ ≥ 0` (only `h₀ > 0` can meet it: it is the exponential law), then for `t, T ≥ 0` the ratio
-`S_τ(T) / S_τ(t)` of its survival function is the credit layer's
+(memorylessness): if a measurable lifetime `τ` has the exponential law `expMeasure h₀`, `h₀ > 0`,
+then for `t, T ≥ 0` the ratio `S_τ(T) / S_τ(t)` of its survival function is the credit layer's
 `survivalProbability h₀ t T = e^{−h₀(T−t)}`, a function of `T − t` alone. For `T ≥ t` it is the
 probability `_{T−t}p_t` of surviving from `t` to `T` (`survive_eq_survivalProbability`). -/
-theorem survivalFunction_div_eq_survivalProbability {h₀ : ℝ} (hh : 0 ≤ h₀) (hτ : Measurable τ)
-    (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (Real.exp (-(h₀ * a))))
-    {t T : ℝ} (ht : 0 ≤ t) (hT : 0 ≤ T) :
+theorem survivalFunction_div_eq_survivalProbability {h₀ : ℝ} (hh : 0 < h₀) (hτ : Measurable τ)
+    (hlaw : HasLaw τ (expMeasure h₀) P) {t T : ℝ} (ht : 0 ≤ t) (hT : 0 ≤ T) :
     SurvivalModel.survivalFunction P τ T / SurvivalModel.survivalFunction P τ t =
       survivalProbability h₀ t T := by
   have hcdf' (a : ℝ) (ha : 0 ≤ a) :
       P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival (fun _ ↦ h₀) a) := by
-    rw [hazardSurvival_eq_const_survival, hcdf a ha, survivalProbability, sub_zero]
-  rw [survivalFunction_eq_hazardSurvival (fun _ ↦ hh) hτ hcdf' hT,
-    survivalFunction_eq_hazardSurvival (fun _ ↦ hh) hτ hcdf' ht,
+    rw [hazardSurvival_eq_const_survival, measure_le_of_hasLaw_expMeasure hh hlaw ha,
+      survivalProbability, sub_zero]
+  rw [survivalFunction_eq_hazardSurvival (fun _ ↦ hh.le) hτ hcdf' hT,
+    survivalFunction_eq_hazardSurvival (fun _ ↦ hh.le) hτ hcdf' ht,
     hazardSurvival_eq_const_survival, hazardSurvival_eq_const_survival, survivalProbability,
     survivalProbability, survivalProbability, ← Real.exp_sub]
   congr 1
@@ -144,12 +157,11 @@ theorem survivalFunction_div_eq_survivalProbability {h₀ : ℝ} (hh : 0 ≤ h�
 /-- **The actuarial survival probability of an exponential lifetime**: under the hypotheses of
 `survivalFunction_div_eq_survivalProbability`, for `0 ≤ t ≤ T` a life aged `t` survives to `T`
 with probability `_{T−t}p_t = survivalProbability h₀ t T = e^{−h₀(T−t)}`. -/
-theorem survive_eq_survivalProbability {h₀ : ℝ} (hh : 0 ≤ h₀) (hτ : Measurable τ)
-    (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (Real.exp (-(h₀ * a))))
-    {t T : ℝ} (ht : 0 ≤ t) (htT : t ≤ T) :
+theorem survive_eq_survivalProbability {h₀ : ℝ} (hh : 0 < h₀) (hτ : Measurable τ)
+    (hlaw : HasLaw τ (expMeasure h₀) P) {t T : ℝ} (ht : 0 ≤ t) (htT : t ≤ T) :
     SurvivalModel.survive P τ (T - t) t = survivalProbability h₀ t T := by
-  rw [SurvivalModel.survive_eq_survivalFunction_ratio hτ t (sub_nonneg.2 htT), add_sub_cancel,
-    survivalFunction_div_eq_survivalProbability hh hτ hcdf ht (ht.trans htT)]
+  rw [SurvivalModel.survive_eq_survivalFunction_div hτ t (sub_nonneg.2 htT), add_sub_cancel,
+    survivalFunction_div_eq_survivalProbability hh hτ hlaw ht (ht.trans htT)]
 
 /-- **The actuarial `ₜpₓ` of a lifetime with hazard `h`**: under the hypotheses of
 `survivalFunction_eq_hazardSurvival` with `h` continuous, a life aged `x ≥ 0` survives a further
@@ -158,7 +170,7 @@ theorem survive_eq_exp_neg_integral (hh : Continuous h) (hnn : ∀ s, 0 ≤ h s)
     (hcdf : ∀ a, 0 ≤ a → P {ω | τ ω ≤ a} = 1 - ENNReal.ofReal (hazardSurvival h a)) {x t : ℝ}
     (hx : 0 ≤ x) (ht : 0 ≤ t) :
     SurvivalModel.survive P τ t x = Real.exp (-∫ s in x..x + t, h s) := by
-  rw [SurvivalModel.survive_eq_survivalFunction_ratio hτ x ht,
+  rw [SurvivalModel.survive_eq_survivalFunction_div hτ x ht,
     survivalFunction_eq_hazardSurvival hnn hτ hcdf (add_nonneg hx ht),
     survivalFunction_eq_hazardSurvival hnn hτ hcdf hx]
   simp only [hazardSurvival, survivalFromIntensity, cumulativeIntensity]

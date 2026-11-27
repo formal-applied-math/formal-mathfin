@@ -28,15 +28,15 @@ mixture of Gaussian kernels and exchanging the integrals, so the density is the 
 * `studentTNormConst`: the normalising constant `C_ν = ∫ k_ν` (equal to
   `√(νπ) Γ(ν/2) / Γ((ν+1)/2)` for `ν > 0`, by `studentTNormConst_eq`).
 * `studentTPDFReal`, `studentTPDF`: the density `k_ν / C_ν`, real- and `ℝ≥0∞`-valued.
-* `studentTMeasure`: the standard Student-t law, `volume.withDensity (studentTPDF ν)`; a
+* `studentT`: the standard Student-t law, `volume.withDensity (studentTPDF ν)`; a
   probability measure for `ν > 0`.
 
 ## Main results
 
-* `isProbabilityMeasure_studentTMeasure`: the Student-t law is a probability measure for `ν > 0`.
+* `isProbabilityMeasure_studentT`: the Student-t law is a probability measure for `ν > 0`.
 * `studentTNormConst_eq`, `studentTPDFReal_eq`: the normalizing constant and the density in
   closed form, `g_ν(x) = Γ((ν+1)/2) / (√(νπ) Γ(ν/2)) · (1 + x²/ν)^(-(ν+1)/2)`.
-* `studentTMeasure_one`: at `ν = 1` it is Mathlib's standard Cauchy law `cauchyMeasure 0 1`.
+* `studentT_one`: at `ν = 1` it is Mathlib's standard Cauchy law `cauchyMeasure 0 1`.
 * `integrable_mul_studentTPDFReal`: the law has a finite mean for `ν > 1`.
 * `setIntegral_Ioi_mul_studentTPDFReal`: the tail first moment
   `∫_q^∞ t g_ν(t) dt = g_ν(q) (ν + q²)/(ν − 1)` for `ν > 1`, the integral behind the
@@ -55,9 +55,9 @@ Gamma mixture, MSC 60E05, MSC 91G70
 
 @[expose] public section
 
-namespace MathFin
+namespace ProbabilityTheory
 
-open MeasureTheory ProbabilityTheory Real Set Filter
+open MeasureTheory Real Set Filter
 open scoped ENNReal Topology
 
 variable {ν : ℝ}
@@ -197,12 +197,12 @@ lemma lintegral_studentTPDF (hν : 0 < ν) : ∫⁻ x, studentTPDF ν x = 1 := b
     ENNReal.ofReal_one]
 
 /-- The standard **Student-t law** with `ν` degrees of freedom; a probability measure for `ν > 0`
-(`isProbabilityMeasure_studentTMeasure`). For `ν ≤ 0` the value is junk. -/
-noncomputable def studentTMeasure (ν : ℝ) : Measure ℝ := volume.withDensity (studentTPDF ν)
+(`isProbabilityMeasure_studentT`). For `ν ≤ 0` the value is junk. -/
+noncomputable def studentT (ν : ℝ) : Measure ℝ := volume.withDensity (studentTPDF ν)
 
-lemma isProbabilityMeasure_studentTMeasure (hν : 0 < ν) :
-    IsProbabilityMeasure (studentTMeasure ν) :=
-  ⟨by rw [studentTMeasure, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
+lemma isProbabilityMeasure_studentT (hν : 0 < ν) :
+    IsProbabilityMeasure (studentT ν) :=
+  ⟨by rw [studentT, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
     lintegral_studentTPDF hν]⟩
 
 @[fun_prop]
@@ -215,7 +215,7 @@ lemma measurable_studentTPDF (ν : ℝ) : Measurable (studentTPDF ν) :=
   (measurable_studentTPDFReal ν).ennreal_ofReal
 
 /-- The Student-t law has a density, so it charges no single point. -/
-instance nullSingletonClass_studentTMeasure (ν : ℝ) : NullSingletonClass (studentTMeasure ν) :=
+instance nullSingletonClass_studentT (ν : ℝ) : NullSingletonClass (studentT ν) :=
   inferInstanceAs (NullSingletonClass (volume.withDensity _))
 
 /-! ### The Cauchy anchor -/
@@ -228,8 +228,8 @@ lemma studentTNormConst_one : studentTNormConst 1 = π := by
 
 /-- **At one degree of freedom the Student-t law is the standard Cauchy law**, Mathlib's
 `cauchyMeasure 0 1`. -/
-theorem studentTMeasure_one : studentTMeasure 1 = cauchyMeasure 0 1 := by
-  rw [cauchyMeasure_of_scale_ne_zero 0 one_ne_zero, studentTMeasure]
+theorem studentT_one : studentT 1 = cauchyMeasure 0 1 := by
+  rw [cauchyMeasure_of_scale_ne_zero 0 one_ne_zero, studentT]
   congr 1 with x
   simp only [studentTPDF, cauchyPDF, studentTPDFReal, cauchyPDFReal, studentTKernel_one,
     studentTNormConst_one, sub_zero, NNReal.coe_one, one_pow]
@@ -296,4 +296,4 @@ theorem setIntegral_Ioi_mul_studentTPDFReal (hν : 1 < ν) (q : ℝ) :
   field_simp
   ring
 
-end MathFin
+end ProbabilityTheory

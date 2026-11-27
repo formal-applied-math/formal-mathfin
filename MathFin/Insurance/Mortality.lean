@@ -51,6 +51,8 @@ same calculus.
 * `survivalFromForce_pos`: positivity.
 * `gompertz_cumulative_force`: for `c ≠ 0`, `∫₀^t B·e^{c·u} du = (B/c)·(e^{c·t} − 1)`.
 * `thieleFactor_eq_exp_neg_integral`: the factor is `exp(−∫ₜˢ (δ + μ))`.
+* `hasDerivAt_integral_div_exp_neg_integral`: the integrating-factor reserve lemma, the derivative
+  `lam t * V t - G t / S t` of `V u = (∫ᵤᵀ G + c) / exp (-∫₀ᵘ lam)`.
 * `hasDerivAt_thieleReserve`: Thiele's equation `V' = (δ + μ) V + π − μ b` for the
   prospective reserve integral `thieleReserve`, at interior times.
 
@@ -149,6 +151,43 @@ theorem lundberg_zero_at_zero (lam c : ℝ) (M : ℝ → ℝ) (hM0 : M 0 = 1) :
   rw [hM0]
   ring
 
+/-- **The integrating-factor reserve lemma.** For `lam` and `G` continuous on `[0, T]`, a constant
+`c` and `0 < t < T`, the function
+`u ↦ V u = (∫ᵤᵀ G + c) / S u`, with the integrating factor `S u = exp (−∫₀ᵘ lam)`, has derivative
+`lam t * V t − G t / S t` at `t`: the integral loses `G` at its lower limit and the factor `S`
+grows at the rate `−lam`. Thiele's equation is the case `G = S · (μb − prem)`
+(`hasDerivAt_thieleReserve`). -/
+theorem hasDerivAt_integral_div_exp_neg_integral (lam G : ℝ → ℝ) (c T : ℝ)
+    (hlam : ContinuousOn lam (Set.Icc 0 T)) (hG : ContinuousOn G (Set.Icc 0 T)) {t : ℝ}
+    (ht0 : 0 < t) (htT : t < T) :
+    HasDerivAt (fun u ↦ ((∫ s in u..T, G s) + c) / Real.exp (-∫ v in (0 : ℝ)..u, lam v))
+      (lam t * (((∫ s in t..T, G s) + c) / Real.exp (-∫ v in (0 : ℝ)..t, lam v))
+        - G t / Real.exp (-∫ v in (0 : ℝ)..t, lam v)) t := by
+  have hlamAt : ∀ x ∈ Set.Ioo (0 : ℝ) T, ContinuousAt lam x :=
+    fun x hx ↦ hlam.continuousAt (Icc_mem_nhds hx.1 hx.2)
+  have hGAt : ∀ x ∈ Set.Ioo (0 : ℝ) T, ContinuousAt G x :=
+    fun x hx ↦ hG.continuousAt (Icc_mem_nhds hx.1 hx.2)
+  have hlamM : StronglyMeasurableAtFilter lam (nhds t) volume :=
+    ContinuousAt.stronglyMeasurableAtFilter isOpen_Ioo hlamAt t ⟨ht0, htT⟩
+  have hGM : StronglyMeasurableAtFilter G (nhds t) volume :=
+    ContinuousAt.stronglyMeasurableAtFilter isOpen_Ioo hGAt t ⟨ht0, htT⟩
+  have hlamInt0t : IntervalIntegrable lam volume 0 t :=
+    ContinuousOn.intervalIntegrable_of_Icc ht0.le
+      (hlam.mono (Set.Icc_subset_Icc le_rfl htT.le))
+  have hGInt : IntervalIntegrable G volume t T :=
+    ContinuousOn.intervalIntegrable_of_Icc htT.le
+      (hG.mono (Set.Icc_subset_Icc ht0.le le_rfl))
+  have hPderiv : HasDerivAt (fun u ↦ ∫ v in (0 : ℝ)..u, lam v) (lam t) t :=
+    integral_hasDerivAt_right hlamInt0t hlamM (hlamAt t ⟨ht0, htT⟩)
+  have hSderiv : HasDerivAt (fun u ↦ Real.exp (-∫ v in (0 : ℝ)..u, lam v))
+      (Real.exp (-∫ v in (0 : ℝ)..t, lam v) * -lam t) t := hPderiv.neg.exp
+  have hAderiv : HasDerivAt (fun u ↦ (∫ s in u..T, G s) + c) (-G t) t := by
+    exact (integral_hasDerivAt_left hGInt hGM (hGAt t ⟨ht0, htT⟩)).add_const c
+  have hSt := Real.exp_ne_zero (-∫ v in (0 : ℝ)..t, lam v)
+  refine (hAderiv.div hSderiv hSt).congr_deriv ?_
+  field_simp
+  ring
+
 /-- The **Thiele discount factor** from `t` to `s`: the discount `exp(−∫ₜˢ δ)` at the force of
 interest `δ`, times the survival factor `hazardSurvival μ s / hazardSurvival μ t` from `t` to `s`
 under the force of mortality `μ`, a probability when `μ ≥ 0`
@@ -178,9 +217,9 @@ noncomputable def thieleReserve (δ μ prem b : ℝ → ℝ) (g T t : ℝ) : ℝ
 
 /-- **Thiele's differential equation.** At each interior time `t`, the reserve
 `V` satisfies `V' = (δ + μ) * V + prem - μ * b`. The proof factors the discount
-factor as `S s / S t` with `S u = exp (-∫₀ᵘ (δ + μ))`, so `V` is a quotient of
-an integral (depending on `t` only through its lower limit) by `S`, and applies
-the fundamental theorem of calculus with the quotient rule. -/
+factor as `S s / S t` with `S u = exp (-∫₀ᵘ (δ + μ))`, so `V` is `(∫ᵤᵀ G + S T * g) / S u` with
+`G = S * (μ * b - prem)`, and the integrating-factor reserve lemma
+(`hasDerivAt_integral_div_exp_neg_integral`) gives its derivative `(δ + μ) V - G / S`. -/
 theorem hasDerivAt_thieleReserve (δ μ prem b : ℝ → ℝ) (g T : ℝ) (hT : 0 < T)
     (hδ : ContinuousOn δ (Set.Icc 0 T)) (hμ : ContinuousOn μ (Set.Icc 0 T))
     (hprem : ContinuousOn prem (Set.Icc 0 T)) (hb : ContinuousOn b (Set.Icc 0 T))
@@ -202,43 +241,7 @@ theorem hasDerivAt_thieleReserve (δ μ prem b : ℝ → ℝ) (g T : ℝ) (hT : 
     exact Real.continuous_exp.comp_continuousOn hP'.neg
   have hGC : ContinuousOn G (Set.Icc 0 T) := hSC.mul ((hμ.mul hb).sub hprem)
   have hmem : Set.Icc (0:ℝ) T ∈ nhds t := Icc_mem_nhds ht0 htT
-  have hlamAt : ∀ x ∈ Set.Ioo (0:ℝ) T, ContinuousAt lam x :=
-    fun x hx => hlamC.continuousAt (Icc_mem_nhds hx.1 hx.2)
-  have hGAt : ∀ x ∈ Set.Ioo (0:ℝ) T, ContinuousAt G x :=
-    fun x hx => hGC.continuousAt (Icc_mem_nhds hx.1 hx.2)
-  have hlamM : StronglyMeasurableAtFilter lam (nhds t) volume :=
-    ContinuousAt.stronglyMeasurableAtFilter isOpen_Ioo hlamAt t ⟨ht0, htT⟩
-  have hGM : StronglyMeasurableAtFilter G (nhds t) volume :=
-    ContinuousAt.stronglyMeasurableAtFilter isOpen_Ioo hGAt t ⟨ht0, htT⟩
-  have htT' : t ≤ T := htT.le
-  have hlamInt0t : IntervalIntegrable lam volume 0 t :=
-    ContinuousOn.intervalIntegrable_of_Icc ht0.le
-      (hlamC.mono (Set.Icc_subset_Icc le_rfl htT'))
-  have hGInt : IntervalIntegrable G volume t T :=
-    ContinuousOn.intervalIntegrable_of_Icc htT'
-      (hGC.mono (Set.Icc_subset_Icc ht0.le le_rfl))
-  have hPderiv : HasDerivAt (fun u => ∫ v in (0:ℝ)..u, lam v) (lam t) t :=
-    integral_hasDerivAt_right hlamInt0t hlamM (hlamAt t ⟨ht0, htT⟩)
-  have hSderiv : HasDerivAt S (S t * -lam t) t := by
-    have h1 : HasDerivAt (fun u => -∫ v in (0:ℝ)..u, lam v) (-lam t) t :=
-      hPderiv.neg
-    exact h1.exp
-  have hAderiv : HasDerivAt A (-G t) t := by
-    have h1 : HasDerivAt (fun u => ∫ s in u..T, G s) (-G t) t :=
-      integral_hasDerivAt_left hGInt hGM (hGAt t ⟨ht0, htT⟩)
-    have h2 : HasDerivAt (fun _ => S T * g) 0 t := hasDerivAt_const t (S T * g)
-    have h3 : HasDerivAt ((fun u => ∫ s in u..T, G s) + (fun _ => S T * g))
-        (-G t) t := by
-      simpa using h1.add h2
-    exact h3
-  have hSapp : ∀ v : ℝ, S v = Real.exp (-∫ w in (0:ℝ)..v, lam w) :=
-    fun v => rfl
-  have hSt : S t ≠ 0 := by
-    rw [hSapp t]
-    exact Real.exp_ne_zero _
-  have hdiv : HasDerivAt (A / S)
-      ((-G t * S t - A t * (S t * -lam t)) / S t ^ 2) t :=
-    HasDerivAt.div hAderiv hSderiv hSt
+  have hSt : S t ≠ 0 := Real.exp_ne_zero _
   have hGs : ∀ s : ℝ, G s = S s * (μ s * b s - prem s) := fun s => rfl
   have hlamt : lam t = δ t + μ t := rfl
   have hI (f : ℝ → ℝ) (hf : ContinuousOn f (Set.Icc 0 T)) {a b : ℝ} (ha : a ∈ Set.Icc (0:ℝ) T)
@@ -277,15 +280,12 @@ theorem hasDerivAt_thieleReserve (δ μ prem b : ℝ → ℝ) (g T : ℝ) (hT : 
     change ∀ᶠ u in nhds t, thieleReserve δ μ prem b g T u = (A / S) u
     exact Filter.eventually_of_mem hmem
       (fun u hu => by simp only [hVeq u hu, Pi.div_apply])
-  have hmain := hdiv.congr_of_eventuallyEq heq
-  have hAS : (A t / S t) * (S t ^ 2) = A t * S t := by
-    rw [pow_two, ← mul_assoc, div_mul_cancel₀ _ hSt]
-  have hD : (-G t * S t - A t * (S t * -lam t)) / S t ^ 2
-      = (δ t + μ t) * thieleReserve δ μ prem b g T t + prem t - μ t * b t := by
-    rw [hVeq t ⟨ht0.le, htT.le⟩, hGs t, hlamt, div_eq_iff (pow_ne_zero 2 hSt)]
-    field_simp
-    ring
-  rw [← hD]
-  exact hmain
+  refine ((hasDerivAt_integral_div_exp_neg_integral lam G (S T * g) T hlamC hGC ht0
+    htT).congr_of_eventuallyEq heq).congr_deriv ?_
+  rw [hVeq t ⟨ht0.le, htT.le⟩]
+  change lam t * (A t / S t) - G t / S t = _
+  rw [hGs t, hlamt]
+  field_simp
+  ring
 
 end MathFin

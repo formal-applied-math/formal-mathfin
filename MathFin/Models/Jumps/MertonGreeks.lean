@@ -180,6 +180,19 @@ theorem mertonDelta_lt_one (hk : -1 < k) (S : ℝ) : mertonDelta S K r σ T k δ
 
 /-! ### Gamma -/
 
+/-- The gamma summand at spot `s ≥ a > 0` is at most `cₙ/(a σ √T)`: `ϕ ≤ 1` and `σₙ ≥ σ`. -/
+private lemma mertonGamma_summand_le (δ K r : ℝ) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k)
+    {a s : ℝ} (ha : 0 < a) (has : a ≤ s) (n : ℕ) :
+    mertonSpot 1 k Λ n
+        * gaussianPDFReal 0 1 (bsd1 (mertonSpot s k Λ n) K r (mertonVol σ δ T n) T)
+        / (s * mertonVol σ δ T n * Real.sqrt T)
+      ≤ mertonSpot 1 k Λ n / (a * σ * Real.sqrt T) :=
+  div_le_div₀ (mertonSpot_pos one_pos hk Λ n).le
+    (mul_le_of_le_one_right (mertonSpot_pos one_pos hk Λ n).le (gaussianPDFReal_zero_one_le_one _))
+    (mul_pos (mul_pos ha hσ) (Real.sqrt_pos.mpr hT))
+    (mul_le_mul_of_nonneg_right (mul_le_mul has (le_mertonVol δ hσ.le hT n) hσ.le
+      (ha.le.trans has)) (Real.sqrt_nonneg T))
+
 /-- **The Merton gamma**: `∑ₙ wₙ cₙ ϕ(d₁ⁿ)/(S σₙ √T)`, the Poisson mixture of the Black–Scholes
 gammas at the conditional spots, each multiplied by `cₙ²`. -/
 noncomputable def mertonGamma (S K r σ T k δ : ℝ) (Λ : ℝ≥0) : ℝ :=
@@ -240,16 +253,7 @@ theorem hasDerivAt_mertonDelta (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1
           * (S / 2 * σ * Real.sqrt T)⁻¹ := by
     have hs' : S / 2 < s := hs
     have hs0 : 0 < s := hS2.trans hs'
-    have hden : S / 2 * σ * Real.sqrt T ≤ s * mertonVol σ δ T n * Real.sqrt T :=
-      mul_le_mul_of_nonneg_right (mul_le_mul hs'.le (le_mertonVol δ hσ.le hT n) hσ.le hs0.le)
-        hsT.le
-    have hfrac : mertonSpot 1 k Λ n
-          * gaussianPDFReal 0 1 (bsd1 (mertonSpot s k Λ n) K r (mertonVol σ δ T n) T)
-          / (s * mertonVol σ δ T n * Real.sqrt T)
-        ≤ mertonSpot 1 k Λ n / (S / 2 * σ * Real.sqrt T) :=
-      div_le_div₀ (hc n).le
-        (mul_le_of_le_one_right (hc n).le (gaussianPDFReal_zero_one_le_one _))
-        (mul_pos (mul_pos hS2 hσ) hsT) hden
+    have hfrac := mertonGamma_summand_le (Λ := Λ) δ K r hσ hT hk hS2 hs'.le n
     calc ‖rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
           (mertonSpot 1 k Λ n
               * gaussianPDFReal 0 1 (bsd1 (mertonSpot s k Λ n) K r (mertonVol σ δ T n) T)
@@ -304,11 +308,8 @@ theorem mertonGamma_pos (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) {S : ℝ} (hS 
               * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol σ δ T n) T)
             / (S * mertonVol σ δ T n * Real.sqrt T))
         ≤ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * (mertonSpot 1 k Λ n / (S * σ * Real.sqrt T)) :=
-          mul_le_mul_of_nonneg_left (div_le_div₀ (hc n).le
-            (mul_le_of_le_one_right (hc n).le (gaussianPDFReal_zero_one_le_one _))
-            (mul_pos (mul_pos hS hσ) (Real.sqrt_pos.mpr hT))
-            (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (le_mertonVol δ hσ.le hT n)
-              hS.le) (Real.sqrt_nonneg T))) (by positivity)
+          mul_le_mul_of_nonneg_left
+            (mertonGamma_summand_le (Λ := Λ) δ K r hσ hT hk hS le_rfl n) (by positivity)
       _ = rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot 1 k Λ n
           * (S * σ * Real.sqrt T)⁻¹ := by
           ring
@@ -371,18 +372,10 @@ theorem hasDerivAt_mertonCallPrice_sigma {S : ℝ} (hS : 0 < S) (hK : 0 < K) (hT
     have hphi := gaussianPDFReal_zero_one_le_one
       (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
     have hphi0 := gaussianPDFReal_nonneg 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
-    have hinner : mertonSpot S k Λ n
-          * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
-          * Real.sqrt T * (s / mertonVol s δ T n)
-        ≤ mertonSpot S k Λ n * Real.sqrt T := by
-      calc mertonSpot S k Λ n
-            * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
-            * Real.sqrt T * (s / mertonVol s δ T n)
-          ≤ mertonSpot S k Λ n * 1 * Real.sqrt T * 1 :=
-            mul_le_mul (mul_le_mul_of_nonneg_right
-              (mul_le_mul_of_nonneg_left hphi (hspot n).le) (Real.sqrt_nonneg T)) hq1 hq0
-              (mul_nonneg (mul_nonneg (hspot n).le zero_le_one) (Real.sqrt_nonneg T))
-        _ = mertonSpot S k Λ n * Real.sqrt T := by ring
+    -- `S ϕ √T (σ/σₙ) ≤ S ϕ √T ≤ S √T`, from `σ/σₙ ≤ 1` and `ϕ ≤ 1`
+    have hinner := (mul_le_of_le_one_right
+      (mul_nonneg (mul_nonneg (hspot n).le hphi0) (Real.sqrt_nonneg T)) hq1).trans
+        (mul_le_mul_of_nonneg_right (mul_le_of_le_one_right (hspot n).le hphi) (Real.sqrt_nonneg T))
     calc ‖rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! *
           (mertonSpot S k Λ n
             * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol s δ T n) T)
@@ -425,13 +418,13 @@ theorem mertonVega_pos {S : ℝ} (hS : 0 < S) (hT : 0 < T) (hk : -1 < k) (hσ : 
           (mertonSpot S k Λ n
             * gaussianPDFReal 0 1 (bsd1 (mertonSpot S k Λ n) K r (mertonVol σ δ T n) T)
             * Real.sqrt T * (σ / mertonVol σ δ T n))
-        ≤ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * (mertonSpot S k Λ n * 1 * Real.sqrt T * 1) :=
-          mul_le_mul_of_nonneg_left (mul_le_mul (mul_le_mul_of_nonneg_right
-            (mul_le_mul_of_nonneg_left (gaussianPDFReal_zero_one_le_one _) (hspot n).le)
-            (Real.sqrt_nonneg T)) ((div_le_one hv).mpr (le_mertonVol δ hσ.le hT n))
-            (div_nonneg hσ.le hv.le)
-            (mul_nonneg (mul_nonneg (hspot n).le zero_le_one) (Real.sqrt_nonneg T)))
-            (by positivity)
+        ≤ rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * (mertonSpot S k Λ n * Real.sqrt T) :=
+          mul_le_mul_of_nonneg_left ((mul_le_of_le_one_right (mul_nonneg
+            (mul_nonneg (hspot n).le (gaussianPDFReal_nonneg 0 1 _)) (Real.sqrt_nonneg T))
+            ((div_le_one hv).mpr (le_mertonVol δ hσ.le hT n))).trans
+              (mul_le_mul_of_nonneg_right
+                (mul_le_of_le_one_right (hspot n).le (gaussianPDFReal_zero_one_le_one _))
+                (Real.sqrt_nonneg T))) (by positivity)
       _ = rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot S k Λ n * Real.sqrt T := by ring
   refine hsum.tsum_pos hterm 0 ?_
   rw [pow_zero, Nat.factorial_zero, Nat.cast_one, mul_one, div_one]

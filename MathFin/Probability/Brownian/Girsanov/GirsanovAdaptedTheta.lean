@@ -11,7 +11,7 @@ public import MathFin.Probability.Brownian.Girsanov.GirsanovPredictableTheta
 
 A bounded (`|θ| ≤ C`) adapted (`𝓕_t`-measurable in each `t`) path-continuous market price of risk is
 strongly predictable (`isStronglyPredictable_of_bdd_adapted_cont`: left-continuous and adapted), so
-the bounded predictable Girsanov theorem `Btheta_isQBrownianMotion_predictable_of_bdd` applies. This
+the bounded predictable Girsanov theorem `Btheta_isBrownianOn_predictable_of_bdd` applies. This
 file identifies its objects with the pathwise ones of the continuous case, and transports the
 conclusion across the identification:
 
@@ -42,7 +42,7 @@ Brownian motion; path continuity is not stated.
 
 ## Main results
 
-* `Btheta_isQBrownianMotion_adapted`: for a bounded adapted path-continuous `θ`, `B^θ` is
+* `Btheta_isBrownianOn_adapted`: for a bounded adapted path-continuous `θ`, `B^θ` is
   `IsBrownianOn` `[0, T]` under `Q = μ.withDensity Z_T` with `Z_T` the Doléans density
   `contDoleansExp`. Path continuity is not part of the conclusion.
 * `itoIntPred_eq_itoIntCont`: the continuous Itô integral is the predictable one (by `rfl`).
@@ -147,9 +147,9 @@ the Doléans density `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`, the 
 `B^θ_u = B_u + ∫₀ᵘθ ds` has, on `[0,T]`: zero start, Gaussian increments `𝒩(0,t−s)`, and
 independent increments (`HasIndepIncrements`), which fix its finite-dimensional laws on `[0,T]`;
 path continuity is not stated. The bounded predictable theorem
-`Btheta_isQBrownianMotion_predictable_of_bdd` at the (predictable) continuous `θ`, transported along
+`Btheta_isBrownianOn_predictable_of_bdd` at the (predictable) continuous `θ`, transported along
 `ZTpred_ae_eq_contDoleansExp` and `BthetaPred_ae_eq_BthetaCont`. -/
-theorem Btheta_isQBrownianMotion_adapted :
+theorem Btheta_isBrownianOn_adapted :
     IsBrownianOn (μ.withDensity fun ω ↦
       ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) T
       (BthetaCont B θ) := by
@@ -159,7 +159,7 @@ theorem Btheta_isQBrownianMotion_adapted :
         (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω) :=
     (ZTpred_ae_eq_contDoleansExp hB hBmeas hadap hcont hbdd T).mono fun _ h ↦
       congrArg ENNReal.ofReal h
-  have h := Btheta_isQBrownianMotion_predictable_of_bdd hB hBmeas hpred hbdd T
+  have h := Btheta_isBrownianOn_predictable_of_bdd hB hBmeas hpred hbdd T
   rw [withDensity_congr_ae hZ] at h
   exact IsBrownianOn.congr_modification
     (fun u hu ↦ (withDensity_absolutelyContinuous μ _).ae_eq

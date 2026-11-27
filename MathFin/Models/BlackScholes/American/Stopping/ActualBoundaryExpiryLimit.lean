@@ -19,7 +19,8 @@ double-boundary case) are not treated here, because the underlying boundary theo
 
 ## Main results
 
-`tendsto_brownianUsualExerciseBoundary_expiry`.
+* `tendsto_brownianUsualExerciseBoundary_expiry`: for `K, σ > 0`, `0 < r` and `0 ≤ q ≤ r`, the
+  exercise boundary `brownianUsualExerciseBoundary K r q σ τ.toNNReal` tends to `K` as `τ ↓ 0`.
 
 ## References
 

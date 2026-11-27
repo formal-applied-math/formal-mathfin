@@ -135,4 +135,41 @@ theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     rwa [hfe] at h
   exact (hB.hasLaw_sub t₁ t₀).integrable_fun_comp hg
 
+omit hB in
+open Set in
+/-- **The second-order Taylor remainder under an oscillation bound on `f''`**: if `f''` stays
+within `η` of `f''(x)` between `x` and `y`, the remainder is at most `η (y − x)²`. Two
+applications of the mean value inequality. -/
+theorem abs_discreteTaylorRemainder_le_of_abs_sub_le {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x) {x y η : ℝ}
+    (hη : ∀ t ∈ uIcc x y, |f'' t - f'' x| ≤ η) :
+    |discreteTaylorRemainder f f' f'' x y| ≤ η * (y - x) ^ 2 := by
+  have hη0 : 0 ≤ η := (abs_nonneg _).trans (hη x left_mem_uIcc)
+  have hd1 (u : ℝ) : HasDerivAt (fun s ↦ f' s - f' x - f'' x * (s - x)) (f'' u - f'' x) u := by
+    have h := ((hf' u).sub_const (f' x)).sub
+      (((hasDerivAt_id u).sub_const x).const_mul (f'' x))
+    simp only [id_eq] at h
+    convert h using 1; ring
+  have hL1 (t : ℝ) (ht : t ∈ uIcc x y) : |f' t - f' x - f'' x * (t - x)| ≤ η * |y - x| := by
+    have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
+      (fun u _ ↦ (hd1 u).hasDerivWithinAt) (fun u hu ↦ (Real.norm_eq_abs _).trans_le (hη u hu))
+      left_mem_uIcc ht
+    simp only [Real.norm_eq_abs, sub_self, mul_zero, sub_zero] at h
+    exact h.trans (mul_le_mul_of_nonneg_left (abs_sub_left_of_mem_uIcc ht) hη0)
+  have hd0 (u : ℝ) : HasDerivAt (fun s ↦ f s - f x - f' x * (s - x) - 1 / 2 * f'' x * (s - x) ^ 2)
+      (f' u - f' x - f'' x * (u - x)) u := by
+    have h := (((hf u).sub_const (f x)).sub
+        (((hasDerivAt_id u).sub_const x).const_mul (f' x))).sub
+        ((((hasDerivAt_id u).sub_const x).pow 2).const_mul (1 / 2 * f'' x))
+    simp only [id_eq] at h
+    convert h using 1; ring
+  have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
+    (fun u _ ↦ (hd0 u).hasDerivWithinAt) (fun u hu ↦ (Real.norm_eq_abs _).trans_le (hL1 u hu))
+    left_mem_uIcc right_mem_uIcc
+  simp only [Real.norm_eq_abs] at h
+  rw [show f y - f x - f' x * (y - x) - 1 / 2 * f'' x * (y - x) ^ 2
+        - (f x - f x - f' x * (x - x) - 1 / 2 * f'' x * (x - x) ^ 2)
+      = discreteTaylorRemainder f f' f'' x y from by unfold discreteTaylorRemainder; ring] at h
+  exact h.trans_eq (by rw [mul_assoc, ← sq, sq_abs])
+
 end MathFin

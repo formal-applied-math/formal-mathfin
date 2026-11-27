@@ -6,6 +6,7 @@ Authors: Yang Ye, Raphael Coelho
 module
 
 public import MathFin.Probability.Jumps.PoissonInterarrival
+public import MathFin.Probability.Laws.ExpMin
 public import MathFin.Models.Credit.Credit
 public import MathFin.Models.Credit.HazardCurve
 public import MathFin.Models.Credit.CDSTimeVarying
@@ -277,29 +278,13 @@ theorem cumHazard_surjOn_Ici {h : ℝ → ℝ} (hh : Continuous h) (hpos : ∀ s
 `ν(−∞, x] = 1 − e^{−x}`. -/
 theorem expClock_Iic {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Iic x) = ENNReal.ofReal (1 - rexp (-x)) := by
-  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
-  rw [← ENNReal.ofReal_toReal (measure_ne_top _ _),
-    show ENNReal.toReal (expMeasure 1 (Set.Iic x)) = cdf (expMeasure 1) x from by
-      rw [cdf_eq_real, measureReal_def],
-    cdf_expMeasure_eq one_pos x, ite_eq_left hx]
-  simp only [one_mul]
+  simpa using expMeasure_Iic 1 one_pos hx
 
 /-- **Tail of the unit exponential clock**: for `ν = Exp(1)` and `x ≥ 0`,
 `ν(x, ∞) = e^{−x}`. -/
 theorem expClock_Ioi {x : ℝ} (hx : 0 ≤ x) :
     expMeasure 1 (Set.Ioi x) = ENNReal.ofReal (rexp (-x)) := by
-  have : IsProbabilityMeasure (expMeasure 1) := isProbabilityMeasure_expMeasure one_pos
-  have hset : Set.Ioi x = (Set.Iic x)ᶜ := by
-    ext y
-    simp only [Set.mem_Ioi, Set.mem_compl_iff, Set.mem_Iic, not_le]
-  have hnn : 0 ≤ 1 - rexp (-x) := by
-    have hle : rexp (-x) ≤ 1 := Real.exp_le_one_iff.mpr (by linarith)
-    linarith
-  rw [hset, measure_compl measurableSet_Iic (measure_ne_top _ _), measure_univ,
-    expClock_Iic hx, show ((1:ℝ≥0∞)) = ENNReal.ofReal 1 from ENNReal.ofReal_one.symm,
-    ← ENNReal.ofReal_sub 1 hnn]
-  congr 1
-  ring
+  simpa using expMeasure_Ioi 1 one_pos hx
 
 /-- The unit exponential clock is almost surely nonnegative. -/
 theorem expClock_null_neg {ξ : Ω → ℝ} (hξmeas : Measurable ξ)

@@ -36,7 +36,7 @@ of measure.
 
 The first three identify a tilted law by computing one function. Their users: the Esscher
 transform of the jump-diffusion log-return law (`jumpDiffusionIncrementLaw_tilted`) uses all three;
-the Gaussian increments of `isQBrownianMotion_of_expMartingale` are identified by
+the Gaussian increments of `isBrownianOn_of_expMartingale` are identified by
 `measure_eq_of_mgf_id_eq`; and the identification of the Lévy measure from the law
 (`jumpDiffusionIncrementLaw_eq_iff`) applies `measure_eq_of_mgf_id_eventuallyEq` to finite measures
 that are not probability laws. The Gaussian tilt gives the static Girsanov change of measure

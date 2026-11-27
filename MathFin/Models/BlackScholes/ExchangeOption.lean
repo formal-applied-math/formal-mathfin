@@ -56,9 +56,9 @@ discounted expected exchange payoff.
 * `margrabe_effective_variance`: substituting `σ₁²T, σ₂²T, ρσ₁σ₂T` gives the
   effective variance `(σ₁² + σ₂² − 2ρσ₁σ₂)·T`.
 * `exchange_payoff_eq_ratio`: `max(a − b, 0) = b · max(a/b − 1, 0)` for `b > 0`.
-* `margrabe_eq_bsVGarman`: Margrabe price is a `GarmanNormalForm` instance.
+* `margrabePrice_eq_bsVGarman`: Margrabe price is a `GarmanNormalForm` instance.
 * `margrabePrice_eq_bsV`: it is the Black–Scholes call formula at strike `S²₀` and rate `0`.
-* `margrabe_parity`: `Margrabe(S¹,S²) − Margrabe(S²,S¹) = S¹ − S²`.
+* `margrabe_parity`: `Margrabe(S²,S¹) = Margrabe(S¹,S²) − S¹ + S²` (tagged `@[pricing =]`).
 * `margrabe_price_via_call`: the exchange option is a `bs_call_formula` call
   on the ratio (price-level reduction).
 
@@ -145,7 +145,7 @@ second asset plays the role of the discounted strike and `DF = 1` because the
 S²-numeraire measure carries no discounting. So a *multivariate* option is the
 same closed form `V = A·Φ(d₁) − K·DF·Φ(d₂)` as every BS-family price — one
 more consumer of the `GarmanNormalForm` principle. -/
-theorem margrabe_eq_bsVGarman (S1 S2 σ T : ℝ) :
+theorem margrabePrice_eq_bsVGarman (S1 S2 σ T : ℝ) :
     margrabePrice S1 S2 σ T = bsVGarman S1 S2 1 σ T := by
   have hd1 : margrabeD1 S1 S2 σ T = gbsd1 S1 S2 1 σ T := by
     unfold margrabeD1 gbsd1; rw [mul_one]
@@ -162,19 +162,21 @@ theorem margrabePrice_eq_bsV (S1 S2 σ T : ℝ) : margrabePrice S1 S2 σ T = bsV
     ring
   rw [margrabePrice, bsV, margrabeD2, bsd2, hd1, zero_mul, neg_zero, Real.exp_zero, mul_one]
 
-/-- **Exchange-option parity** — the analog of put-call parity. The option to
+/-- **Exchange-option parity** — the analog of put-call parity, in price form (the reverse
+exchange option as a function of the forward one, as `bsP_eq_bsV`). The option to
 exchange asset 2 for asset 1 minus the option to exchange asset 1 for asset 2
 equals the forward on the spread:
 
-  `Margrabe(S¹, S²) − Margrabe(S², S¹) = S¹ − S²`.
+  `Margrabe(S², S¹) = Margrabe(S¹, S²) − S¹ + S²`.
 
 Foundation-certain: swapping the two assets sends `d₁ ↦ −d₂` and `d₂ ↦ −d₁`
 (the `σ²T/(σ√T) = σ√T` identity), and `Φ(x) + Φ(−x) = 1` (the same symmetry
 `Phi_add_Phi_neg` that drives put-call parity) collapses the rest. No
 probability machinery, no assumed moments — pure algebra on the closed form. -/
+@[pricing =]
 theorem margrabe_parity (S1 S2 σ T : ℝ)
     (hS1 : 0 < S1) (hS2 : 0 < S2) (hσ : σ ≠ 0) (hT : 0 < T) :
-    margrabePrice S1 S2 σ T - margrabePrice S2 S1 σ T = S1 - S2 := by
+    margrabePrice S2 S1 σ T = margrabePrice S1 S2 σ T - S1 + S2 := by
   have hσT : σ * Real.sqrt T ≠ 0 := mul_ne_zero hσ (Real.sqrt_pos.mpr hT).ne'
   -- The swapped d₁ and the original d₁ sum to σ√T.
   have hsum : margrabeD1 S2 S1 σ T + margrabeD1 S1 S2 σ T = σ * Real.sqrt T := by

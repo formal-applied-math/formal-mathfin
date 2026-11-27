@@ -37,6 +37,13 @@ His [ButterflyFreeSVI](https://github.com/robertmartin8/ButterflyFreeSVI) is por
 Black–Scholes call with a raw SVI volatility is convex in the strike. The modules carry his name
 and the landmark `MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex` records its scope.
 
+**Licence.** The upstream ButterflyFreeSVI repository carries no licence file. The grant is
+Robert Martin's reply on [#174](https://github.com/formal-applied-math/formal-mathfin/issues/174),
+in answer to the maintainer's offer to port the certificate under this repository's Apache-2.0
+licence: "Apache-2.0 is fine with me." The port is therefore Apache-2.0, and the headers keep his
+copyright. A LICENSE file upstream would make the grant self-standing, but the library does not
+wait on one.
+
 ## Bilokon, *The Contract Is Not the Model* (2026)
 
 Paul Bilokon, *The Contract Is Not the Model: Proof-Carrying Exotic Derivatives

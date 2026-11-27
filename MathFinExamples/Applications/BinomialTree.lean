@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin
+public import MathFinExamples.Applications.Provenance
 
 /-!
 # Using the library: a binomial tree you can trust
@@ -20,11 +21,14 @@ binomial tree before pricing on it. A tree is trustworthy when:
 This file checks the first three on a sample tree and the fourth on a separate CRR market:
 
 1. records a one-period tree as data (spot, strike, up and down factors, rate per step), with what
-   it leaves out;
-2. proves its no-arbitrage condition `d < eʳ < u` from the numbers (`sample_noArb`), using only
-   `1 + x ≤ eˣ`;
-3. prices a call on it, and proves the price is the cost of a hedge, `½` a share and a short bond,
-   that pays the call in both states (`TreeSheet.hedge`, `sample_price`);
+   it leaves out; the sample is the one-step Cox–Ross–Rubinstein tree of a market with `σ = 20%`,
+   `r = 5%`, `T = 1`;
+2. proves its no-arbitrage condition `d < eʳ < u` (`sample_noArb`) from `|r| √T < σ`
+   (`binomialNoArb_crr`);
+3. prices a call on it, and proves the price is the cost of a hedge, a share fraction and a short
+   bond,
+   that pays the call in both states (`TreeSheet.hedge`, `sample_price`), and is the only such
+   position, so the only arbitrage-free price (`TreeSheet.hedge_unique`);
 4. applies put–call parity `C − P = S − K e^{−nr}` on the `n`-step tree
    (`binomialPrice_callPut_parity`), which follows from the linearity of the tree price and the
    fact that the tree prices the stock at spot and cash at its discount;
@@ -40,7 +44,8 @@ This file checks the first three on a sample tree and the fourth on a separate C
 
 * `MathFin.BinomialNoArb`: the no-arbitrage condition.
 * `MathFin.binomialOptionPriceOnePeriod`, `replicating_portfolio_cost`, `replicating_payoff_up`,
-  `replicating_payoff_down`: the one-period price and its hedge.
+  `replicating_payoff_down`, `binomial_replicatingPortfolio_unique`,
+  `binomial_replication_cost_eq_price`: the one-period price, its hedge, and their uniqueness.
 * `MathFin.binomialPrice_callPut_parity`: put–call parity on the `n`-step tree, from
   `binomialPrice_add`, `binomialPrice_smul`, `binomialPrice_id` and `binomialPrice_const`.
 * `MathFin.Contracts.Binomial.market`, `isPricingMeasure_coinFlipMeasure`,
@@ -73,7 +78,7 @@ open scoped Topology NNReal
 
 /-- A one-period binomial tree for a call: the spot, the strike, the up and down factors, and the
 continuously compounded rate per step, with what the tree leaves out. -/
-structure TreeSheet where
+structure TreeSheet extends Provenance String where
   spot : ℝ
   strike : ℝ
   /-- The factor the underlying moves by in the up state. -/
@@ -83,10 +88,6 @@ structure TreeSheet where
   /-- The continuously compounded rate per step. -/
   rate : ℝ
   spot_pos : 0 < spot
-  /-- Where the numbers come from. -/
-  sources : List String
-  /-- What the tree does not model. -/
-  unmodelled : List String
 
 namespace TreeSheet
 
@@ -117,55 +118,91 @@ theorem hedge (t : TreeSheet) (h : BinomialNoArb t.up t.down t.rate) :
   ⟨replicating_portfolio_cost t.spot_pos h, replicating_payoff_up t.spot_pos h,
     replicating_payoff_down t.spot_pos h⟩
 
+/-- **The hedge is the only one, and its cost the only arbitrage-free price.** On an
+arbitrage-free tree, any position of `Δ` shares and `B` in the bond that pays the call in both
+states is the hedge `shares`, `bond` (`binomial_replicatingPortfolio_unique`), and so costs the tree
+price (`binomial_replication_cost_eq_price`): a different price would be an arbitrage. -/
+theorem hedge_unique (t : TreeSheet) (h : BinomialNoArb t.up t.down t.rate) {Δ B : ℝ}
+    (hup : Δ * (t.spot * t.up) + B * Real.exp t.rate = t.callUp)
+    (hdown : Δ * (t.spot * t.down) + B * Real.exp t.rate = t.callDown) :
+    Δ = t.shares ∧ B = t.bond ∧ Δ * t.spot + B = t.price := by
+  obtain ⟨p, -, hp⟩ := binomial_replicatingPortfolio_unique (V_u := t.callUp) (V_d := t.callDown)
+    t.spot_pos h
+  obtain ⟨h₁, h₂⟩ := Prod.mk.inj ((hp (Δ, B) ⟨hup, hdown⟩).trans
+    (hp (t.shares, t.bond) ⟨(t.hedge h).2.1, (t.hedge h).2.2⟩).symm)
+  exact ⟨h₁, h₂, binomial_replication_cost_eq_price t.spot_pos h hup hdown⟩
+
 end TreeSheet
 
-/-- Illustrative numbers: spot `100`, strike `100`, the underlying up `10%` or down `10%` over
-one step, and a rate of `1%` per step. -/
+/-- The one-step Cox–Ross–Rubinstein tree of a market with volatility `20%` and rate `5%` over a
+one-year horizon: spot `100`, strike `100`, the up and down factors `crrUp 0.2 1 1 = e^{0.2}` and
+`crrDown 0.2 1 1 = e^{−0.2}`, and the rate per step `crrPerStepRate 0.05 1 1 = 0.05`. -/
 noncomputable def sample : TreeSheet where
   spot := 100
   strike := 100
-  up := 1.1
-  down := 0.9
-  rate := 0.01
+  up := crrUp 0.2 1 1
+  down := crrDown 0.2 1 1
+  rate := crrPerStepRate 0.05 1 1
   spot_pos := by norm_num
-  sources := ["illustrative: a one-step tree for an at-the-money call"]
+  sources := ["illustrative: the one-step CRR tree (σ = 20%, r = 5%, T = 1), at the money"]
   unmodelled :=
     ["dividends on the underlying", "transaction costs and bid–ask spreads",
       "moves other than up or down by the stated factors", "a rate that changes over the step"]
 
-/-- **The sample tree admits no arbitrage**: `0.9 < e^{0.01} < 1.1`, from `1 + x ≤ eˣ` at `0.01`
-and at `−0.01`. -/
-theorem sample_noArb : BinomialNoArb sample.up sample.down sample.rate := by
-  have h₁ : (1.01 : ℝ) ≤ Real.exp 0.01 := by linarith [Real.add_one_le_exp (0.01 : ℝ)]
-  have h₂ : (0.99 : ℝ) ≤ Real.exp (-0.01) := by linarith [Real.add_one_le_exp (-0.01 : ℝ)]
-  have h₃ : Real.exp 0.01 * Real.exp (-0.01) = 1 := by rw [← Real.exp_add]; norm_num
-  refine ⟨by norm_num [sample], by simp only [sample]; linarith, ?_⟩
-  simp only [sample]
-  nlinarith [Real.exp_pos (0.01 : ℝ)]
+theorem sample_spot : sample.spot = 100 := rfl
 
-/-- **The sample call's price, and its hedge.** The call pays `10` up and `0` down. It costs
-`50 − 45 e^{−0.01}`, about `5.45` (a numerical remark, not proved): half a share, and a bond
-position worth `−45 e^{−0.01}` today. -/
+theorem sample_strike : sample.strike = 100 := rfl
+
+theorem sample_up : sample.up = Real.exp 0.2 := by simp [sample, crrUp, crrStep]
+
+theorem sample_down : sample.down = Real.exp (-0.2) := by simp [sample, crrDown, crrStep]
+
+theorem sample_rate : sample.rate = 0.05 := by simp [sample, crrPerStepRate, crrStep]
+
+/-- **The sample tree admits no arbitrage**: `|r| √T = 0.05 < 0.2 = σ` (`binomialNoArb_crr`). -/
+theorem sample_noArb : BinomialNoArb sample.up sample.down sample.rate := by
+  have hrT : |(0.05 : ℝ)| * Real.sqrt 1 < 0.2 := by
+    rw [Real.sqrt_one, abs_of_pos (by norm_num)]
+    norm_num
+  exact binomialNoArb_crr one_pos hrT one_pos
+
+/-- **The sample call's price, and its hedge.** With `a = e^{0.2}` the call pays `100 (a − 1)` up
+and `0` down. It costs `100 (a − e^{−0.05}) / (a + 1)`: `a / (a + 1)` of a share, and a bond
+position worth `−100 e^{−0.05} / (a + 1)` today. -/
 theorem sample_price :
-    sample.shares = 1 / 2 ∧ sample.bond = -45 * Real.exp (-0.01) ∧
-      sample.price = 50 - 45 * Real.exp (-0.01) := by
-  have hUp : sample.callUp = 10 := by norm_num [TreeSheet.callUp, sample]
-  have hDown : sample.callDown = 0 := by norm_num [TreeSheet.callDown, sample]
-  have hΔ : sample.shares = 1 / 2 := by
-    rw [TreeSheet.shares, hUp, hDown]
-    norm_num [sample]
-  have hB : sample.bond = -45 * Real.exp (-0.01) := by
-    rw [TreeSheet.bond, hUp, hDown]
-    norm_num [sample]
-    ring
+    sample.shares = Real.exp 0.2 / (Real.exp 0.2 + 1) ∧
+      sample.bond = -(100 * Real.exp (-0.05)) / (Real.exp 0.2 + 1) ∧
+      sample.price = 100 * (Real.exp 0.2 - Real.exp (-0.05)) / (Real.exp 0.2 + 1) := by
+  have ha : 1 < Real.exp 0.2 := by
+    linarith [Real.add_one_lt_exp (x := (0.2 : ℝ)) (by norm_num)]
+  have hab : Real.exp 0.2 * Real.exp (-0.2) = 1 := by rw [← Real.exp_add]; norm_num
+  have hb : Real.exp (-0.2) < 1 := by
+    nlinarith [mul_pos (sub_pos.2 ha) (Real.exp_pos (-0.2))]
+  have hne : Real.exp 0.2 + 1 ≠ 0 := by positivity
+  have hsub : Real.exp 0.2 - Real.exp (-0.2) ≠ 0 := by linarith
+  have hUp : sample.callUp = 100 * Real.exp 0.2 - 100 := by
+    rw [TreeSheet.callUp, sample_spot, sample_strike, sample_up]
+    exact max_eq_left (by linarith)
+  have hDown : sample.callDown = 0 := by
+    rw [TreeSheet.callDown, sample_spot, sample_strike, sample_down]
+    exact max_eq_right (by linarith)
+  have hΔ : sample.shares = Real.exp 0.2 / (Real.exp 0.2 + 1) := by
+    rw [TreeSheet.shares, hUp, hDown, sample_spot, sample_up, sample_down,
+      div_eq_div_iff (mul_ne_zero (by norm_num) hsub) hne]
+    linear_combination 100 * hab
+  have hB : sample.bond = -(100 * Real.exp (-0.05)) / (Real.exp 0.2 + 1) := by
+    rw [TreeSheet.bond, hUp, hDown, sample_rate, sample_up, sample_down,
+      div_eq_div_iff hsub hne]
+    linear_combination (-100 * Real.exp (-0.05) * Real.exp 0.2) * hab
   refine ⟨hΔ, hB, ?_⟩
-  rw [← (sample.hedge sample_noArb).1, hΔ, hB]
-  norm_num [sample]
+  rw [← (sample.hedge sample_noArb).1, hΔ, hB, sample_spot, div_mul_eq_mul_div, ← add_div]
+  congr 1
   ring
 
 /-! ### The tree as a market -/
 
-/-- The risk-neutral up-probability of the sample tree, `(e^{0.01} − 0.9) / 0.2`. -/
+/-- The risk-neutral up-probability of the sample tree,
+`(e^{0.05} − e^{−0.2}) / (e^{0.2} − e^{−0.2})`. -/
 noncomputable def sampleQ : ℝ≥0 :=
   ⟨crrUpProb sample.up sample.down sample.rate, (crrUpProb_mem_Ioo sample_noArb).1.le⟩
 
@@ -177,7 +214,7 @@ noncomputable def fairCoin : MeasureTheory.Measure (ℕ → Bool) :=
   coinFlipMeasure (1 / 2) (by norm_num)
 
 /-- **The sample tree as a market**: one step a year, the spot after the flips, the money market
-`e^{0.01 n}` as numéraire, and a fair coin as the physical law. -/
+`e^{0.05 n}` as numéraire, and a fair coin as the physical law. -/
 noncomputable def sampleMarket : Market Unit (ℕ → Bool) :=
   Contracts.Binomial.market fairCoin sample.spot sample.up sample.down sample.rate (h := 1)
     zero_le_one
@@ -193,7 +230,7 @@ theorem sampleMarket_checked :
     zero_le_one (p := 1 / 2) (by norm_num) (by norm_num) 1, fun Q hQ ↦ ?_⟩
   rw [sampleMarket, Contracts.europeanCall,
     Contracts.Binomial.price_pay_eq_binomialPrice_of_isPricingMeasure (by norm_num [sample])
-      sample_noArb (q := sampleQ) rfl one_pos (T := 1) (N := 1) (by norm_num)
+      sample_noArb one_pos (T := 1) (N := 1) (by norm_num)
       (a := Contracts.europeanCallPayoff sample.strike 1)
       (g := fun S ↦ max (S - sample.strike) 0) (fun _ ↦ rfl) hQ]
   exact (binomialPrice_succ _ _ _ _ 0 _).trans rfl
@@ -219,7 +256,7 @@ theorem market_tendsto_bs :
 
 /-- **The check for the sample tree and market**, the statement this file's build certifies:
 - the sample tree admits no arbitrage;
-- the call's price on it is `50 − 45 e^{−0.01}`;
+- the call's price on it is `100 (e^{0.2} − e^{−0.05}) / (e^{0.2} + 1)`;
 - half a share and the bond cost that price and pay the call in both states;
 - put–call parity holds on every `n`-step version of the tree;
 - the sample tree, as a market under a fair coin, is priced by its risk-neutral law, and every
@@ -228,7 +265,7 @@ theorem market_tendsto_bs :
   its Black–Scholes call price. -/
 theorem sample_checked :
     BinomialNoArb sample.up sample.down sample.rate ∧
-      sample.price = 50 - 45 * Real.exp (-0.01) ∧
+      sample.price = 100 * (Real.exp 0.2 - Real.exp (-0.05)) / (Real.exp 0.2 + 1) ∧
       (sample.shares * sample.spot + sample.bond = sample.price ∧
         sample.shares * (sample.spot * sample.up) + sample.bond * Real.exp sample.rate
           = sample.callUp ∧

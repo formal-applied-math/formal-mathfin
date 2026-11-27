@@ -73,7 +73,9 @@ open MeasureTheory
 open scoped NNReal
 
 /-- Covered-interest-parity FX forward rate for maturity `T`, continuous
-compounding: `F(0, T) = S · exp((r_d - r_f) · T)`. -/
+compounding: `F(0, T) = S · exp((r_d - r_f) · T)`. It is the library's cost-of-carry forward: the
+foreign rate `r_f` is the slot of any continuous yield (a commodity's convenience yield, a
+dividend yield), as `ContangoBackwardation.lean` reads it. -/
 noncomputable def fxForward (S r_d r_f T : ℝ) : ℝ := S * Real.exp ((r_d - r_f) * T)
 
 /-- **Covered interest parity from no-arbitrage.** A finite-state market with

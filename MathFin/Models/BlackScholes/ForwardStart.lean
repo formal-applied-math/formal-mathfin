@@ -24,14 +24,18 @@ discounted price at `t₁` freezes at its mean, and the payoff of the ratio keep
 unit-spot asset over the remaining time `τ = T − t₁`. The frozen leg contributes the martingale
 mean `e^{−rt₁} 𝔼[S_{t₁}] = S₀` (`discounted_terminal_eq_S0`), the ratio leg the Black–Scholes call
 price on a unit spot, `bsV α r σ 1 τ` (`integral_bsCall_payoff_eq_bsV`). The closed form
-`S₀ · bsV α r σ 1 (T − t₁)` is Rubinstein's at zero dividend yield: the general formula's
-dividend scaling `S₀ e^{−qT}` and its rate `r − q` are absent because this market's asset pays
-no dividends.
+`S₀ · bsV α r σ 1 (T − t₁)` is Rubinstein's at zero dividend yield; with a continuous dividend
+yield `q` the asset drifts at `r − q` and the value is `S₀ e^{−qT} · bsV α (r − q) σ 1 (T − t₁)`
+(`value_forwardStartCall_div`), the discount `e^{−rT}` splitting as `e^{−qT} e^{−(r−q)T}`.
 
 ## Main results
 
 * `value_forwardStartCall`: on the risk-neutral geometric Brownian path of a filtered
   pre-Brownian motion, the forward-start call's value is `S₀ · bsV α r σ 1 (T − t₁)`.
+* `value_forwardStartCall_div`: the same with a continuous dividend yield `q`: the asset is
+  `pathAssets S₀ (r − q) σ B` and the value is `S₀ e^{−qT} · bsV α (r − q) σ 1 (T − t₁)`
+  (equal to `S₀ e^{−qt₁} · bsVDiv α r q σ 1 (T − t₁)`), Rubinstein's general formula; at `q = 0`
+  it is `value_forwardStartCall`.
 * `price_forwardStartCall_constGirsanovMeasure`: in the Black–Scholes market, under the Girsanov
   pricing measure of the market price of risk, the forward-start call has that same price,
   whatever the physical drift.
@@ -81,14 +85,8 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
       = S_0 * bsV α r σ 1 ((T : ℝ) - (t₁ : ℝ)) := by
   have hT : 0 < (T : ℝ) := lt_trans ht₁ hτ
   have ht₁T : t₁ ≤ T := by exact_mod_cast hτ.le
-  have hposT : ∀ ω, 0 ≤ pathAssets S_0 r σ B () T ω := by
-    intro ω
-    unfold pathAssets
-    exact mul_nonneg hS₀.le (Real.exp_pos _).le
-  have hpos₁ : ∀ ω, 0 ≤ pathAssets S_0 r σ B () t₁ ω := by
-    intro ω
-    unfold pathAssets
-    exact mul_nonneg hS₀.le (Real.exp_pos _).le
+  have hposT := pathAssets_nonneg B hS₀.le r σ T
+  have hpos₁ := pathAssets_nonneg B hS₀.le r σ t₁
   have hZlaw : HasLaw (fun ω ↦ (B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ)))
       (gaussianReal 0 1) Q :=
     scaled_increment_law hB.toIsPreBrownianReal (by exact_mod_cast hτ)
@@ -136,21 +134,8 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
         max (bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
           ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) - α) 0 := by
     intro ω
-    have hratio : pathAssets S_0 r σ B () T ω = pathAssets S_0 r σ B () t₁ ω *
-        Real.exp ((r - σ ^ 2 / 2) * ((T : ℝ) - (t₁ : ℝ)) + σ * (B T ω - B t₁ ω)) := by
-      unfold pathAssets
-      rw [mul_assoc, ← Real.exp_add]
-      congr 2
-      ring
-    have hbs : Real.exp ((r - σ ^ 2 / 2) * ((T : ℝ) - (t₁ : ℝ)) + σ * (B T ω - B t₁ ω))
-        = bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
-          ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) := by
-      unfold bsTerminal
-      rw [one_mul]
-      congr 1
-      have hne : Real.sqrt ((T : ℝ) - (t₁ : ℝ)) ≠ 0 := (Real.sqrt_pos.mpr (sub_pos.2 hτ)).ne'
-      field_simp
-    rw [hratio, hbs, mul_comm α (pathAssets S_0 r σ B () t₁ ω), ← mul_sub]
+    rw [pathAssets_eq_mul_bsTerminal B hτ S_0 r σ ω,
+      mul_comm α (pathAssets S_0 r σ B () t₁ ω), ← mul_sub]
     by_cases hle : bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
         ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) ≤ α
     · have hle' : bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
@@ -217,6 +202,28 @@ theorem value_forwardStartCall {Q : Measure Ω} [IsProbabilityMeasure Q]
   rw [forwardStartCall, Contract.value_pay]
   simp only [Payoff.eval, scenarioAt]
   rw [integral_congr_ae (ae_of_all _ hfactor), hsplit, hEX, mul_assoc, ← neg_mul, hEY]
+
+/-- **The forward-start call with a continuous dividend yield** (Rubinstein's general formula).
+On the asset `pathAssets S₀ (r − q) σ B` that drifts at `r − q` (rate `r`, dividend yield `q`),
+discounted at `e^{−rT}`, the value of `forwardStartCall α t₁ T` is
+`S₀ e^{−qT} · bsV α (r − q) σ 1 (T − t₁) = S₀ e^{−qt₁} · bsVDiv α r q σ 1 (T − t₁)`: the discount
+splits as `e^{−qT} e^{−(r−q)T}`, and the rest is `value_forwardStartCall` at the rate `r − q`.
+At `q = 0` the right side is the statement of `value_forwardStartCall`. -/
+theorem value_forwardStartCall_div {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ} (hB : IsFilteredPreBrownian B 𝓕 Q)
+    {S_0 r q α σ : ℝ} {t₁ T : ℝ≥0} (hS₀ : 0 < S_0) (hα : 0 < α) (hσ : 0 < σ)
+    (ht₁ : 0 < (t₁ : ℝ)) (hτ : (t₁ : ℝ) < (T : ℝ)) :
+    (forwardStartCall α t₁ T).value Q (fun _ _ ↦ Real.exp (-(r * (T : ℝ))))
+        (pathAssets S_0 (r - q) σ B)
+      = S_0 * Real.exp (-(q * (T : ℝ))) * bsV α (r - q) σ 1 ((T : ℝ) - (t₁ : ℝ)) := by
+  have h := value_forwardStartCall hB (r := r - q) hS₀ hα hσ ht₁ hτ
+  simp only [forwardStartCall, Contract.value_pay] at h ⊢
+  have hexp : Real.exp (-(r * (T : ℝ)))
+      = Real.exp (-(q * (T : ℝ))) * Real.exp (-((r - q) * (T : ℝ))) := by
+    rw [← Real.exp_add]; congr 1; ring
+  simp_rw [hexp, mul_assoc]
+  rw [integral_const_mul, h]
+  ring
 
 /-- **The forward-start call in the Black–Scholes market** is worth Rubinstein's closed form
 `S₀ · bsV α r σ 1 (T − t₁)` under the Girsanov pricing measure of the market price of risk

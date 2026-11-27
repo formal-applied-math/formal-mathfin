@@ -45,6 +45,8 @@ public import MathFin.Probability.Jumps.PoissonPgf
 -- iterated integral
 public import MathFin.Probability.Laws.GammaPoissonMixturePgf
 -- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
+public import MathFin.Probability.Analysis.IdentDistribSum
+public import MathFin.Probability.Dependence.IndepPast
 public import MathFin.Probability.Analysis.IndepFreezing
 -- Jensen's inequality through a supporting line (no closed domain needed)
 public import MathFin.Probability.Analysis.AffineMinorant
@@ -242,8 +244,9 @@ public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 public import MathFin.Probability.Brownian.Ito.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 public import MathFin.Probability.Brownian.Ito.DriftRiemannConvergence
+public import MathFin.Probability.Brownian.Ito.DriftPath
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
--- Btheta_isQBrownianMotion_adapted
+-- Btheta_isBrownianOn_adapted
 public import MathFin.Probability.Brownian.Girsanov.GirsanovAdaptedTheta
 -- Rung 1 (bounded predictable θ Girsanov, Route B): marshal a SimpleProcess into single-partition
 -- (s,c) form; generic simple-Doléans moment bounds; the predictable distributional Girsanov
@@ -548,6 +551,7 @@ public import MathFin.Models.StochVol.HestonSmallVolOfVol
 -- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
 -- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 public import MathFin.Models.BlackScholes.Lookback
+public import MathFin.Models.BlackScholes.BarrierReflection
 public import MathFin.Models.BlackScholes.BarrierParity
 public import MathFin.Models.BlackScholes.BinaryBarrierOption
 -- Also consumes the bivariate normal CDF (Probability/Gaussian/BivariateNormalCDF),
@@ -797,6 +801,7 @@ public import MathFin.Models.ModelFree.SVI.TraceForm
 public import MathFin.Models.ModelFree.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 public import MathFin.Models.ModelFree.SVI.TailCondition
+public import MathFin.Models.ModelFree.SVI.SSVI
 -- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
 public import MathFin.Models.ModelFree.CalendarArbitrage
 -- Fisher/Sraffa own rate: Sraffa's implied own rate from spot, forward and financing rate
@@ -846,6 +851,7 @@ public import MathFin.Risk.UtilityDerivation
 -- The one coherence structure: the four ADEH axioms for losses, ρ(0) = 0, convexity, and (finite
 -- state) pointwise monotonicity and continuity
 public import MathFin.Risk.Coherent
+public import MathFin.Risk.CompleteMixability
 public import MathFin.Risk.ConvexOrderSums
 -- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
 public import MathFin.Risk.PositionsConvention

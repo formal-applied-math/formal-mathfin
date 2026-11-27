@@ -66,7 +66,9 @@ main's 2026-11-25 contributed wave landed and carries that wave in its merges.
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
 917 entries: 871 full (from 866), 18 library wrappers, 28 reduced cores (from 22); 889 are
 delivery-ready (`full` + `library_wrapper`). The dated sections below record what each pull
-request added.
+request added. The backlog pass then split `mf-bgk-discrete-barrier-shift` into the image form and
+scaling of `ptDownOutCall` (`mf-barrier-down-out-image-form`) and the BGK shift and limit (918
+entries, 29 reduced cores).
 
 ### The Ho–Lee bond price (2026-11-24)
 
@@ -240,7 +242,7 @@ One `full` entry in `benchmarks/defi.json`. It adds one entry to the corpus.
   constant-product payoff of invariant `V²`
   (`constantMeanPayoff_one_half_eq_constantProductPayoff`) — tying the constant-mean line to
   the `thm:impermanent-loss` pricing line. The frontier node `thm:balancer-invariant` is
-  tagged on `price_constantMeanPayoff` and the frontier entry is deleted; the node joins the
+  tagged on `price_constantMeanPayoff_eq_hodl` (the position priced as its reserves at the pool's spot price, through `Contract.value_pay`) and the frontier entry is deleted; the node joins the
   trunk through the contract-pricing definitions. Disclosed out of scope: the n-token mark
   (the payoff language has one underlying), fees, per-LP-token pricing, liquidity provision.
   Axioms-clean, `full`.
@@ -695,16 +697,16 @@ states VaR and ES of `μ + σT` through the library's `valueAtRisk` and `expecte
 
 | Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
 |---|---|---|---|
-| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Probability/Laws/StudentT.lean`, `MathFin.studentTPDFReal_eq` | `full` |
-| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentTMeasure 1 = cauchyMeasure 0 1. | `MathFin/Probability/Laws/StudentT.lean`, `MathFin.studentTMeasure_one` | `full` |
-| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentTMeasure` | `full` |
-| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
-| `qrm-student-t-var-le-es` | For T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the general VaR ≤ ES at the law. | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentTMeasure` | `full` |
+| `qrm-student-t-density` | For ν > 0, the Student-t law built as Lebesgue measure with density k_ν/∫k_ν, k_ν(x) = (1 + x²/ν)^(-(ν+1)/2), has density Γ((ν+1)/2)/(√(νπ)Γ(ν/2))·(1 + x²/ν)^(-(ν+1)/2). | `MathFin/Probability/Laws/StudentT.lean`, `ProbabilityTheory.studentTPDFReal_eq` | `full` |
+| `qrm-student-t-cauchy` | The Student-t law with ν = 1 is Mathlib's standard Cauchy law: studentT 1 = cauchyMeasure 0 1. | `MathFin/Probability/Laws/StudentT.lean`, `ProbabilityTheory.studentT_one` | `full` |
+| `qrm-student-t-var` | For T ~ t_ν, σ ≥ 0 and α ∈ (0, 1): VaR_α(μ + σT) = μ + σ·t_ν⁻¹(α), with t_ν⁻¹(α) the quantile of the law. | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_of_hasLaw_studentT` | `full` |
+| `qrm-student-t-es` | For T ~ t_ν, ν > 1, σ ≥ 0 and α ∈ (0, 1): ES_α(μ + σT) = μ + σ·g_ν(q)/(1 − α)·(ν + q²)/(ν − 1) at q = t_ν⁻¹(α). | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.expectedShortfall_of_hasLaw_studentT` | `full` |
+| `qrm-student-t-var-le-es` | For T ~ t_ν, ν > 1 and α ∈ (0, 1): VaR_α(μ + σT) ≤ ES_α(μ + σT), the general VaR ≤ ES at the law. | `MathFin/Risk/StudentTValueAtRisk.lean`, `MathFin.valueAtRisk_le_expectedShortfall_of_hasLaw_studentT` | `full` |
 
 What is not covered:
 - `t_ν⁻¹(α)` is the generic `quantile` of the law; no closed form for it is given.
 - The same inequality read through the two closed forms,
-  `quantile_studentTMeasure_le_expectedShortfall_closedForm`, is not itself a benchmark entry.
+  `quantile_studentT_le_expectedShortfall_closedForm`, is not itself a benchmark entry.
 - The construction as the law of `Z/√(V/ν)` (independent normal and χ²) is not formalized.
 
 Verification:
@@ -2203,7 +2205,7 @@ test cannot see a name that a row leaves out; that is still a review item.
 ### Girsanov: independent increments, proved (2026-09-25)
 
 The first of the two gaps named in the next section, joint independence of the increments, is
-closed in Lean; the second, path continuity, is not. `isQBrownianMotion_of_expMartingale` now
+closed in Lean; the second, path continuity, is not. `isBrownianOn_of_expMartingale` now
 concludes, for the process `Y` under `Q` on `[0, T]`:
 
 1. `Y_0 = 0` almost surely;
@@ -2216,14 +2218,12 @@ That implication is not itself proved here; on the whole time axis `ℝ≥0` it 
 `HasIndepIncrements.isPreBrownianReal_of_hasLaw`. Neither path continuity nor independence of the
 increments from `𝓕_s` is stated.
 
-The proof extends the two-increment argument to `n` increments. By induction on `n`, the joint MGF
-of the increments over `t₀ ≤ ⋯ ≤ tₙ` is the product of the Gaussian ones: the increments before
-the last are `𝓕_{t_{n−1}}`-measurable and factor out of the conditional expectation given
-`𝓕_{t_{n−1}}`, which is deterministic on the last increment. So every linear combination of the
-increments is Gaussian with the diagonal variance, and `iIndepFun_iff_charFun_pi` turns that into
-joint independence (`increments_iIndepFun_of_expMartingale`). `HasIndepIncrements.of_nat` reduces
-the general statement to the first `N` increments of a monotone sequence
-(`hasIndepIncrements_of_expMartingale`). The pairwise lemmas `increments_indepFun_of_expMartingale`
+Each increment `Y_t − Y_s` is independent of `𝓕_s` (`indep_increment_of_expMartingale`: integrate
+the deterministic conditional MGF over `A ∈ 𝓕_s`), and adaptedness with increments independent of
+the past gives `HasIndepIncrements` (`hasIndepIncrements_of_indep_past`, then
+`hasIndepIncrements_of_expMartingale`). (An earlier proof ran an MGF induction over the increments
+and a characteristic-function computation, `increments_iIndepFun_of_expMartingale`; both are
+removed.) The pairwise lemmas `increments_indepFun_of_expMartingale`
 and `Btheta_increments_indepFun`, and the two-increment code they used, are removed: pairwise
 independence is `iIndepFun.indepFun` of the joint statement. One lemma,
 `map_eq_gaussianReal_of_mgf`, replaces three copies of the MGF-to-law argument.
@@ -2265,22 +2265,22 @@ process under `Q`, on `[0, T]`:
 
 The third is independence of two increments at a time. A Brownian motion also has jointly
 independent increments, which fix its finite-dimensional law, and continuous paths. Neither is
-stated. All four entries read the three properties off `isQBrownianMotion_of_expMartingale`
+stated. All four entries read the three properties off `isBrownianOn_of_expMartingale`
 (`Probability/Brownian/ExpMartingaleQBrownian.lean`), whose conclusion has the same form.
 
 | Benchmark ID | θ | Lean declaration |
 |---|---|---|
-| `gir-const-theta-qbm` | constant | `Btheta_isQBrownianMotion` |
-| `gir-simple-adapted` | bounded, piecewise-constant adapted | `Btheta_simple_isQBrownianMotion` |
-| `gir-thm-9.1.8` | bounded, continuous adapted | `Btheta_isQBrownianMotion_adapted` |
-| `gir-thm-9.1.8-predictable` | bounded, predictable | `Btheta_isQBrownianMotion_predictable_of_bdd` |
+| `gir-const-theta-qbm` | constant | `Btheta_isBrownianOn` |
+| `gir-simple-adapted` | bounded, piecewise-constant adapted | `Btheta_simple_isBrownianOn` |
+| `gir-thm-9.1.8` | bounded, continuous adapted | `Btheta_isBrownianOn_adapted` |
+| `gir-thm-9.1.8-predictable` | bounded, predictable | `Btheta_isBrownianOn_predictable_of_bdd` |
 
 Their names, descriptions, scope notes and snippet docstrings now state the three properties, and
 so do the docstrings of the five Lean modules involved. The two Theorem 9.1.8 entries say in
 `description` that the textbook conclusion is not derived in full. The same wording in the scope
 of `gir-const-theta-marginal` and in the description and scope of `sc-thm-9.1.8` was corrected
-with them, as were the notes further down this file. The declaration names still say
-`isQBrownianMotion`; renaming them changes the API and is left for a separate decision.
+with them, as were the notes further down this file. The declarations are named for the conclusion
+(`isBrownianOn_of_expMartingale`, `Btheta_isBrownianOn*`).
 
 The four entries stay `full` for now. By the vocabulary above, the two Theorem 9.1.8 entries are
 narrower than the textbook theorem, whose conclusion is a Brownian motion, so they meet the
@@ -2403,19 +2403,18 @@ prior corpus audit, not a verification of this addition.
 > **The trade probabilities are derived, not posited.** `P(buy | V_H) = (1+p)/2` and
 > `P(buy | V_L) = (1−p)/2` follow from the four primitives — the prior, the informed event
 > independent of the value, informed traders trading on the value, uninformed traders tossing a
-> coin — which is what makes this `full` rather than a restatement. They are stated additively
-> (`2 · μ[B|H] = 1 + p`, `2 · μ[B|Hᶜ] + p = 1`) so that no step forms a difference in a type where
-> subtraction truncates; the textbook form does follow from the additive one, so this buys the
-> proofs, not the statements. The quotes are honest Bochner integrals: with the payoff written as
+> coin — which is what makes this `full` rather than a restatement. They are stated on `μ.real`
+> (`(μ[|H]).real B = (1 + p)/2`, `(μ[|Hᶜ]).real B = (1 − p)/2`). The quotes are honest Bochner
+> integrals: with the payoff written as
 > a constant plus an indicator, integrability is one line and the asset cancels, leaving
 > `(V_H − V_L)` times the gap between the posteriors.
 >
-> **The seam is the load-bearing part.** `cond_toReal_eq` is Bayes pushed through `.toReal` once
+> **The seam is the load-bearing part.** `cond_real_eq` is Bayes in `ℝ` (on `μ.real`) once
 > and generically; it is what identifies the model's `μ[H | B]` with the real function `postBuy`
 > the closed form is about, and the buy and sell sides are then the same lemma applied twice with
 > the likelihoods swapped. Without it the measure-theoretic half and the real-analysis half are
-> true statements about unrelated objects. `toReal` sends `∞ ↦ 0` and `x/0 ↦ 0`, so every
-> conversion carries its `≠ ∞` side condition.
+> true statements about unrelated objects. Conditioning on a null event is the zero
+> measure and `x/0 ↦ 0`, so every step carries its non-nullity condition.
 >
 > **`0 < θ < 1` is a hypothesis issue #107's acceptance criterion omits, and the prior's two
 > endpoints fail differently.** With `p < 1` a degenerate prior leaves nothing to be adversely
@@ -2965,7 +2964,7 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-10, bounded-PREDICTABLE Girsanov — Rung 1):** corpus **319**,
 > **286 full + 18 wrappers = 304/319 delivery-ready**, 15 reduced cores, 0 placeholders. New `full`
 > entry `gir-thm-9.1.8-predictable` (`girsanov_predictable_qbm`,
-> `Probability/Brownian/Girsanov/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`) **strengthens**
+> `Probability/Brownian/Girsanov/GirsanovPredictableTheta.Btheta_isBrownianOn_predictable_of_bdd`) **strengthens**
 > the continuous-adapted `gir-thm-9.1.8` to a bounded **predictable** `θ` — the honest domain of the Itô
 > `L²` integral, dropping the path-continuity assumption. `B^θ_u = B_u + driftContinuousMod θ̂ u` (the
 > genuinely-`𝓕`-adapted modification of `∫₀ᵘθ ds`) starts at `0`, has `N(0,t−s)` increments, and has
@@ -2985,7 +2984,7 @@ prior corpus audit, not a verification of this addition.
 > **Prior (2026-07-09, continuous-adapted Girsanov closes `gir-thm-9.1.8`):** corpus **318**,
 > **285 full + 18 wrappers = 303/318 delivery-ready**, 15 reduced cores, 0 placeholders. `gir-thm-9.1.8`
 > flips `reduced_core → full`: `girsanov_adapted_continuous_qbm`
-> (`Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives zero start, Gaussian
+> (`Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isBrownianOn_adapted`) derives zero start, Gaussian
 > `𝒩(0,t−s)` increments, and independence of any two non-overlapping increments under `Q` for a
 > bounded (`|θ| ≤ C`), `𝓕`-adapted, path-continuous `θ`, under `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`
 > with `B^θ_u = B_u + ∫₀ᵘθ ds`. **Spine-free:** rather than a continuous Doléans stochastic exponential
@@ -2994,7 +2993,7 @@ prior corpus audit, not a verification of this addition.
 > limit — the stochastic exponent `Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θ dB` in `L²`, the drift parts converge everywhere,
 > and the **mixed-time** set-integral limit `∫_A exp(a·Yⁿ−½)·Zⁿ_T → ∫_A exp(a·Y−½)·Z_T` goes through the
 > a.e.-subsequence engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound` with a route-A L⁴/AM-GM uniform
-> `L²` bound, then `isQBrownianMotion_of_expMartingale` reads off the three properties (no adapted-integrand
+> `L²` bound, then `isBrownianOn_of_expMartingale` reads off the three properties (no adapted-integrand
 > Itô formula). Axioms-clean, `lake build` green, gates + ledger fresh. This is the culmination of the
 > Girsanov Track-α arc (constant → simple → continuous adapted). **Only the strictly more general
 > `L²`/progressive-`θ` under Novikov (unbounded) remains `reduced_core`, at `sc-thm-9.1.8`.**
@@ -3129,12 +3128,12 @@ prior corpus audit, not a verification of this addition.
 > AM–GM (`exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T)`, each Gaussian-MGF-integrable). This partially
 > wires the architecture doc's Girsanov seam (I↔II, the martingale side; see `mathematical-architecture.md`).
 > **The distributional side, for constant `θ` (2026-07-05):**
-> `Probability/Brownian/Girsanov/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
+> `Probability/Brownian/Girsanov/GirsanovConstantTheta.Btheta_isBrownianOn` proves the drift-corrected
 > `B^θ_t = X_t + θ t` has zero start, Gaussian increments
 > `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of any two non-overlapping increments (corpus
 > `gir-const-theta-qbm`, `full`; the marginal law is `gir-const-theta-marginal`, `full`). All three
 > properties are now read off in **one** application of the process-agnostic exponential
-> characterization `Probability/Brownian/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` (2026-07-06):
+> characterization `Probability/Brownian/ExpMartingaleQBrownian.isBrownianOn_of_expMartingale` (2026-07-06):
 > the const-θ exponential martingale `exp(a·B^θ − ½a²·)` (`expBtheta_isQMartingale`, from the Bayes
 > engine + two Wald exponentials) is packaged as `IsExpQMartingale`, and the characterization derives
 > the marginal law, the increment law, and independence — the same reusable module now scheduled to
@@ -3147,22 +3146,22 @@ prior corpus audit, not a verification of this addition.
 > characteristic functions (`charFun_gaussianReal`) — no adapted-integrand Itô formula.
 >
 > **Simple (piecewise-constant) adapted θ — now `full` (2026-07-06):** `gir-simple-adapted`
-> (`Probability/Brownian/Girsanov/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion`) proves `B^θ_t = X_t + ∑_i c_i
+> (`Probability/Brownian/Girsanov/GirsanovSimpleTheta.Btheta_simple_isBrownianOn`) proves `B^θ_t = X_t + ∑_i c_i
 > (s_{i+1}∧t − s_i∧t)` has the same three properties under `Q = P.withDensity(E^{−c}_T)` for bounded
 > `𝓕_{s i}`-measurable multipliers — the general bounded-**adapted**-θ Girsanov for the simple case,
-> strictly beyond constant θ, via one application of `isQBrownianMotion_of_expMartingale` (no charFun
+> strictly beyond constant θ, via one application of `isBrownianOn_of_expMartingale` (no charFun
 > chain re-derived). The two simple-θ-specific ingredients: the spine `simple_spine_ae`
 > (`E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`) and the mixed-time integrability
 > `integrable_expBthetaSimple_mul_density` (an `L²` Hölder: `Z_T² = E^{−2c}_T·exp(∑ c_i²Δτ_i)` with
 > `∑ c_i²Δτ_i ≤ K²T`).
 >
 > **Continuous adapted θ — now `full` (2026-07-09):** `gir-thm-9.1.8`
-> (`Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) closes the bounded adapted
+> (`Probability/Brownian/Girsanov/GirsanovAdaptedTheta.Btheta_isBrownianOn_adapted`) closes the bounded adapted
 > **continuous** case by exactly the `L²`-approximation route anticipated here: the simple-θ identity
 > `isExpQMartingale_BthetaSimple` (on the uniform-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)`) passed to the
 > limit through the a.e.-subsequence set-integral engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound`
 > (route-A L⁴/AM-GM uniform `L²` bound on the mixed-time product `exp(a·Yⁿ−½)·Zⁿ_T`), then one
-> application of `isQBrownianMotion_of_expMartingale` — no adapted-integrand Itô formula, no continuous
+> application of `isBrownianOn_of_expMartingale` — no adapted-integrand Itô formula, no continuous
 > stochastic-exponential-is-a-martingale (Novikov) crux. **Open (still `reduced_core`):** only the
 > strictly more general `L²`/**progressive**-`θ` under Novikov (unbounded, merely progressively
 > measurable), at `sc-thm-9.1.8`.

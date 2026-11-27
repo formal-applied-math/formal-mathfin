@@ -72,21 +72,48 @@ For each cell:
 
    The library describes its cells better than any outside vocabulary does, so the profile comes
    from the library itself.
-3. **Classification.** A paper's title and abstract are scored against every cell profile by
-   TF-IDF similarity, and its OpenAlex topics break ties. The best cell is kept, with a second
-   when its score is close. This is deterministic, runs on the CPU and is cheap. If it fails the
-   validation in step 4, the next step is local sentence embeddings, once the GPU is free.
+3. **Classification.** First tried as written here: a paper's title and abstract scored against
+   every cell profile by TF-IDF similarity. It placed 34% of the validation papers where the
+   labellers did; local sentence embeddings matched to the library's pieces placed 22–29%. The
+   profiles describe what the library has formalised, not the region of the field: `risk/insurance`
+   is thin in the library and large in the corpus. So the cells are learned instead
+   (`mathfin_corpus.place`, 2026-11-26):
+   - **Training labels:** 2,983 papers, each labelled once by an agent that read the title and the
+     full abstract against the cell list: 2,000 sampled across the cells, then 983 sampled near the
+     cells cross-validation found weak. `NONE` (outside every cell) is a class like the others.
+   - **Features:** the paper's sentence embedding, its similarity to an agent-written description
+     of each cell's field, and TF-IDF over its title and abstract.
+   - **Model:** balanced logistic regression, its two settings chosen by cross-validation on the
+     training labels alone. The best cell is kept, with the runner-up when its probability is at
+     least half the best.
 4. **Validation, with no hand labelling.**
    - **Ground truth from the library's own citations.** Every `references.bib` entry is cited by a
      module, and every module sits in a cell. When a cited paper is in the corpus, its cell is
-     known without anyone judging it.
-   - **Two independent agent labellers** cover the cells the citations do not reach. They get
-     different instructions, and neither sees the other's answer or the classifier's. A third
-     agent settles their disagreements. Their agreement with each other is reported: a low rate
-     means the cell is fuzzy, not only that the classifier is.
-   - The classifier must reach 70% against the citation labels. The atlas reports its agreement
-     per cell, against both kinds of label, and shows a cell under 70% with that warning, not
-     hidden.
+     known without anyone judging it. Only 14 cited sources turned out to be corpus papers, too
+     few to score against, so these labels check the classifier but do not carry the bar.
+   - **Two independent agent labellers** labelled a held-out sample of 297 papers. They got
+     different instructions, and neither saw the other's answer or the classifier's. A third agent
+     settled the 34 papers they did not share. They chose the same first cell for 80% of the
+     papers, which is the ceiling any classifier can be measured to.
+   - The classifier must reach 70% against these held-out labels: its first cell is one of the
+     paper's gold cells. The training labels never include a held-out paper. The atlas reports
+     agreement per cell, measured by cross-validation on the training labels, and shows a cell
+     under 70% with that warning, not hidden.
+   - **Measured (2026-11-26).** Three embeddings were tried on the first 2,000 labels:
+     `bge-small`, `bge-base`, and both together. Cross-validation prefers `bge-base` and both
+     equally (1,353 and 1,352 right) over `bge-small` (1,330); on the held-out sample the first
+     cell was a gold cell for 68% and 71% of the papers. That sat at the bar, so 983 more papers
+     were labelled near the 19 cells with recall under 70%, and the classifier was refitted with
+     the same settings. On the untouched held-out sample its first cell is a gold cell for 71.4%
+     of the papers, and one of the first two for 86.9%, against the labellers' own 80%. With 297
+     papers one standard error is 2.6 points, so the bar is cleared, not by a wide margin. The
+     atlas uses both embeddings.
+   - **What the atlas publishes is a count, and counts are steadier than placements.** Under
+     cross-validation, 3.5% of the training papers would move between cell totals. The new labels
+     mended the worst undercount (`valuation/trees`, 7 predicted against 20 labelled, now 54
+     against 54), but small cells remain the weak ones: 20 of the 33 cells have recall under 70%
+     (`valuation/general` 0.41, `probability/discrete` 0.41, `probability/analysis` 0.18). The
+     atlas marks them.
 
    This is enough because an atlas error misorders a roadmap and asserts no theorem.
 
@@ -122,8 +149,8 @@ No paper text is published. The founding-work lists are bibliographic metadata.
      show no reference list: short notes, chapters, scans without text).
    - OpenAlex metadata is fetched for every paper (`mathfin_corpus.metadata`).
    - Exit: every one of the 24,147 papers has a metadata record or is listed as missing one.
-2. **The classifier.** Cell profiles, TF-IDF scoring and the validated sample.
-   - Exit: agreement is reported per cell, and is at least 70% over the corpus.
+2. **The classifier.** Cell profiles, the labels, the trained classifier and the held-out sample.
+   - Exit: agreement is reported per cell, and is at least 70% on the held-out sample.
 3. **The atlas.** `docs/atlas.json`, the Literature layer, and a dated note in `docs/roadmap.md`
    naming the three cells with the largest gap.
    - Exit: the layer renders on the docs site, and the roadmap note is written.

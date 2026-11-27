@@ -7,6 +7,7 @@ module
 
 public import MathFin.Init
 public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Basic.Real.Basic
 public import Mathlib.Tactic.FieldSimp
 public import Mathlib.Tactic.Linarith.Frontend
@@ -32,8 +33,11 @@ provided `c_last + F ≠ 0`.
 
 Applied recursively, starting from a single-period bond (where `sprev = ∅` and
 `B_last = P / (c_last + F)`), this identity is how the discount curve is bootstrapped
-from coupon-bond market data. Only the single steps are proved here; the recursion over
-instruments is the search-based `boot` of `Models/Rates/Bootstrapping.lean`, where
+from coupon-bond market data. For a strip of annual par bonds the recursion is closed-form
+(`parBootstrap`): it reprices every bond and is the only curve that does, and a repeated coupon
+makes the next factor the previous one over `1 + c` (`parBootstrap_succ_of_coupon_eq`). The
+search-based recursion over general instruments is `boot` of
+`Models/Rates/Bootstrapping.lean`, where
 `swapBootstrap_recovers_couponBondFactor` shows that bisection on a zero-value swap
 recovers the factor named by `bootstrap_solve`.
 
@@ -41,6 +45,9 @@ recovers the factor named by `bootstrap_solve`.
 
 * `couponBondPricingEq`: the proposition `P = (∑ i ∈ sprev, c i * B i) + (c_last + F) * B_last`,
   the price of a coupon bond with previously known maturities `sprev` and one new maturity.
+* `parAnnuity`, `parBootstrap`: for annual par bonds with coupons `c n` maturing in year `n + 1`,
+  the sum of the solved factors and the factor to year `n + 1` solved from the bond maturing then.
+* `parBondPricingEq`: the bond with index `n` is priced at par on a curve `B`.
 
 ## Main results
 
@@ -52,6 +59,10 @@ recovers the factor named by `bootstrap_solve`.
   `B_2 = (P_2 − c · B_1) / (c + F)`.
 * `bootstrap_consistency`: the bootstrapped price, plugged back into the pricing
   equation, recovers the bond price.
+* `parBootstrap_reprices`, `parBootstrap_unique`: the bootstrapped curve prices every par bond
+  of the strip at par, and a curve that does so is that curve.
+* `parBootstrap_succ_of_coupon_eq`: a coupon repeated in the next year gives
+  `B (n + 1) = B n / (1 + c n)`.
 
 ## References
 
@@ -109,6 +120,59 @@ lemma bootstrap_consistency {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)
     couponBondPricingEq sprev c B P c_last F
       ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) := by
   unfold couponBondPricingEq
+  field_simp
+  ring
+
+/-- The sum of the discount factors to years `1, …, n` of the par strip with coupons `c`, built
+with the curve: each step adds the factor the next bond solves for. -/
+noncomputable def parAnnuity (c : ℕ → ℝ) : ℕ → ℝ
+  | 0 => 0
+  | n + 1 => parAnnuity c n + (1 - c n * parAnnuity c n) / (1 + c n)
+
+/-- **The bootstrapped discount factor** to year `n + 1` of the par strip with coupons `c`: the
+bond maturing then, paying `c n` each year and `1 + c n` at the end, is priced at par on the
+factors already solved. -/
+noncomputable def parBootstrap (c : ℕ → ℝ) (n : ℕ) : ℝ :=
+  (1 - c n * parAnnuity c n) / (1 + c n)
+
+/-- The bond with index `n` of the par strip with coupons `c`, on the curve `B`, is priced at par:
+`1` equals its coupons discounted to years `1, …, n` plus its final payment `1 + c n` discounted
+to year `n + 1` (`couponBondPricingEq`). -/
+def parBondPricingEq (c B : ℕ → ℝ) (n : ℕ) : Prop :=
+  couponBondPricingEq (Finset.range n) (fun _ ↦ c n) B 1 (c n) 1 (B n)
+
+/-- The recursion for `parAnnuity` sums the bootstrapped discount factors. -/
+theorem parAnnuity_eq_sum (c : ℕ → ℝ) (n : ℕ) :
+    parAnnuity c n = ∑ k ∈ Finset.range n, parBootstrap c k := by
+  induction n with
+  | zero => rfl
+  | succ n ih => rw [parAnnuity, Finset.sum_range_succ, ← ih, parBootstrap]
+
+/-- **The bootstrapped curve reprices every bond of the par strip** (`bootstrap_consistency`):
+the bond of maturity `n` needs only its own denominator `1 + c n ≠ 0`. -/
+theorem parBootstrap_reprices (c : ℕ → ℝ) (n : ℕ) (hc : 1 + c n ≠ 0) :
+    parBondPricingEq c (parBootstrap c) n := by
+  have h := bootstrap_consistency (Finset.range n) (fun _ ↦ c n) (parBootstrap c) 1 (c n) 1
+    (by rw [add_comm]; exact hc)
+  rwa [← Finset.mul_sum, ← parAnnuity_eq_sum, add_comm (c n) 1, ← parBootstrap] at h
+
+/-- **The bootstrapped curve is the only one that reprices the par strip.** A curve on which every
+bond is priced at par is the bootstrapped one: by induction on the maturity, each pricing equation
+determines the next factor from the earlier ones (`bootstrap_solve`). -/
+theorem parBootstrap_unique (c : ℕ → ℝ) (hc : ∀ n, 1 + c n ≠ 0) {B : ℕ → ℝ}
+    (hB : ∀ n, parBondPricingEq c B n) (n : ℕ) : B n = parBootstrap c n := by
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    rw [bootstrap_solve _ _ _ _ _ _ _ (by rw [add_comm]; exact hc n) (hB n), ← Finset.mul_sum,
+      Finset.sum_congr rfl fun k hk ↦ ih k (Finset.mem_range.1 hk), ← parAnnuity_eq_sum,
+      add_comm (c n) 1, parBootstrap]
+
+/-- **A repeated coupon makes the curve geometric**: if the bond maturing in year `n + 2` pays the
+coupon of the one maturing in year `n + 1`, the factor to year `n + 2` is the factor to year
+`n + 1` over `1 + c n`. -/
+theorem parBootstrap_succ_of_coupon_eq (c : ℕ → ℝ) {n : ℕ} (hn : 1 + c n ≠ 0)
+    (h : c (n + 1) = c n) : parBootstrap c (n + 1) = parBootstrap c n / (1 + c n) := by
+  rw [parBootstrap, parBootstrap, parAnnuity, h]
   field_simp
   ring
 

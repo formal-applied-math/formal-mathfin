@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Risk.ExpectedShortfall
+public import MathFin.Risk.GaussianValueAtRisk
 public import MathFin.Risk.RockafellarUryasev
 public import MathFin.Probability.Gaussian.NormalQuantile
 public import Mathlib.Probability.Distributions.Gaussian.HasGaussianLaw.Basic
@@ -32,6 +33,8 @@ supplies its meaning.
   `X ~ N(m, σ²)` with `σ > 0`.
 * `expectedShortfall_of_hasGaussianLaw`: the same for any Gaussian `X` (degenerate included), in
   terms of `E X` and `Var X`.
+* `riskReport_of_hasLaw_gaussianReal`: the report for `L ~ N(m, s²)`: VaR and ES in closed form
+  at `z = Φ⁻¹(α)`, the tail `{L > VaR_α(L)}` of mass `1 − α`, and ES as the average of `L` over it.
 
 ## References
 
@@ -102,5 +105,27 @@ theorem expectedShortfall_of_hasGaussianLaw (hX : HasGaussianLaw X P) (hα : α 
       (expectedShortfall_mono (integrable_const _) hX.integrable h0.symm.le hα)
   · rw [expectedShortfall_of_hasLaw_gaussianReal (Real.toNNReal_pos.2 hv).ne'
       ⟨hX.aemeasurable, hX.map_eq_gaussianReal⟩ hα, Real.coe_toNNReal _ (variance_nonneg X P)]
+
+/-- **The risk report for one Gaussian loss** `L ~ N(m, s²)` with `s > 0`, at a level `α ∈ (0, 1)`:
+- `VaR_α(L) = m + s z` and `ES_α(L) = m + s ϕ(z)/(1 − α)`, at `z = Φ⁻¹(α)`;
+- the tail `{L > VaR_α(L)}` has mass `1 − α`;
+- `ES_α(L)` is the average of `L` over that tail. -/
+theorem riskReport_of_hasLaw_gaussianReal {L : Ω → ℝ} {m s : ℝ}
+    (hL : HasLaw L (gaussianReal m (s ^ 2).toNNReal) P) (hs : 0 < s) (hα : α ∈ Ioo 0 1) :
+    valueAtRisk L P α = gaussianVaR m s (PhiInv α) ∧
+      expectedShortfall L P α = gaussianCVaR m s (PhiInv α) α ∧
+      P.real {ω | valueAtRisk L P α < L ω} = 1 - α ∧
+      expectedShortfall L P α = ⨍ ω in {ω | valueAtRisk L P α < L ω}, L ω ∂P := by
+  have hv : (s ^ 2).toNNReal ≠ 0 := (Real.toNNReal_pos.2 (by positivity)).ne'
+  have hσ : √((s ^ 2).toNNReal : ℝ) = s := by
+    rw [Real.coe_toNNReal _ (sq_nonneg s), Real.sqrt_sq hs.le]
+  have := nullSingletonClass_gaussianReal (μ := m) hv
+  have hF : Continuous (cdf (P.map L)) := hL.map_eq ▸ continuous_cdf
+  have htail := measureReal_valueAtRisk_lt hL.aemeasurable hF hα
+  refine ⟨?_, ?_, htail, ?_⟩
+  · rw [valueAtRisk_of_hasLaw_gaussianReal hL hα, hσ]
+  · rw [expectedShortfall_of_hasLaw_gaussianReal hv hL hα, hσ]
+  · rw [setAverage_eq, htail, smul_eq_mul]
+    exact expectedShortfall_eq_setIntegral_tail hL.hasGaussianLaw.integrable hF hα
 
 end MathFin

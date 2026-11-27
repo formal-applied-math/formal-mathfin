@@ -72,31 +72,6 @@ open scoped NNReal
 
 namespace MathFin.Market
 
-/-- The two-step filtration of `ℕ`: nothing is known at `0`, everything from `1` on. -/
-def twoStepFiltration (Ω : Type*) [mΩ : MeasurableSpace Ω] : Filtration ℕ mΩ where
-  seq n := if n = 0 then ⊥ else mΩ
-  mono' a b hab := by
-    dsimp only
-    split_ifs with ha hb hb
-    · exact le_rfl
-    · exact bot_le
-    · exact absurd (Nat.le_zero.mp (hb ▸ hab)) ha
-    · exact le_rfl
-  le' := fun n ↦ by
-    split_ifs
-    · exact bot_le
-    · exact le_rfl
-
-section TwoStep
-
-variable (Ω : Type*) [mΩ : MeasurableSpace Ω]
-
-theorem twoStepFiltration_zero : twoStepFiltration Ω 0 = ⊥ := rfl
-
-theorem twoStepFiltration_one : twoStepFiltration Ω 1 = mΩ := rfl
-
-end TwoStep
-
 /-- The step of a date: `0` before `τ`, `1` from `τ` on. -/
 noncomputable def dateStep (τ t : ℝ≥0) : ℕ := if t < τ then 0 else 1
 
@@ -114,19 +89,19 @@ theorem dateStep_of_not_lt {τ t : ℝ≥0} (h : ¬ t < τ) : dateStep τ t = 1 
 on. It is the two-step filtration read along the step of the date. -/
 noncomputable def dateFiltration (Ω : Type*) [mΩ : MeasurableSpace Ω] (τ : ℝ≥0) :
     Filtration ℝ≥0 mΩ :=
-  (twoStepFiltration Ω).comp (monotone_dateStep τ)
+  (Filtration.twoStep Ω).comp (monotone_dateStep τ)
 
 section DateFiltration
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {τ t : ℝ≥0}
 
 theorem dateFiltration_of_lt (h : t < τ) : dateFiltration Ω τ t = ⊥ := by
-  change twoStepFiltration Ω (dateStep τ t) = ⊥
-  rw [dateStep_of_lt h, twoStepFiltration_zero]
+  change Filtration.twoStep Ω (dateStep τ t) = ⊥
+  rw [dateStep_of_lt h, Filtration.twoStep_zero]
 
 theorem dateFiltration_of_not_lt (h : ¬ t < τ) : dateFiltration Ω τ t = mΩ := by
-  change twoStepFiltration Ω (dateStep τ t) = mΩ
-  rw [dateStep_of_not_lt h, twoStepFiltration_one]
+  change Filtration.twoStep Ω (dateStep τ t) = mΩ
+  rw [dateStep_of_not_lt h, Filtration.twoStep_one]
 
 end DateFiltration
 
@@ -195,20 +170,20 @@ latter gives back `s₀`. -/
 theorem isPricingMeasure_oneDate {Q : Measure Ω} [IsProbabilityMeasure Q] (hQP : Q ≪ P)
     (hPQ : P ≪ Q) (hint : Integrable X Q) (hmean : ∫ ω, X ω ∂Q = s₀ * Real.exp (r * τ)) :
     (oneDate P hX s₀ r τ).IsPricingMeasure τ Q := by
-  have hmart : Martingale (fun n ↦ deflatedStep X s₀ r τ (min n 1)) (twoStepFiltration Ω) Q := by
-    refine martingale_min_of_condExp_succ (𝓕 := twoStepFiltration Ω) (S := deflatedStep X s₀ r τ)
+  have hmart : Martingale (fun n ↦ deflatedStep X s₀ r τ (min n 1)) (Filtration.twoStep Ω) Q := by
+    refine martingale_min_of_condExp_succ (𝓕 := Filtration.twoStep Ω) (S := deflatedStep X s₀ r τ)
       (T := 1) (fun t ht ↦ ?_) (fun t ht ↦ ?_) (fun t ht ↦ ?_)
     · rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
       · have hc : StronglyMeasurable[(⊥ : MeasurableSpace Ω)] (fun _ : Ω ↦ s₀) :=
           stronglyMeasurable_const
-        exact hc.mono (twoStepFiltration_zero Ω).ge
+        exact hc.mono (Filtration.twoStep_zero Ω).ge
       · exact (hX.div_const (Real.exp (r * τ))).stronglyMeasurable.mono
-          (twoStepFiltration_one Ω).ge
+          (Filtration.twoStep_one Ω).ge
     · rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ht with rfl | rfl
       · exact integrable_const s₀
       · exact hint.div_const (Real.exp (r * τ))
     · obtain rfl : t = 0 := Nat.lt_one_iff.mp ht
-      rw [twoStepFiltration_zero, condExp_bot]
+      rw [Filtration.twoStep_zero, condExp_bot]
       refine Filter.Eventually.of_forall fun ω ↦ ?_
       change s₀ = ∫ x, X x / Real.exp (r * τ) ∂Q
       rw [integral_div, hmean, mul_div_assoc, div_self (Real.exp_pos _).ne', mul_one]

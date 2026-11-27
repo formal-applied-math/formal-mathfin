@@ -179,9 +179,9 @@ namespace MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.exchange_payoff_eq_ratio
 
-/-- info: 'MathFin.margrabe_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.margrabePrice_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.margrabe_eq_bsVGarman
+#print axioms MathFin.margrabePrice_eq_bsVGarman
 
 /-- info: 'MathFin.margrabe_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -397,17 +397,17 @@ namespace MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.sharpeRatio_affine_invariant
 
-/-- info: 'MathFin.studentTMeasure_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'ProbabilityTheory.studentT_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.studentTMeasure_one
+#print axioms ProbabilityTheory.studentT_one
 
-/-- info: 'MathFin.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'ProbabilityTheory.studentTPDFReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.studentTPDFReal_eq
+#print axioms ProbabilityTheory.studentTPDFReal_eq
 
-/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentTMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.expectedShortfall_of_hasLaw_studentT' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
-#print axioms MathFin.expectedShortfall_of_hasLaw_studentTMeasure
+#print axioms MathFin.expectedShortfall_of_hasLaw_studentT
 
 /-! ## Implied correlation and dispersion -/
 
@@ -1757,17 +1757,17 @@ Three of the four defining Brownian properties of the drift-corrected process (a
 continuity) — zero start, Gaussian `𝒩(0,t−s)` increments, and independent increments — are read
 off, under the Girsanov measure `Q = P.withDensity(Z_T)`, from a *single* structural hypothesis:
 that every `exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. That reduction is
-`isQBrownianMotion_of_expMartingale`, which runs the characteristic-function chain (marginal MGF →
-increment MGF → joint MGF → linear-combination Gaussian law → independence via `charFun`) exactly
-ONCE, process-agnostically. Each θ regime then supplies only its own exponential-martingale identity
+`isBrownianOn_of_expMartingale`, which runs the argument (marginal MGF → increment MGF →
+independence of each increment from the past → `HasIndepIncrements`) exactly ONCE,
+process-agnostically. Each θ regime then supplies only its own exponential-martingale identity
 and lands as a one-line application:
 
-* `Btheta_isQBrownianMotion` — CONSTANT θ, `Z·D = Wald(a−θ)` a genuine martingale everywhere (the
+* `Btheta_isBrownianOn` — CONSTANT θ, `Z·D = Wald(a−θ)` a genuine martingale everywhere (the
   instance that first validated the abstraction against a known-good result).
-* `Btheta_simple_isQBrownianMotion` — SIMPLE (piecewise-constant adapted) θ, via the spine
+* `Btheta_simple_isBrownianOn` — SIMPLE (piecewise-constant adapted) θ, via the spine
   `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}` fed to the Bayes change-of-measure engine with an `L²`-Hölder
   mixed-time integrability. Strictly beyond constant θ, on the existing tower.
-* `Btheta_isQBrownianMotion_adapted` — the culmination, bounded adapted CONTINUOUS θ under
+* `Btheta_isBrownianOn_adapted` — the culmination, bounded adapted CONTINUOUS θ under
   `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`. **Spine-free**: instead of proving a continuous Doléans
   stochastic exponential to be a martingale (the Novikov crux), the simple-θ identity is passed to
   the limit — the mixed-time set-integral `∫_A exp(a·Yⁿ−½)·Zⁿ_T dμ` converges through the
@@ -1776,32 +1776,28 @@ and lands as a one-line application:
 
 *2026-09-25:* until this date the independence read off was two increments at a time. It is now
 independence of any number of increments (`HasIndepIncrements` on `[0,T]`, through
-`increments_iIndepFun_of_expMartingale`), which with the other two properties fixes the
+`hasIndepIncrements_of_indep_past`), which with the other two properties fixes the
 finite-dimensional law of a Brownian motion on `[0,T]`. Path continuity is not stated. -/
 
-/-- info: 'MathFin.isQBrownianMotion_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.isBrownianOn_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.isQBrownianMotion_of_expMartingale
-
-/-- info: 'MathFin.increments_iIndepFun_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-#print axioms MathFin.increments_iIndepFun_of_expMartingale
+#print axioms MathFin.isBrownianOn_of_expMartingale
 
 /-- info: 'MathFin.hasIndepIncrements_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.hasIndepIncrements_of_expMartingale
 
-/-- info: 'MathFin.Btheta_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Btheta_isBrownianOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_isQBrownianMotion
+#print axioms MathFin.Btheta_isBrownianOn
 
-/-- info: 'MathFin.Btheta_simple_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Btheta_simple_isBrownianOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_simple_isQBrownianMotion
+#print axioms MathFin.Btheta_simple_isBrownianOn
 
-/-- info: 'MathFin.Btheta_isQBrownianMotion_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Btheta_isBrownianOn_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Btheta_isQBrownianMotion_adapted
+#print axioms MathFin.Btheta_isBrownianOn_adapted
 
 /-! ### Continuous-time first FTAP: an EMM precludes simple-strategy arbitrage
 
@@ -2112,16 +2108,13 @@ only a.e. adaptedness). -/
 alone. Five theorems are pinned, one per load-bearing claim.
 
 The **trade probabilities** are derived from the trader mix rather than assumed, which is what
-separates a `full` entry from a restatement. They are stated additively
-(`2 * μ[B | H] = 1 + p`) so that no step forms a difference in a type where subtraction
-truncates — the subtracting form follows from the additive one, so this buys the proofs, not
-the statements.
+separates a `full` entry from a restatement: `(μ[|H]).real B = (1 + p)/2`, on `μ.real` throughout.
 
-`cond_toReal_eq` is the **seam**: Bayes pushed through `.toReal` once, generically, which is
-what identifies the model's posterior `μ[H | B]` with the real function `postBuy` the closed
+`cond_real_eq` is the **seam**: Bayes in `ℝ` once, generically, which is
+what identifies the model's posterior `(μ[|B]).real H` with the real function `postBuy` the closed
 form is about. Without it the measure-theoretic half and the real-analysis half are true
-statements about unrelated objects. `toReal` sends `∞ ↦ 0` and `x/0 ↦ 0`, so this is exactly
-where a careless bridge would manufacture a silent wrong answer.
+statements about unrelated objects. Conditioning on a null event is the zero measure, so `x/0 ↦ 0`
+is exactly where a careless step would manufacture a silent wrong answer.
 
 `spread_pos_of_model` is the result itself, from the model's own primitives.
 
@@ -2136,13 +2129,13 @@ informed or not, uninformed trader tossing a coin — satisfies every hypothesis
 `spread_pos_of_model`, symbolically in `θ` and `p`, so the result is not true for want of a
 model. -/
 
-/-- info: 'MathFin.Execution.two_mul_cond_buy_high' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Execution.cond_buy_high' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Execution.two_mul_cond_buy_high
+#print axioms MathFin.Execution.cond_buy_high
 
-/-- info: 'MathFin.Execution.cond_toReal_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'MathFin.Execution.cond_real_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
-#print axioms MathFin.Execution.cond_toReal_eq
+#print axioms MathFin.Execution.cond_real_eq
 
 /-- info: 'MathFin.Execution.spread_pos_of_model' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
@@ -2207,6 +2200,14 @@ than definitionally, since `driftContinuousMod 0` is a `limUnder` along a chosen
 /-- info: 'MathFin.expectedShortfall_le_of_convexOrder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms MathFin.expectedShortfall_le_of_convexOrder
+
+/-- info: 'MathFin.CompletelyMixable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CompletelyMixable
+
+/-- info: 'MathFin.CompletelyMixable.exists_convexOrder_min' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.CompletelyMixable.exists_convexOrder_min
 
 /-- info: 'MathFin.expectedShortfall_isCoherentRiskMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
@@ -3359,6 +3360,10 @@ and `uncovered_interest_parity` from the risk-neutral expectation. -/
 /-- info: 'MathFin.DeFi.price_constantMeanPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.DeFi.price_constantMeanPayoff
+
+/-- info: 'MathFin.DeFi.price_constantMeanPayoff_eq_hodl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.DeFi.price_constantMeanPayoff_eq_hodl
 
 /-- info: 'MathFin.DeFi.constantMeanPayoff_one_half_eq_constantProductPayoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

@@ -122,7 +122,11 @@ variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}
 /-! ### Bounded horizon: the restricted trim measure -/
 
 /-- The restriction of `timeMeasure` (the σ-finite Lebesgue pushforward to
-`ℝ≥0`, defined in `ItoIntegralL2.lean`) to `Ioc 0 T`. Finite of total mass `T`. -/
+`ℝ≥0`, defined in `ItoIntegralL2.lean`) to `Ioc 0 T`. Finite of total mass `T`.
+
+The `Horizon` suffix is kept only where the bare name is taken by the all-times object
+(`timeMeasure`, `simpleProcessL2`, `simpleAssembly`, `itoAssembly`, `iocSP`); the objects whose
+name is free (`trimMeasure`, `itoIntegralCLM`) carry the horizon as their `T` argument alone. -/
 noncomputable def timeMeasureHorizon (T : ℝ≥0) : Measure ℝ≥0 :=
   ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)
 
@@ -148,6 +152,35 @@ noncomputable def trimMeasure (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) :=
   ((timeMeasureHorizon T).prod μ).trim
     (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+
+omit [IsProbabilityMeasure μ] in
+/-- **Product-conull predictable sets are trim-conull.** A set measurable for the predictable
+σ-algebra that holds `timeMeasureHorizon T ⊗ μ`-almost everywhere holds `trimMeasure T`-almost
+everywhere: the trim agrees with the product on predictable sets (`trim_measurableSet_eq`). -/
+lemma ae_trimMeasure_of_ae_prod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {C : Set (ℝ≥0 × Ω)}
+    (hC : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable] C)
+    (h : ∀ᵐ z ∂((timeMeasureHorizon T).prod μ), z ∈ C) :
+    ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), z ∈ C := by
+  rw [ae_iff, trimMeasure]
+  exact (trim_measurableSet_eq (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
+    hC.compl).trans (ae_iff.mp h)
+
+omit [IsProbabilityMeasure μ] in
+/-- **The time origin is trim-null.** For any time measure `ν` that charges no point at the
+origin, the predictable trim of `ν ⊗ μ` gives no mass to a bottom rectangle `{0} × F` with `F`
+in `𝓕 ⊥`: the trim agrees with the product on predictable sets, and the product of the rectangle is
+`ν {0} · μ F = 0`. The one computation behind every "off the time origin" almost-everywhere
+statement of the Itô tower. -/
+lemma trim_singleton_zero_prod_eq_zero {ν : Measure ℝ≥0} [SFinite μ]
+    (hν : ν {(0 : ℝ≥0)} = 0) (hBmeas : ∀ t, Measurable (B t)) {F : Set Ω}
+    (hF : MeasurableSet[ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas ⊥] F) :
+    ((ν.prod μ).trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)
+      ({(0 : ℝ≥0)} ×ˢ F) = 0 := by
+  have hpred : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable]
+      ({(0 : ℝ≥0)} ×ˢ F) :=
+    MeasureTheory.measurableSet_predictable_singleton_bot_prod
+      (𝓕 := ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) hF
+  rw [trim_measurableSet_eq _ hpred, Measure.prod_prod, hν, zero_mul]
 
 /-! ### Basic predictable rectangles: the π-system
 
@@ -274,7 +307,8 @@ lemma memLp_prod_of_lp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   memLp_of_memLp_trim (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod
     (Lp.memLp φ)
 
-/-- The simple process's `L²` class in the T-restricted trim. -/
+/-- The simple process's `L²` class in the T-restricted trim. Suffixed `Horizon` because
+`simpleProcessL2` is the all-times embedding. -/
 noncomputable def simpleProcessL2Horizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
     Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) :=
@@ -387,7 +421,8 @@ private lemma simpleProcessL2Horizon_norm_eq (T : ℝ≥0) (hBmeas : ∀ t, Meas
   unfold simpleProcessL2Horizon ItoIntegralL2.simpleProcessL2
   rw [Lp.norm_toLp, Lp.norm_toLp, h]
 
-/-- **The T-restricted simple-process `L²` embedding** as a linear map. -/
+/-- **The T-restricted simple-process `L²` embedding** as a linear map. Suffixed `Horizon`
+because `simpleAssembly` is the all-times one. -/
 noncomputable def simpleAssemblyHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
     TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas) where
   toFun V := simpleProcessL2Horizon T hBmeas V.val
@@ -405,7 +440,8 @@ noncomputable def simpleAssemblyHorizon (T : ℝ≥0) (hBmeas : ∀ t, Measurabl
     congr 1
     exact ItoIntegralL2.uncurry_coe_smul hBmeas c V.val
 
-/-- The Itô assembly composed with the inclusion `TBoundedSP T ↪ SimpleProcess`.
+/-- The Itô assembly composed with the inclusion `TBoundedSP T ↪ SimpleProcess` (suffixed
+`Horizon` because `itoAssembly` is the all-times one).
 For T-bounded `V`, the discrete Itô integral `∑ V(p)(B_{p.2}−B_{p.1})`
 automatically lives in `[0,T]`. -/
 noncomputable def itoAssemblyHorizon (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
@@ -521,7 +557,8 @@ zero; Phase 5 extends to all measurable sets; `ae_eq_zero_of_forall_setIntegral`
 concludes `g = 0`. The CLM `itoIntegralCLM` is then the `extendOfNorm` of
 `itoAssemblyHorizon` along the (now dense) `simpleAssemblyHorizon`. -/
 
-/-- The T-bounded SimpleProcess representing the indicator of `Ioc a b × F`,
+/-- The T-bounded SimpleProcess representing the indicator of `Ioc a b × F` (suffixed `Horizon`
+because `iocSP` is the all-times one),
 built from upstream `ElementaryPredictableSet.IocProd.indicator`. We require
 `a ≤ b` (so the IocProd's index set `I` is `{(a, b)}`) and `b ≤ T` (so the only
 interval is in `[0, T]`). -/

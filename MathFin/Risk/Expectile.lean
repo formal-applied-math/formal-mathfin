@@ -113,7 +113,7 @@ lemma expectileGap_eq (hY : Integrable Y P) (e : ℝ) :
   ring
 
 /-- The upper partial moment `e ↦ E[(Y − e)⁺]` is antitone and falls by at most the increment. -/
-lemma upperPartialMoment_sub (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
+lemma upperPartialMoment_sub_nonneg_and_le (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
     0 ≤ (∫ ω, max (Y ω - e) 0 ∂P) - ∫ ω, max (Y ω - e') 0 ∂P ∧
       (∫ ω, max (Y ω - e) 0 ∂P) - ∫ ω, max (Y ω - e') 0 ∂P ≤ e' - e := by
   have hM (e : ℝ) : Integrable (fun ω ↦ max (Y ω - e) 0) P :=
@@ -132,7 +132,7 @@ lemma upperPartialMoment_sub (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
 theorem expectileGap_sub_le (hY : Integrable Y P) {e e' : ℝ} (h : e ≤ e') :
     min α (1 - α) * (e' - e) ≤ expectileGap α Y P e - expectileGap α Y P e' := by
   rw [expectileGap_eq hY, expectileGap_eq hY]
-  obtain ⟨h0, h1⟩ := upperPartialMoment_sub hY h
+  obtain ⟨h0, h1⟩ := upperPartialMoment_sub_nonneg_and_le hY h
   rcases le_total 0 (2 * α - 1) with hs | hs
   · nlinarith [mul_nonneg hs h0,
       mul_le_mul_of_nonneg_right (min_le_right α (1 - α)) (sub_nonneg.2 h)]
@@ -145,10 +145,10 @@ lemma continuous_expectileGap (hY : Integrable Y P) : Continuous (expectileGap �
     refine (LipschitzWith.of_dist_le_mul fun e e' ↦ ?_).continuous (K := 1)
     simp only [Real.dist_eq, NNReal.coe_one, one_mul]
     rcases le_total e e' with h | h
-    · obtain ⟨h0, h1⟩ := upperPartialMoment_sub hY h
+    · obtain ⟨h0, h1⟩ := upperPartialMoment_sub_nonneg_and_le hY h
       rw [abs_of_nonneg h0, abs_of_nonpos (sub_nonpos.2 h)]
       linarith
-    · obtain ⟨h0, h1⟩ := upperPartialMoment_sub hY h
+    · obtain ⟨h0, h1⟩ := upperPartialMoment_sub_nonneg_and_le hY h
       rw [abs_of_nonpos (by linarith), abs_of_nonneg (sub_nonneg.2 h)]
       linarith
   simp_rw [funext (expectileGap_eq (α := α) hY)]

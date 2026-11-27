@@ -152,7 +152,7 @@ theorem kirkSpreadPrice_zero_eq_margrabe (S1 r σ1 σ2 ρ T : ℝ) {S2 : ℝ} (h
   rw [← kirkEffectiveVariance_zero_eq_margrabe S2 σ1 σ2 ρ hS2]
   unfold kirkSpreadPrice kirkDiscountedStrike
   rw [zero_mul, add_zero]
-  exact (margrabe_eq_bsVGarman S1 S2 _ T).symm
+  exact (margrabePrice_eq_bsVGarman S1 S2 _ T).symm
 
 /-- **At zero strike Kirk's price is the expected spread payoff.** For two Black–Scholes
 terminals driven by a jointly Gaussian pair of standard normals with covariance `ρ`, and a

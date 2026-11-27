@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 module
 
+public import MathFin.Choice.Portfolio.CAPMEquilibrium
 public import MathFin.Choice.Portfolio.Markowitz
 public import MathFin.Choice.Performance.Ratios
 public import Mathlib.Algebra.Ring.IsFormallyReal
@@ -39,13 +40,15 @@ loop between the optimization-theoretic and algebraic perspectives.
 ## Main definitions
 
 * `expectedReturnTwo`: the two-asset expected return `w r₁ + (1 − w) r₂`.
-* `marginalVarOne`, `marginalVarTwo`: the components `(Σw)₁`, `(Σw)₂` of the marginal variance.
 * `sharpeSqTwo`: the squared Sharpe ratio `E(w)² / V(w)` as a function of `w`.
 
 ## Main results
 
 * `sharpeSqTwo_eq_sharpeRatio_sq`: for `V(w) ≥ 0`, `Sh²(w)` is the squared `sharpeRatio` of the
   portfolio return (zero risk-free rate) at volatility `√V(w)`.
+* `marginalVariance_covTwo_zero`, `marginalVariance_covTwo_one`: the components `(Σw)₁`, `(Σw)₂` of
+  `marginalVariance` (`Choice/Portfolio/CAPMEquilibrium.lean`) at `covTwo` and the
+  weights `(w, 1 − w)`.
 * `portfolioVarTwo_eq_sum_mul_marginalVar`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂`.
 * `hasDerivAt_portfolioVarTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
 * `sharpeSqTwo_deriv_numerator_factored`: the derivative numerator
@@ -72,13 +75,23 @@ namespace MathFin
 (with `1 − w` on asset 2). -/
 noncomputable def expectedReturnTwo (w r₁ r₂ : ℝ) : ℝ := w * r₁ + (1 - w) * r₂
 
-/-- Marginal variance contribution of asset 1: `(Σw)₁ = w σ₁² + (1−w) ρ σ₁ σ₂`. -/
-noncomputable def marginalVarOne (w σ₁ σ₂ ρ : ℝ) : ℝ :=
-  w * σ₁^2 + (1 - w) * ρ * σ₁ * σ₂
+/-- Marginal variance of asset 1 at `covTwo` and the weights `(w, 1 − w)`:
+`(Σw)₁ = w σ₁² + (1−w) ρ σ₁ σ₂`. -/
+lemma marginalVariance_covTwo_zero (σ₁ σ₂ ρ w : ℝ) :
+    marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0 =
+      w * σ₁ ^ 2 + (1 - w) * ρ * σ₁ * σ₂ := by
+  simp only [marginalVariance, covTwo, Fin.sum_univ_two, Matrix.of_apply, Matrix.cons_val',
+    Matrix.cons_val_fin_one, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.isValue]
+  ring
 
-/-- Marginal variance contribution of asset 2: `(Σw)₂ = w ρ σ₁ σ₂ + (1−w) σ₂²`. -/
-noncomputable def marginalVarTwo (w σ₁ σ₂ ρ : ℝ) : ℝ :=
-  w * ρ * σ₁ * σ₂ + (1 - w) * σ₂^2
+/-- Marginal variance of asset 2 at `covTwo` and the weights `(w, 1 − w)`:
+`(Σw)₂ = w ρ σ₁ σ₂ + (1−w) σ₂²`. -/
+lemma marginalVariance_covTwo_one (σ₁ σ₂ ρ w : ℝ) :
+    marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1 =
+      w * ρ * σ₁ * σ₂ + (1 - w) * σ₂ ^ 2 := by
+  simp only [marginalVariance, covTwo, Fin.sum_univ_two, Matrix.of_apply, Matrix.cons_val',
+    Matrix.cons_val_fin_one, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.isValue]
+  ring
 
 /-- Two-asset Sharpe-ratio squared as a function of weight `w`. -/
 noncomputable def sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ) : ℝ :=
@@ -99,8 +112,10 @@ theorem sharpeSqTwo_eq_sharpeRatio_sq (w r₁ r₂ σ₁ σ₂ ρ : ℝ)
 `portfolioVarN_eq_sum_mul_marginalVariance`, `Choice/Portfolio/CAPMEquilibrium.lean`). -/
 lemma portfolioVarTwo_eq_sum_mul_marginalVar (σ₁ σ₂ ρ w : ℝ) :
     portfolioVarTwo σ₁ σ₂ ρ w =
-      w * marginalVarOne w σ₁ σ₂ ρ + (1 - w) * marginalVarTwo w σ₁ σ₂ ρ := by
-  unfold portfolioVarTwo marginalVarOne marginalVarTwo
+      w * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0
+        + (1 - w) * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1 := by
+  rw [marginalVariance_covTwo_zero, marginalVariance_covTwo_one]
+  unfold portfolioVarTwo
   ring
 
 /-- **Derivative of `E(w) = w r₁ + (1 − w) r₂`** is `r₁ − r₂`. -/
@@ -122,7 +137,8 @@ lemma hasDerivAt_expectedReturnTwo (w r₁ r₂ : ℝ) :
 `A w² + B w + C`, then `(A w² + B w + C)' = 2 A w + B`. -/
 lemma hasDerivAt_portfolioVarTwo (σ₁ σ₂ ρ w : ℝ) :
     HasDerivAt (portfolioVarTwo σ₁ σ₂ ρ)
-               (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) w := by
+               (2 * (marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0
+                 - marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1)) w := by
   -- Rewrite V as A w² + B w + C
   have h_v_poly : portfolioVarTwo σ₁ σ₂ ρ =
       (fun w' ↦ (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂) * w'^2 +
@@ -138,7 +154,8 @@ lemma hasDerivAt_portfolioVarTwo (σ₁ σ₂ ρ w : ℝ) :
   have h_term2 := (hasDerivAt_id w).const_mul (-2*σ₂^2 + 2*ρ*σ₁*σ₂)
   have h_term3 : HasDerivAt (fun _ : ℝ ↦ (σ₂^2 : ℝ)) 0 w := hasDerivAt_const w _
   have h := (h_term1.add h_term2).add h_term3
-  convert h using 1 <;> first | rfl | (unfold marginalVarOne marginalVarTwo; ring)
+  convert h using 1 <;>
+    first | rfl | (rw [marginalVariance_covTwo_zero, marginalVariance_covTwo_one]; ring)
 
 /-- **Derivative of `E²(w)`** is `2 E (r₁ − r₂)`. -/
 lemma hasDerivAt_expectedReturnTwo_sq (w r₁ r₂ : ℝ) :
@@ -154,7 +171,8 @@ theorem hasDerivAt_sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ)
                ((2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
                    portfolioVarTwo σ₁ σ₂ ρ w -
                  (expectedReturnTwo w r₁ r₂)^2 *
-                   (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ))) /
+                   (2 * (marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0
+                     - marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1))) /
                 (portfolioVarTwo σ₁ σ₂ ρ w)^2) w := by
   unfold sharpeSqTwo
   exact (hasDerivAt_expectedReturnTwo_sq w r₁ r₂).div
@@ -173,10 +191,13 @@ exactly to `r₁ (Σw)₂ − r₂ (Σw)₁`. -/
 theorem sharpeSqTwo_deriv_numerator_factored (w r₁ r₂ σ₁ σ₂ ρ : ℝ) :
     2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) * portfolioVarTwo σ₁ σ₂ ρ w -
         (expectedReturnTwo w r₁ r₂)^2 *
-          (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) =
+          (2 * (marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0
+            - marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1)) =
       2 * expectedReturnTwo w r₁ r₂ *
-        (r₁ * marginalVarTwo w σ₁ σ₂ ρ - r₂ * marginalVarOne w σ₁ σ₂ ρ) := by
-  unfold expectedReturnTwo portfolioVarTwo marginalVarOne marginalVarTwo
+        (r₁ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1
+          - r₂ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0) := by
+  rw [marginalVariance_covTwo_zero, marginalVariance_covTwo_one]
+  unfold expectedReturnTwo portfolioVarTwo
   ring
 
 /-- **Critical-point characterisation**: in the `E ≠ 0`, `V ≠ 0` regime, the
@@ -190,55 +211,21 @@ theorem sharpeSqTwo_critical_iff_crossProduct_FOC
     (w r₁ r₂ σ₁ σ₂ ρ : ℝ) (hV : portfolioVarTwo σ₁ σ₂ ρ w ≠ 0)
     (hE : expectedReturnTwo w r₁ r₂ ≠ 0) :
     HasDerivAt (fun w' ↦ sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔
-      r₂ * marginalVarOne w σ₁ σ₂ ρ = r₁ * marginalVarTwo w σ₁ σ₂ ρ := by
-  -- (a) The derivative computed above is unique; if HasDerivAt f 0 w, then
-  --     the computed expression equals 0.
-  have h_deriv := hasDerivAt_sharpeSqTwo w r₁ r₂ σ₁ σ₂ ρ hV
-  constructor
-  · intro h_zero
-    -- Uniqueness of HasDerivAt: both derivatives must agree
-    have h_eq : (2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                   portfolioVarTwo σ₁ σ₂ ρ w -
-                 (expectedReturnTwo w r₁ r₂)^2 *
-                   (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ))) /
-                (portfolioVarTwo σ₁ σ₂ ρ w)^2 = 0 := h_deriv.unique h_zero
-    have hV_sq : (portfolioVarTwo σ₁ σ₂ ρ w)^2 ≠ 0 := pow_ne_zero _ hV
-    -- Division-by-nonzero is zero implies numerator is zero
-    have h_num : 2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                   portfolioVarTwo σ₁ σ₂ ρ w -
-                 (expectedReturnTwo w r₁ r₂)^2 *
-                   (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) = 0 :=
-      (div_eq_zero_iff.mp h_eq).resolve_right hV_sq
-    -- Apply the algebraic factorization
-    rw [sharpeSqTwo_deriv_numerator_factored] at h_num
-    -- 2 * E * (r₁·(Σw)₂ - r₂·(Σw)₁) = 0
-    have : r₁ * marginalVarTwo w σ₁ σ₂ ρ - r₂ * marginalVarOne w σ₁ σ₂ ρ = 0 := by
-      have h2E_ne : (2 * expectedReturnTwo w r₁ r₂) ≠ 0 := by
-        simp [hE]
-      have : (2 * expectedReturnTwo w r₁ r₂) *
-              (r₁ * marginalVarTwo w σ₁ σ₂ ρ - r₂ * marginalVarOne w σ₁ σ₂ ρ) = 0 := h_num
-      rcases mul_eq_zero.mp this with h | h
-      · exact absurd h h2E_ne
-      · exact h
+      r₂ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0 =
+        r₁ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1 := by
+  -- the derivative, with its numerator factored (`sharpeSqTwo_deriv_numerator_factored`)
+  have h := (hasDerivAt_sharpeSqTwo w r₁ r₂ σ₁ σ₂ ρ hV).congr_deriv
+    (g' := 2 * expectedReturnTwo w r₁ r₂ *
+      (r₁ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1 -
+        r₂ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0) /
+      (portfolioVarTwo σ₁ σ₂ ρ w) ^ 2)
+    (by rw [sharpeSqTwo_deriv_numerator_factored])
+  refine ⟨fun h0 ↦ ?_, fun h0 ↦ ?_⟩
+  · have h2 := (div_eq_zero_iff.1 (h.unique h0)).resolve_right (pow_ne_zero _ hV)
+    have h3 := (mul_eq_zero.1 h2).resolve_left (mul_ne_zero two_ne_zero hE)
     linarith
-  · intro h_foc
-    -- r₂ (Σw)₁ = r₁ (Σw)₂ ⟹ derivative is 0
-    -- Use the factorization: 2EE'V - E²V' = 2E(r₁(Σw)₂ - r₂(Σw)₁) = 2E·0 = 0
-    have h_diff_zero : r₁ * marginalVarTwo w σ₁ σ₂ ρ -
-                       r₂ * marginalVarOne w σ₁ σ₂ ρ = 0 := by linarith
-    have h_num_zero : 2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                        portfolioVarTwo σ₁ σ₂ ρ w -
-                      (expectedReturnTwo w r₁ r₂)^2 *
-                        (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) = 0 := by
-      rw [sharpeSqTwo_deriv_numerator_factored]
-      rw [h_diff_zero]; ring
-    have h_zero_div : (2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
-                         portfolioVarTwo σ₁ σ₂ ρ w -
-                       (expectedReturnTwo w r₁ r₂)^2 *
-                         (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ))) /
-                      (portfolioVarTwo σ₁ σ₂ ρ w)^2 = 0 := by
-      rw [h_num_zero]; simp
-    rw [← h_zero_div]
-    exact h_deriv
+  · have h2 : r₁ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 1 -
+        r₂ * marginalVariance Finset.univ (covTwo σ₁ σ₂ ρ) ![w, 1 - w] 0 = 0 := by linarith
+    rwa [h2, mul_zero, zero_div] at h
 
 end MathFin
