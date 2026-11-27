@@ -47,8 +47,9 @@ assembled.
 * `Market.gammaSwapFairStrike M T Q κ L U`: twice the market price of the `1/K` strip
   per `κ·T`; under a pricing measure with the unit numéraire and `S_T ∈ [L, U]` a.s., and
   `0 < κ`, `0 < T`, `0 < L ≤ κ ≤ U`, it is the fair strike. The division is junk at
-  `κ = 0` or `T = 0`; at `κ < 0` or outside the ordering it is well defined but is not a
-  fair strike.
+  `κ = 0` or `T = 0`; at `κ < 0` with a range crossing `K = 0` the totalized value is junk
+  (the `1/K` weight diverges there); otherwise, or outside the ordering, it is well defined
+  but is not a fair strike.
 
 ## Main results
 
@@ -177,8 +178,10 @@ factor is `2`; the reference level `κ` in the `S₀` slot, at the at-the-money 
 `κ = F₀`); the unbounded strip of the source is cut to the compact range. Under a pricing
 measure of the market with the unit numéraire and `S_T ∈ [L, U]` almost surely, and with
 `0 < κ`, `0 < T` and `0 < L ≤ κ ≤ U`, the value is the fair strike
-(`gammaSwapFairStrike_eq_integral`); the division is junk at `κ = 0` or `T = 0`, and at
-`κ < 0` or outside the ordering it is well defined but is not a fair strike. -/
+(`gammaSwapFairStrike_eq_integral`); the division is junk at `κ = 0` or `T = 0`; at
+`κ < 0` with a strike range crossing `K = 0` the strip's `1/K` weight diverges there and
+the totalized value is junk; otherwise, or outside the ordering, it is well defined but is
+not a fair strike. -/
 noncomputable def gammaSwapFairStrike (M : Market Unit Ω) (T : ℝ≥0) (Q : Measure Ω)
     (κ L U : ℝ) : ℝ :=
   2 / (κ * (T : ℝ)) *
