@@ -49,7 +49,8 @@ backlog merges (#646, #650–#652).
   summing to one, nonnegative volatilities and a nonnegative observed variance
   (`jensenProxy_le_bossuProxy`). The dispersion P&L
   identity `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`), the flat-weight index variance
-  `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²` (`indexVar_equicorrelation_flat_weights`), and the
+  `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²` (`indexVar_equicorrelation_flat_weights`; at an empty index
+  both sides read `0`, the right side as the junk `0/0`, disclosed), and the
   correlation swap's floating leg realising the common correlation at index weights whose
   off-diagonal weight mass `(∑ wᵢ)² − ∑ wᵢ²` is nonzero
   (`realisedCorrelation_equicorrelation`). Cited: Jacquier & Slaoui, arXiv:1004.0125 (2010),

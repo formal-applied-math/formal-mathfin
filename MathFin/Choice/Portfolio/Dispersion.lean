@@ -270,7 +270,9 @@ theorem dispersionPnL_eq (w σ : n → ℝ) (ρ : ℝ) :
 
 /-- **The flat-weight index variance**: at the equal weights `wᵢ = 1/d` the equicorrelated index
 variance is `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²`, the heterogeneous-volatility generalisation of the
-equal-weight diversification floor `portfolioVarN_equicorrelation_equal_weights`. -/
+equal-weight diversification floor `portfolioVarN_equicorrelation_equal_weights`. At an empty
+index both sides are `0`, the right side as the junk `0/0`; the weights' reading `wᵢ = 1/d` is
+for a nonempty index, the domain the cited floor gates with `[Nonempty n]`. -/
 theorem indexVar_equicorrelation_flat_weights (σ : n → ℝ) (ρ : ℝ) :
     portfolioVarN univ (fun _ ↦ (Fintype.card n : ℝ)⁻¹)
         (fun i j ↦ σ i * σ j * equicorrelationMatrix n ρ i j)
