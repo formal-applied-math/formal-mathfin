@@ -56,6 +56,8 @@ ASSETS = Path(__file__).with_name("site_assets")
 BLUEPRINT_NODES = Path("docs/blueprint_nodes.json")
 FRONTIER = Path("docs/blueprint_frontier.toml")
 LANDMARKS = Path("docs/landmarks.toml")
+TALKS = Path("docs/talks")
+PROBLEMS = Path("docs/research-problems/problems.json")
 
 # The layers of the map (its colour): the taxonomy's roots, trunk and limbs.
 LAYER_NAMES = {"roots": "Probability and statistics", "trunk": "Positions and markets",
@@ -1056,6 +1058,73 @@ does not cover stated next to it. The prose above a statement is a reading aid; 
         encoding="utf-8")
 
 
+TALK_KEYS = ("slug", "title", "event", "intro")
+
+
+def load_talks(talks_dir: Path = TALKS, landmarks: list[dict] | None = None,
+               problems_path: Path = PROBLEMS) -> list[dict]:
+    """The talk pages (docs/talks/*.toml). A talk selects landmarks and catalogue problems by
+    name and restates neither; a name that selects nothing is an error, never a dropped card."""
+    if not talks_dir.exists():
+        return []
+    known = {e["decl"] for e in (load_landmarks() if landmarks is None else landmarks)}
+    ids = ({p["id"] for p in json.loads(problems_path.read_text(encoding="utf-8"))["problems"]}
+           if problems_path.exists() else set())
+    talks = []
+    for path in sorted(talks_dir.glob("*.toml")):
+        t = tomllib.loads(path.read_text(encoding="utf-8"))
+        for k in TALK_KEYS:
+            if not isinstance(t.get(k), str) or not t[k].strip():
+                raise ValueError(f"{path}: missing or empty string key `{k}`")
+        if extra := set(t) - set(TALK_KEYS) - {"landmarks", "problems", "link"}:
+            raise ValueError(f"{path}: unknown keys {sorted(extra)}")
+        if bad := [d for d in t.get("landmarks", []) if d not in known]:
+            raise ValueError(f"{path}: landmarks not in {LANDMARKS}: {bad}")
+        if bad := [i for i in t.get("problems", []) if i not in ids]:
+            raise ValueError(f"{path}: problems not in {problems_path}: {bad}")
+        for ln in t.get("link", []):
+            if not all(isinstance(ln.get(k), str) and ln[k].strip() for k in ("title", "url", "text")):
+                raise ValueError(f"{path}: a [[link]] needs title, url and text")
+        talks.append(t)
+    return talks
+
+
+def problem_card(p: dict) -> str:
+    """One catalogue record: its question, its mathematical status and its Lean status, kept
+    apart as the catalogue keeps them."""
+    lean = p.get("formalization", {}).get("lean_statement", {}).get("status", "")
+    issue = (f' · <a href="{esc(p["issue_url"])}">discussion</a>' if p.get("issue_url") else "")
+    return (f'<section class="landmark" id="{esc(p["id"])}"><h2>{esc(p["id"])}: '
+            f'{esc(p["title"])}</h2><p class="lm-summary">{_inline(p["statement"])}</p>'
+            f'<p class="muted">Mathematical status: <strong>{esc(p["mathematical_status"].replace("_", " "))}</strong>'
+            f' · Lean statement: {esc(lean.replace("_", " ") or "none")}{issue}</p></section>')
+
+
+def build_talks(site: Site, out: Path, landmarks: list[dict], nodes_json: list[dict],
+                link: Linker) -> None:
+    by_decl = {e["decl"]: e for e in landmarks}
+    anchors = {n["name"]: n["title"] for n in nodes_json if n.get("name")}
+    anchors.update({e["decl"]: e["title"] for e in landmarks})
+    problems = ({p["id"]: p for p in json.loads(PROBLEMS.read_text(encoding="utf-8"))["problems"]}
+                if PROBLEMS.exists() else {})
+    for t in load_talks(landmarks=landmarks):
+        links = "".join(f'<li><a href="{esc(ln["url"])}">{esc(ln["title"])}</a>: {esc(ln["text"])}</li>'
+                        for ln in t.get("link", []))
+        cards = "".join(landmark_card(site, link, by_decl[d], anchors) for d in t.get("landmarks", []))
+        probs = "".join(problem_card(problems[i]) for i in t.get("problems", []))
+        body = f"""<h1>{esc(t["title"])}</h1>
+<p class="muted">{esc(t["event"])}</p>
+<p class="lede ink2">{_inline(t["intro"])}</p>
+<h2>Start here</h2><ul>{links}</ul>
+<h2>The results, as Lean states them</h2>{cards}
+<h2>Open problems in the catalogue</h2>
+<p class="muted">Each record has a precise statement, dated sources and a resolution search. Its
+mathematical status and its Lean status are separate: a problem can be solved on paper and not yet
+stated in Lean, or stated in Lean and still open.</p>{probs}"""
+        (out / f'{t["slug"]}.html').write_text(
+            page(f'{t["title"]} — MathFin', body, "", "", t["event"]), encoding="utf-8")
+
+
 def build_corpus(site: Site, out: Path) -> None:
     by_file: dict[str, list[tuple[str, dict]]] = defaultdict(list)
     for f, e in site.all_entries:
@@ -1287,6 +1356,7 @@ def build(index_path: str | Path, out: str | Path, issues_path: str | Path | Non
     build_tree(site, out, nodes_json, frontier, issues, connectors)
     build_joints(site, out, nodes_json, frontier)
     build_landmarks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
+    build_talks(site, out, landmarks, nodes_json, Linker(site.idx, "", public))
     build_corpus(site, out)
     build_subjects(site, out)
     build_references(site, out)

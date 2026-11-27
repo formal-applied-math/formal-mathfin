@@ -1,0 +1,67 @@
+# A talk page on the docs site (tools/verify/docs_site.py, `build_talks`): rendered at
+# <slug>.html. It selects, never restates: landmark cards come from docs/landmarks.toml and
+# problems from docs/research-problems/problems.json, so the page cannot drift from either.
+#
+#   slug       the page's file name
+#   title      the talk title
+#   event      where and when
+#   intro      Markdown, a few sentences
+#   landmarks  decls of docs/landmarks.toml, in the order shown
+#   problems   MF-OP ids of the catalogue, in the order shown
+#   [[link]]   title, url, text
+
+slug = "rio-2026"
+title = "Formally verified option pricing: a Lean 4 library of mathematical finance"
+event = "Research in Options 2026, FGV EMAp, Rio de Janeiro, 3 December 2026"
+intro = """formal-mathfin is an open-source library of mathematical finance in Lean 4, built on \
+Mathlib and on Rémy Degenne's formalization of Brownian motion. A theorem enters only when every \
+hypothesis is stated and every step is checked by Lean's kernel. This page collects what the talk \
+showed: the option-pricing results with their exact Lean statements and what each leaves out, \
+the open problems the library catalogues, and where to start. Nothing needs installing to read \
+any of it."""
+landmarks = [
+  "MathFin.binomialPrice_call_tendsto_bs_closed",
+  "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
+  "MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex",
+  "MathFin.calendar_free_iff",
+  "MathFin.Dupire.dupire_weak",
+  "MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualStockBoundary_strictConvexOn",
+  "MathFin.JumpDiffusionProcess.martingale_iff",
+  "MathFin.ftap_discrete",
+  "MathFin.Btheta_isFilteredPreBrownian_predictable_of_bdd",
+]
+problems = [
+  "MF-OP-006", "MF-OP-007",
+  "MF-OP-004", "MF-OP-005", "MF-OP-009", "MF-OP-001", "MF-OP-010", "MF-OP-015",
+  "MF-OP-013", "MF-OP-018",
+]
+
+[[link]]
+title = "The program tree"
+url = "tree.html"
+text = "The whole library as one tree: probability at the roots, the pricing trunk, the model families as limbs, with what is proved and what is next."
+
+[[link]]
+title = "When the prose says more than the Lean"
+url = "https://github.com/formal-applied-math/formal-mathfin/blob/main/docs/faithfulness.md"
+text = "107 confirmed cases from the library's history where a description claimed more than its statement, and what catches them now."
+
+[[link]]
+title = "The open-problem catalogue"
+url = "https://github.com/formal-applied-math/formal-mathfin/blob/main/docs/research-problems/README.md"
+text = "Precise statements, dated sources and resolution searches, with mathematical and Lean status kept apart."
+
+[[link]]
+title = "Learning Lean through the library"
+url = "https://github.com/formal-applied-math/formal-mathfin/blob/main/docs/beginners-manual.md"
+text = "The beginners' manual, for mathematicians who have not used Lean, with checked exercises."
+
+[[link]]
+title = "The corpus as a dataset"
+url = "https://huggingface.co/datasets/formal-applied-math/formal-mathfin-theorems"
+text = "Every corpus entry with its Lean statement, status and what it leaves out."
+
+[[link]]
+title = "The repository"
+url = "https://github.com/formal-applied-math/formal-mathfin"
+text = "Source, issues, and how to contribute."

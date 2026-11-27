@@ -77,6 +77,25 @@ def test_landmarks_toml_has_the_required_keys():
         <= {e["decl"] for e in landmarks}
 
 
+def test_talk_pages_select_only_what_exists():
+    talks = docs_site.load_talks()                 # raises on a name that selects nothing
+    assert {t["slug"] for t in talks} >= {"rio-2026"}
+    for t in talks:
+        assert len(set(t.get("landmarks", []))) == len(t.get("landmarks", [])), t["slug"]
+        assert len(set(t.get("problems", []))) == len(t.get("problems", [])), t["slug"]
+
+
+def test_talk_with_an_unknown_landmark_fails_loudly(tmp_path):
+    (tmp_path / "t.toml").write_text(
+        'slug = "t"\ntitle = "T"\nevent = "E"\nintro = "I"\nlandmarks = ["MathFin.nope"]\n',
+        encoding="utf-8")
+    try:
+        docs_site.load_talks(tmp_path)
+    except ValueError:
+        return
+    raise AssertionError("a talk selecting an unknown landmark was accepted")
+
+
 def test_malformed_landmark_fails_loudly(tmp_path):
     bad = tmp_path / "landmarks.toml"
     bad.write_text('[[landmark]]\ndecl = "MathFin.x"\ntitle = "X"\nsummary = "s"\n',

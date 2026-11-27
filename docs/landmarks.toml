@@ -151,14 +151,53 @@ alters the jump rate or the jump law is not covered."""
 also = ["MathFin.JumpDiffusionProcess.condExp_call_eq_mertonCallPrice"]
 
 [[landmark]]
-decl = "MathFin.BlackScholes.AmericanPut.Stopping.value_eq_of_attained"
-title = "The American put"
-summary = """A bounded continuous supermartingale dominating the discounted reward bounds the \
-value, and a stopping rule whose expected reward equals its initial value attains it."""
-scope = """This is a verification principle: the supermartingale is a hypothesis, not \
-constructed. Separately, convexity of the early-exercise boundary in the time to expiry is \
-proved for the value defined over stopping times of the completed Brownian filtration, with \
-r > 0 and dividend yield 0 ≤ q ≤ r (see the PhysicalBoundaryConvexity module)."""
+decl = "MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualStockBoundary_strictConvexOn"
+title = "The American put exercise boundary"
+summary = """For K, r, σ > 0 and dividend yield 0 ≤ q ≤ r, the early-exercise boundary of the \
+American put, defined from its value over stopping times of the completed Brownian filtration, is \
+strictly convex in the time to expiry on (0, ∞), and the logarithm of the strike-normalised \
+boundary is convex. This settled an open question (MF-OP-006), proved by Robert Martin."""
+scope = """Convexity is in the chord sense: no second derivative of the boundary is asserted. For \
+q > r the boundary is known not to be convex, and that case is not treated."""
+also = ["MathFin.BlackScholes.AmericanPut.Stopping.brownianUsualLogBoundary_convexOn"]
+
+[[landmark]]
+decl = "MathFin.binomialPrice_call_tendsto_bs_closed"
+title = "Cox–Ross–Rubinstein to Black–Scholes"
+summary = """For σ, T, S₀, K > 0, if the n-step Cox–Ross–Rubinstein tree is free of arbitrage for \
+every n ≥ 1, its call price converges as n → ∞ to the Black–Scholes price \
+S₀Φ(d₁) − Ke^(−rT)Φ(d₂). The no-arbitrage hypothesis holds whenever |r|√T < σ."""
+scope = """The convergence is for the European call, with no rate of convergence. The tree's no-arbitrage \
+condition is a hypothesis of the limit theorem, discharged by the companion lemma only when \
+|r|√T < σ."""
+also = ["MathFin.binomialNoArb_crr"]
+
+[[landmark]]
+decl = "MathFin.calendar_free_iff"
+title = "Calendar arbitrage"
+summary = """For a total-variance surface w(k, t) > 0 priced by the zero-rate Black–Scholes \
+formula, call prices are non-decreasing in maturity at every strike exactly when total variance \
+t ↦ w(k, t) is non-decreasing at every log-moneyness k. If the prices are those of a martingale, \
+total variance is non-decreasing."""
+scope = """The prices are zero-rate Black–Scholes prices with the forward as spot; rates and \
+dividends enter only through that normalisation. Butterfly arbitrage within a slice is a \
+separate condition (see Raw SVI)."""
+also = ["MathFin.monotone_totalVariance_of_martingale", "MathFin.SVI.bsSmile_calendar_free_iff"]
+
+[[landmark]]
+decl = "MathFin.Dupire.dupire_weak"
+title = "Dupire's equation"
+summary = """For a driftless Itô process X = c + ∫δ dB, with δ bounded, adapted and \
+path-continuous, and call surface C(T, K) = E[(X_T − K)⁺], the equation \
+∂_T C = ½ b̂²(T, K) ∂²_K C holds in the sense of distributions in the strike at every time before \
+the horizon, where b̂²(T, ·) is a version of E[δ_T² | X_T = ·]. No regularity of C is assumed. \
+Under regularity of C in (T, K) on a strike window, and when δ_t = v(t, X_t), it holds \
+pointwise there: v(t, K)² = 2 ∂_T C / ∂²_K C wherever ∂²_K C > 0."""
+scope = """Zero rates and bounded coefficients: the lognormal model is outside this class. The \
+local-volatility diffusion that reproduces C is assumed in the pointwise form, not constructed. \
+The classical proof tests the forward equation against (x − K)⁺, which is not C²; the library \
+smears the strike with Carr–Madan spanning instead."""
+also = ["MathFin.Dupire.dupire_localVol"]
 
 [[landmark]]
 decl = "MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex"

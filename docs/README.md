@@ -37,6 +37,7 @@ library's own vocabulary; the [README](../README.md) gives the main results and 
 | [`research-problems/`](research-problems/README.md) | The catalogue of open problems of the field (`MF-OP-NNN`): precise statements, sources, mathematical and Lean status. |
 | [`open-problems.md`](open-problems.md) | The earlier survey and candidate pool the catalogue was drawn from. |
 | [`hjm-program.md`](hjm-program.md) | The Heath–Jarrow–Morton program: what is proved and what remains. |
+| [`faithfulness.md`](faithfulness.md) | When the prose said more than the Lean: 107 confirmed cases from the history, their kinds, and what catches them now. |
 | [`coverage.md`](coverage.md) | The dated log of status changes and corrections to corpus entries. |
 | [`sources.md`](sources.md) | Outside work the library draws on, and what was taken from each. |
 

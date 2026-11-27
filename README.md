@@ -21,7 +21,8 @@ The [corpus](docs/glossary.md#corpus) records 924 results from the literature in
 [`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 877 are proved in
 full, 18 restate a lemma from Mathlib or BrownianMotion, and 29 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
-Each entry records its status and what it leaves out. The library contains no `sorry`, and a
+Each entry records its status and what it leaves out; [`docs/faithfulness.md`](docs/faithfulness.md)
+records the 107 times the history's prose said more than its Lean, and what now catches it. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
 axioms `propext`, `Classical.choice` and `Quot.sound`.
 
@@ -124,6 +125,19 @@ exact statement of each one, and what it leaves out.
   it holds exactly when that call is a normalized call price, free of butterfly arbitrage
   ([`extendedCertificateFormula_iff_bsSmile_convex`](MathFin/Models/ModelFree/SVI/ExtendedFormula.lean),
   [`butterflyFreeFormula_iff_isNormalizedCallPrice`](MathFin/Models/ModelFree/SVI/TailCondition.lean)).
+- **Cox–Ross–Rubinstein to Black–Scholes.** If the n-step tree is free of arbitrage for every
+  n ≥ 1, which holds when |r|√T < σ, its call price converges to the Black–Scholes price
+  ([`binomialPrice_call_tendsto_bs_closed`](MathFin/Models/Binomial/CRRClosedForm.lean)).
+- **Calendar arbitrage.** For a total-variance surface priced by the zero-rate Black–Scholes
+  formula, call prices are non-decreasing in maturity at every strike exactly when total variance
+  is non-decreasing in maturity at every log-moneyness
+  ([`calendar_free_iff`](MathFin/Models/ModelFree/CalendarArbitrage.lean)).
+- **Dupire's equation.** For a driftless Itô process with bounded continuous adapted volatility, at
+  zero rates, ∂_T C = ½ b̂² ∂²_K C holds in the sense of distributions in the strike, with no
+  regularity assumed of the call surface; under regularity it holds pointwise, and in a
+  local-volatility model it is Dupire's formula
+  ([`dupire_weak`](MathFin/Models/LocalVol/Dupire.lean),
+  [`dupire_localVol`](MathFin/Models/LocalVol/Dupire.lean)).
 - **Contracts, separate from models.** One contract term is priced in interchangeable models. A call
   less a put is worth the forward in any martingale model
   ([`value_europeanCall_sub_put_of_martingale`](MathFin/Pricing/Parity.lean)), and the call's
