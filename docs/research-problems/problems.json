@@ -624,7 +624,12 @@
         "nearby_results_checked": [
           "Continuous-time Kyle–Back uniqueness is a different question."
         ],
-        "conclusion": "Do not publish this as an unqualified open problem. Track the reported resolution and review status separately."
+        "conclusion": "Do not publish this as an unqualified open problem. Track the reported resolution and review status separately.",
+        "referee": {
+          "verdict": "faithful",
+          "date": "2026-11-26",
+          "comment": "https://github.com/formal-applied-math/formal-mathfin/issues/537#issuecomment-7208420387"
+        }
       },
       "related_problems": [],
       "issue_number": 537,
@@ -641,7 +646,9 @@
           "reason": "Stated in Lean from Theorem 1.1 of the reported resolution (MathFinFrontier/OpenProblems/KyleUniqueness.lean)."
         }
       ],
-      "attempts": {}
+      "attempts": {
+        "referee": 1
+      }
     },
     {
       "id": "MF-OP-009",
@@ -1237,7 +1244,12 @@
           "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
           "Adversarial check 2026-11-19: survives. Finite-dimensional probability: Lean-statable now (volume.restrict C, identically distributed R^d-valued random variables with a.s. constant sum). S2 coverage of citations is incomplete (rate-limited)."
         ],
-        "conclusion": "Class A source is 11 years old, so by the catalogue's rule the status is 'lead', not 'open': my searches (web search only; arXiv API was rate-limited) found no resolution, but I did not do a citation-graph sweep of papers citing Wang 2015."
+        "conclusion": "Class A source is 11 years old, so by the catalogue's rule the status is 'lead', not 'open': my searches (web search only; arXiv API was rate-limited) found no resolution, but I did not do a citation-graph sweep of papers citing Wang 2015.",
+        "referee": {
+          "verdict": "faithful",
+          "date": "2026-11-26",
+          "comment": "https://github.com/formal-applied-math/formal-mathfin/issues/552#issuecomment-7208419609"
+        }
       },
       "related_problems": [
         "MF-OP-017",
@@ -1277,7 +1289,9 @@
           }
         }
       },
-      "attempts": {}
+      "attempts": {
+        "referee": 1
+      }
     },
     {
       "id": "MF-OP-017",
@@ -1342,7 +1356,12 @@
           "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
           "Adversarial check 2026-11-19: killed provisionally by Shmalo (Thm 1.1–1.2); unrefereed, so recorded as resolution_reported."
         ],
-        "conclusion": "Two unrefereed claims conflict: Yin–Zhu (arXiv 1706.05499) report a counterexample; Shmalo (Zenodo 24070253, 2026-11-08, self-declared AI-generated) reports a proof and disputes that example. Neither is checked here."
+        "conclusion": "Two unrefereed claims conflict: Yin–Zhu (arXiv 1706.05499) report a counterexample; Shmalo (Zenodo 24070253, 2026-11-08, self-declared AI-generated) reports a proof and disputes that example. Neither is checked here.",
+        "referee": {
+          "verdict": "faithful",
+          "date": "2026-11-26",
+          "comment": "https://github.com/formal-applied-math/formal-mathfin/issues/553#issuecomment-7208419951"
+        }
       },
       "related_problems": [
         "MF-OP-016",
@@ -1374,7 +1393,10 @@
           }
         }
       },
-      "attempts": {}
+      "attempts": {
+        "referee": 1,
+        "prover": 1
+      }
     },
     {
       "id": "MF-OP-018",
