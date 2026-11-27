@@ -32,7 +32,9 @@ business-day convention, no issuer credit risk, no discrete-coupon memory beyond
 
 ## Main definitions
 
-* `Scenario.FirstAbove` — the `k`-th observation is the first at or above the barrier.
+* `Scenario.FirstAbove` — the `k`-th observation is the first at or above the barrier; by
+  `Scenario.firstAbove_iff_hittingAfter` it is Mathlib's discrete `hittingAfter` of the sampled
+  process, the grid case of the language's `Scenario.hitTime`.
 * `survivalPayoff` — the indicator that the first `k` observations are all below the barrier.
 * `redemptionPayoff`, `maturityPayoff` — the early redemption at date `k`, and the maturity
   redemption with its protection barrier.
@@ -100,6 +102,41 @@ theorem Scenario.FirstAbove.unique {s : Scenario ι} {i : ι} {t : ℕ → ℝ�
   · exact absurd hk.1 (not_le.2 (hj.2 k h))
   · exact h
   · exact absurd hj.1 (not_le.2 (hk.2 j h))
+
+/-- **`FirstAbove` is Mathlib's discrete hitting time.** The `k`-th observation of underlying `i` at
+the dates `t` is the first at or above `B` exactly when `hittingAfter` (from time `0`) of the
+sampled process `k ↦ s i (t k)` at the set `[B, ∞)` is `k`. So the autocall's first date is the
+one object of the language's `Scenario.hitTime`, `hittingAfter` of `u ↦ s i u`, read on the grid of
+observation dates: the `FirstAbove` predicate is the explicit form of the discrete case. -/
+theorem Scenario.firstAbove_iff_hittingAfter (s : Scenario ι) (i : ι) (t : ℕ → ℝ≥0) (B : ℝ)
+    (k : ℕ) :
+    s.FirstAbove i t B k ↔
+      MeasureTheory.hittingAfter (fun (j : ℕ) (s : Scenario ι) ↦ s i (t j)) (Set.Ici B) 0 s
+        = (k : WithTop ℕ) := by
+  have hle (m : ℕ) :
+      MeasureTheory.hittingAfter (fun (j : ℕ) (s : Scenario ι) ↦ s i (t j)) (Set.Ici B) 0 s
+        ≤ (m : WithTop ℕ) ↔ ∃ j ∈ Set.Icc 0 m, B ≤ s i (t j) :=
+    MeasureTheory.hittingAfter_le_iff
+  have hlt (m : ℕ) :
+      MeasureTheory.hittingAfter (fun (j : ℕ) (s : Scenario ι) ↦ s i (t j)) (Set.Ici B) 0 s
+        < (m : WithTop ℕ) ↔ ∃ j ∈ Set.Ico 0 m, B ≤ s i (t j) :=
+    MeasureTheory.hittingAfter_lt_iff
+  constructor
+  · rintro ⟨hk, hbelow⟩
+    refine le_antisymm ((hle k).2 ⟨k, ⟨Nat.zero_le _, le_rfl⟩, hk⟩) (not_lt.1 fun h ↦ ?_)
+    obtain ⟨j, hj, hjB⟩ := (hlt k).1 h
+    exact absurd hjB (not_le.2 (hbelow j hj.2))
+  · intro h
+    have h1 := (hle k).1 h.le
+    have h2 : ¬ ∃ j ∈ Set.Ico 0 k, B ≤ s i (t j) := fun h' ↦ ((hlt k).2 h').ne h
+    have h3 : ∀ j < k, s i (t j) < B := fun j hj ↦
+      not_le.1 fun hB ↦ h2 ⟨j, ⟨Nat.zero_le _, hj⟩, hB⟩
+    obtain ⟨j, hj, hjB⟩ := h1
+    have hjk : j = k := by
+      by_contra hne
+      exact absurd hjB (not_le.2 (h3 j (lt_of_le_of_ne hj.2 hne)))
+    subst hjk
+    exact ⟨hjB, h3⟩
 
 /-- If some observation among the first `n` reaches the barrier, there is a first one. -/
 theorem Scenario.exists_firstAbove {s : Scenario ι} {i : ι} {t : ℕ → ℝ≥0} {B : ℝ} {n : ℕ}

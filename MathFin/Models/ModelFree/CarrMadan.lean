@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Init
+public import MathFin.Contracts.StaticHedge
 public import Mathlib.Algebra.Ring.IsFormallyReal
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
@@ -30,12 +31,24 @@ The proof is one integration by parts — the second-order Taylor remainder
 case one option leg vanishes (its positive part is `0` over its strike range) and the other
 reproduces the remainder.
 
+The finite exact case is the static-hedge compiler of `Contracts/StaticHedge.lean`: a continuous
+piecewise-linear payoff is `a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`, the same decomposition with the measure
+`f'' dK` replaced by the point masses `wⱼ δ_{Kⱼ}`. The bridge is `StaticHedge.jump_eval_of_mem_normalize`:
+in the normal form of a portfolio the weight of the call at `K` is the jump of the one-sided slopes
+of the value function at `K`, `f'(K+) − f'(K−)`, the second derivative of `f` in the sense of
+distributions; and the forward amount is the right slope at `0` when every strike is positive
+(`StaticHedge.derivWithin_Ioi_zero`).
+
 ## Main results
 
 * `carrMadan_spanning`: for `f` twice differentiable on `[L, U]` with `f''` continuous there, and
   `L ≤ κ ≤ U`, `S ∈ [L, U]`,
   `f S = f κ + f' κ · (S − κ) + ∫_L^κ f''(K)·(K − S)⁺ dK + ∫_κ^U f''(K)·(S − K)⁺ dK`.
   This is the compact strike-range form; no improper integral appears.
+* `StaticHedge.jump_eval_of_mem_normalize`: the weight of a call of a normalised static hedge is the
+  jump of the right and left slopes of its value function at the strike.
+* `StaticHedge.derivWithin_Ioi_zero`: the forward amount is the right slope at `0`, when the strikes
+  are positive.
 * `carrMadan_log_spanning`: the case `f = log` with `0 < L`, where the option weights are
   `−1/K²`.
 
@@ -190,3 +203,163 @@ theorem carrMadan_log_spanning {L U κ S : ℝ} (hL : 0 < L)
     (((continuousOn_id.pow 2).inv₀ (fun K hK ↦ pow_ne_zero 2 (hpos K hK))).neg)
 
 end MathFin
+
+namespace MathFin.Contracts
+
+open Set Filter Topology
+
+/-- A call `w (S − K)⁺` has the right derivative `w` at `x` if `K ≤ x`, and `0` if `x < K`. -/
+theorem hasDerivWithinAt_call_Ioi (K w x : ℝ) :
+    HasDerivWithinAt (fun y : ℝ ↦ w * max (y - K) 0) (if K ≤ x then w else 0) (Ioi x) x := by
+  by_cases hK : K ≤ x
+  · rw [if_pos hK]
+    have h : HasDerivWithinAt (fun y : ℝ ↦ w * (y - K)) w (Ioi x) x :=
+      (((hasDerivAt_id' x).sub (hasDerivAt_const x K)).const_mul w).hasDerivWithinAt.congr_deriv
+        (by ring)
+    refine h.congr (fun y hy ↦ ?_) ?_
+    · rw [max_eq_left (by linarith [mem_Ioi.1 hy])]
+    · rw [max_eq_left (by linarith)]
+  · rw [if_neg hK]
+    have hxK : x < K := not_le.1 hK
+    have hev : (fun y : ℝ ↦ w * max (y - K) 0) =ᶠ[𝓝[Ioi x] x] fun _ ↦ (0 : ℝ) := by
+      filter_upwards [Ioo_mem_nhdsGT hxK] with y hy
+      rw [max_eq_right (by linarith [hy.2]), mul_zero]
+    exact (hasDerivAt_const x (0 : ℝ)).hasDerivWithinAt.congr_of_eventuallyEq hev
+      (by rw [max_eq_right (by linarith), mul_zero])
+
+/-- A call `w (S − K)⁺` has the left derivative `w` at `x` if `K < x`, and `0` if `x ≤ K`. -/
+theorem hasDerivWithinAt_call_Iio (K w x : ℝ) :
+    HasDerivWithinAt (fun y : ℝ ↦ w * max (y - K) 0) (if K < x then w else 0) (Iio x) x := by
+  by_cases hK : K < x
+  · rw [if_pos hK]
+    have h : HasDerivWithinAt (fun y : ℝ ↦ w * (y - K)) w (Iio x) x :=
+      (((hasDerivAt_id' x).sub (hasDerivAt_const x K)).const_mul w).hasDerivWithinAt.congr_deriv
+        (by ring)
+    have hev : (fun y : ℝ ↦ w * max (y - K) 0) =ᶠ[𝓝[Iio x] x] fun y ↦ w * (y - K) := by
+      filter_upwards [Ioo_mem_nhdsLT hK] with y hy
+      rw [max_eq_left (by linarith [hy.1])]
+    exact h.congr_of_eventuallyEq hev (by rw [max_eq_left (by linarith)])
+  · rw [if_neg hK]
+    have hxK : x ≤ K := not_lt.1 hK
+    refine (hasDerivAt_const x (0 : ℝ)).hasDerivWithinAt.congr (fun y hy ↦ ?_) ?_
+    · rw [max_eq_right (by linarith [mem_Iio.1 hy]), mul_zero]
+    · rw [max_eq_right (by linarith), mul_zero]
+
+/-- A call sum has the right derivative the sum of the weights of the calls struck at or below `x`. -/
+theorem hasDerivWithinAt_callSum_Ioi (L : List (ℝ × ℝ)) (x : ℝ) :
+    HasDerivWithinAt (callSum L) (L.map fun p ↦ if p.1 ≤ x then p.2 else 0).sum (Ioi x) x := by
+  induction L with
+  | nil =>
+    have h := (hasDerivAt_const x (0 : ℝ)).hasDerivWithinAt (s := Ioi x)
+    simpa using h.congr (fun y _ ↦ callSum_nil y) (callSum_nil x)
+  | cons p L ih =>
+    rw [List.map_cons, List.sum_cons]
+    exact ((hasDerivWithinAt_call_Ioi p.1 p.2 x).add ih).congr (fun y _ ↦ callSum_cons p L y)
+      (callSum_cons p L x)
+
+/-- A call sum has the left derivative the sum of the weights of the calls struck below `x`. -/
+theorem hasDerivWithinAt_callSum_Iio (L : List (ℝ × ℝ)) (x : ℝ) :
+    HasDerivWithinAt (callSum L) (L.map fun p ↦ if p.1 < x then p.2 else 0).sum (Iio x) x := by
+  induction L with
+  | nil =>
+    have h := (hasDerivAt_const x (0 : ℝ)).hasDerivWithinAt (s := Iio x)
+    simpa using h.congr (fun y _ ↦ callSum_nil y) (callSum_nil x)
+  | cons p L ih =>
+    rw [List.map_cons, List.sum_cons]
+    exact ((hasDerivWithinAt_call_Iio p.1 p.2 x).add ih).congr (fun y _ ↦ callSum_cons p L y)
+      (callSum_cons p L x)
+
+namespace StaticHedge
+
+/-- The affine part `a + b S` of a portfolio has the derivative `b`, on any side. -/
+theorem hasDerivWithinAt_affine (a b x : ℝ) (s : Set ℝ) :
+    HasDerivWithinAt (fun y : ℝ ↦ a + b * y) b s x :=
+  ((hasDerivAt_const x a).add ((hasDerivAt_id' x).const_mul b)).hasDerivWithinAt.congr_deriv
+    (by ring)
+
+/-- **The right slope of a static hedge**: its value function has the right derivative `b` plus the
+weights of the calls struck at or below `x`. -/
+theorem hasDerivWithinAt_eval_Ioi (H : StaticHedge) (x : ℝ) :
+    HasDerivWithinAt H.eval
+      (H.forwardAmount + (H.calls.map fun p ↦ if p.1 ≤ x then p.2 else 0).sum) (Ioi x) x :=
+  (hasDerivWithinAt_affine H.bondAmount H.forwardAmount x _).add
+    (hasDerivWithinAt_callSum_Ioi H.calls x)
+
+/-- **The left slope of a static hedge**: its value function has the left derivative `b` plus the
+weights of the calls struck below `x`. -/
+theorem hasDerivWithinAt_eval_Iio (H : StaticHedge) (x : ℝ) :
+    HasDerivWithinAt H.eval
+      (H.forwardAmount + (H.calls.map fun p ↦ if p.1 < x then p.2 else 0).sum) (Iio x) x :=
+  (hasDerivWithinAt_affine H.bondAmount H.forwardAmount x _).add
+    (hasDerivWithinAt_callSum_Iio H.calls x)
+
+/-- The weights of the calls struck at or below `x`, less those struck below `x`, are the weights of
+the calls struck at `x`. -/
+theorem sum_ite_le_sub_sum_ite_lt (L : List (ℝ × ℝ)) (x : ℝ) :
+    (L.map fun p ↦ if p.1 ≤ x then p.2 else 0).sum - (L.map fun p ↦ if p.1 < x then p.2 else 0).sum
+      = (L.map fun p ↦ if p.1 = x then p.2 else 0).sum := by
+  induction L with
+  | nil => simp
+  | cons p L ih =>
+    simp only [List.map_cons, List.sum_cons]
+    rcases lt_trichotomy p.1 x with h | h | h
+    · simp only [if_pos h, if_pos h.le, if_neg h.ne]
+      linarith
+    · simp only [if_pos h.le, if_neg (not_lt.2 h.ge), if_pos h]
+      linarith
+    · simp only [if_neg (not_le.2 h), if_neg (not_lt.2 h.le), if_neg h.ne']
+      linarith
+
+/-- **The jump of the slope of a static hedge** at `x`, `f'(x+) − f'(x−)` for `f = H.eval`, is the
+total weight of the calls struck at `x`. -/
+theorem derivWithin_Ioi_sub_derivWithin_Iio (H : StaticHedge) (x : ℝ) :
+    derivWithin H.eval (Ioi x) x - derivWithin H.eval (Iio x) x
+      = (H.calls.map fun p ↦ if p.1 = x then p.2 else 0).sum := by
+  rw [(hasDerivWithinAt_eval_Ioi H x).derivWithin (uniqueDiffWithinAt_Ioi x),
+    (hasDerivWithinAt_eval_Iio H x).derivWithin (uniqueDiffWithinAt_Iio x),
+    ← sum_ite_le_sub_sum_ite_lt H.calls x]
+  ring
+
+/-- In a list with strictly increasing strikes, the weights of the calls struck at `K` sum to the
+weight `w` of a call `(K, w)` of the list. -/
+theorem sum_ite_eq_of_mem {K w : ℝ} :
+    ∀ L : List (ℝ × ℝ), L.Pairwise (fun a b ↦ a.1 < b.1) → (K, w) ∈ L →
+      (L.map fun p ↦ if p.1 = K then p.2 else 0).sum = w
+  | [], _, h => absurd h List.not_mem_nil
+  | r :: L, hL, h => by
+    obtain ⟨h1, h2⟩ := List.pairwise_cons.1 hL
+    rw [List.map_cons, List.sum_cons]
+    rcases List.mem_cons.1 h with rfl | h
+    · have h0 : (L.map fun p ↦ if p.1 = K then p.2 else 0).sum = 0 :=
+        List.sum_eq_zero fun a ha ↦ by
+          obtain ⟨q, hq, rfl⟩ := List.mem_map.1 ha
+          exact if_neg (h1 q hq).ne'
+      rw [h0, if_pos rfl, add_zero]
+    · rw [if_neg (h1 _ h).ne, zero_add]
+      exact sum_ite_eq_of_mem L h2 h
+
+/-- **The slope bridge to the Carr–Madan formula.** In the normal form of a portfolio, the weight
+of the call at a strike `K` is the jump of the one-sided slopes of the value function there:
+`w = f'(K+) − f'(K−)` for `f = H.eval`. The calls of a static hedge are the second derivative of the
+payoff, as a measure; `carrMadan_spanning` is the same decomposition for a payoff with a density
+`f''`. -/
+theorem jump_eval_of_mem_normalize (H : StaticHedge) {K w : ℝ} (h : (K, w) ∈ H.normalize.calls) :
+    derivWithin H.eval (Ioi K) K - derivWithin H.eval (Iio K) K = w := by
+  have hf : H.normalize.eval = H.eval := funext (eval_normalize H)
+  rw [← hf, derivWithin_Ioi_sub_derivWithin_Iio]
+  exact sum_ite_eq_of_mem _ (pairwise_normalize_calls H) h
+
+/-- **The forward amount is the right slope at `0`**, when every call is struck above `0`: the
+value function of the portfolio is then `a + b S` just right of `0`. -/
+theorem derivWithin_Ioi_zero (H : StaticHedge) (h : ∀ q ∈ H.calls, 0 < q.1) :
+    derivWithin H.eval (Ioi 0) 0 = H.forwardAmount := by
+  rw [(hasDerivWithinAt_eval_Ioi H 0).derivWithin (uniqueDiffWithinAt_Ioi 0)]
+  have : (H.calls.map fun p ↦ if p.1 ≤ 0 then p.2 else 0).sum = 0 :=
+    List.sum_eq_zero fun a ha ↦ by
+      obtain ⟨q, hq, rfl⟩ := List.mem_map.1 ha
+      exact if_neg (not_le.2 (h q hq))
+  rw [this, add_zero]
+
+end StaticHedge
+
+end MathFin.Contracts
