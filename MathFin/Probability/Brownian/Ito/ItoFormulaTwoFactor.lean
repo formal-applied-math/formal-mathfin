@@ -37,11 +37,14 @@ quadratic variations `∑ w ΔX²`, `∑ w ΔY²` converge in probability by
 sequences yields one subsequence along which all converge almost surely
 (`tendstoInMeasure_prodMk`), and along it the pathwise formula applies.
 
-Not here: `f` or its derivatives unbounded, and the formula for every `t ≤ T`, as an identity of
-processes. The one-factor versions are `ito_formula_adapted_td_local_le`,
-`ito_formula_adapted_unbounded_process`. Two *independent* Brownian motions are not covered (the
-library has no multidimensional Brownian motion); `d⟨X, Y⟩ = σ τ dt` here holds because both
-martingale parts are integrals against the same `B`.
+This file is the bounded case: `σ`, `τ`, `b`, `c` and the partials of `f` bounded, at the single
+time `T`, the stochastic integrals taken against `M^σ`, `M^τ`. The formula without a bound on `f`
+is `ito_formula_adapted_two_factor_local` (`ItoFormulaTwoFactorLocal`), and the formula with
+unbounded coefficients, as an identity of processes at every `t ≤ T`, is
+`ito_formula_adapted_two_factor_process` (`ItoFormulaTwoFactorUnbounded`). Two *independent*
+Brownian motions are not covered (neither this library nor BrownianMotion at the pinned version
+defines a multi-dimensional Brownian motion); `d⟨X, Y⟩ = σ τ dt` here holds because both martingale
+parts are integrals against the same `B`.
 
 ## Main results
 
@@ -52,6 +55,8 @@ martingale parts are integrals against the same `B`.
   negatives.
 * `integral_two_factor_drift`: the real identity that assembles the drift integrals and the
   polarised covariation integral.
+* `ito2Drift`: the drift `f_t + f_x b + f_y c + ½ f_xx σ² + f_xy σ τ + ½ f_yy τ²` of
+  `f(t, X_t, Y_t)`.
 
 ## References
 
@@ -119,6 +124,14 @@ open scoped NNReal ENNReal
 private theorem abs_half_mul_le {z C : ℝ} (h : |z| ≤ C) : |1 / 2 * z| ≤ 1 / 2 * C := by
   rw [abs_mul, abs_of_pos (by norm_num : (0 : ℝ) < 1 / 2)]
   exact mul_le_mul_of_nonneg_left h (by norm_num)
+
+/-- **The drift of `f(t, X_t, Y_t)`** at the point `(s, x, y)`, for coefficients `b`, `c` (drifts)
+and `σ`, `τ` (volatilities) of the two processes:
+`f_t + f_x b + f_y c + ½ f_xx σ² + f_xy σ τ + ½ f_yy τ²`. The term `f_xy σ τ` is the one that
+only a second driven process brings: the quadratic covariation of the two martingale parts. -/
+def ito2Drift (f_t f_x f_y f_xx f_xy f_yy : ℝ → ℝ → ℝ → ℝ) (b c σ τ s x y : ℝ) : ℝ :=
+  f_t s x y + f_x s x y * b + f_y s x y * c + 1 / 2 * (f_xx s x y * σ ^ 2)
+    + f_xy s x y * (σ * τ) + 1 / 2 * (f_yy s x y * τ ^ 2)
 
 /-- **Polarisation of a weighted sum.** For increments `Δx = xb − xa` and `Δy = yb − ya` and a
 weight `W`, `∑ W Δx Δy = ∑ ½ W (Δx + Δy)² − ∑ ½ W Δx² − ∑ ½ W Δy²`. -/
@@ -335,29 +348,10 @@ theorem ito_formula_adapted_two_factor_against {Ct Cx Cy Cxx Cxy Cyy : ℝ}
             fun s ω ↦ hby s
               (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b s ω)
               (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)) ω
-        + ∫ s in Ioc 0 T,
-          (f_t s (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b s ω)
-              (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
-            + f_x s (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b
-                s ω)
-              (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
-              * b s ω
-            + f_y s (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b
-                s ω)
-              (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
-              * c s ω
-            + 1 / 2 * (f_xx s (adaptedItoProcess T hBmeas
-                (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b s ω)
-              (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
-              * σ s ω ^ 2)
-            + f_xy s (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b
-                s ω)
-              (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
-              * (σ s ω * τ s ω)
-            + 1 / 2 * (f_yy s (adaptedItoProcess T hBmeas
-                (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b s ω)
-              (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
-              * τ s ω ^ 2)) ∂timeMeasure := by
+        + ∫ s in Ioc 0 T, ito2Drift f_t f_x f_y f_xx f_xy f_yy (b s ω) (c s ω) (σ s ω) (τ s ω) s
+          (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hσa hσc hσb) x₀ b s ω)
+          (adaptedItoProcess T hBmeas (processToLp (μ := μ) T hBmeas hτa hτc hτb) y₀ c s ω)
+          ∂timeMeasure := by
   set φσ := processToLp (μ := μ) T hBmeas hσa hσc hσb
   set φτ := processToLp (μ := μ) T hBmeas hτa hτc hτb
   set X := adaptedItoProcess T hBmeas φσ x₀ b
@@ -561,6 +555,7 @@ theorem ito_formula_adapted_two_factor_against {Ct Cx Cy Cxx Cxy Cyy : ℝ}
     (hcomp hf_xx_cont hxc hyc) (hcomp hf_xy_cont hxc hyc) (hcomp hf_yy_cont hxc hyc)
     (hb_cont ω).continuousOn (hc_cont ω).continuousOn (hσc ω).continuousOn (hτc ω).continuousOn
   beta_reduce at hint
+  unfold ito2Drift
   linarith [key, hint]
 
 end Against
