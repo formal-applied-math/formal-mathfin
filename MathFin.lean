@@ -956,6 +956,7 @@ public import MathFin.Choice.Utility.MarketMarginalUtility
 -- QRM bridges: equicorrelation, Gaussian VaR/ES-optimal = Markowitz portfolios, the HHI
 -- systematic floor, and the square-root-of-time rule for GBM losses
 public import MathFin.Choice.Portfolio.Equicorrelation
+public import MathFin.Choice.Portfolio.Dispersion
 public import MathFin.Choice.Portfolio.SingleIndexModel
 public import MathFin.Choice.Portfolio.RegressionBeta
 

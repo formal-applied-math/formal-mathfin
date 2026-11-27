@@ -26,6 +26,43 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+### Implied correlation and dispersion (2026-11-26)
+
+One `full` entry in `benchmarks/portfolio_and_performance.json`. Corpus 924 → 925 on the
+merged tree (877 full before, 878 after; 895 → 896 delivery-ready) — the delta is measured
+after main's 2026-11-25 contributed merge (#558, #577–#586) and the 2026-11-26 atlas and
+backlog merges (#646, #650–#652).
+
+- **`mf-implied-correlation-dispersion`** (MathFin/Choice/Portfolio/Dispersion.lean): the
+  dispersion identities of an index over its components, read off the equicorrelation quadratic
+  form `portfolioVarN` (`def:portfolio-variance`). Proved: the equicorrelated index variance
+  `(1 − ρ)·∑ wᵢ²σᵢ² + ρ·(∑ wᵢσᵢ)²` (`indexVar_equicorrelation`), the implied correlation
+  `ρ_imp = (V − ∑ wᵢ²σᵢ²)/((∑ wᵢσᵢ)² − ∑ wᵢ²σᵢ²)` with its defining equation
+  (`indexVar_impliedCorrelation`), uniqueness of the solve while the squared weighted-volatility
+  sum differs from the weighted variance sum (`impliedCorrelation_unique`), and the boundary
+  where the two agree: every common correlation reproduces the same variance and the observation
+  identifies none (`indexVar_const_of_sq_sum_eq`). The Bossu proxy `V/(∑ wᵢσᵢ)²` and its exact
+  gap `(1 − ρ)·∑ wᵢ²σᵢ²/(∑ wᵢσᵢ)²` over the common correlation at a nonzero squared
+  weighted-volatility sum (`bossuProxy_eq_add_gap`), the proxy sitting between the correlation
+  and one at nonnegative weights and volatilities with `ρ ≤ 1` (`bossuProxy_between`), and the
+  variance-denominated variant `V/∑ wᵢσᵢ²` as a Jensen lower bound at nonnegative weights
+  summing to one, nonnegative volatilities and a nonnegative observed variance
+  (`jensenProxy_le_bossuProxy`). The dispersion P&L
+  identity `ρ·(∑ wᵢ²σᵢ² − (∑ wᵢσᵢ)²)` (`dispersionPnL_eq`), the flat-weight index variance
+  `((1 − ρ)·∑ σᵢ² + ρ·(∑ σᵢ)²)/d²` (`indexVar_equicorrelation_flat_weights`; at an empty index
+  both sides read `0`, the right side as the junk `0/0`, disclosed), and the
+  correlation swap's floating leg realising the common correlation at index weights whose
+  off-diagonal weight mass `(∑ wᵢ)² − ∑ wᵢ²` is nonzero
+  (`realisedCorrelation_equicorrelation`). Cited: Jacquier & Slaoui, arXiv:1004.0125 (2010),
+  §3.1–§3.2 (the implied correlation, its Bossu proxy, the correlation swap; the static P&L
+  identity is §3.1's decomposition rearranged), with §5.1–§5.4 and Appendix D (the dynamic P&L
+  and the weighting schemes) out of scope. Scope: the static, deterministic identities only —
+  no stochastic process, expectation or pricing measure. Disclosed out of scope: the dynamic
+  P&L decompositions of the source's section 5 (the vega/volga/vanna volatility terms and the
+  implied-vs-fair-strike correlation spread under stochastic volatility), the
+  vega/gamma/theta-flat weighting strategies, and the realised correlation as a random
+  variable. Axioms-clean, `full`.
+
 ### The 2026-11-25 merge
 
 Eleven contributed pull requests (#558, #577–#586) landed together. The corpus goes from 906 to
