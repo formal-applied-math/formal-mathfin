@@ -57,6 +57,7 @@ for two factors.
 
 ## References
 
+* [Y. F. Saporito, *Stochastic Processes*][Saporito], Theorem 7.5.2 (shared-driver case).
 * [I. Karatzas and S. E. Shreve, *Brownian Motion and Stochastic Calculus*][KaratzasShreve1991],
   Theorem 3.3.6
 * [Revuz and Yor, *Continuous Martingales and Brownian Motion*][RevuzYor], Theorem IV.3.3

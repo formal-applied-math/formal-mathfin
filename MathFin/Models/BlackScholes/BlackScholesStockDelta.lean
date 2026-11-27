@@ -38,6 +38,10 @@ The route is the one the integrals dictate.
   integrand equal, by injectivity of the Itô isometry, hence `ψ = Δ` wherever
   `φ = σ S̃ ≠ 0` (`ae_eq_hedgeDelta_of_replicates`).
 
+## Main definitions
+
+* `deltaHedgeLp` is the class of the delta hedge integrand in `L²(trimMeasure τ)`.
+
 ## Main results
 
 * `BlackScholes.europeanCall_payoff_eq_value_add_itoIntegral`: the discounted payoff of the call is
@@ -213,7 +217,8 @@ theorem europeanCall_payoff_eq_value_add_itoIntegral (hB : IsPreBrownianReal B �
           hlim').sub_const _)
   -- ... and in `L²` to the terminal integral
   have hL2 : TendstoInMeasure μ
-      (fun n ↦ ⇑(itoProcessCLM hB T (u n) hBmeas (deltaHedgeLp hB hBmeas hBcont T K r σ S_0 T))) atTop
+      (fun n ↦ ⇑(itoProcessCLM hB T (u n) hBmeas
+        (deltaHedgeLp hB hBmeas hBcont T K r σ S_0 T))) atTop
       ⇑(itoIntegralCLM hB T hBmeas (deltaHedgeLp hB hBmeas hBcont T K r σ S_0 T)) := by
     rw [← itoProcessCLM_terminal_eq hB T hBmeas (deltaHedgeLp hB hBmeas hBcont T K r σ S_0 T)]
     exact tendstoInMeasure_of_tendsto_Lp

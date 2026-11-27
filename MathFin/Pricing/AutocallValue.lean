@@ -34,7 +34,7 @@ each statement names.
 ## References
 
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
-* [S. Bouzoubaa and A. Osseiran, *Exotic Options and Hybrids*][BouzoubaaOsseiran2010], ch. 7
+* [M. Bouzoubaa and A. Osseiran, *Exotic Options and Hybrids*][BouzoubaaOsseiran2010], ch. 12
 
 ## Tags
 

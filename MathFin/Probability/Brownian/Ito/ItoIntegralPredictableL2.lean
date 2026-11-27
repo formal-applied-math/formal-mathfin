@@ -83,7 +83,9 @@ theorem memLp_uncurry_trimMeasure_of_integral_sq_le (hBmeas : ∀ t, Measurable 
   show ∫⁻ z, ‖Function.uncurry θ z ^ 2‖ₑ
       ∂(((timeMeasureHorizon T).prod μ).trim hm) < ⊤
   have hmeasP : Measurable[(natFiltration hBmeas).predictable]
-      fun z ↦ ‖Function.uncurry θ z ^ 2‖ₑ := hg.measurable.enorm
+      fun z ↦ ‖Function.uncurry θ z ^ 2‖ₑ := by
+    letI := (natFiltration (mΩ := mΩ) hBmeas).predictable
+    exact hg.measurable.enorm
   rw [lintegral_trim hm hmeasP,
     lintegral_prod _ (hmeasP.mono hm le_rfl).aemeasurable]
   have hle : ∫⁻ s, ∫⁻ ω, ‖Function.uncurry θ (s, ω) ^ 2‖ₑ ∂μ ∂(timeMeasureHorizon T)
@@ -153,11 +155,17 @@ theorem tendsto_processToLpPredictable_clip {T : ℝ≥0} (hBmeas : ∀ t, Measu
       show (0 : ℝ) = (clip N θ z.1 z.2 - θ z.1 z.2) ^ 2
       rw [clip_eq_self hle]
       simp
+    letI := (natFiltration (mΩ := mΩ) hBmeas).predictable
+    have hmeas (N : ℕ) : AEStronglyMeasurable
+        (fun z ↦ (Function.uncurry (clip N θ) z - Function.uncurry θ z) ^ 2)
+        (trimMeasure (μ := μ) T hBmeas) :=
+      ((hF N).aestronglyMeasurable.sub hG.aestronglyMeasurable).pow 2
     have h := tendsto_integral_of_dominated_convergence
+      (m := (natFiltration (mΩ := mΩ) hBmeas).predictable)
       (μ := trimMeasure (μ := μ) T hBmeas)
       (F := fun (N : ℕ) z ↦ (Function.uncurry (clip N θ) z - Function.uncurry θ z) ^ 2)
       (f := fun _ ↦ (0 : ℝ)) (fun z ↦ Function.uncurry θ z ^ 2)
-      (fun N ↦ ((hF N).aestronglyMeasurable.sub hG.aestronglyMeasurable).pow 2)
+      hmeas
       ((memLp_two_iff_integrable_sq hG.aestronglyMeasurable).1 hG) hbound hlim
     simpa using h
   rw [hφeq]

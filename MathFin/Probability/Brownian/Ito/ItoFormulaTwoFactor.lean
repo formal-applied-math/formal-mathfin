@@ -46,6 +46,10 @@ Brownian motions are not covered (neither this library nor BrownianMotion at the
 defines a multi-dimensional Brownian motion); `d⟨X, Y⟩ = σ τ dt` here holds because both martingale
 parts are integrals against the same `B`.
 
+## Main definitions
+
+* `ito2Drift` is the drift of `f(t, X_t, Y_t)` for two processes driven by one Brownian motion.
+
 ## Main results
 
 * `ito_formula_adapted_two_factor_against`: the identity above, for `f` with bounded jointly
@@ -92,7 +96,7 @@ theorem tendstoInMeasure_prodMk {Ω E F : Type*} [MeasurableSpace Ω] {μ : Meas
   intro ε hε
   have h := (hg₁ ε hε).add (hg₂ ε hε)
   rw [add_zero] at h
-  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h (fun n ↦ zero_le _)
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h (fun _ ↦ zero_le)
     fun n ↦ ?_
   refine le_trans (measure_mono fun ω hω ↦ ?_) (measure_union_le _ _)
   have hω' : ε ≤ edist (g₁ n ω, g₂ n ω) (h₁ ω, h₂ ω) := hω
@@ -129,7 +133,7 @@ private theorem abs_half_mul_le {z C : ℝ} (h : |z| ≤ C) : |1 / 2 * z| ≤ 1 
 and `σ`, `τ` (volatilities) of the two processes:
 `f_t + f_x b + f_y c + ½ f_xx σ² + f_xy σ τ + ½ f_yy τ²`. The term `f_xy σ τ` is the one that
 only a second driven process brings: the quadratic covariation of the two martingale parts. -/
-def ito2Drift (f_t f_x f_y f_xx f_xy f_yy : ℝ → ℝ → ℝ → ℝ) (b c σ τ s x y : ℝ) : ℝ :=
+noncomputable def ito2Drift (f_t f_x f_y f_xx f_xy f_yy : ℝ → ℝ → ℝ → ℝ) (b c σ τ s x y : ℝ) : ℝ :=
   f_t s x y + f_x s x y * b + f_y s x y * c + 1 / 2 * (f_xx s x y * σ ^ 2)
     + f_xy s x y * (σ * τ) + 1 / 2 * (f_yy s x y * τ ^ 2)
 
@@ -419,6 +423,7 @@ theorem ito_formula_adapted_two_factor_against {Ct Cx Cy Cxx Cxy Cyy : ℝ}
       Lp.coeFn_add (itoProcessCLM hB T t hBmeas φσ) (itoProcessCLM hB T t hBmeas φτ)]
       with ω h1 h2 h3
     rw [Pi.add_apply] at h3
+    dsimp only [X, Y]
     rw [hlin, h3, h1, h2]
     ring
   -- the weighted quadratic variations of `X`, `Y` and `Z`
@@ -545,6 +550,8 @@ theorem ito_formula_adapted_two_factor_against {Ct Cx Cy Cxx Cxy Cyy : ℝ}
     (m := fun t ↦ itoContinuousMod T hBmeas φσ t ω) (m' := fun t ↦ itoContinuousMod T hBmeas φτ t ω)
     (cx := x₀) (cy := y₀) (fun _ ↦ rfl) (fun _ ↦ rfl) hxc hyc hν hE hDx hDy hPs hQx hQy
   beta_reduce at key
+  change X 0 ω = x₀ at h0x
+  change Y 0 ω = y₀ at h0y
   rw [h0x, h0y] at key
   have hint := integral_two_factor_drift (T := T)
     (ft := fun s ↦ f_t s (X s ω) (Y s ω)) (fx := fun s ↦ f_x s (X s ω) (Y s ω))

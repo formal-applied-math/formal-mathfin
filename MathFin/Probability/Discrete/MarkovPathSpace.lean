@@ -12,6 +12,8 @@ public import Mathlib.Probability.ProbabilityMassFunction.Monad
 public import Mathlib.Topology.Algebra.InfiniteSum.Ring
 public import Mathlib.Data.Matrix.Mul
 
+public import Mathlib.LinearAlgebra.Matrix.Stochastic
+
 /-!
 # Markov chains on path space: the recurrence criterion and the strong Markov property
 
@@ -107,7 +109,7 @@ lemma ext_of_map_frestrictLe {μ ν : Measure (ℕ → ι)} [IsFiniteMeasure μ]
       = ν.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) :
     μ = ν := by
   have hproj : IsProjectiveMeasureFamily
-      (inducedFamily fun n ↦ μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) :=
+      (inducedFamily (X := fun _ : ℕ ↦ ι) fun n ↦ μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) :=
     isProjectiveMeasureFamily_inducedFamily _ fun a b hab ↦ by
       show (μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) b)).map
           (frestrictLe₂ (π := fun _ : ℕ ↦ ι) hab) = μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) a)
@@ -352,7 +354,7 @@ theorem markovPathMeasure_strong_markov (init : PMF ι) (P : ι → PMF ι)
     obtain ⟨B, -, hDB⟩ := key k
     rw [hDB]
     exact (measurable_frestrictLe (X := fun _ : ℕ ↦ ι) k) (Set.to_countable B).measurableSet
-  have hdisjD : Pairwise (Disjoint on
+  have hdisjD : Pairwise (Function.onFun Disjoint
       fun k : ℕ ↦ C ∩ {ω | τ ω = (k : WithTop ℕ)} ∩ {ω | ω k = j}) := by
     intro k k' hne
     refine Set.disjoint_left.2 fun ω h h' ↦ hne ?_
@@ -363,7 +365,7 @@ theorem markovPathMeasure_strong_markov (init : PMF ι) (P : ι → PMF ι)
       | exact WithTop.coe_injective e
       | exact_mod_cast e
       | simpa using e
-  have hdisj1 : Pairwise (Disjoint on
+  have hdisj1 : Pairwise (Function.onFun Disjoint
       fun k : ℕ ↦ (C ∩ {ω | τ ω = (k : WithTop ℕ)} ∩ {ω | ω k = j}) ∩ shiftBy k ⁻¹' A) :=
     fun k k' hne ↦
       Disjoint.mono Set.inter_subset_left Set.inter_subset_left (hdisjD hne)
@@ -461,8 +463,9 @@ lemma setOf_return_eq_iUnion (i : ι) :
     obtain ⟨k, hk⟩ := Set.mem_iUnion.1 hω
     exact ⟨k + 1, Nat.succ_pos k, ((mem_firstReturnAt i (k + 1) ω).1 hk).1⟩
 
-lemma measurableSet_visit (i : ι) (m : ℕ) : MeasurableSet {ω : ℕ → ι | ω m = i} :=
-  (measurable_pi_apply m) (measurableSet_singleton i)
+lemma measurableSet_visit (i : ι) (m : ℕ) : MeasurableSet {ω : ℕ → ι | ω m = i} := by
+  change MeasurableSet ((fun ω : ℕ → ι ↦ ω m) ⁻¹' {i})
+  exact (measurable_pi_apply m) (measurableSet_singleton i)
 
 /-- **First-passage decomposition.** The probability of being at `i` at time `n + 1` is the sum
 over the first return time `k + 1 ≤ n + 1`:
@@ -612,22 +615,33 @@ theorem chainLaw_visit_toReal_eq_pow [Fintype ι] [DecidableEq ι] (P : ι → P
   let N : Matrix ι ι NNReal := Matrix.of fun a b ↦ (P a b).toNNReal
   have h1 : (Matrix.of fun a b ↦ P a b : Matrix ι ι ℝ≥0∞) = ENNReal.ofNNRealHom.mapMatrix N := by
     ext a b
-    simp [N, ENNReal.coe_toNNReal (PMF.apply_ne_top (P a) b)]
+    exact (ENNReal.coe_toNNReal (PMF.apply_ne_top (P a) b)).symm
   have h2 : transitionMatrix P = NNReal.toRealHom.mapMatrix N := by
     ext a b
-    simp [N, transitionMatrix]
+    rfl
   rw [chainLaw_visit_eq_pow, h1, h2, ← map_pow ENNReal.ofNNRealHom.mapMatrix,
     ← map_pow NNReal.toRealHom.mapMatrix]
-  simp
+  exact ENNReal.coe_toReal _
 
 /-! ### Renewal sequences -/
 
 omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
 /-- The Cauchy product, for sums in `ℝ≥0∞`. -/
 lemma tsum_range_mul_eq (g q : ℕ → ℝ≥0∞) :
-    ∑' n, ∑ k ∈ Finset.range (n + 1), g k * q (n - k) = (∑' k, g k) * ∑' n, q n :=
-  (Summable.tsum_mul_tsum_eq_tsum_sum_range ENNReal.summable ENNReal.summable
-    ENNReal.summable).symm
+    ∑' n, ∑ k ∈ Finset.range (n + 1), g k * q (n - k) = (∑' k, g k) * ∑' n, q n := by
+  simp_rw [← Finset.Nat.sum_antidiagonal_eq_sum_range_succ fun k l ↦ g k * q l]
+  symm
+  calc (∑' k, g k) * ∑' n, q n = ∑' p : ℕ × ℕ, g p.1 * q p.2 := by
+         rw [ENNReal.tsum_prod]
+         simp_rw [ENNReal.tsum_mul_left]
+         rw [ENNReal.tsum_mul_right]
+    _ = _ := by
+      rw [← Finset.HasAntidiagonal.sigmaAntidiagonalEquivProd.tsum_eq
+        (fun p : ℕ × ℕ ↦ g p.1 * q p.2)]
+      rw [ENNReal.tsum_sigma']
+      apply tsum_congr
+      intro n
+      rw [tsum_fintype, ← Finset.sum_finset_coe]
 
 omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
 lemma tsum_eq_one_add_mul (g p : ℕ → ℝ≥0∞) (hp0 : p 0 = 1)
@@ -688,13 +702,14 @@ theorem tsum_eq_one_iff_tsum_eq_top_of_renewal (g p : ℕ → ℝ≥0∞) (hg : 
     have hbound : ∑' n, p n ≤ ENNReal.ofReal (1 / (1 - (∑' k, g k).toReal)) := by
       refine ENNReal.tsum_le_of_sum_range_le fun N ↦ ?_
       have hfin : ∑' n, (if n < N then p n else 0) ≠ ∞ := by
-        have e : ∑' n, (if n < N then p n else 0) = ∑ n ∈ Finset.range N, (if n < N then p n else 0) :=
+        have e : ∑' n, (if n < N then p n else 0)
+            = ∑ n ∈ Finset.range N, (if n < N then p n else 0) :=
           tsum_eq_sum fun n hn ↦ if_neg (by simpa using hn)
         rw [e]
         refine ENNReal.sum_ne_top.2 fun n _ ↦ ne_top_of_le_ne_top ENNReal.one_ne_top ?_
         split_ifs
         · exact hp1 n
-        · exact zero_le _
+        · exact zero_le
       have hq : ∀ n, (if n + 1 < N then p (n + 1) else 0)
           ≤ ∑ k ∈ Finset.range (n + 1), g k * (if n - k < N then p (n - k) else 0) := by
         intro n
@@ -706,7 +721,7 @@ theorem tsum_eq_one_iff_tsum_eq_top_of_renewal (g p : ℕ → ℝ≥0∞) (hg : 
             omega
           rw [if_pos hlt]
         · rw [if_neg hn]
-          exact zero_le _
+          exact zero_le
       calc ∑ n ∈ Finset.range N, p n
           = ∑ n ∈ Finset.range N, (if n < N then p n else 0) :=
             Finset.sum_congr rfl fun n hn ↦ (if_pos (Finset.mem_range.1 hn)).symm
@@ -717,7 +732,7 @@ theorem tsum_eq_one_iff_tsum_eq_top_of_renewal (g p : ℕ → ℝ≥0∞) (hg : 
                   show (if 0 < N then p 0 else 0) ≤ 1
                   split_ifs
                   · exact hp1 0
-                  · exact zero_le _)
+                  · exact zero_le)
                 hq)
     rw [hS] at hbound
     exact ENNReal.ofReal_ne_top (top_le_iff.1 hbound)

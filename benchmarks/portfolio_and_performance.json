@@ -1604,13 +1604,14 @@
       },
       "metadata": {
         "chapter": 10,
-        "reference": "von Neumann and Morgenstern 1944; Föllmer and Schied, Stochastic Finance",
+        "reference": "von Neumann and Morgenstern 1944; Föllmer and Schied, Stochastic Finance, §2.2",
         "citations": [
           {
             "key": "VonNeumannMorgenstern1944"
           },
           {
-            "key": "FollmerSchied"
+            "key": "FollmerSchied",
+            "locator": "§2.2"
           }
         ],
         "difficulty": "advanced",

@@ -163,7 +163,7 @@ theorem lundberg_inequality (u : ℝ) (hY : ∀ k, Measurable (Y k)) (hindep : i
   have hM := lundbergExp_martingale u hY hindep hident hadj
   have hnonneg : 0 ≤ lundbergExp R u Y := fun n ω ↦ (Real.exp_pos _).le
   have hcard (n : ℕ) : ∫ ω, lundbergExp R u Y n ω ∂P = Real.exp (-R * u) := by
-    have h := hM.setIntegral_eq (zero_le n) MeasurableSet.univ
+    have h := hM.setIntegral_eq (Nat.zero_le n) MeasurableSet.univ
     simp only [Measure.restrict_univ] at h
     rw [← h]
     simp [lundbergExp, surplus, integral_const]
@@ -174,7 +174,9 @@ theorem lundberg_inequality (u : ℝ) (hY : ∀ k, Measurable (Y k)) (hindep : i
     refine (measure_mono ?_).trans (hmax.trans ?_)
     · rintro ω ⟨k, hk, hneg⟩
       show (1 : ℝ) ≤ _
-      refine (Real.one_le_exp (by nlinarith [mul_pos hR (neg_pos.2 hneg)])).trans ?_
+      have hpos : 0 ≤ -R * surplus u Y k ω :=
+        mul_nonneg_of_nonpos_of_nonpos (neg_nonpos.2 hR.le) hneg.le
+      refine (Real.one_le_exp hpos).trans ?_
       exact Finset.le_sup' (fun j ↦ lundbergExp R u Y j ω)
         (Finset.mem_range.2 (Nat.lt_succ_of_le hk))
     · rw [← hcard n]

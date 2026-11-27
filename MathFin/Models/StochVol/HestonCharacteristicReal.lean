@@ -25,7 +25,8 @@ that of the Möbius form by the linear term `γτ`).
 
 ## References
 
-* [Albrecher, Mayer, Schoutens, Tistaert, *The little Heston trap*][AlbrecherMayerSchoutensTistaert2007]
+* [Albrecher, Mayer, Schoutens, Tistaert,
+  *The little Heston trap*][AlbrecherMayerSchoutensTistaert2007]
 * [Heston, *A closed-form solution for options with stochastic volatility with applications to bond
   and currency options*][Heston1993]
 
@@ -138,7 +139,8 @@ theorem hestonTrapC_ofReal (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
     rw [hestonTrapE, neg_mul, Complex.exp_neg, ← Complex.ofReal_mul, ← Complex.ofReal_exp,
       Complex.ofReal_inv]
   have hgc : hestonTrapG κ ξ ρ (u : ℂ) (hestonGamma κ ξ ρ u : ℂ)
-      = (((κ - ρ * ξ * u - hestonGamma κ ξ ρ u) / (κ - ρ * ξ * u + hestonGamma κ ξ ρ u) : ℝ) : ℂ) := by
+      = (((κ - ρ * ξ * u - hestonGamma κ ξ ρ u)
+          / (κ - ρ * ξ * u + hestonGamma κ ξ ρ u) : ℝ) : ℂ) := by
     simp only [hestonTrapG, hestonCoeff]
     first
       | (push_cast; ring)
@@ -146,7 +148,8 @@ theorem hestonTrapC_ofReal (r κ θ ξ ρ u τ : ℝ) (hξ : ξ ≠ 0) (hu1 : 0 
   have h1gE : (1 : ℂ) - hestonTrapG κ ξ ρ (u : ℂ) (hestonGamma κ ξ ρ u : ℂ)
         * hestonTrapE (hestonGamma κ ξ ρ u : ℂ) τ
       = ((hestonBvDenom κ ξ ρ u τ
-        / ((κ - ρ * ξ * u + hestonGamma κ ξ ρ u) * Real.exp (hestonGamma κ ξ ρ u * τ)) : ℝ) : ℂ) := by
+        / ((κ - ρ * ξ * u + hestonGamma κ ξ ρ u)
+            * Real.exp (hestonGamma κ ξ ρ u * τ)) : ℝ) : ℂ) := by
     rw [← hg1, hgc, hexp]
     first
       | (push_cast; ring)

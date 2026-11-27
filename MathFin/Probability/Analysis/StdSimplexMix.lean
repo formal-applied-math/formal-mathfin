@@ -11,6 +11,8 @@ public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 public import Mathlib.Tactic.Linarith.Frontend
 public import Mathlib.Tactic.Ring.RingNF
 
+public import Mathlib.Data.Real.Basic
+
 /-!
 # Mixtures of standard simplices
 

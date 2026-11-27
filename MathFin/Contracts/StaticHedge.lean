@@ -32,32 +32,6 @@ zero is folded into the affine part there. The values of the two contracts in ev
 prices of the pieces by the call price function of a market, are in `Pricing/StaticHedge.lean` and
 `Models/ModelFree/StaticHedgeMarket.lean`.
 
-## Implementation notes
-
-The compiler is explicit. Each connective of the payoff language has an operation on portfolios
-that is correct for the function the portfolio stands for:
-* `add`, `sub` and `smul` concatenate the call lists and combine the amounts;
-* `posPart` computes the positive part `h⁺` of `h = a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`. It sorts the kinks
-  (`sortKinks`) and scans them from the left, keeping the first kink `K` and the rest `R`. A kink
-  below zero is affine on `S ≥ 0` and is folded into `a` and `b`. Otherwise `h⁺` is the positive
-  part of the affine function `a + b S` left of `K`, and right of `K` the positive part of the
-  portfolio of `R` with `a − w K` and `b + w`, computed recursively. The two are joined at `K`:
-  their difference, which vanishes at `K`, is cut off below `K` by `tail`, whose single new call at
-  `K` carries the slope the difference has there. The zero crossings of the pieces enter through
-  `affinePos`, the positive part of an affine function, which is `b (S − r)⁺` for `b > 0` and
-  `(a + b S) + (−b)(S − r)⁺` for `b < 0`, with `r = −a / b`;
-* `sup` is `f + (g − f)⁺` and `inf` is `f + g − max f g`.
-
-`Payoff.staticHedge` is the recursion on the syntax: constants and `obs () T` to the affine
-portfolios, `add`, `sub`, `max`, `min` to the operations, a product with a constant to `smul`, and
-anything else (and `obs` at another date) to the empty portfolio. The list `calls` is not reduced:
-it may hold calls of weight zero and calls at one strike twice, which is the same function.
-`StaticHedge.normalize` reduces it to the normal form, merged, sorted and without zero weights, with
-the same value (`StaticHedge.eval_normalize`); the normal form is what the slope bridge to the
-Carr–Madan formula reads (`Models/ModelFree/CarrMadan.lean`, `StaticHedge.jump_eval_of_mem_normalize`),
-the finite exact case of `carrMadan_spanning`, which spans a smooth payoff by a continuum of calls.
-Outside the fragment the compiler returns a portfolio that no theorem relates to the payoff.
-
 ## Main definitions
 
 * `callSum`: the sum `∑ⱼ wⱼ (S − Kⱼ)⁺` of a list of `(Kⱼ, wⱼ)`.
@@ -83,9 +57,53 @@ Outside the fragment the compiler returns a portfolio that no theorem relates to
   present value along every scenario with nonnegative terminal observation, for every discount
   function.
 * `staticHedge_europeanCallPayoff`: the compiler maps the call payoff to the one call at its strike.
-* `StaticHedge.eval_normalize`: the normal form is worth what the portfolio is worth, at every price.
+* `StaticHedge.eval_normalize`: the normal form is worth what the portfolio is worth,
+  at every price.
 * `staticHedge_cappedCall_normalize`: the capped call's two calls, compiled and normalised, are the
   portfolio `⟨0, 0, [(K₁, 1), (K₂, -1)]⟩` for `K₁ < K₂`.
+
+## Implementation notes
+
+The compiler is explicit. Each connective of the payoff language has an operation on portfolios
+that is correct for the function the portfolio stands for:
+* `add`, `sub` and `smul` concatenate the call lists and combine the amounts;
+* `posPart` computes the positive part `h⁺` of `h = a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`. It sorts the kinks
+  (`sortKinks`) and scans them from the left, keeping the first kink `K` and the rest `R`. A kink
+  below zero is affine on `S ≥ 0` and is folded into `a` and `b`. Otherwise `h⁺` is the positive
+  part of the affine function `a + b S` left of `K`, and right of `K` the positive part of the
+  portfolio of `R` with `a − w K` and `b + w`, computed recursively. The two are joined at `K`:
+  their difference, which vanishes at `K`, is cut off below `K` by `tail`, whose single new call at
+  `K` carries the slope the difference has there. The zero crossings of the pieces enter through
+  `affinePos`, the positive part of an affine function, which is `b (S − r)⁺` for `b > 0` and
+  `(a + b S) + (−b)(S − r)⁺` for `b < 0`, with `r = −a / b`;
+* `sup` is `f + (g − f)⁺` and `inf` is `f + g − max f g`.
+
+`Payoff.staticHedge` is the recursion on the syntax: constants and `obs () T` to the affine
+portfolios, `add`, `sub`, `max`, `min` to the operations, a product with a constant to `smul`, and
+anything else (and `obs` at another date) to the empty portfolio. The list `calls` is not reduced:
+it may hold calls of weight zero and calls at one strike twice, which is the same function.
+`StaticHedge.normalize` reduces it to the normal form, merged, sorted and without zero weights, with
+the same value (`StaticHedge.eval_normalize`); the normal form is what the slope bridge to the
+Carr–Madan formula reads (`Models/ModelFree/CarrMadan.lean`,
+`StaticHedge.jump_eval_of_mem_normalize`),
+the finite exact case of `carrMadan_spanning`, which spans a smooth payoff by a continuum of calls.
+Outside the fragment the compiler returns a portfolio that no theorem relates to the payoff.
+
+## Source
+
+The layered separation of contract semantics from pricing semantics, and the
+framing "the contract is not the model", are due to Paul Bilokon,
+*The Contract Is Not the Model: Proof-Carrying Exotic Derivatives and the
+Economics of Model Risk* (working paper, 9 August 2026; Mathematical
+Finance, Imperial College London), with code at
+<https://github.com/thalesians/lean_contracts> (Apache-2.0). That paper in
+turn builds on the compositional contract-DSL of
+Peyton Jones, Eber and Seward (2000) and the certified-contract work of Bahr,
+Berthold and Elsman (2015) and Annenkov (2018).
+
+No code is copied from `lean_contracts`; every definition and proof here is
+written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
+§6 for the full credit line.
 
 ## References
 
@@ -179,7 +197,7 @@ theorem callSum_split_eq_zero (K : ℝ) (L : List (ℝ × ℝ)) (S : ℝ) (hS : 
 
 /-- Inserting a call into a list of calls, kept sorted by strictly increasing strike: a call at a
 strike already present is merged into it, the weights adding. -/
-def insertCall (p : ℝ × ℝ) : List (ℝ × ℝ) → List (ℝ × ℝ)
+noncomputable def insertCall (p : ℝ × ℝ) : List (ℝ × ℝ) → List (ℝ × ℝ)
   | [] => [p]
   | q :: L =>
     if p.1 < q.1 then p :: q :: L
@@ -246,8 +264,9 @@ theorem callSum_filter_ne_zero (L : List (ℝ × ℝ)) (S : ℝ) :
   | nil => simp
   | cons p L ih =>
     by_cases h : p.2 = 0
-    · simp [List.filter_cons, h, ih, callSum_cons]
-    · simp [List.filter_cons, h, ih, callSum_cons]
+    · simpa [List.filter_cons, h, callSum_cons] using ih
+    · simpa [List.filter_cons, h, callSum_cons] using
+        congrArg (p.2 * max (S - p.1) 0 + ·) ih
 
 /-! ### Portfolios and their operations -/
 
@@ -589,13 +608,14 @@ theorem Payoff.IsPiecewiseLinear.eval_staticHedge {T : ℝ≥0} {e : Payoff Unit
     simp only [Payoff.eval, Payoff.staticHedge, Payoff.constOf, StaticHedge.eval_smul, ← iha]
   | @mulConst a c _ iha =>
     rcases hc : a.constOf with _ | d
-    · simp only [Payoff.eval, Payoff.staticHedge, hc, Payoff.constOf, StaticHedge.eval_smul,
+    · rw [Payoff.eval, Payoff.staticHedge, hc]
+      simp only [Payoff.constOf, StaticHedge.eval_smul,
         ← iha]
       ring
     · have ha : a = .const d := Payoff.eq_const_of_constOf hc
       subst ha
-      simp [Payoff.staticHedge, Payoff.constOf, StaticHedge.eval_smul, Payoff.eval,
-        StaticHedge.eval]
+      simp [Payoff.staticHedge, Payoff.constOf, Payoff.eval, StaticHedge.smul,
+        StaticHedge.eval, callSum]
 
 /-- **A static portfolio exists for every payoff of the fragment**: its value at the terminal price
 is the payoff, on every scenario with nonnegative terminal observation. -/

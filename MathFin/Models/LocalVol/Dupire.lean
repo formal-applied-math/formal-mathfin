@@ -99,7 +99,8 @@ bounded drift and bounded diffusion coefficients; the lognormal model is outside
   the call prices of a market's pricing measure (`Market.IsPricingMeasure.isNormalizedCallPrice`).
 * `dupire_weak_drift`: for `X = c + ∫β + M` with bounded adapted `β`, `δ` and smooth compactly
   supported `ψ`, `d/dT ∫ ψ(K) C(T, K) dK = ∫ ψ(K) 𝔼[â(T, X_T) 1{X_T > K}] dK +
-  ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)`, `â`, `b̂²` Borel versions of `𝔼[β_T | X_T]`, `𝔼[δ_T² | X_T]`.
+  ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)`, `â`, `b̂²` Borel versions
+  of `𝔼[β_T | X_T]`, `𝔼[δ_T² | X_T]`.
 * `dupire_weak`: for the driftless process `X = c + M` and smooth compactly supported `ψ`,
   `d/dT ∫ ψ(K) C(T, K) dK = ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)` (`β = 0` of the above).
 * `dupire_pointwise_drift`: with drift, at every strike of the window with `C_KK > 0`,
@@ -114,7 +115,8 @@ bounded drift and bounded diffusion coefficients; the lognormal model is outside
   `C_KK` continuous, the restricted law of `X_s` has density `C_KK` with respect to Lebesgue
   measure.
 * `dupire_ae`: under regularity hypotheses on `C_K`, `C_KK`, `C_T` on a window `Ioo a b` (and
-  continuity of the drift tail), `𝔼[δ_t² | X_t] = 2 (C_T(t, X_t) − D(X_t)) / C_KK(X_t)` almost everywhere on `{X_t ∈ Ioo a b}`,
+  continuity of the drift tail), `𝔼[δ_t² | X_t] = 2 (C_T(t, X_t) − D(X_t)) / C_KK(X_t)`
+  almost everywhere on `{X_t ∈ Ioo a b}`,
   `D(K) = 𝔼[â(t, X_t) 1{X_t > K}]` the drift tail (`driftTail`); at zero drift `D = 0`.
 * `dupire_pointwise_coeff`: a continuous version `v2` of `𝔼[δ_t² | X_t = ·]` on the window
   equals `2 (C_T(t, K) − driftTail(K)) / C_KK(K)` at every strike with `C_KK > 0`.
@@ -308,7 +310,8 @@ left of `supp ψ`) is a test function of the weak forward equation
 call book with strike density `ψ`: `f_ψ S = ∫ K, ψ K · (S − K)⁺ dK` for every `S`
 (`span_of_vanish_left`, i.e. `MathFin.carrMadan_spanning`). Its first derivative is the
 strike-density mass below the spot, `f_ψ' x = ∫_{(-∞, x)} ψ` (the digital book
-`∫ ψ(K) 1{x > K} dK`), which is what the drift term of the forward equation tests against. Note `f_ψ` itself is unbounded
+`∫ ψ(K) 1{x > K} dK`), which is what the drift term of the forward equation tests against.
+Note `f_ψ` itself is unbounded
 (affine right of `supp ψ`); the weak equation needs no bound on `f`. -/
 theorem call_spanning_compactSupport {ψ : ℝ → ℝ} (hψ : ContDiff ℝ ∞ ψ)
     (hψc : HasCompactSupport ψ) :
@@ -957,7 +960,8 @@ theorem dupire_ae_window
     rw [hlaw]; exact (withDensity_absolutelyContinuous _ _).ae_le h0
   have h2 : ∀ᵐ K ∂(ν.restrict (Ioc p q)), (ρ K : ℝ≥0∞) ≠ 0 := by
     rw [hlaw]; exact (ae_withDensity_iff hρm.coe_nnreal_ennreal).2 (ae_of_all _ fun _ h => h)
-  have h3 : ∀ᵐ K ∂ν, K ∈ Ioc p q → K ∈ Ioo p q → bt K = 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K := by
+  have h3 : ∀ᵐ K ∂ν, K ∈ Ioc p q → K ∈ Ioo p q →
+      bt K = 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K := by
     refine (ae_restrict_iff' measurableSet_Ioc).1 ?_
     filter_upwards [h1, h2] with K hK1 hK2 hK
     have hρK := hρeq K (Ioo_subset_Icc_self hK)
@@ -992,7 +996,8 @@ own; none relates `Ct` to `CKK`), and continuity of the drift tail on the window
 
 `D(K) = 𝔼[â(t, X_t) 1{X_t > K}]` (`driftTail`) for the Borel version `â` of `𝔼[β_t | X_t = ·]`
 given by `hafn`.
-With `σ²_loc(t, K) := b̂²(t, K)/K²` and `D = 0` this is eq. 9.4 at `r = q = 0`. The conclusion is about the
+With `σ²_loc(t, K) := b̂²(t, K)/K²` and `D = 0` this is eq. 9.4 at `r = q = 0`.
+The conclusion is about the
 conditional expectation `diffCoeffSq` itself, not a free `b̂²`: a Borel version is chosen
 internally (Doob–Dynkin, `StronglyMeasurable.exists_eq_measurable_comp`), and the windows
 `Ioo p q` (`p, q` rational) of `dupire_ae_window` exhaust `Ioo a b`. The drift version is not
@@ -1037,7 +1042,8 @@ theorem dupire_ae
       X (Real.toNNReal t) ω ∈ Ioo (pq.1 : ℝ) pq.2 →
       bfn t (X (Real.toNNReal t) ω)
         = 2 * (Ct t (X (Real.toNNReal t) ω)
-          - driftTail μ X (afn t) t (X (Real.toNNReal t) ω)) / CKK (X (Real.toNNReal t) ω) := fun pq => by
+          - driftTail μ X (afn t) t (X (Real.toNNReal t) ω))
+            / CKK (X (Real.toNNReal t) ω) := fun pq => by
     by_cases h : a < (pq.1 : ℝ) ∧ (pq.1 : ℝ) ≤ pq.2 ∧ (pq.2 : ℝ) < b
     · filter_upwards [dupire_ae_window hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel
         hafn (fun s => ⟨hbfm s, hbfeq s⟩) t ht htT hε hCK hCKK hCKKc hCt hCtc hDrc
@@ -1095,7 +1101,8 @@ theorem dupire_pointwise_coeff
   have hXm : Measurable (X (Real.toNNReal t)) :=
     measurable_marginal_drift hB hBmeas hβadap hβcont hβbdd hD c hXrel _
   set Xt := X (Real.toNNReal t)
-  have hae : ∀ᵐ ω ∂μ, Xt ω ∈ Ioo a b → v2 (Xt ω) = 2 * (Ct t (Xt ω) - driftTail μ X (afn t) t (Xt ω)) / CKK (Xt ω) := by
+  have hae : ∀ᵐ ω ∂μ, Xt ω ∈ Ioo a b →
+      v2 (Xt ω) = 2 * (Ct t (Xt ω) - driftTail μ X (afn t) t (Xt ω)) / CKK (Xt ω) := by
     filter_upwards [dupire_ae hB hBmeas hβadap hβcont hβbdd hD c hXcont hXrel hafn t ht htT
       hε hCK hCKK hCKKc hCt hCtc hDrc, hv2rep] with ω h1 h2 hmem
     rw [← h2 hmem, h1 hmem]
@@ -1108,12 +1115,14 @@ theorem dupire_pointwise_coeff
     (hv2c.continuousAt hU).sub
       ((continuousAt_const.mul (hCtK.sub (hDrc.continuousAt hU))).div
       (hCKKc.continuousAt hU) hpos.ne')
-  have hev : ∀ᶠ K in 𝓝 K₀, (v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K :=
+  have hev : ∀ᶠ K in 𝓝 K₀,
+      (v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K :=
     ((hR.eventually_ne (sub_ne_zero.2 hne)).and hU).and
       ((hCKKc.continuousAt hU).eventually (lt_mem_nhds hpos))
   obtain ⟨r, hr, hball⟩ := Metric.eventually_nhds_iff.1 hev
   have hIcc : ∀ K ∈ Icc (K₀ - r / 2) (K₀ + r / 2),
-      (v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K ≠ 0 ∧ K ∈ Ioo a b) ∧ 0 < CKK K := fun K hK =>
+      (v2 K - 2 * (Ct t K - driftTail μ X (afn t) t K) / CKK K ≠ 0 ∧ K ∈ Ioo a b)
+        ∧ 0 < CKK K := fun K hK =>
     hball (by rw [Real.dist_eq, abs_lt]; constructor <;> linarith [hK.1, hK.2])
   have hc := (hIcc (K₀ - r / 2) ⟨le_rfl, by linarith⟩).1.2
   have hd := (hIcc (K₀ + r / 2) ⟨by linarith, le_rfl⟩).1.2
@@ -1276,9 +1285,11 @@ formalised here. Proof: `dupire_pointwise_drift`, then `driftTail_linear` and
 `strikeDeriv_callSurface_eq_neg_tail` (`∂_K C = −P(X_t > K)`).
 
 **Scope.** The class is that of `dupire_weak_drift` (bounded drift rate `β` and bounded `δ`). The
-linear-drift hypothesis is restrictive inside it: `â(t, x) = 𝔼[β_t | X_t = x]` is bounded by the bound
+linear-drift hypothesis is restrictive inside it: `â(t, x) = 𝔼[β_t | X_t = x]`
+is bounded by the bound
 on `β`, so `â(t, x) = m·x` for every `x > a` with `m ≠ 0` can hold only if `X_t` is bounded above
-almost surely; for unbounded `X_t` the theorem applies only with `m = 0`. The lognormal model `dX = μX dt + σX dB` has `β = μX` and `δ = σX`, neither bounded, so it is *not*
+almost surely; for unbounded `X_t` the theorem applies only with `m = 0`.
+The lognormal model `dX = μX dt + σX dB` has `β = μX` and `δ = σX`, neither bounded, so it is *not*
 in this class: this theorem says nothing about the Black–Scholes surface, and the textbook formula
 for lognormal models is not proved here. -/
 theorem dupire_pointwise_linearDrift
@@ -1321,7 +1332,8 @@ theorem dupire_pointwise_linearDrift
     ring
   -- the drift tail is continuous on the window: it is `m (C − K C_K)`, `C` and `C_K` continuous
   have hcont : ContinuousOn (fun K => m * (callSurface μ X t K - K * CK K)) (Ioo a b) :=
-    continuousOn_const.mul ((continuous_callSurface (s := t) (hXint (Real.toNNReal t))).continuousOn.sub
+    continuousOn_const.mul
+      ((continuous_callSurface (s := t) (hXint (Real.toNNReal t))).continuousOn.sub
       (continuousOn_id.mul fun K hK => (hCKK K hK).continuousAt.continuousWithinAt))
   have hDrc : ContinuousOn (driftTail μ X (afn t) t) (Ioo a b) :=
     hcont.congr fun K hK => hDe K hK

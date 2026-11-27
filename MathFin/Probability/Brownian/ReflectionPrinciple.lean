@@ -122,7 +122,7 @@ private lemma measurableSet_natural_firstHit (hm : ∀ t, Measurable (X t)) (τ 
       (firstHit X τ a k) := by
   refine MeasurableSet.inter (Finset.measurableSet_biInter _ fun j hj ↦ ?_) ?_
   · exact (measurable_natural_of_le hm (mul_le_mul_of_nonneg_right
-      (Nat.cast_le.2 (Finset.mem_range.1 hj).le) (zero_le _))) measurableSet_Iio
+      (Nat.cast_le.2 (Finset.mem_range.1 hj).le) zero_le)) measurableSet_Iio
   · exact (measurable_natural_of_le hm le_rfl) measurableSet_Ici
 
 private lemma measurableSet_firstHit (hm : ∀ t, Measurable (X t)) (τ : ℝ≥0) (a : ℝ) (k : ℕ) :
@@ -286,7 +286,7 @@ private lemma measure_bad_le (hX : IsPreBrownianReal X P) (τ : ℝ≥0) (n : �
         ≤ ENNReal.ofReal (3 * (τ : ℝ) ^ 2 / δ ^ 4) := by
     intro j _
     have hst : (j : ℝ≥0) * τ ≤ ((j + 1 : ℕ) : ℝ≥0) * τ :=
-      mul_le_mul_of_nonneg_right (Nat.cast_le.2 (Nat.le_succ j)) (zero_le _)
+      mul_le_mul_of_nonneg_right (Nat.cast_le.2 (Nat.le_succ j)) zero_le
     have hv : ((j + 1 : ℕ) : ℝ≥0) * τ - (j : ℝ≥0) * τ = τ := by
       rw [Nat.cast_succ, add_mul, one_mul, add_tsub_cancel_left]
     have h := hasLaw_increment hX hst
@@ -316,7 +316,7 @@ theorem measure_ge_add_le (hX : IsPreBrownianReal X P) (hm : ∀ t, Measurable (
   have hG₁ : MeasurableSet {ω | a ≤ X ((n : ℝ≥0) * τ) ω} := measurableSet_le measurable_const (hm _)
   -- the sets `W k`: first passage at `k` with overshoot at most `δ`
   let W : ℕ → Set Ω := fun k ↦ firstHit X τ a k ∩ X ((k : ℝ≥0) * τ) ⁻¹' Set.Iic (a + δ)
-  have hWn : ∀ k, MeasurableSet[Filtration.natural X (fun u ↦ (hm u).stronglyMeasurable)
+  have hWn : ∀ k : ℕ, MeasurableSet[Filtration.natural X (fun u ↦ (hm u).stronglyMeasurable)
       ((k : ℝ≥0) * τ)] (W k) := fun k ↦
     (measurableSet_natural_firstHit hm τ a k).inter
       ((measurable_natural_of_le hm le_rfl) measurableSet_Iic)
@@ -341,7 +341,8 @@ theorem measure_ge_add_le (hX : IsPreBrownianReal X P) (hm : ∀ t, Measurable (
     refine (measure_biUnion_firstHit (f := fun k ↦
         W k ∩ {ω | X ((n : ℝ≥0) * τ) ω - X ((k : ℝ≥0) * τ) ω < -δ})
       (fun k ↦ Set.inter_subset_left.trans (hWE k))
-      (fun k ↦ (hW k).inter (measurableSet_lt ((hm _).sub (hm _)) measurable_const)) n).symm.trans_le ?_
+      (fun k ↦ (hW k).inter
+        (measurableSet_lt ((hm _).sub (hm _)) measurable_const)) n).symm.trans_le ?_
     refine measure_mono (Set.iUnion₂_subset fun k hk ↦ ?_)
     rintro ω ⟨⟨hE, hle⟩, hZ⟩
     have hE' := mem_firstHit.1 hE
@@ -421,7 +422,7 @@ section Limit
 private lemma exists_grid_near {τ s : ℝ≥0} {n : ℕ} (hs : s ≤ (n : ℝ≥0) * τ) :
     ∃ k ≤ n, dist ((k : ℝ≥0) * τ) s ≤ τ := by
   rcases eq_or_ne τ 0 with rfl | hτ
-  · have hs0 : s = 0 := le_antisymm (by simpa using hs) (zero_le _)
+  · have hs0 : s = 0 := le_antisymm (by simpa using hs) zero_le
     exact ⟨0, Nat.zero_le _, by simp [hs0]⟩
   · have hτ0 : (0 : ℝ) < τ := NNReal.coe_pos.2 (pos_iff_ne_zero.2 hτ)
     have hs' : (s : ℝ) ≤ n * τ := by exact_mod_cast hs
@@ -440,7 +441,8 @@ for all large `n`.** -/
 private lemma exists_grid_ge {ω : Ω} (hc : Continuous fun u ↦ X u ω) {t s : ℝ≥0} (hst : s ≤ t)
     {b : ℝ} (hb : b < X s ω) :
     ∃ N : ℕ, ∀ m ≥ N, ∃ k ≤ m + 1, b ≤ X ((k : ℝ≥0) * (t / ((m + 1 : ℕ) : ℝ≥0))) ω := by
-  obtain ⟨η, hη, hcont⟩ := Metric.continuousAt_iff.1 (hc.continuousAt (x := s)) (X s ω - b) (sub_pos.2 hb)
+  obtain ⟨η, hη, hcont⟩ := Metric.continuousAt_iff.1
+      (hc.continuousAt (x := s)) (X s ω - b) (sub_pos.2 hb)
   obtain ⟨N, hN⟩ := exists_nat_gt ((t : ℝ) / η)
   refine ⟨N, fun m hm ↦ ?_⟩
   have hm1 : (0 : ℝ) < (m : ℝ) + 1 := by positivity
@@ -489,7 +491,7 @@ private lemma measure_exists_gt_le (hB : IsBrownianReal X P) (hm : ∀ t, Measur
     rw [mul_div_cancel₀ t hn] at h
     refine h.trans ?_
     rw [two_mul]
-    exact add_le_add le_rfl (measure_mono fun ω hω ↦ le_of_lt hω)
+    exact add_le_add le_rfl (measure_mono fun ω hω ↦ (show b < X t ω from hω).le)
   have hmono : Monotone F := fun N N' hNN' ω hω ↦ by
     simp only [F, Set.mem_iInter] at hω ⊢
     exact fun m hm ↦ hω m (hNN'.trans hm)
@@ -522,7 +524,7 @@ private lemma measure_add_le_exists (hX : IsPreBrownianReal X P) (hm : ∀ t, Me
           ⟨(k : ℝ≥0) * (t / ((m + 1 : ℕ) : ℝ≥0)), by
             calc (k : ℝ≥0) * (t / ((m + 1 : ℕ) : ℝ≥0))
                 ≤ ((m + 1 : ℕ) : ℝ≥0) * (t / ((m + 1 : ℕ) : ℝ≥0)) :=
-                  mul_le_mul_of_nonneg_right (Nat.cast_le.2 hk) (zero_le _)
+                  mul_le_mul_of_nonneg_right (Nat.cast_le.2 hk) zero_le
               _ = t := mul_div_cancel₀ t hn, hak⟩
       · rw [← ENNReal.ofReal_natCast, ← ENNReal.ofReal_mul (Nat.cast_nonneg _)]
         refine ENNReal.ofReal_le_ofReal (le_of_eq ?_)
@@ -574,7 +576,7 @@ private theorem reflection_of_measurable (hB : IsBrownianReal X P)
   -- `P(a ≤ B_t) ≤ P(a < B_t)`, since `B_t = a` is null
   have hge : P {ω | a ≤ X t ω} ≤ P {ω | a < X t ω} := by
     calc P {ω | a ≤ X t ω} ≤ P ({ω | a < X t ω} ∪ {ω | X t ω = a}) :=
-          measure_mono fun ω hω ↦ (lt_or_eq_of_le hω).imp id Eq.symm
+          measure_mono fun ω hω ↦ (lt_or_eq_of_le (show a ≤ X t ω from hω)).imp id Eq.symm
       _ ≤ P {ω | a < X t ω} + P {ω | X t ω = a} := measure_union_le _ _
       _ = P {ω | a < X t ω} := by rw [hnull, add_zero]
   apply le_antisymm
@@ -601,9 +603,10 @@ private theorem reflection_of_measurable (hB : IsBrownianReal X P)
     rw [hDinter] at hlim
     have hlim2 := ENNReal.Tendsto.const_mul (a := 2) hlim (Or.inr ENNReal.ofNat_ne_top)
     refine ge_of_tendsto' hlim2 fun j ↦ ?_
-    refine (measure_mono fun ω ⟨s, hst, has⟩ ↦ ⟨s, hst, ?_⟩ : _ ≤
-      P {ω | ∃ s : ℝ≥0, s ≤ t ∧ a - 1 / ((j : ℝ) + 1) < X s ω}).trans
-      (measure_exists_gt_le hB hm t _)
+    refine le_trans ?_ (measure_exists_gt_le hB hm t (a - 1 / ((j : ℝ) + 1)))
+    apply measure_mono
+    rintro ω ⟨s, hst, has⟩
+    refine ⟨s, hst, ?_⟩
     have : (0 : ℝ) < 1 / ((j : ℝ) + 1) := by positivity
     linarith
   · calc 2 * P {ω | a ≤ X t ω} = P {ω | a ≤ X t ω} + P {ω | a ≤ X t ω} := two_mul _
@@ -618,7 +621,8 @@ private theorem reflection_of_measurable (hB : IsBrownianReal X P)
 Only the independence and Gaussianity of the increments at fixed times are used, through the
 grid argument of `MathFin.measure_exists_grid_le` and `MathFin.measure_ge_add_le`; continuity of
 paths passes from the grid to `[0, t]`. -/
-theorem _root_.ProbabilityTheory.IsBrownianReal.reflection_principle (hB : IsBrownianReal X P) {t : ℝ≥0} {a : ℝ}
+theorem _root_.ProbabilityTheory.IsBrownianReal.reflection_principle
+    (hB : IsBrownianReal X P) {t : ℝ≥0} {a : ℝ}
     (ha : 0 < a) :
     P {ω | ∃ s : ℝ≥0, s ≤ t ∧ a ≤ X s ω} = 2 * P {ω | a ≤ X t ω} := by
   have hP := hB.toIsPreBrownianReal

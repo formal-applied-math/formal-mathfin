@@ -246,7 +246,8 @@ theorem integral_contDoleansExp_eq_one_of_novikov (hB : IsPreBrownianReal B μ)
     filter_upwards [hint] with ω hω
     have hmeas : ∀ N : ℕ, AEStronglyMeasurable (fun s ↦ clip N θ s ω ^ 2)
         (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := fun N ↦
-      (((hSM N).measurable.comp (measurable_prodMk_right (y := ω))).pow_const 2).aestronglyMeasurable
+      (((hSM N).measurable.comp
+        (measurable_prodMk_right (y := ω))).pow_const 2).aestronglyMeasurable
     have hbound : ∀ N : ℕ, ∀ᵐ s ∂(timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)),
         ‖clip N θ s ω ^ 2‖ ≤ θ s ω ^ 2 := fun N ↦ ae_of_all _ fun s ↦ by
       rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
@@ -290,12 +291,12 @@ theorem memLp_trim_of_novikov (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) {
   show ∫⁻ z, ‖Function.uncurry θ z ^ 2‖ₑ
       ∂(((timeMeasureHorizon T).prod μ).trim hm) < ⊤
   have hmeasP : Measurable[(natFiltration hBmeas).predictable]
-      fun z ↦ ‖Function.uncurry θ z ^ 2‖ₑ := hg.measurable.enorm
+      fun z ↦ ‖Function.uncurry θ z ^ 2‖ₑ := by
+    letI := (natFiltration (mΩ := mΩ) hBmeas).predictable
+    exact hg.measurable.enorm
   have hmeasF : Measurable fun z : ℝ≥0 × Ω ↦ ‖Function.uncurry θ z ^ 2‖ₑ :=
     ((stronglyMeasurable_uncurry_of_predictable hBmeas hpred).pow 2).measurable.enorm
-  rw [lintegral_trim hm hmeasP, lintegral_prod _ hmeasF.aemeasurable,
-    lintegral_lintegral_swap (f := fun s ω ↦ ‖Function.uncurry θ (s, ω) ^ 2‖ₑ)
-      hmeasF.aemeasurable]
+  rw [lintegral_trim hm hmeasP, lintegral_prod_symm' _ hmeasF]
   have hle : ∫⁻ ω, ∫⁻ s, ‖Function.uncurry θ (s, ω) ^ 2‖ₑ ∂(timeMeasureHorizon T) ∂μ
       ≤ ∫⁻ ω, 2 * ENNReal.ofReal (Real.exp (2⁻¹ *
           ∫ s in Set.Ioc (0 : ℝ≥0) T, θ s ω ^ 2 ∂timeMeasure)) ∂μ := by

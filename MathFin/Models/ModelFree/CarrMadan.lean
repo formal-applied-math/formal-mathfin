@@ -33,7 +33,8 @@ reproduces the remainder.
 
 The finite exact case is the static-hedge compiler of `Contracts/StaticHedge.lean`: a continuous
 piecewise-linear payoff is `a + b S + ∑ⱼ wⱼ (S − Kⱼ)⁺`, the same decomposition with the measure
-`f'' dK` replaced by the point masses `wⱼ δ_{Kⱼ}`. The bridge is `StaticHedge.jump_eval_of_mem_normalize`:
+`f'' dK` replaced by the point masses `wⱼ δ_{Kⱼ}`. The bridge is
+`StaticHedge.jump_eval_of_mem_normalize`:
 in the normal form of a portfolio the weight of the call at `K` is the jump of the one-sided slopes
 of the value function at `K`, `f'(K+) − f'(K−)`, the second derivative of `f` in the sense of
 distributions; and the forward amount is the right slope at `0` when every strike is positive
@@ -245,7 +246,8 @@ theorem hasDerivWithinAt_call_Iio (K w x : ℝ) :
     · rw [max_eq_right (by linarith [mem_Iio.1 hy]), mul_zero]
     · rw [max_eq_right (by linarith), mul_zero]
 
-/-- A call sum has the right derivative the sum of the weights of the calls struck at or below `x`. -/
+/-- A call sum has the right derivative the sum of the weights of the calls
+struck at or below `x`. -/
 theorem hasDerivWithinAt_callSum_Ioi (L : List (ℝ × ℝ)) (x : ℝ) :
     HasDerivWithinAt (callSum L) (L.map fun p ↦ if p.1 ≤ x then p.2 else 0).sum (Ioi x) x := by
   induction L with

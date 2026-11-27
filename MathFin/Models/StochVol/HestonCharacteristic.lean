@@ -7,6 +7,8 @@ module
 
 public import MathFin.Models.StochVol.Heston
 
+public import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+
 /-!
 # The Heston Riccati system at complex argument, in the "little Heston trap" branch
 
@@ -36,7 +38,8 @@ under
 * `d² = b² + ξ²(u − u²)` (`d` is *a* square root of the discriminant; nothing is assumed about
   which one beyond the hypotheses below);
 * `b + d ≠ 0` (so that `g` is a quotient and not a junk value);
-* `‖g E(τ)‖ < 1` (`hτ`). This is what keeps `1 − g E(τ)` in the right half plane, where `Complex.log`
+* `‖g E(τ)‖ < 1` (`hτ`). This is what keeps `1 − g E(τ)` in the right half plane,
+  where `Complex.log`
   is holomorphic: the logarithm is then a genuine antiderivative at `τ`, not a branch accident.
 
 For `τ ≥ 0` the last two follow from two conditions on `(b, d)`, proved here: `Re d ≥ 0` gives
@@ -79,7 +82,8 @@ time-dependent formula). This module is the generator/PDE level and the ODE leve
 
 ## References
 
-* [Albrecher, Mayer, Schoutens, Tistaert, *The little Heston trap*][AlbrecherMayerSchoutensTistaert2007]
+* [Albrecher, Mayer, Schoutens, Tistaert,
+  *The little Heston trap*][AlbrecherMayerSchoutensTistaert2007]
 * [Heston, *A closed-form solution for options with stochastic volatility with applications to bond
   and currency options*][Heston1993]
 
@@ -153,7 +157,8 @@ private theorem trap_ratio_norm_lt_one {b d : ℂ} (h : 0 < b.re * d.re + b.im *
   have hlt : ‖b - d‖ < ‖b + d‖ := by
     by_contra hge
     push_neg at hge
-    nlinarith [mul_nonneg (sub_nonneg.2 hge) (add_nonneg (norm_nonneg (b - d)) (norm_nonneg (b + d)))]
+    nlinarith [mul_nonneg (sub_nonneg.2 hge)
+      (add_nonneg (norm_nonneg (b - d)) (norm_nonneg (b + d)))]
   have hne : b + d ≠ 0 := fun h0 => by
     have := norm_nonneg (b - d)
     rw [h0, norm_zero] at hlt
@@ -267,8 +272,7 @@ theorem hasDerivAt_hestonTrapD (κ ξ ρ : ℝ) (u d : ℂ) (τ : ℝ) (hξ : ξ
     (by linear_combination (-1 / 2 : ℂ) * hgs) (by linear_combination (1 / 2 : ℂ) * hgs) hw
     (Complex.slitPlane_ne_zero hMs)
   refine key.congr_deriv ?_
-  simp only [hestonCoeff, hestonTrapD, hestonTrapE, hestonTrapG]
-  ring
+  simp only [hestonCoeff, hestonTrapD, hestonTrapE, hestonTrapG] <;> ring
 
 /-- **The `C` ODE at complex `u`.** Under the hypotheses of `hasDerivAt_hestonTrapD`, the trap-form
 `C` has derivative `r u + κθ D(τ)` at `τ` — the equation of `hasDerivAt_hestonA` with `u`
@@ -288,8 +292,7 @@ theorem hasDerivAt_hestonTrapC (r κ θ ξ ρ : ℝ) (u d : ℂ) (τ : ℝ) (hξ
     (hestonCoeff κ ξ ρ u + d) (ξ : ℂ) ((r : ℂ) * u) ((κ : ℂ) * θ) τ hξ'
     (by linear_combination (-1 / 2 : ℂ) * hgs) (by linear_combination (1 / 2 : ℂ) * hgs) hMs
   refine key.congr_deriv ?_
-  simp only [hestonCoeff, hestonTrapD, hestonTrapE, hestonTrapG]
-  ring
+  simp only [hestonCoeff, hestonTrapD, hestonTrapE, hestonTrapG] <;> ring
 
 /-- `hasDerivAt_hestonTrapD` for `τ ≥ 0`, from the two conditions on `(b, d)`:
 `Re d ≥ 0` and `0 < Re(b · conj d)`. -/
@@ -392,7 +395,7 @@ the complex counterpart of `hestonGenerator_expAffine2` (`hestonGenerator` takes
 normed space). -/
 theorem hestonGenerator_cexpAffine2 (r κ θ ξ ρ : ℝ) (A Bx Bv : ℂ) :
     hestonGenerator r κ θ ξ ρ (cexpAffine2 A Bx Bv)
-      = fun x v ↦ ((r * Bx + κ * θ * Bv)
+      = fun (x v : ℝ) ↦ ((r * Bx + κ * θ * Bv)
           + (Bx ^ 2 / 2 + ρ * ξ * Bx * Bv + ξ ^ 2 / 2 * Bv ^ 2 - κ * Bv - Bx / 2) * v)
           * Complex.exp (A + Bx * x + Bv * v) := by
   funext x v

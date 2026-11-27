@@ -184,7 +184,7 @@ theorem one_le_lintegral_of_tendsto_of_rpow_le [IsProbabilityMeasure P] {z : ℕ
             lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
         _ ≤ ∫⁻ ω, ENNReal.ofReal (min (z n ω) R) ∂P
               + ENNReal.ofReal (R ^ (-(r - 1))) * C :=
-          add_le_add_left (mul_le_mul_left' (hbd n) _) _
+          add_le_add le_rfl (mul_le_mul_right (hbd n) _)
     have hmin_lim : Tendsto (fun n ↦ ∫⁻ ω, ENNReal.ofReal (min (z n ω) R) ∂P) atTop
         (𝓝 (∫⁻ ω, ENNReal.ofReal (min (g ω) R) ∂P)) := by
       refine tendsto_lintegral_of_dominated_convergence (fun _ ↦ ENNReal.ofReal R) hFm
@@ -193,12 +193,12 @@ theorem one_le_lintegral_of_tendsto_of_rpow_le [IsProbabilityMeasure P] {z : ℕ
       exact (ENNReal.continuous_ofReal.tendsto _).comp (hω.min tendsto_const_nhds)
     have hge := ge_of_tendsto (hmin_lim.add_const (ENNReal.ofReal (R ^ (-(r - 1))) * C))
       (Eventually.of_forall hbound)
-    exact hge.trans (add_le_add_right
-      (lintegral_mono fun ω ↦ ENNReal.ofReal_le_ofReal (min_le_left _ _)) _)
+    exact hge.trans (add_le_add
+      (lintegral_mono fun ω ↦ ENNReal.ofReal_le_ofReal (min_le_left _ _)) le_rfl)
   have h0 : Tendsto (fun R : ℝ ↦ ENNReal.ofReal (R ^ (-(r - 1)))) atTop (𝓝 0) := by
     have := (ENNReal.continuous_ofReal.tendsto 0).comp
       (tendsto_rpow_neg_atTop (by linarith : 0 < r - 1))
-    simpa using this
+    simpa [Function.comp_def] using this
   have hδ : Tendsto (fun R : ℝ ↦ ENNReal.ofReal (R ^ (-(r - 1))) * C) atTop (𝓝 0) := by
     simpa using ENNReal.Tendsto.mul_const h0 (Or.inr hC)
   have := ge_of_tendsto (hδ.const_add (∫⁻ ω, ENNReal.ofReal (g ω) ∂P))
@@ -364,7 +364,7 @@ theorem lintegral_exp_eq_one_of_novikov [IsProbabilityMeasure P] {M A : ℕ → 
       ENNReal.mul_ne_top (ENNReal.rpow_ne_top_of_nonneg (by positivity) hIne)
         (ENNReal.rpow_ne_top_of_nonneg hq (ENNReal.rpow_ne_top_of_nonneg (by norm_num) hNov))
     have h := ENNReal.toReal_mono hfin ((hlow p hp0 hp1).trans (hup p hp0 hp1))
-    simp only [ENNReal.toReal_one, ENNReal.toReal_mul, ENNReal.toReal_rpow] at h
+    simp only [ENNReal.toReal_one, ENNReal.toReal_mul, ← ENNReal.toReal_rpow] at h
     exact h
   have h1le : 1 ≤ I.toReal := by
     rcases eq_or_ne I.toReal 0 with h0 | h0
@@ -401,8 +401,10 @@ theorem integral_exp_eq_one_of_novikov [IsProbabilityMeasure P] {M A : ℕ → �
     (hAlim : ∀ᵐ ω ∂P, Tendsto (fun n ↦ A n ω) atTop (𝓝 (A' ω)))
     (hNov : ∫⁻ ω, ENNReal.ofReal (Real.exp (2⁻¹ * A' ω)) ∂P ≠ ⊤) :
     ∫ ω, Real.exp (M' ω - 2⁻¹ * A' ω) ∂P = 1 := by
+  have hm : Measurable (fun ω ↦ Real.exp (M' ω - 2⁻¹ * A' ω)) :=
+    Real.measurable_exp.comp (hM'.sub (hA'.const_mul _))
   rw [integral_eq_lintegral_of_nonneg_ae (ae_of_all _ fun ω ↦ (Real.exp_pos _).le)
-    (Real.measurable_exp.comp (hM'.sub (hA'.const_mul _))).aestronglyMeasurable,
+    hm.aestronglyMeasurable,
     lintegral_exp_eq_one_of_novikov hM hA hM' hA' hA0 hAle hmart hMlim hAlim hNov,
     ENNReal.toReal_one]
 

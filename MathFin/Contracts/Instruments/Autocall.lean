@@ -50,9 +50,12 @@ business-day convention, no issuer credit risk, no discrete-coupon memory beyond
   maturity amount is the protected redemption.
 * `pathPV_autocallUnit_of_firstAbove`, `pathPV_autocallUnit_of_forall_lt` — the same for the
   present value under any discount function.
-* `pathPV_autocallUnit_mono_coupon` — the present value is nondecreasing in the coupon.
-* `pathPV_autocallUnit_le` — under a nonincreasing nonnegative discount function, the note is worth
-  at most `1 + n c` paid at the first observation date.
+* `pathPV_autocallUnit_mono_coupon` — with nonnegative discount factors at observation dates,
+  the present value is nondecreasing in the coupon.
+* `pathPV_autocallUnit_le` bounds the value by `1 + n c` discounted at the first observation.
+  It assumes at least one observation, a nonnegative coupon, a positive initial fixing, a
+  protection barrier at most that fixing, and nonincreasing discount factors nonnegative through
+  maturity. Every observation falls between the first observation and maturity.
 * `autocallUnit_fixedDated` — the note pays at fixed dates.
 
 ## Source
@@ -74,7 +77,7 @@ written for this library. See `docs/specs/2026-08-16-contracts-tower-design.md`
 ## References
 
 * [P. Bilokon, *The Contract Is Not the Model*][Bilokon2026]
-* [S. Bouzoubaa and A. Osseiran, *Exotic Options and Hybrids*][BouzoubaaOsseiran2010], ch. 7
+* [M. Bouzoubaa and A. Osseiran, *Exotic Options and Hybrids*][BouzoubaaOsseiran2010], ch. 12
 
 ## Tags
 
@@ -164,7 +167,8 @@ theorem eval_survivalPayoff (s : Scenario ι) (i : ι) (t : ℕ → ℝ≥0) (B 
         · exact h1 j h
         · obtain rfl : j = k := by omega
           exact h2⟩
-    simp only [survivalPayoff, Payoff.eval, ih]
+    change (survivalPayoff i t B k).eval s * (if s i (t k) < B then 1 else 0) = _
+    rw [ih]
     by_cases h1 : ∀ j < k, s i (t j) < B <;> by_cases h2 : s i (t k) < B
     · rw [if_pos h1, if_pos h2, if_pos (key.2 ⟨h1, h2⟩)] <;> ring
     · rw [if_pos h1, if_neg h2, if_neg (fun h ↦ h2 (key.1 h).2)] <;> ring
@@ -182,7 +186,9 @@ autocall date, and `0` otherwise. -/
 theorem eval_redemptionPayoff (s : Scenario ι) (i : ι) (t : ℕ → ℝ≥0) (B c : ℝ) (k : ℕ) :
     (redemptionPayoff i t B c k).eval s
       = if s.FirstAbove i t B k then 1 + ((k : ℝ) + 1) * c else 0 := by
-  simp only [redemptionPayoff, Payoff.eval, eval_survivalPayoff]
+  change (survivalPayoff i t B k).eval s *
+    ((1 + ((k : ℝ) + 1) * c) * (1 - if s i (t k) < B then 1 else 0)) = _
+  rw [eval_survivalPayoff]
   by_cases h1 : ∀ j < k, s i (t j) < B
   · by_cases h2 : s i (t k) < B
     · have h3 : ¬ s.FirstAbove i t B k := fun h ↦ absurd h.1 (not_le.2 h2)
@@ -202,7 +208,8 @@ noncomputable def maturityPayoff (i : ι) (P S₀ : ℝ) (T : ℝ≥0) : Payoff 
 /-- The maturity redemption is `1` at or above the protection barrier and `S_T / S₀` below. -/
 theorem eval_maturityPayoff (s : Scenario ι) (i : ι) (P S₀ : ℝ) (T : ℝ≥0) :
     (maturityPayoff i P S₀ T).eval s = if P ≤ s i T then 1 else S₀⁻¹ * s i T := by
-  simp only [maturityPayoff, Payoff.eval]
+  change (1 - if s i T < P then 1 else 0) +
+    (if s i T < P then 1 else 0) * (S₀⁻¹ * s i T) = _
   by_cases h : s i T < P
   · rw [if_pos h, if_neg (not_le.2 h)] <;> ring
   · rw [if_neg h, if_pos (not_lt.1 h)] <;> ring
@@ -242,7 +249,8 @@ theorem pathPV_autocallUnit (D : ℝ≥0 → ℝ) (s : Scenario ι) (i : ι) (t 
     (autocallUnit i t n B c S₀ P T).pathPV D s
       = ∑ j ∈ Finset.range n,
           D (t j) * (if s.FirstAbove i t B j then 1 + ((j : ℝ) + 1) * c else 0)
-        + D T * (if ∀ j < n, s i (t j) < B then (if P ≤ s i T then 1 else S₀⁻¹ * s i T) else 0) := by
+        + D T * (if ∀ j < n, s i (t j) < B
+            then (if P ≤ s i T then 1 else S₀⁻¹ * s i T) else 0) := by
   have hpay : (Contract.pay T (.mul (survivalPayoff i t B n) (maturityPayoff i P S₀ T))).pathPV D s
       = D T * ((survivalPayoff i t B n).eval s * (maturityPayoff i P S₀ T).eval s) := by
     simp [Contract.pathPV, Contract.cashflows, Payoff.eval]

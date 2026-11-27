@@ -15,6 +15,8 @@ ones*. The **pipeline enforces the cadence** (not a quality threshold):
 has grown more than 12 entries past the last recorded review. A regex cannot
 check "beautiful"; it can check "nobody refreshed the backlog."
 
+Reviews before November 2026 are in [`archive/values-review-2026-05-to-10.md`](archive/values-review-2026-05-to-10.md).
+
 ## The eight lenses
 
 1. **Inspired math quality** — each result earns its place: a structural
@@ -1696,5 +1698,3 @@ hypothesis-difference sentence repeated in six places.
 2. #429's flow identification through one complex ODE (lens 8 above). [#613]
 3. One reflection factor `(H/S)^{2μ}` for the binary, partial-time and Heynen–Kat barriers. [done: `barrierReflection` (`BarrierReflection.lean`)]
 4. #423's two squeeze scaffolds as one lemma ("`|f κ − L| ≤ C|κ|` near 0⁺ gives the limit"). [done: `tendsto_nhdsGT_zero_of_abs_sub_le`]
-
-Reviews before November 2026 are in [`archive/values-review-2026-05-to-10.md`](archive/values-review-2026-05-to-10.md).

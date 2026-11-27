@@ -8,6 +8,8 @@ module
 public import MathFin.Init
 public import Mathlib.Probability.Distributions.Gaussian.Real
 
+public import Mathlib.Analysis.Real.Pi.Bounds
+
 /-!
 # Small-ball bound for the real Gaussian law
 

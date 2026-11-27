@@ -162,7 +162,7 @@ theorem memLp_two_bsTerminal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measur
     show Continuous fun z ↦ S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
     fun_prop
   have hm : AEStronglyMeasurable (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) Q :=
-    (hcont.comp_aemeasurable hZ.aemeasurable).aestronglyMeasurable
+    (hcont.measurable.comp_aemeasurable hZ.aemeasurable).aestronglyMeasurable
   refine (memLp_two_iff_integrable_sq hm).2 ?_
   show Integrable (fun ω ↦ bsTerminal S_0 r σ T (Z ω) ^ 2) Q
   have hsq : (fun z ↦ bsTerminal S_0 r σ T z ^ 2) = fun z ↦

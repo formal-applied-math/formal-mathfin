@@ -267,8 +267,8 @@ summary = """Every payoff of the terminal price built from constants, the price,
 maxima, minima and constant multiples compiles to a bond, a forward and finitely many calls that \
 pay the same along every path with a nonnegative price, for any discount. In normal form the \
 weight of each call is the jump in the payoff's slope at its strike, and the capped call compiles \
-to exactly long the lower call, short the upper. Under a pricing measure the payoff is priced \
-from the market's call prices."""
+to exactly long the lower call, short the upper. With a deterministic numéraire, a pricing measure gives its price \
+from the bond, forward and call prices."""
 scope = """A single underlying observed once, at T. Payoffs outside the fragment (products of two \
 prices, path dependence) are not compiled. The compiled hedge is not claimed cheapest or unique \
 beyond its normal form, and the smooth case is the separate Carr–Madan spanning formula."""
@@ -283,11 +283,11 @@ decl = "MathFin.Contracts.BlackScholes.europeanCall_hedge_in_stock_eq_delta"
 title = "The replicating holding of the call is its delta"
 summary = """In Black–Scholes, the discounted call payoff is its Black–Scholes value plus the gains \
 of a unique square-integrable holding in the discounted stock, and that holding equals the delta \
-Φ(d₁) almost everywhere. Every contract paying at fixed dates up to T with square-integrable cash flows \
-has a unique such holding, at a cost equal to its value."""
+Φ(d₁) almost everywhere for the stock's bracket measure. Every fixed-date contract observing and \
+paying by T with a square-integrable total discounted payoff has a unique such holding at its value."""
 scope = """Wealth is in discounted units. The identification with a formula is for the European \
 call only; for a general contract the holding exists and is unique but is not given by a formula \
-(Clark–Ocone). One stock, constant coefficients."""
+(Clark–Ocone). One stock with positive initial price and constant nonzero volatility. The call result assumes positive strike, maturity and volatility."""
 also = [
   "MathFin.Contracts.BlackScholes.exists_unique_hedge_in_stock",
 ]

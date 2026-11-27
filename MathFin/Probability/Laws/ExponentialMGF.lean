@@ -46,7 +46,7 @@ open MeasureTheory ProbabilityTheory Set
 `∫ e^{t x} d Exp(r)(x) = r / (r − t)` for `t < r`. -/
 theorem mgf_id_expMeasure {r t : ℝ} (hr : 0 < r) (ht : t < r) :
     mgf id (expMeasure r) t = r / (r - t) := by
-  have hmeas : Measurable fun x ↦ ENNReal.ofReal (gammaPDFReal 1 r x) :=
+  have hmeas : Measurable (gammaPDF 1 r) :=
     (measurable_gammaPDFReal 1 r).ennreal_ofReal
   have hdens : ∀ x : ℝ, (gammaPDF 1 r x).toReal = gammaPDFReal 1 r x := fun x ↦
     ENNReal.toReal_ofReal (gammaPDFReal_nonneg one_pos hr x)

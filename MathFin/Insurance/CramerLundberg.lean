@@ -103,7 +103,8 @@ theorem mgf_gap_sub_claim {T X : Ω → ℝ} (hT : Measurable T) (hX : Measurabl
   ring
 
 /-- **The adjustment equation of the embedded walk is the Cramér–Lundberg equation.** If the
-waiting time `T ∼ Exp(λ)` is independent of the claim `X`, then `𝔼[e^{−R(cT − X)}] = 1` holds exactly when
+waiting time `T ∼ Exp(λ)` is independent of the claim `X`, then `𝔼[e^{−R(cT − X)}] = 1`
+holds exactly when
 `λ(𝔼[e^{R X}] − 1) − c R = 0`. -/
 theorem isLundbergAdjustmentCoefficient_iff {T X : Ω → ℝ} {lam c R : ℝ} (hlam : 0 < lam)
     (hc : 0 < c) (hR : 0 < R) (hTm : Measurable T) (hXm : Measurable X) (hind : IndepFun T X P)

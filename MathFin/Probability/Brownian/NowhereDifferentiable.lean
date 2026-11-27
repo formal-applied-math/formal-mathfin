@@ -135,7 +135,7 @@ private lemma hasLaw_grid_increment (hX : IsPreBrownianReal X P) (n i : ℕ) :
     HasLaw (fun ω ↦ X (((i + 1 : ℕ) : ℝ≥0) / n) ω - X (((i : ℕ) : ℝ≥0) / n) ω)
       (gaussianReal 0 (n : ℝ≥0)⁻¹) P := by
   have h := hasLaw_increment hX (s := ((i : ℕ) : ℝ≥0) / n) (t := ((i + 1 : ℕ) : ℝ≥0) / n)
-    (div_le_div_of_nonneg_right (by exact_mod_cast Nat.le_succ i) (zero_le _))
+    (div_le_div_of_nonneg_right (by exact_mod_cast Nat.le_succ i) zero_le)
   rw [grid_sub] at h
   exact h
 
@@ -156,7 +156,7 @@ private lemma measure_three_increments_le (hX : IsPreBrownianReal X P) {n : ℕ}
         {ω | |X (((m + 1 : ℕ) : ℝ≥0) / n) ω - X (((m : ℕ) : ℝ≥0) / n) ω| ≤ c / n})
       ≤ ENNReal.ofReal (c / √n) ^ 3 := by
   have hmono : Monotone (fun i : ℕ ↦ ((i : ℝ≥0) / n)) := fun a b hab ↦
-    div_le_div_of_nonneg_right (Nat.cast_le.2 hab) (zero_le _)
+    div_le_div_of_nonneg_right (Nat.cast_le.2 hab) zero_le
   have hind := hX.hasIndepIncrements.nat hmono
   have h := hind.measure_inter_preimage_eq_mul (Finset.Ico k (k + 3))
     (sets := fun _ ↦ {x : ℝ | |x| ≤ c / n})

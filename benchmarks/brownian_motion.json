@@ -57,7 +57,7 @@
       "description": "Theorem 5.1.7: for a Brownian motion B (IsBrownianReal: Brownian finite-dimensional laws and almost surely continuous paths), a time t and a level a > 0, P(B_s ≥ a for some s ∈ [0,t]) = 2·P(B_t ≥ a). Derived from the independence and Gaussianity of the increments, not assumed.",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import MathFin.Probability.Brownian.ReflectionPrinciple\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Theorem 5.1.7 (reflection principle): for a Brownian motion `B`, a time `t` and a level\n    `a > 0`, `P(B_s ≥ a for some s ∈ [0, t]) = 2 · P(B_t ≥ a)`. -/\ntheorem brownian_reflection_principle_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsBrownianReal B P) {t : ℝ≥0} {a : ℝ}\n    (ha : 0 < a) :\n    P {ω | ∃ s : ℝ≥0, s ≤ t ∧ a ≤ B s ω} = 2 * P {ω | a ≤ B t ω} :=\n  hB.reflection_principle ha\n"
+        "lean": "import MathFin.Probability.Brownian.ReflectionPrinciple\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Theorem 5.1.7 (reflection principle): for a Brownian motion `B`, a time `t` and a level\n    `a > 0`, `P(B_s ≥ a for some s ∈ [0, t]) = 2 · P(B_t ≥ a)`. -/\ntheorem brownian_reflection_principle_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsBrownianReal B P) {t : ℝ≥0} {a : ℝ}\n    (ha : 0 < a) :\n    P {ω | ∃ s : ℝ≥0, s ≤ t ∧ a ≤ B s ω} = 2 * P {ω | a ≤ B t ω} :=\n  ProbabilityTheory.IsBrownianReal.reflection_principle hB ha\n"
       },
       "metadata": {
         "chapter": 5,
@@ -108,7 +108,7 @@
       "description": "Corollary 5.3.4: for a Brownian motion B, almost surely the path is differentiable at no x ≥ 0 (for the extension t ↦ B(max(t,0)) to ℝ); the proof shows that almost surely there is not even a right derivative at any x ≥ 0. Derived from the independent Gaussian increments (Paley–Wiener–Zygmund), not assumed.",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import MathFin.Probability.Brownian.NowhereDifferentiable\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Corollary 5.3.4 (nowhere differentiability): almost surely, the path of a Brownian motion is\n    differentiable at no `x ≥ 0` (for the extension `t ↦ B (max t 0)` to the real line). -/\ntheorem brownian_nowhere_differentiable_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsBrownianReal B P) :\n    ∀ᵐ ω ∂P, ∀ x : ℝ≥0, ¬ DifferentiableAt ℝ (fun t : ℝ ↦ B t.toNNReal ω) x :=\n  hB.toIsPreBrownianReal.ae_not_differentiableAt\n"
+        "lean": "import MathFin.Probability.Brownian.NowhereDifferentiable\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- Corollary 5.3.4 (nowhere differentiability): almost surely, the path of a Brownian motion is\n    differentiable at no `x ≥ 0` (for the extension `t ↦ B (max t 0)` to the real line). -/\ntheorem brownian_nowhere_differentiable_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ≥0 → Ω → ℝ} (hB : IsBrownianReal B P) :\n    ∀ᵐ ω ∂P, ∀ x : ℝ≥0, ¬ DifferentiableAt ℝ (fun t : ℝ ↦ B t.toNNReal ω) x :=\n  ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt hB.toIsPreBrownianReal\n"
       },
       "metadata": {
         "chapter": 5,

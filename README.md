@@ -12,8 +12,8 @@ hypothesis is stated and every step is checked by Lean's kernel. It covers stoch
 no-arbitrage theory, derivative pricing, fixed income, portfolio choice, risk measures and
 actuarial mathematics.
 
-The [corpus](docs/glossary.md#corpus) records 934 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 890 are proved in
+The [corpus](docs/glossary.md#corpus) records 935 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 891 are proved in
 full, 18 restate a lemma from Mathlib or BrownianMotion, and 26 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after,
 and say so. The library contains no `sorry`, and a build-time audit checks that every library
@@ -51,12 +51,14 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   asset on any probability space (Dalang–Morton–Willinger).
 - **Black–Scholes.** The PDE from Feynman–Kac, the delta hedge, and the call value as the value of
   a contract.
-- **Contracts.** A payoff language separate from any model. A compiler sends every piecewise-linear
-  payoff of the terminal price to a bond, a forward and calls, proved to pay the same on every
-  path with a nonnegative price, so a market with a pricing measure prices it from its call
-  prices. In Black–Scholes, every contract paying at fixed dates up to T with square-integrable
-  cash flows is replicated by a unique holding in the stock, at a cost
-  equal to its value; for the call, that holding is the delta Φ(d₁). The autocallable note is written in the language and proved to redeem once.
+- **Contracts.** The compiler turns piecewise-linear expressions in one terminal price into a
+  bond, a forward and calls. Their path values agree whenever the terminal price is nonnegative.
+  Under a pricing measure with a deterministic numéraire, the prices of those instruments give
+  the price of the payoff. In Black–Scholes with positive initial stock price and nonzero volatility,
+  a fixed-date contract whose observations and payments fall by T has a unique hedge in the stock
+  if its total discounted payoff is square-integrable. Its initial cost is the contract value.
+  For the European call the holding agrees with Φ(d₁) almost everywhere for the stock's bracket
+  measure. An autocall redeems at the first scheduled barrier hit or at maturity.
 - **Trees and the limit.** Cox–Ross–Rubinstein converges to Black–Scholes.
 - **The smile.** An exact polynomial-sign certificate for butterfly-free raw SVI; calendar
   arbitrage as monotone total variance; Dupire's equation in the sense of distributions, with no
@@ -69,8 +71,9 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   of expected losses over a set of probability vectors. Lundberg's bound on the probability of
   ruin of a random-walk surplus. The von Neumann–Morgenstern theorem on finitely many outcomes.
 - **Markov chains.** The strong Markov property and the recurrence criterion on a countable state
-  space; on a finite one, the unique stationary distribution, convergence to it, and the ergodic
-  theorem in mean square.
+  space. A nonempty finite irreducible chain has a unique stationary distribution. With
+  aperiodicity, its transition probabilities converge to that distribution and its time averages
+  converge in mean square.
 
 ## How it is kept honest
 

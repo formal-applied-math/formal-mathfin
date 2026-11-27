@@ -2965,6 +2965,25 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written: BlackScholes.europeanCall_hedge_in_stock_eq_delta in MathFin/Models/BlackScholes/BlackScholesStockDelta.lean. It joins the two hedging theorems of the library. europeanCall_deltaHedge (localised Itô integral, up to every T' < T) becomes an identity in the L2 Itô process of the class of the delta hedge integrand through ae_predItoIntegral_eq_itoProcessCLM and the horizon consistency itoProcessCLM_toLp_eq_itoIntegralCLM; the passage T' → T combines the almost sure limit tendsto_hedge_europeanCall_payoff with the L2 continuity of the Itô process in time (limits in measure agree), giving payoff = bsV + terminal L2 integral of the delta hedge integrand. A holding ψ with the same terminal wealth then has ψ·stockVol equal to that class (the Itô isometry is injective), hence ψ = Φ(d1) wherever stockVol ≠ 0. The identification holds almost everywhere for the bracket measure, not at every (t, ω); the delta is the hedgeDelta process of BlackScholesSelfFinancing. Wealth in discounted units. Not a legal instrument."
       }
+    },
+    {
+      "id": "mf-heston-trap-real-coefficients",
+      "name": "Heston Trap Coefficients on the Real Moment Strip",
+      "description": "For real 0 < u < 1 and nonzero volatility of volatility, choose the positive real discriminant root in the complex Heston trap formula. Its two Riccati coefficients then equal the real Möbius coefficients at every real time to maturity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.StochVol.HestonCharacteristicReal\n\nopen MathFin.Heston\n\ntheorem heston_trap_real_coefficients (r κ θ ξ ρ u τ : ℝ)\n    (hξ : ξ ≠ 0) (hu : 0 < u) (hu' : u < 1) :\n    hestonTrapD κ ξ ρ (u : ℂ) (hestonGamma κ ξ ρ u : ℂ) τ = (hestonBv κ ξ ρ u τ : ℂ) ∧\n    hestonTrapC r κ θ ξ ρ (u : ℂ) (hestonGamma κ ξ ρ u : ℂ) τ =\n      (hestonA r κ θ ξ ρ u τ : ℂ) :=\n  ⟨hestonTrapD_ofReal κ ξ ρ u τ hξ hu hu', hestonTrapC_ofReal r κ θ ξ ρ u τ hξ hu hu'⟩"
+      },
+      "metadata": {
+        "reference": "Albrecher, Mayer, Schoutens and Tistaert, The Little Heston Trap.",
+        "citations": [
+          {
+            "key": "AlbrecherMayerSchoutensTistaert2007"
+          }
+        ],
+        "formalization_status": "full",
+        "formalization_scope": "Algebraic agreement of the two coefficient formulas on the real strip. The identification with a stochastic expectation would require a separate argument."
+      }
     }
   ]
 }
