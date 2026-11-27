@@ -3016,9 +3016,9 @@
     "mf-gamma-swap-replication": {
       "benchmark_file": "jumps_and_variance_swaps.json",
       "date": "2026-11-27",
-      "elapsed_s": 2.8,
-      "input_hash": "b839e23c2dd9be382fab2e5c847150618ec766ceb1b5b61bc11bcf992f73ffd2",
-      "verified_at_commit": "0a98861"
+      "elapsed_s": 4.4,
+      "input_hash": "44ac233d1fbae0d64e9768e222089f88aa33f0969f7cfe5e05ba7e71f1f2e080",
+      "verified_at_commit": "454c578"
     },
     "mf-garman-kohlhagen": {
       "benchmark_file": "black_scholes.json",
