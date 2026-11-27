@@ -325,13 +325,6 @@ uses = ["thm:bracket-compensator", "thm:quadratic-variation", "thm:ito-integral-
 area = "probability/brownian"
 
 [[node]]
-label = "thm:brownian-nowhere-differentiable"
-title = "Brownian paths are nowhere differentiable"
-statement = "Almost every path of the canonical continuous Brownian motion is differentiable at no time t ≥ 0."
-uses = ["def:brownian-motion"]
-area = "probability/brownian"
-
-[[node]]
 label = "thm:clark-ocone"
 title = "L¹ martingale representation and Clark–Ocone"
 statement = "Martingale representation extends from square-integrable to integrable claims (L¹ and H¹), and for a Malliavin-differentiable claim H the integrand is the predictable projection of its Malliavin derivative (Clark–Ocone)."
@@ -444,13 +437,6 @@ uses = []
 ground = "Mathlib: positive-semidefinite kernels"
 area = "choice/trading"
 family = "mechanisms"
-
-[[node]]
-label = "thm:reflection-principle"
-title = "Reflection principle for Brownian motion"
-statement = "On the canonical continuous Brownian path space, P(max_{s≤t} B_s ≥ a) = 2P(B_t ≥ a) for every a ≥ 0, proved by reflecting the path at the hitting time of a by the strong Markov property."
-uses = ["def:brownian-motion"]
-area = "probability/brownian"
 
 [[node]]
 label = "thm:second-ftap-converse"
@@ -671,16 +657,6 @@ statement = "Unilateral CVA is the price, under a pricing measure with a default
 uses = ["def:pricing-functional", "thm:unilateral-cva"]
 area = "valuation/default"
 family = "default"
-
-[[node]]
-label = "thm:von-neumann-morgenstern"
-title = "von Neumann–Morgenstern representation theorem"
-statement = """A preference on finite lotteries that is complete, transitive, continuous and \
-satisfies independence is represented by expected utility: there is a utility u, unique up to a \
-positive affine map, with p ⪰ q iff E_p[u] ≥ E_q[u]. The library proves the converse, that \
-expected-utility preferences satisfy the axioms (thm:expected-utility-axioms)."""
-uses = ["thm:expected-utility-axioms", "def:expected-utility"]
-area = "choice/preferences"
 
 [[node]]
 label = "thm:delbaen-representation"

@@ -2768,6 +2768,18 @@ The landmarks of `docs/blueprint.md` that no section above pins: one `#print axi
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.prefersEU_independence
 
+/-- info: 'MathFin.vnm_representation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.vnm_representation
+
+/-- info: 'ProbabilityTheory.IsBrownianReal.reflection_principle' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms ProbabilityTheory.IsBrownianReal.reflection_principle
+
+/-- info: 'ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt
+
 /-- info: 'MathFin.expectedUtility' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.expectedUtility

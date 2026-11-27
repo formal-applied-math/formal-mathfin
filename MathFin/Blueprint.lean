@@ -229,6 +229,9 @@ import MathFin.Probability.Discrete.SnellDoobDecomposition
 import MathFin.Models.Credit.HazardCurve
 import MathFin.Probability.Brownian.Ito.StochasticFubiniIto
 import MathFin.Models.StochVol.HestonSmallVolOfVol
+import MathFin.Probability.Brownian.ReflectionPrinciple
+import MathFin.Probability.Brownian.NowhereDifferentiable
+import MathFin.Choice.Utility.VonNeumannMorgensternRepresentation
 
 /-!
 # The blueprint: a map of the field's landmarks
@@ -382,6 +385,25 @@ attribute [blueprint "thm:bracket-compensator"
   MathFin.BracketCompensator.condExp_sq_sub_bracket
 
 -- ===== probability/brownian: Brownian calculus =====
+
+attribute [blueprint "thm:reflection-principle"
+  (title := "Reflection principle for Brownian motion")
+  (uses := ["def:brownian-motion"])
+  (statement := /-- For a Brownian motion $B$, $t \ge 0$ and $a > 0$,
+  $P(B_s \ge a \text{ for some } s \le t) = 2P(B_t \ge a)$. Proved without the strong Markov
+  property: first passages on finite grids, the Markov property at fixed times and Gaussian
+  symmetry bound the grid maxima from both sides, and path continuity passes to the limit. The
+  joint law of the maximum and the endpoint is not stated. -/)]
+  ProbabilityTheory.IsBrownianReal.reflection_principle
+
+attribute [blueprint "thm:brownian-nowhere-differentiable"
+  (title := "Brownian paths are nowhere differentiable")
+  (uses := ["def:brownian-motion"])
+  (statement := /-- Almost every path of a pre-Brownian motion has, at no time $x \ge 0$, a right
+  derivative, so in particular is differentiable at no time (Paley–Wiener–Zygmund: three
+  consecutive small increments near a point of differentiability have probability
+  $O(n^{-1/2})$ per position). -/)]
+  ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt
 
 attribute [blueprint "thm:quadratic-variation"
   (title := "Quadratic variation of Brownian motion")
@@ -1597,10 +1619,21 @@ attribute [blueprint "thm:expected-utility-axioms"
   (statement := /-- A preference defined by finite expected utility, $p \succeq q$ iff $\sum_i
   p_iu_i \ge \sum_i q_iu_i$, satisfies independence: if $p \succeq q$ then $\alpha p +
   (1-\alpha)r \succeq \alpha q + (1-\alpha)r$ for every weight $\alpha \in [0,1]$; it also
-  satisfies continuity (`prefersEU_continuity`). Only this easy direction is proved: the
-  representation theorem, that the axioms imply an expected-utility representation, is the
-  frontier node `thm:von-neumann-morgenstern`. -/)]
+  satisfies continuity (`prefersEU_continuity`). This is the easy direction of the
+  representation theorem `thm:von-neumann-morgenstern`. -/)]
   MathFin.prefersEU_independence
+
+attribute [blueprint "thm:von-neumann-morgenstern"
+  (title := "von Neumann–Morgenstern representation theorem")
+  (uses := ["thm:expected-utility-axioms", "def:expected-utility"])
+  (statement := /-- A preference on the probability vectors over a finite set of outcomes that is
+  complete, transitive, satisfies independence at every weight in $(0,1]$ and continuity ($p \succ
+  q \succ r$ gives $\alpha, \beta \in (0,1)$ with $\alpha p + (1-\alpha) r \succ q \succ \beta p +
+  (1-\beta) r$) is represented by expected utility: there is $u$ with $p \succeq q$ iff
+  $\sum_i p_iu_i \ge \sum_i q_iu_i$, and the representing utilities are exactly the $au + b$ with
+  $a > 0$. Finitely many outcomes; the proof calibrates against a best and a worst point mass
+  (Herstein–Milnor). -/)]
+  MathFin.vnm_representation
 
 attribute [blueprint "def:expected-utility"
   (title := "Expected utility")
