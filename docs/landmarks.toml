@@ -1,7 +1,7 @@
 # The curated headline results shown on the docs site's Landmarks page (landmarks.html).
-# One [[landmark]] per bullet of the README's "Main results". The page prints the exact Lean
+# The headline results the README's "Main results" summarise. The page prints the exact Lean
 # statement from the declaration index; `summary` and `scope` are prose and must never claim more
-# than that statement. `scope` is what is NOT proved, taken from the README's "Limitations".
+# than that statement. `scope` is what is NOT proved.
 #
 #   decl    the full Lean name (a name missing from the index renders a "not in this build" card)
 #   title   short heading

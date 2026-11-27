@@ -1048,7 +1048,7 @@ def build_landmarks(site: Site, out: Path, landmarks: list[dict], nodes_json: li
     cards = "".join(landmark_card(site, link, e, anchors) for e in landmarks)
     toc = "".join(f'<li><a href="#{esc(e["decl"])}">{esc(e["title"])}</a></li>' for e in landmarks)
     body = f"""<h1>Landmarks</h1>
-<p class="lede ink2">The {term("landmark", "landmark")} results, one per line of the README's main results. Each shows the
+<p class="lede ink2">The {term("landmark", "landmark")} results: the headline theorems the README's main results summarise. Each shows the
 statement exactly as Lean elaborates it, read from the declaration index, with what the statement
 does not cover stated next to it. The prose above a statement is a reading aid; the statement is the claim.</p>
 <ul class="toc">{toc}</ul>{cards}"""
