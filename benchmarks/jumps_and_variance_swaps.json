@@ -89,7 +89,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: the Carr-Madan market replication (integral_eq_carrMadan) instantiated at the entropy-anchored payoff phi(x) = x log(x/kappa) - x + kappa, whose convexity 1/K is the gamma swap's strip weight and whose value and first derivative vanish at kappa, so no cash or forward leg remains. The strike range is bounded and S_T is assumed to stay in it; the unbounded strip, the nonzero-rate factor e^(2rT) of the source's fair strike, the mark-to-market formula, the Greeks and the dispersion decomposition are not treated. The fair-strike normalization (gammaSwapFairStrike) and the identity K_Gamma = 2 E_Q[phi(S_T)]/(kappa T) live in the same module. Lives in MathFin/Models/ModelFree/GammaSwap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: the Carr-Madan market replication (integral_eq_carrMadan) instantiated at the payoff phi(x) = x log(x/kappa) - x + kappa, whose convexity 1/K is the gamma swap's strip weight and whose value and first derivative vanish at kappa, so no cash or forward leg remains. The strike range is bounded and S_T is assumed to stay in it; the unbounded strip, the nonzero-rate factor e^(2rT) of the source's fair strike, the mark-to-market formula, the Greeks and the dispersion decomposition are not treated. The fair-strike normalization (gammaSwapFairStrike) and the identity K_Gamma = 2 E_Q[phi(S_T)]/(kappa T) live in the same module. Lives in MathFin/Models/ModelFree/GammaSwap.lean. Axioms-clean."
       }
     },
     {

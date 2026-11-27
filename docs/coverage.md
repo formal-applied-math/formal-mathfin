@@ -31,7 +31,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 One `full` entry in `benchmarks/jumps_and_variance_swaps.json` (85 entries in that file).
 
 - **`mf-gamma-swap-replication`** (MathFin/Models/ModelFree/GammaSwap.lean): the gamma swap
-  (Jacquier-Slaoui arXiv:1004.0125, section 2) runs on the entropy-anchored payoff
+  (Jacquier-Slaoui arXiv:1004.0125, section 2) runs on the payoff
   `phi(x) = x log(x/kappa) - x + kappa`, whose convexity `phi'' = 1/K` is the gamma swap's
   strip weight -- where the log payoff's Carr-Madan weight is `-1/K^2` (the variance swap's
   strip), the gamma swap's is `1/K`. `gammaSwapPayoff_eq_strip` proves the payoff equals its
@@ -40,7 +40,7 @@ One `full` entry in `benchmarks/jumps_and_variance_swaps.json` (85 entries in th
   remains. `Market.IsPricingMeasure.integral_eq_gammaSwap` lifts it to a market with unit
   numeraire: under a pricing measure `Q` with `S_T` in the range almost surely, the expected
   payoff is the market price of that strip (`Market.IsPricingMeasure.integral_eq_carrMadan`
-  instantiated at the entropy payoff). `Market.gammaSwapFairStrike` is the fair strike as
+  instantiated at the payoff). `Market.gammaSwapFairStrike` is the fair strike as
   twice the strip per `kappa * T` -- the source's printed
   `K_Gamma = (2e^{2rT}/(T S_0))[integral P/K + integral C/K]` at the zero-rate,
   numeraire-discounted instance where the factor collapses to `2` (reference level in the

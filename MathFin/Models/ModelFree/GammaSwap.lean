@@ -13,7 +13,7 @@ public import MathFin.Models.ModelFree.CarrMadanMarket
 
 A **gamma swap** is a variance swap whose floating leg weights the squared return by the
 price level: with notional `N` it pays `N·(T⁻¹∫₀ᵀ σ_t²·(S_t/S₀) dt − K_Γ)` (Jacquier–Slaoui,
-§2). Its static replication runs through the entropy-anchored payoff
+§2). Its static replication runs through the payoff
 `φ(x) = x·log(x/κ) − x + κ`, whose convexity is `φ″(K) = 1/K`: where the log payoff's
 Carr–Madan weight is `−1/K²` (the variance swap's strip), the gamma swap's is `1/K`.
 
@@ -45,9 +45,10 @@ assembled.
   meant by the strip identity at `x > 0` with `κ > 0` (outside that quadrant the
   logarithm is out of its domain and the value is junk).
 * `Market.gammaSwapFairStrike M T Q κ L U`: twice the market price of the `1/K` strip
-  per `κ·T`; it is the fair strike under `0 < κ`, `0 < T` and `0 < L ≤ κ ≤ U`. The
-  division is junk at `κ = 0` or `T = 0`; at `κ < 0` or outside the ordering it is well
-  defined but is not a fair strike.
+  per `κ·T`; under a pricing measure with the unit numéraire and `S_T ∈ [L, U]` a.s., and
+  `0 < κ`, `0 < T`, `0 < L ≤ κ ≤ U`, it is the fair strike. The division is junk at
+  `κ = 0` or `T = 0`; at `κ < 0` or outside the ordering it is well defined but is not a
+  fair strike.
 
 ## Main results
 
@@ -110,9 +111,9 @@ private theorem gammaSwapPayoff_derivs {κ x : ℝ} (hκ : 0 < κ) (hx : 0 < x) 
 replication payoff is exactly its `1/K` strip — the payoff *is* the static book of puts on
 `[L, κ]` and calls on `[κ, U]`, each weighted by `1/K`:
 
-  `x·log(x/κ) − x + κ = ∫_L^κ K⁻¹·(K − S)⁺ dK + ∫_κ^U K⁻¹·(S − K)⁺ dK`.
+  `S·log(S/κ) − S + κ = ∫_L^κ K⁻¹·(K − S)⁺ dK + ∫_κ^U K⁻¹·(S − K)⁺ dK`.
 
-Specialises `carrMadan_spanning` to the entropy-anchored payoff; the cash and forward
+Specialises `carrMadan_spanning` to the payoff; the cash and forward
 legs vanish because `φ(κ) = φ′(κ) = 0`. -/
 theorem gammaSwapPayoff_eq_strip {L U κ S : ℝ} (hL : 0 < L) (hLκ : L ≤ κ) (hκU : κ ≤ U)
     (hS : S ∈ Set.Icc L U) :
@@ -147,8 +148,8 @@ The expected replication payoff is the market price of the gamma swap's `1/K` st
   `𝔼_Q[φ(S_T)] = ∫_L^κ K⁻¹·P(K) dK + ∫_κ^U K⁻¹·C(K) dK`,
 
 with `P(K)`, `C(K)` the market's prices of the European put and call at strike `K` and
-maturity `T`. Instantiates `IsPricingMeasure.integral_eq_carrMadan` at the entropy-anchored
-payoff; its cash and forward legs vanish since `φ(κ) = φ′(κ) = 0`. -/
+maturity `T`. Instantiates `IsPricingMeasure.integral_eq_carrMadan` at the payoff; its
+cash and forward legs vanish since `φ(κ) = φ′(κ) = 0`. -/
 theorem IsPricingMeasure.integral_eq_gammaSwap {M : Market Unit Ω} {T : ℝ≥0}
     {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t x, M.numeraire t x = 1)
     {L U κ : ℝ} (hL : 0 < L) (hLκ : L ≤ κ) (hκU : κ ≤ U)
@@ -173,10 +174,11 @@ with `P(K)` and `C(K)` the market's prices of the European put and call at strik
 maturity `T`. This is Jacquier–Slaoui's `K_Γ^{0,T} = (2e^{2rT}/(T S₀))[∫₀^{F₀} P/K dK
 + ∫_{F₀}^∞ C/K dK]` at the substitutions the numéraire convention makes (`r = 0`, so the
 factor is `2`; the reference level `κ` in the `S₀` slot, at the at-the-money forward
-`κ = F₀`); the unbounded strip of the source is cut to the compact range. The value is
-the fair strike under `0 < κ`, `0 < T` and `0 < L ≤ κ ≤ U`; the division is junk at
-`κ = 0` or `T = 0`, and at `κ < 0` or outside the ordering it is well defined but is not
-a fair strike. -/
+`κ = F₀`); the unbounded strip of the source is cut to the compact range. Under a pricing
+measure of the market with the unit numéraire and `S_T ∈ [L, U]` almost surely, and with
+`0 < κ`, `0 < T` and `0 < L ≤ κ ≤ U`, the value is the fair strike
+(`gammaSwapFairStrike_eq_integral`); the division is junk at `κ = 0` or `T = 0`, and at
+`κ < 0` or outside the ordering it is well defined but is not a fair strike. -/
 noncomputable def gammaSwapFairStrike (M : Market Unit Ω) (T : ℝ≥0) (Q : Measure Ω)
     (κ L U : ℝ) : ℝ :=
   2 / (κ * (T : ℝ)) *
