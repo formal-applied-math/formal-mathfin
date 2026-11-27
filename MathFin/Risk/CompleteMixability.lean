@@ -76,12 +76,19 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Set
 open scoped ENNReal
 
+/-- **Joint mixability**: a coupling of the laws `μ i`, i.e. a probability measure on `Fin n → E`
+whose `i`-th coordinate has law `μ i`, under which the sum is almost surely constant. -/
+def JointlyMixable {E : Type*} [MeasurableSpace E] [AddCommMonoid E] {n : ℕ}
+    (μ : Fin n → Measure E) : Prop :=
+  ∃ π : Measure (Fin n → E), IsProbabilityMeasure π ∧ (∀ i, π.map (fun x ↦ x i) = μ i) ∧
+    ∃ c, ∀ᵐ x ∂π, ∑ i, x i = c
+
 /-- **Complete mixability**: a coupling of `n` copies of `μ`, i.e. a probability measure on
-`Fin n → E` whose coordinates all have law `μ`, under which the sum is almost surely constant. -/
+`Fin n → E` whose coordinates all have law `μ`, under which the sum is almost surely constant.
+It is joint mixability of `n` copies of one law. -/
 def CompletelyMixable {E : Type*} [MeasurableSpace E] [AddCommMonoid E] (n : ℕ)
     (μ : Measure E) : Prop :=
-  ∃ π : Measure (Fin n → E), IsProbabilityMeasure π ∧ (∀ i, π.map (fun x ↦ x i) = μ) ∧
-    ∃ c, ∀ᵐ x ∂π, ∑ i, x i = c
+  JointlyMixable fun _ : Fin n ↦ μ
 
 section Criterion
 
@@ -90,6 +97,20 @@ variable {E : Type*} [MeasurableSpace E] [NormedAddCommGroup E] [BorelSpace E]
 
 lemma measurableSet_sum_eq {n : ℕ} (c : E) : MeasurableSet {x : Fin n → E | ∑ i, x i = c} :=
   measurableSet_eq_fun (Finset.measurable_sum _ fun i _ ↦ measurable_pi_apply i) measurable_const
+
+/-- **Random variables with a constant sum give a joint mix.** If `X i` has law `μ i` under a
+probability measure `P` and `∑ i, X i` is a.s. constant, the joint law of the `X i` is a joint
+mix of the `μ i`. This is the form in which constructions produce mixes. -/
+theorem JointlyMixable.of_hasLaw {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
+    [IsProbabilityMeasure P] {n : ℕ} {μ : Fin n → Measure E} {X : Fin n → Ω → E}
+    (hX : ∀ i, Measurable (X i)) (hlaw : ∀ i, P.map (X i) = μ i) (c : E)
+    (hc : ∀ᵐ ω ∂P, ∑ i, X i ω = c) : JointlyMixable μ := by
+  sorry
+
+/-- **An affine image of a joint mix is a joint mix.** -/
+theorem JointlyMixable.map_affine {n : ℕ} {μ : Fin n → Measure ℝ} (h : JointlyMixable μ)
+    (a b : ℝ) : JointlyMixable fun i ↦ (μ i).map fun x ↦ a * x + b := by
+  sorry
 
 namespace CompletelyMixable
 
@@ -279,6 +300,25 @@ theorem completelyMixable_simplex {n : ℕ} [NeZero n] (b : AffineBasis (Fin n) 
     (ae_of_all _ (sum_simplexShift b))
 
 end Uniform
+
+section UniformInterval
+
+/-- **The uniform law on `(0, 1]` is `3`-completely mixable**, through `x`, the fractional part
+of `-2x` and the fractional part of `x + 1/2`. Off the null set `{1/2, 1}` the three add up to
+`3/2`: for `x < 1/2` they are `x`, `1 - 2x`, `x + 1/2`, and for `x > 1/2` they are `x`,
+`2 - 2x`, `x - 1/2`. On the circle `ℝ/ℤ` the three maps are the identity, multiplication by
+`-2` and a rotation, each preserving the Haar measure. -/
+theorem completelyMixable_three_uniformIoc : CompletelyMixable 3 (volume.restrict (Ioc (0 : ℝ) 1)) := by
+  sorry
+
+/-- **The uniform law on an interval is `n`-completely mixable for every `n ≥ 2`**
+(Gaffke–Rüschendorf): `2` by reflection through the midpoint, `3` by
+`completelyMixable_three_uniformIoc`, and every `n ≥ 2` is a sum of twos and threes. -/
+theorem completelyMixable_uniformIcc {a b : ℝ} (hab : a < b) {n : ℕ} (hn : 2 ≤ n) :
+    CompletelyMixable n (volume[|Icc a b]) := by
+  sorry
+
+end UniformInterval
 
 /-- **A complete mix is the convex-order minimum of the sum.** If `π` couples `n` copies of an
 integrable law `μ` on `ℝ` with an a.s. constant sum, the law of that sum is below, in convex

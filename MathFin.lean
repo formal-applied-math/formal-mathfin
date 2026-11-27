@@ -852,6 +852,10 @@ public import MathFin.Risk.UtilityDerivation
 -- state) pointwise monotonicity and continuity
 public import MathFin.Risk.Coherent
 public import MathFin.Risk.CompleteMixability
+public import MathFin.Risk.CompleteMixability.LargeN
+public import MathFin.Risk.CompleteMixability.Pairing
+public import MathFin.Risk.CompleteMixability.QuantileGrid
+public import MathFin.Risk.CompleteMixability.UniformPiece
 public import MathFin.Risk.ConvexOrderSums
 -- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
 public import MathFin.Risk.PositionsConvention
