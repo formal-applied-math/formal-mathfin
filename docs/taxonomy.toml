@@ -463,7 +463,8 @@ landmarks = ["MathFin.CVA.potentialFutureExposure_gaussian"]
 key = "risk/insurance"
 title = "Collective risk theory"
 blurb = "premium principles as risk-loaded functionals, the compound claims process, ruin"
-modules = ["MathFin.Insurance.StandardDeviationPrinciple", "MathFin.Insurance.ActuarialInsurance"]
+modules = ["MathFin.Insurance.StandardDeviationPrinciple", "MathFin.Insurance.ActuarialInsurance",
+  "MathFin.Insurance.Lundberg", "MathFin.Insurance.CramerLundberg"]
 subjects = ["MSC 91G05", "JEL G22"]
 
 # ───────────────────────────── families ─────────────────────────────

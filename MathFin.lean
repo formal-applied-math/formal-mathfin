@@ -973,6 +973,10 @@ public import MathFin.Insurance.BuhlmannCredibility
 -- and under Mack's model the predictions of the ultimate are a martingale
 public import MathFin.Insurance.ChainLadder
 public import MathFin.Insurance.EsscherPremium
+-- Collective risk theory: Lundberg's inequality for a random-walk surplus, and the Cramér–Lundberg
+-- adjustment equation of the embedded walk
+public import MathFin.Insurance.Lundberg
+public import MathFin.Insurance.CramerLundberg
 
 -- Markets
 public import MathFin.Markets.Execution.AlmgrenChriss
