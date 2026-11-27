@@ -266,6 +266,7 @@ public import MathFin.Probability.Brownian.Girsanov.GirsanovPredictableTheta
 public import MathFin.Probability.Brownian.Girsanov.GirsanovFiltered
 -- Novikov's criterion, analytic core: unit mean of the limit exponential (Hölder + truncation)
 public import MathFin.Probability.Brownian.Girsanov.NovikovCore
+public import MathFin.Probability.Brownian.Girsanov.NovikovIto
 public import MathFin.Probability.Brownian.Ito.ItoFormulaCLM
 -- Summit A′: time-dependent Itô formula in L² — TD Taylor remainder vanishes,
 -- TD Riemann↔CLM bridge, and the assembly f(T,B_T) = f(0,B₀) + ∫f_x dB + ∫(f_t+½f_xx)ds

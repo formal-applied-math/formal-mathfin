@@ -20,10 +20,10 @@ Novikov's condition makes the Doléans exponential `Z = exp(M − ½A)` a unit-m
 file proves the *analytic* half of that statement, with no stochastic calculus in it: a statement
 about sequences of real random variables `Mₙ → M'`, `Aₙ → A'` whose exponentials
 `exp(c·Mₙ − c²/2·Aₙ)` all have unit mean (for every real `c`). These are the hypotheses the
-bounded Girsanov theorem should supply for the bounded truncations `cθₙ` of an unbounded integrand
-(`integral_ZTpred_eq_one`, `Btheta_isBrownianOn_predictable_of_bdd`); that this file's hypotheses
-are met by those truncations is not proved here, so Novikov's theorem for the Itô integral is not
-yet a consequence of this file.
+bounded Girsanov theorem supplies for the bounded truncations `cθₙ` of an unbounded integrand
+(`integral_ZTpred_eq_one`); `NovikovIto` checks that this file's hypotheses are met by those
+truncations of a predictable `θ` and concludes `E exp(−∫θ dB − ½∫θ² ds) = 1`
+(`integral_contDoleansExp_eq_one_of_novikov`).
 
 The argument is the classical "`p`-exponential" trick (Karatzas–Shreve §3.5; Revuz–Yor §VIII.1),
 run on the truncations so that no stopping times are needed:
@@ -50,10 +50,10 @@ run on the truncations so that no stopping times are needed:
 
 ## What is not here
 
-This module is not Girsanov's theorem for unbounded `θ`. It does not construct the truncations
-`θₙ = θ·1{|θ| ≤ n}`, does not show that their Itô integrals and quadratic variations converge
-(`M' = −∫θ dB`, `A' = ∫θ² dt`), and does not transfer the exponential-martingale property to
-`Q = Z·μ`. Those steps are what remains of the frontier node `thm:novikov-girsanov`.
+This module is analytic: no Itô integral appears in it (the link is `NovikovIto`). It is not
+Girsanov's theorem for unbounded `θ`: it does not show that `t ↦ Z_t` is a martingale and does not
+transfer the exponential-martingale property to `Q = Z·μ`. Those steps are what remains of the
+frontier node `thm:novikov-girsanov`.
 
 ## References
 
@@ -249,33 +249,34 @@ theorem lintegral_rpow_exp_le {p r : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (hr1 : 1 <
     _ = K ^ (1 - p) := one_mul _
 
 /-- **Novikov's criterion, analytic core.** Let `Mₙ → M'`, `Aₙ → A'` almost surely, with
-`0 ≤ Aₙ ≤ A'` and `E exp(½A') < ∞` (Novikov's condition), and suppose every
+`0 ≤ Aₙ` and `Aₙ ≤ A'` almost surely, and `E exp(½A') < ∞` (Novikov's condition), and suppose every
 `exp(c·Mₙ − c²/2·Aₙ)` has unit mean, `c ∈ ℝ`. Then the limit exponential has unit mean:
 `E exp(M' − ½A') = 1`. (This is a statement about real random variables; it is not the stochastic
 statement, which needs `Mₙ`, `Aₙ` to be the truncated Itô integrals and quadratic variations.) -/
 theorem lintegral_exp_eq_one_of_novikov [IsProbabilityMeasure P] {M A : ℕ → Ω → ℝ}
     {M' A' : Ω → ℝ} (hM : ∀ n, Measurable (M n)) (hA : ∀ n, Measurable (A n))
     (hM' : Measurable M') (hA' : Measurable A') (hA0 : ∀ n ω, 0 ≤ A n ω)
-    (hAle : ∀ n ω, A n ω ≤ A' ω)
+    (hAle : ∀ᵐ ω ∂P, ∀ n, A n ω ≤ A' ω)
     (hmart : ∀ n (c : ℝ),
       ∫⁻ ω, ENNReal.ofReal (Real.exp (c * M n ω - c ^ 2 / 2 * A n ω)) ∂P = 1)
     (hMlim : ∀ᵐ ω ∂P, Tendsto (fun n ↦ M n ω) atTop (𝓝 (M' ω)))
     (hAlim : ∀ᵐ ω ∂P, Tendsto (fun n ↦ A n ω) atTop (𝓝 (A' ω)))
     (hNov : ∫⁻ ω, ENNReal.ofReal (Real.exp (2⁻¹ * A' ω)) ∂P ≠ ⊤) :
     ∫⁻ ω, ENNReal.ofReal (Real.exp (M' ω - 2⁻¹ * A' ω)) ∂P = 1 := by
-  have hA'0 : ∀ ω, 0 ≤ A' ω := fun ω ↦ (hA0 0 ω).trans (hAle 0 ω)
+  have hA'0 : ∀ᵐ ω ∂P, 0 ≤ A' ω := hAle.mono fun ω h ↦ (hA0 0 ω).trans (h 0)
   obtain ⟨K, hKdef⟩ : ∃ K : ℝ≥0∞,
       K = ∫⁻ ω, ENNReal.ofReal (Real.exp (2⁻¹ * A' ω)) ∂P := ⟨_, rfl⟩
   rw [← hKdef] at hNov
   have hKle : ∀ n, ∫⁻ ω, ENNReal.ofReal (Real.exp (2⁻¹ * A n ω)) ∂P ≤ K := fun n ↦ by
     rw [hKdef]
-    exact lintegral_mono fun ω ↦ ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr
-      (mul_le_mul_of_nonneg_left (hAle n ω) (by norm_num)))
+    refine lintegral_mono_ae (hAle.mono fun ω h ↦ ?_)
+    exact ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr
+      (mul_le_mul_of_nonneg_left (h n) (by norm_num)))
   have hK1 : 1 ≤ K := by
     rw [hKdef]
     calc (1 : ℝ≥0∞) = ∫⁻ _ : Ω, 1 ∂P := by simp
-      _ ≤ _ := lintegral_mono fun ω ↦
-        ENNReal.one_le_ofReal.mpr (Real.one_le_exp (mul_nonneg (by norm_num) (hA'0 ω)))
+      _ ≤ _ := lintegral_mono_ae (hA'0.mono fun ω h ↦
+        ENNReal.one_le_ofReal.mpr (Real.one_le_exp (mul_nonneg (by norm_num) h)))
   have hK0 : K ≠ 0 := (zero_lt_one.trans_le hK1).ne'
   have hfat := lintegral_limit_le_one hM hA hmart hMlim hAlim
   have hI : ∫⁻ ω, ENNReal.ofReal (Real.exp (M' ω - 2⁻¹ * A' ω)) ∂P ≤ 1 := by
@@ -320,8 +321,8 @@ theorem lintegral_exp_eq_one_of_novikov [IsProbabilityMeasure P] {M A : ℕ → 
     have hs2 : 2 * s ^ 2 ≤ 2⁻¹ := by nlinarith
     have hV : ∫⁻ ω, ENNReal.ofReal (Real.exp (2 * s ^ 2 * A' ω)) ∂P ≤ K := by
       rw [hKdef]
-      exact lintegral_mono fun ω ↦ ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr
-        (mul_le_mul_of_nonneg_right hs2 (hA'0 ω)))
+      exact lintegral_mono_ae (hA'0.mono fun ω h ↦ ENNReal.ofReal_le_ofReal (Real.exp_le_exp.mpr
+        (mul_le_mul_of_nonneg_right hs2 h)))
     have hexp : ∫⁻ ω, ENNReal.ofReal (Real.exp (s * M' ω)) ∂P ≤ K ^ (2⁻¹ : ℝ) := by
       have hH := lintegral_ofReal_exp_add_le (P := P) (a := 2⁻¹) (b := 2⁻¹)
         (by norm_num) (by norm_num) (by norm_num)
@@ -393,7 +394,7 @@ theorem lintegral_exp_eq_one_of_novikov [IsProbabilityMeasure P] {M A : ℕ → 
 theorem integral_exp_eq_one_of_novikov [IsProbabilityMeasure P] {M A : ℕ → Ω → ℝ}
     {M' A' : Ω → ℝ} (hM : ∀ n, Measurable (M n)) (hA : ∀ n, Measurable (A n))
     (hM' : Measurable M') (hA' : Measurable A') (hA0 : ∀ n ω, 0 ≤ A n ω)
-    (hAle : ∀ n ω, A n ω ≤ A' ω)
+    (hAle : ∀ᵐ ω ∂P, ∀ n, A n ω ≤ A' ω)
     (hmart : ∀ n (c : ℝ),
       ∫⁻ ω, ENNReal.ofReal (Real.exp (c * M n ω - c ^ 2 / 2 * A n ω)) ∂P = 1)
     (hMlim : ∀ᵐ ω ∂P, Tendsto (fun n ↦ M n ω) atTop (𝓝 (M' ω)))
