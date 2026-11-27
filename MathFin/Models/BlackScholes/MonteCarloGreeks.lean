@@ -205,4 +205,111 @@ theorem eulerGbmStep_variance_le_exact (hZ : HasLaw Z (gaussianReal 0 1) Q) (hr�
       exact mul_le_mul_of_nonneg_right hstep
         (by linarith [mul_nonneg (sq_nonneg σ) hΔ])
 
+/-! ### The pathwise delta -/
+
+variable {K T : ℝ}
+
+/-- The discounted expected call payoff as a function of the spot (the integrand of
+`bs_call_formula`'s left-hand side). -/
+private lemma integral_discountedPayoff_eq_bsV {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S K r σ T : ℝ} {Z : Ω → ℝ} (hZ : HasLaw Z (gaussianReal 0 1) Q) (hS : 0 < S)
+    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    ∫ ω, Real.exp (-r * T) * max (bsTerminal S r σ T (Z ω) - K) 0 ∂Q = bsV K r σ S T :=
+  integral_bsCall_payoff_eq_bsV ⟨hS, hK, hσ, hT, hZ⟩
+
+omit [IsProbabilityMeasure Q] in
+/-- The spot-combination of exponentials in the Black–Scholes delta computations:
+`e^{−rT}·e^{(r−σ²/2)T}·e^{(σ√T)²/2} = 1`. -/
+private lemma delta_exp_combine (r σ T : ℝ) (hT : 0 ≤ T) :
+    Real.exp (-r * T) * Real.exp ((r - σ ^ 2 / 2) * T)
+        * Real.exp ((σ * Real.sqrt T) ^ 2 / 2)
+      = 1 := by
+  rw [mul_assoc, ← Real.exp_add, ← Real.exp_add]
+  rw [show (σ * Real.sqrt T) ^ 2 = σ ^ 2 * T from by
+    rw [mul_pow, Real.sq_sqrt hT]]
+  rw [show -r * T + ((r - σ ^ 2 / 2) * T + σ ^ 2 * T / 2) = 0 from by ring]
+  exact Real.exp_zero
+
+omit [IsProbabilityMeasure Q] in
+/-- The exercise-region bound in the delta computations: `σ√T − (−d₂) = d₁`. -/
+private lemma sqrtT_add_bsd2_eq_bsd1 (S K r σ T : ℝ) :
+    σ * Real.sqrt T - -bsd2 S K r σ T = bsd1 S K r σ T := by
+  simp only [bsd2]
+  ring
+
+omit [IsProbabilityMeasure Q] in
+/-- The pathwise delta integrand on the exercise region: the discounted terminal-to-spot
+ratio times the standard-normal density. -/
+private lemma pathwise_integrand_congr (S r σ T : ℝ) (hS : 0 < S) (x : ℝ) :
+    bsTerminal S r σ T x / S * gaussianPDFReal 0 1 x
+      = Real.exp ((r - σ ^ 2 / 2) * T)
+          * (Real.exp (σ * Real.sqrt T * x) * gaussianPDFReal 0 1 x) := by
+  unfold bsTerminal
+  rw [Real.exp_add, mul_div_cancel_left₀ _ hS.ne']
+  ring
+
+/-- **The pathwise delta estimator's integrand**: the discounted payoff-derivative
+`e^{−rT}·1{S_T > K}·S_T/S₀`, as a function of the standard-normal sample — on the exercise
+region `{z > −d₂}` (where `S_T(z) > K`, `bsTerminal_gt_K_iff`) it is the differentiated
+payoff, off it zero. -/
+noncomputable def pathwiseDeltaPayoff (S K r σ T z : ℝ) : ℝ :=
+  Real.exp (-r * T) *
+    (Set.Ioi (-bsd2 S K r σ T)).indicator (fun z' ↦ bsTerminal S r σ T z' / S) z
+
+omit [IsProbabilityMeasure Q] in
+/-- The pathwise delta integrand is measurable. -/
+private lemma measurable_pathwiseDeltaPayoff (S K r σ T : ℝ) :
+    Measurable (fun z : ℝ ↦ pathwiseDeltaPayoff S K r σ T z) := by
+  have hf : Measurable (fun z' : ℝ ↦ bsTerminal S r σ T z' / S) := by
+    unfold bsTerminal; fun_prop
+  unfold pathwiseDeltaPayoff
+  exact (Measurable.const_mul (Measurable.indicator hf measurableSet_Ioi) (Real.exp (-r * T)))
+
+/-- **The pathwise delta.** The mean of the pathwise estimator is the Black–Scholes delta
+`Φ(d₁)`: the derivative-under-the-expectation value, computed on the exercise region by the
+completing-the-square tail integral. -/
+theorem pathwiseDeltaPayoff_mean {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S K r σ T Z) :
+    ∫ ω, pathwiseDeltaPayoff S K r σ T (Z ω) ∂Q = Phi (bsd1 S K r σ T) := by
+  obtain ⟨hS, hK, hσ, hT, hZ⟩ := h
+  have hmeas : AEStronglyMeasurable (fun z : ℝ ↦ pathwiseDeltaPayoff S K r σ T z)
+      (gaussianReal 0 1) := (measurable_pathwiseDeltaPayoff S K r σ T).aestronglyMeasurable
+  have hsplit : (fun x : ℝ ↦ gaussianPDFReal 0 1 x • pathwiseDeltaPayoff S K r σ T x)
+      = fun x : ℝ ↦ (Set.Ioi (-bsd2 S K r σ T)).indicator
+          (fun x' ↦ Real.exp (-r * T) *
+            (bsTerminal S r σ T x' / S * gaussianPDFReal 0 1 x')) x := by
+    funext x
+    rw [smul_eq_mul, pathwiseDeltaPayoff]
+    by_cases hx : x ∈ Set.Ioi (-bsd2 S K r σ T)
+    · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]; ring
+    · simp only [Set.indicator_of_notMem hx, mul_zero]
+  rw [show (fun ω : Ω ↦ pathwiseDeltaPayoff S K r σ T (Z ω))
+        = (fun z : ℝ ↦ pathwiseDeltaPayoff S K r σ T z) ∘ Z from rfl,
+    hZ.integral_comp hmeas,
+    integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0), hsplit,
+    integral_indicator measurableSet_Ioi,
+    setIntegral_congr_fun measurableSet_Ioi
+      (fun x (_ : x ∈ Set.Ioi (-bsd2 S K r σ T)) ↦ by
+        rw [pathwise_integrand_congr S r σ T hS x]),
+    integral_const_mul, integral_const_mul, integral_exp_mul_gaussianPDFReal_Ioi,
+    sqrtT_add_bsd2_eq_bsd1]
+  linear_combination
+    (Phi (bsd1 S K r σ T)) * delta_exp_combine r σ T hT.le
+
+/-- **The pathwise delta as a derivative under the expectation.** The discounted expected
+payoff `S ↦ e^{−rT}·𝔼[(S_T − K)⁺]` is differentiable in the spot, and its derivative at `S`
+is the pathwise estimator's mean — the differentiated payoff does not need the kink at `K`
+handled separately. -/
+theorem pathwiseDelta_deriv {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S K r σ T Z) :
+    HasDerivAt (fun S' : ℝ ↦ ∫ ω, Real.exp (-r * T) * max (bsTerminal S' r σ T (Z ω) - K) 0 ∂Q)
+      (∫ ω, pathwiseDeltaPayoff S K r σ T (Z ω) ∂Q) S := by
+  obtain ⟨hS, hK, hσ, hT, hZ⟩ := h
+  have hEq : (fun S' : ℝ ↦ ∫ ω, Real.exp (-r * T) * max (bsTerminal S' r σ T (Z ω) - K) 0 ∂Q)
+      =ᶠ[nhds S] (fun S' : ℝ ↦ bsV K r σ S' T) := by
+    filter_upwards [(eventually_gt_nhds hS)] with S' hS'
+    exact integral_discountedPayoff_eq_bsV hZ hS' hK hσ hT
+  exact (hasDerivAt_bsV_S hK hσ hS hT).congr_of_eventuallyEq hEq |>.congr_deriv
+    (pathwiseDeltaPayoff_mean ⟨hS, hK, hσ, hT, hZ⟩).symm
+
 end MathFin
