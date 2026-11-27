@@ -244,6 +244,11 @@ public import MathFin.Probability.Brownian.Ito.ItoIntegralLocalisedPredictable
 public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 -- The product rule for two Itô processes driven by one Brownian motion
 public import MathFin.Probability.Brownian.Ito.ItoProductRule
+public import MathFin.Probability.Brownian.Ito.ItoFormulaTwoFactorTaylor
+public import MathFin.Probability.Brownian.Ito.ItoFormulaTwoFactor
+public import MathFin.Probability.Brownian.Ito.ItoFormulaTwoFactorCutoff
+public import MathFin.Probability.Brownian.Ito.ItoFormulaTwoFactorLocal
+public import MathFin.Probability.Brownian.Ito.ItoFormulaTwoFactorUnbounded
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 public import MathFin.Probability.Brownian.Ito.DriftRiemannConvergence
 public import MathFin.Probability.Brownian.Ito.DriftPath
