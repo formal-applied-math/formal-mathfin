@@ -27,8 +27,10 @@ on an interval is strictly monotone there, hence injective.
 As `σ → ∞` the call price tends to the spot. So a price above the Black–Scholes
 price at some `σ₀ > 0` and below the spot has an implied volatility, above `σ₀`.
 This is the existence result `JumpImpliedVol.lean` needs. Existence for every
-price in the no-arbitrage range would also need the `σ → 0` limit, which is not
-proved.
+price in the no-arbitrage range needs in addition the `σ → 0` limit, which this
+file does not prove: it is `ImpliedVolExistence.lean`'s `tendsto_bsV_sigma_zero`,
+and with it every price in the range has an implied volatility
+(`exists_impliedVol_of_lt` there).
 
 ## Main definitions
 

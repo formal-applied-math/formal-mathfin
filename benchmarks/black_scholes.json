@@ -356,7 +356,7 @@
     {
       "id": "mf-implied-vol-exists-above-reference",
       "name": "Implied Volatility Exists Above a Reference Volatility",
-      "description": "For K, S, T > 0, any rate r and a volatility σ₀ > 0, a call price C strictly between the Black–Scholes price at σ₀ and the spot, bsV K r σ₀ S T < C < S, has an implied volatility σ > σ₀ (bsV K r σ S T = C), and every positive σ' with bsV K r σ' S T = C equals σ. The Black–Scholes price is continuous and strictly increasing in the volatility and tends to S as σ → ∞, so the intermediate value theorem applies. A volatility σ₀ with bsV(σ₀) < C is a hypothesis: existence for every price in the no-arbitrage range ((S − Ke^{−rT})⁺, S) would also need the σ → 0 limit, which is not proved.",
+      "description": "For K, S, T > 0, any rate r and a volatility σ₀ > 0, a call price C strictly between the Black–Scholes price at σ₀ and the spot, bsV K r σ₀ S T < C < S, has an implied volatility σ > σ₀ (bsV K r σ S T = C), and every positive σ' with bsV K r σ' S T = C equals σ. The Black–Scholes price is continuous and strictly increasing in the volatility and tends to S as σ → ∞, so the intermediate value theorem applies. A volatility σ₀ with bsV(σ₀) < C is a hypothesis: existence for every price in the no-arbitrage range ((S − Ke^{−rT})⁺, S) needs in addition the σ → 0 limit, which this entry does not prove — it is mf-bsV-sigma-zero-limit, and with it every price in the range has an implied volatility (mf-implied-vol-existence).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import MathFin.Models.BlackScholes.ImpliedVolatility\n\n/-- **Implied volatility above a reference volatility.** A price strictly between the\nBlack–Scholes price at `σ₀ > 0` and the spot has an implied volatility above `σ₀`, and it is the\nonly positive one. -/\ntheorem implied_vol_exists_above_reference_thm {K r T S σ₀ C : ℝ} (hK : 0 < K) (hT : 0 < T)\n    (hS : 0 < S) (hσ₀ : 0 < σ₀) (hlo : MathFin.bsV K r σ₀ S T < C) (hhi : C < S) :\n    ∃ σ, σ₀ < σ ∧ MathFin.bsV K r σ S T = C ∧\n      ∀ σ' > 0, MathFin.bsV K r σ' S T = C → σ' = σ :=\n  MathFin.exists_impliedVol_gt_of_bsV_lt hK hT hS hσ₀ hlo hhi\n"
@@ -374,7 +374,84 @@
         ],
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The limit σ → ∞ (tendsto_bsV_sigma_atTop) gives σ₁ > σ₀ with C < bsV(σ₁); the intermediate value theorem on [σ₀, σ₁] (intermediate_value_Ioo, with bsV_continuousOn_sigma) gives σ ∈ (σ₀, σ₁) with bsV(σ) = C, and strict monotonicity in σ (implied_volatility_unique) makes it the only positive solution (exists_impliedVol_gt_of_bsV_lt). The σ → 0 limit, which would remove the hypothesis on σ₀, is not proved. Lives in MathFin/Models/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The limit σ → ∞ (tendsto_bsV_sigma_atTop) gives σ₁ > σ₀ with C < bsV(σ₁); the intermediate value theorem on [σ₀, σ₁] (intermediate_value_Ioo, with bsV_continuousOn_sigma) gives σ ∈ (σ₀, σ₁) with bsV(σ) = C, and strict monotonicity in σ (implied_volatility_unique) makes it the only positive solution (exists_impliedVol_gt_of_bsV_lt). The σ → 0 limit, which would remove the hypothesis on σ₀, is not proved here; it is mf-bsV-sigma-zero-limit. Lives in MathFin/Models/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-sigma-zero-limit",
+      "name": "The Black-Scholes Price at Vanishing Volatility",
+      "description": "For S, K > 0 and T > 0, the Black-Scholes call price tends to the positive part of the discounted intrinsic value, max(S - K e^{-rT}, 0), as sigma -> 0+: above the discounted strike both Phi(d1) and Phi(d2) tend to 1, below it both tend to 0, and at equality both tend to 1/2 so the two terms cancel against the vanishing forward. Through the market statement price_europeanCall_constGirsanovMeasure the same limit holds for the price the Black-Scholes market's Girsanov measure assigns the call, which is what the snippet restates.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ImpliedVolExistence\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology\nopen scoped NNReal ENNReal Topology\n\n/-- **The Black-Scholes market's call price at vanishing volatility**: as the market's model\nvolatility `σ → 0⁺`, the Girsanov price of the European call tends to\n`max(S₀ - K e^{-rT}, 0)`, the positive part of the discounted intrinsic value. The formula\nprice has the same limit (`MathFin.tendsto_bsV_sigma_zero`). -/\ntheorem bsV_sigma_zero_limit_thm {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (S₀ m r K : ℝ) {T H : ℝ≥0} (hTH : T ≤ H)\n    (hS₀ : 0 < S₀) (hK : 0 < K) (hT : 0 < (T : ℝ)) :\n    Tendsto (fun σ : ℝ ↦ (MathFin.Contracts.BlackScholes.market μ hWmeas S₀ m r σ).price\n        (MathFin.Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (MathFin.Contracts.europeanCall K T))\n      (𝓝[>] 0) (𝓝 (max (S₀ - K * Real.exp (-(r * (T : ℝ)))) 0)) :=\n  MathFin.tendsto_marketCallPrice_sigma_zero hW hWmeas S₀ m r K hTH hS₀ hK hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility and the no-arbitrage range); Shreve, Stochastic Calculus for Finance II",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "19.10"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "4.5"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The three cases are handled separately: the forward offset log(S/K) + rT positive, negative, and zero, with d1 = (log(S/K) + (r + sigma^2/2)T)/(sigma sqrt T) and d2 = d1 - sigma sqrt T driven by its 1/sigma term. The snippet restates the market-level form (tendsto_marketCallPrice_sigma_zero); the formula-level limit is tendsto_bsV_sigma_zero in the same module. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-implied-vol-existence",
+      "name": "Implied Volatility for Every Arbitrage-Free Price",
+      "description": "For S, K, T > 0, every call price C in the open no-arbitrage range (S - K e^{-rT})^+ < C < S has an implied volatility: a unique sigma > 0 with bsV K r sigma S T = C. The function impliedVol K r S T C realizes it, positive and pricing under the range hypothesis; where no positive volatility prices to C it returns the junk 0 (impliedVol_eq_zero_iff). The sigma -> 0+ limit (mf-bsV-sigma-zero-limit) and the sigma -> infinity route remove any reference volatility. The snippet restates the market face: the Girsanov measure of the Black-Scholes market prices the call at the formula value, so the market price's implied volatility is the model's own sigma.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ImpliedVolExistence\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology Set\nopen scoped NNReal ENNReal Topology\n\n/-- **The implied volatility of the market's call price is the model's volatility.** If the\nGirsanov measure of the Black-Scholes market prices the call at `C` and `C` is in the\nno-arbitrage range, the price's implied volatility is the model's own `σ`. -/\ntheorem implied_vol_every_price_thm {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (S₀ m r σ K : ℝ) {T H : ℝ≥0} (hTH : T ≤ H)\n    (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < (T : ℝ)) {C : ℝ}\n    (hCprice : (MathFin.Contracts.BlackScholes.market μ hWmeas S₀ m r σ).price\n        (MathFin.Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (MathFin.Contracts.europeanCall K T) = C)\n    (hC : C ∈ Ioo (max (S₀ - K * Real.exp (-(r * (T : ℝ)))) 0) S₀) :\n    MathFin.impliedVol K r S₀ (T : ℝ) C = σ :=\n  MathFin.impliedVol_eq_model_vol hW hWmeas S₀ m r σ K hTH hS₀ hK hσ hT hCprice hC\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Hull, Options, Futures, and Other Derivatives (implied volatility); Gatheral, The Volatility Surface",
+        "citations": [
+          {
+            "key": "Hull",
+            "locator": "19.10"
+          },
+          {
+            "key": "Gatheral2006"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The price C is assumed in the open no-arbitrage range; non-attainment at the range endpoints is not formalized (the strict lower bound bsV > (S - K e^{-rT})^+ at positive sigma is not proved here; the strict upper bound bsV < S is bsV_lt_S). Where no positive volatility both prices to C and is unique the function returns the junk 0, characterized by impliedVol_eq_zero_iff. The snippet restates the market-level corollary impliedVol_eq_model_vol, whose proof consumes impliedVol_defining_eq (existence and uniqueness on the whole range) and price_europeanCall_constGirsanovMeasure; a safeguarded Newton iteration is not formalized. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bisection-straddle",
+      "name": "The Straddle Form of Bisection, at a Black-Scholes Threshold",
+      "description": "The textbook bisection theorem: a bracket (a, b) with f a < C <= f b keeps straddling under a bisection step, and with f continuous on [a, b] the nested endpoints and the midpoint estimates converge to a root r with f r = C, the midpoints within (b - a)/2^(n+1) after n steps, no monotonicity of f assumed (bisect_tendsto_root). The threshold theorem of Bisection.lean becomes the corollary bisect_threshold_root: with continuity the limit is the threshold and f sigma = C. The snippet restates the Black-Scholes specialization (marketCallPrice_bisect_threshold_root): at a threshold volatility of the market's Girsanov price, the estimates converge to it and it prices the option.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.BlackScholes.ImpliedVolExistence\n\nopen MeasureTheory ProbabilityTheory Real Filter Topology Set\nopen scoped NNReal ENNReal Topology\n\n/-- **Bisection on the market's call price at a threshold**: at an interior threshold\nvolatility the estimates of the Girsanov price converge to it, and it prices the option. -/\ntheorem bsV_bisect_threshold_thm {Ω : Type*} [mΩ : MeasurableSpace Ω] {W : ℝ≥0 → Ω → ℝ}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] (hW : IsPreBrownianReal W μ)\n    (hWmeas : ∀ t, Measurable (W t)) (S₀ m r K : ℝ) {T H : ℝ≥0} (hTH : T ≤ H)\n    (hS₀ : 0 < S₀) (hK : 0 < K) (hT : 0 < (T : ℝ)) {σ_lo σ_hi σ C : ℝ}\n    (hσlo : 0 < σ_lo) (hloσ : σ_lo < σ) (hσhi : σ ≤ σ_hi)\n    (hC : ∀ x ∈ Icc σ_lo σ_hi, (MathFin.Contracts.BlackScholes.market μ hWmeas S₀ m r x).price\n        (MathFin.Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / x) H)\n        (MathFin.Contracts.europeanCall K T) < C ↔ x < σ) :\n    (MathFin.Contracts.BlackScholes.market μ hWmeas S₀ m r σ).price\n        (MathFin.Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / σ) H)\n        (MathFin.Contracts.europeanCall K T) = C ∧\n      Tendsto (MathFin.bisectMid (fun v : ℝ ↦ (MathFin.Contracts.BlackScholes.market μ hWmeas S₀ m r v).price\n          (MathFin.Contracts.BlackScholes.constGirsanovMeasure hW hWmeas ((m - r) / v) H)\n          (MathFin.Contracts.europeanCall K T)) C σ_lo σ_hi) atTop (𝓝 σ) :=\n  MathFin.marketCallPrice_bisect_threshold_root hW hWmeas S₀ m r K hTH hS₀ hK hT hσlo hloσ hσhi hC\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Burden and Faires, Numerical Analysis (the bisection method); Hull, Options, Futures, and Other Derivatives (implied volatility)",
+        "citations": [
+          {
+            "key": "BurdenFaires2011",
+            "locator": "2.1"
+          },
+          {
+            "key": "Hull",
+            "locator": "19.10"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The threshold hypothesis (the biconditional on the bracket) is assumed, and the bracket must lie inside the positive-volatility region (0 < sigma_lo). The generic engine is the straddle-form theorem bisect_tendsto_root of MathFin/Probability/Analysis/BisectionStraddle.lean (continuity plus an initial straddle; the threshold case bisect_threshold_root derives f sigma = C); the snippet restates the market-level specialization marketCallPrice_bisect_threshold_root, which transfers it through price_europeanCall_constGirsanovMeasure. A safeguarded Newton iteration is not formalized. Lives in MathFin/Models/BlackScholes/ImpliedVolExistence.lean. Axioms-clean."
       }
     },
     {

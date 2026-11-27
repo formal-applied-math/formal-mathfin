@@ -1732,7 +1732,8 @@ Safe wording: "for a compensated jump-diffusion whose jump part is not almost su
 any jump law, the call has a unique Black–Scholes implied volatility, and it is strictly above the
 diffusion volatility, at every strike and maturity". Not covered: how the implied volatility
 varies with the strike (the shape of the smile); the `σ → 0` limit of the Black–Scholes price,
-and with it implied-volatility existence across the whole no-arbitrage range; the put's implied
+and with it implied-volatility existence across the whole no-arbitrage range — now formalized,
+see the straddle section below (2026-11-26); the put's implied
 volatility (parity holds for the price functions, `jumpDiffusionCallPrice_eq_of_compensated`, but
 the put's implied volatility is not stated).
 
@@ -2320,7 +2321,8 @@ contains exactly one root, so the description now says that and points here
 for convergence. Its proof now consumes Mathlib's `intermediate_value_Ioo` for
 existence and uses strict monotonicity only for uniqueness; the statement is
 unchanged. The textbook bisection theorem for a merely continuous `f` with a
-sign change (convergence to *some* root) is not formalized.
+sign change (convergence to *some* root) is now formalized — see the
+straddle section below (2026-11-26).
 
 The native default `lake build` passed, including `AxiomAuditGen.lean` (now
 333 guards), and `lake lint` passed. Both bisection entries re-verified through
@@ -2349,6 +2351,58 @@ support the formal statements, not independent mathematical peer review. No `C²
 boundary regularity, classical curvature, strict log-convexity, or `q > r`
 result is claimed by these entries. The dated baseline below records the
 prior corpus audit, not a verification of this addition.
+
+### Implied volatility for every arbitrage-free price; the straddle form of bisection (2026-11-26)
+
+Three new entries carry `formalization_status: full`, closing issue #317's first
+two acceptance criteria. (1) **The `σ → 0⁺` limit** (`mf-bsV-sigma-zero-limit`,
+`MathFin/Models/BlackScholes/ImpliedVolExistence.lean`,
+`MathFin.tendsto_bsV_sigma_zero`): for `S, K, T > 0` the call price tends to
+`max(S − K·e^{−rT}, 0)` as `σ → 0⁺`, by three cases on the forward offset
+`log(S/K) + rT` — positive (both `Φ` terms tend to 1), negative (both tend to
+0), zero (both tend to `1/2`, and the price vanishes with the forward). This is
+the missing piece the module docstring of `ImpliedVolatility.lean` and the
+`mf-implied-vol-exists-above-reference` entry named as unproved; both now scope
+the sentence to themselves and point here. `BisectionIV.lean`'s
+`impliedVol_bisection_converges` already converged the estimates on a straddled
+bracket through strict monotonicity; the threshold form adds the endpoint case
+`σ = σ_hi` and the root equation at the named threshold. (2) **Existence on the whole range** (`mf-implied-vol-existence`,
+`MathFin.exists_impliedVol_of_lt`, the function `MathFin.impliedVol` with its
+defining equation `impliedVol_defining_eq` and the junk disclosure
+`impliedVol_eq_zero_iff`): every price in `((S − K·e^{−rT})⁺, S)` has a unique
+positive implied volatility. The limit supplies a volatility pricing below `C`;
+above it is the `σ → ∞` route of `exists_impliedVol_gt_of_bsV_lt`. What is not
+proved: non-attainment at the range endpoints (the strict lower bound
+`bsV > (S − K·e^{−rT})⁺` at positive `σ` is not proved here; the strict upper
+bound `bsV < S` is `bsV_lt_S`). (3) **The straddle form of bisection**
+(`mf-bisection-straddle`; generic engine in
+`MathFin/Probability/Analysis/BisectionStraddle.lean`): a step preserves the
+straddle `{I | f I.1 < C ∧ C ≤ f I.2}`, and with `f` continuous on the bracket
+the nested endpoints converge to a root `f r = C` at rate `(b − a)/2ⁿ⁺¹`, no
+monotonicity (`bisect_tendsto_root`) — the textbook theorem the 2026-09-18
+section above records as open; the threshold theorem of
+`Probability/Analysis/Bisection.lean` becomes the corollary
+`bisect_threshold_root` (continuity makes the limit an actual solution:
+`f σ = C`). The corpus entry restates the market-level specialization
+`marketCallPrice_bisect_threshold_root`, which transfers the theorem to the Girsanov price of
+the Black–Scholes market through `price_europeanCall_constGirsanovMeasure`; the other two
+entries likewise restate the market-level corollaries
+`tendsto_marketCallPrice_sigma_zero` and `impliedVol_eq_model_vol` (the implied volatility of
+the market's call price is the model's own volatility). A safeguarded Newton iteration is not formalized
+(issue #317's third task); `impliedVol_bracket_exists` is not renamed (the
+issue scopes that rename to its corpus entry's next touch, and that entry is
+not touched here).
+
+| Benchmark ID | Mathematical conclusion | Lean module and declaration | Faithfulness |
+|---|---|---|---|
+| `mf-bsV-sigma-zero-limit` | `bsV K r σ S T → max(S − K·e^{−rT}, 0)` as `σ → 0⁺` (`S, K, T > 0`) | `MathFin/Models/BlackScholes/ImpliedVolExistence.lean`, `MathFin.tendsto_bsV_sigma_zero` | `full` |
+| `mf-implied-vol-existence` | `C ∈ ((S − K·e^{−rT})⁺, S)` admits a unique positive implied volatility, realized by `impliedVol` | Same module, `MathFin.exists_impliedVol_of_lt`, `MathFin.impliedVol_defining_eq` | `full` |
+| `mf-bisection-straddle` | continuity plus an initial straddle converge bisection to a root at rate `(b−a)/2ⁿ⁺¹`; at a Black–Scholes interior threshold the limit prices the option | `MathFin/Probability/Analysis/BisectionStraddle.lean`, `MathFin.bisect_tendsto_root`; specialization in `ImpliedVolExistence.lean`, `MathFin.bsV_bisect_threshold_root` | `full` |
+
+Corpus 924 → **927** (877 → 880 full). The blueprint node
+`thm:implied-vol-existence` is delivered (frontier entry removed,
+`MathFin.exists_impliedVol_of_lt` tagged). `lake build` and `lake lint` pass;
+the ledger rows come from the hosted sweep on the branch.
 
 > **Live status (2026-09-18):** corpus
 > **373**, **342 full + 18 wrappers = 360/373 delivery-ready**, 13 reduced cores, 0 placeholders.

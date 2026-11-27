@@ -138,6 +138,7 @@ graph TD
   girsanovBrownianCharacterisation["Girsanov's theorem"]:::proved
   hansenJagannathanBound["The Hansen–Jagannathan bound"]:::proved
   hestonPde["The explicit Heston transform solves the pricing equation"]:::proved
+  impliedVolExistence["Implied volatility for every arbitrage-free price"]:::proved
   intensityDefaultModel["Intensity model of default"]:::proved
   jumpDiffusionIncompleteness["Incompleteness of jump-diffusion markets"]:::proved
   jumpDiffusionMixing["Merton's jump-diffusion formula"]:::proved
@@ -397,7 +398,6 @@ graph TD
   subgraph frontier_valuationSmile["⏳ frontier · Valuation · The smile"]
     sabrModel["The SABR model"]:::frontier
     carrLeeMoment["Carr–Lee moment formula"]:::frontier
-    impliedVolExistence["Implied volatility for every arbitrage-free price"]:::frontier
     sabrRightTailCorrection["SABR right tail: the k^{3/2} correction"]:::frontier
   end
   subgraph frontier_valuationTerm["⏳ frontier · Valuation · Interest rates"]
@@ -472,6 +472,7 @@ graph TD
   brownianMotion --> girsanovBrownianCharacterisation
   sharpeRatio --> hansenJagannathanBound
   hestonTransform --> hestonPde
+  standardNormalCdf --> impliedVolExistence
   hazardSurvival --> intensityDefaultModel
   compoundPoissonMgf --> jumpDiffusionIncompleteness
   standardNormalCdf --> jumpDiffusionMixing
@@ -992,8 +993,6 @@ graph TD
   hjmModel --> hjmLogBondDynamics
   hjmDriftCondition --> hjmMusiela
   hjmDriftCondition --> hjmShortRate
-  bsCall --> impliedVolExistence
-  bsDelta --> impliedVolExistence
   itoFormulaC2 --> itoFormula2d
   itoProductRule --> itoFormula2d
   itoIntegralClm --> itoIntegralHorizonFree
@@ -1180,6 +1179,7 @@ graph TD
 | `thm:girsanov-brownian-characterisation` Girsanov's theorem | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Agirsanov-brownian-characterisation%22%20in%3Abody) |
 | `thm:hansen-jagannathan-bound` The Hansen–Jagannathan bound | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahansen-jagannathan-bound%22%20in%3Abody) |
 | `thm:heston-pde` The explicit Heston transform solves the pricing equation | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aheston-pde%22%20in%3Abody) |
+| `thm:implied-vol-existence` Implied volatility for every arbitrage-free price | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aimplied-vol-existence%22%20in%3Abody) |
 | `thm:intensity-default-model` Intensity model of default | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aintensity-default-model%22%20in%3Abody) |
 | `thm:jump-diffusion-incompleteness` Incompleteness of jump-diffusion markets | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-incompleteness%22%20in%3Abody) |
 | `thm:jump-diffusion-mixing` Merton's jump-diffusion formula | ✅ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ajump-diffusion-mixing%22%20in%3Abody) |
@@ -1347,7 +1347,6 @@ graph TD
 | `thm:hjm-log-bond-dynamics` HJM log-bond dynamics | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-log-bond-dynamics%22%20in%3Abody) |
 | `thm:hjm-musiela` HJM Musiela parametrization | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-musiela%22%20in%3Abody) |
 | `thm:hjm-short-rate` HJM induces a short-rate model | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Ahjm-short-rate%22%20in%3Abody) |
-| `thm:implied-vol-existence` Implied volatility for every arbitrage-free price | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aimplied-vol-existence%22%20in%3Abody) |
 | `thm:ito-formula-2d` Two-process Itô formula | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-formula-2d%22%20in%3Abody) |
 | `thm:ito-integral-horizon-free` The Itô integral of a continuous integrand on every horizon at once | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-integral-horizon-free%22%20in%3Abody) |
 | `thm:ito-integral-martingale` General-integrand Itô process is a martingale | ⏳ | [issues](https://github.com/formal-applied-math/formal-mathfin/issues?q=%22thm%3Aito-integral-martingale%22%20in%3Abody) |
