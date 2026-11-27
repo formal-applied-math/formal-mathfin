@@ -86,7 +86,7 @@ risk-neutral lognormal hypothesis:
 * `bsTerminal_gt_K_iff`: for positive `S_0, K, σ, T`, `S_T(z) > K ↔ z > −d₂`.
 * `integrable_bsTerminal`, `integrable_bsCall_payoff`, `integrable_bsPut_payoff`: the terminal
   price and the discounted call and put payoffs are integrable when `Z` has the standard normal
-  law.
+  law. `memLp_two_bsTerminal`: the terminal price is square-integrable.
 
 ## References
 
@@ -150,6 +150,33 @@ theorem integrable_bsTerminal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measu
   refine Integrable.comp_aemeasurable (g := bsTerminal S_0 r σ T) ?_ hZ.aemeasurable
   rw [hZ.map_eq]
   exact integrable_bsTerminal_gaussianReal S_0 r σ T
+
+/-- The Black–Scholes terminal price driven by a standard normal is square-integrable: its square is
+a constant times `exp(2σ√T · z)`, integrable against the standard normal law by Mathlib's
+`integrable_exp_mul_gaussianReal`. It is what puts the call payoff, which the terminal price
+dominates, in `L²`. -/
+theorem memLp_two_bsTerminal {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : Measure Ω} {Z : Ω → ℝ}
+    (hZ : HasLaw Z (gaussianReal 0 1) Q) (S_0 r σ T : ℝ) :
+    MemLp (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) 2 Q := by
+  have hcont : Continuous (bsTerminal S_0 r σ T) := by
+    show Continuous fun z ↦ S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+    fun_prop
+  have hm : AEStronglyMeasurable (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) Q :=
+    (hcont.comp_aemeasurable hZ.aemeasurable).aestronglyMeasurable
+  refine (memLp_two_iff_integrable_sq hm).2 ?_
+  show Integrable (fun ω ↦ bsTerminal S_0 r σ T (Z ω) ^ 2) Q
+  have hsq : (fun z ↦ bsTerminal S_0 r σ T z ^ 2) = fun z ↦
+      S_0 ^ 2 * Real.exp (2 * ((r - σ ^ 2 / 2) * T)) * Real.exp (2 * σ * Real.sqrt T * z) :=
+    funext fun z ↦ by
+      have h2 : ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+          + ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+          = 2 * ((r - σ ^ 2 / 2) * T) + 2 * σ * Real.sqrt T * z := by ring
+      rw [bsTerminal, mul_pow, sq (Real.exp _), ← Real.exp_add, h2, Real.exp_add]
+      ring
+  refine Integrable.comp_aemeasurable (g := fun z ↦ bsTerminal S_0 r σ T z ^ 2) ?_
+    hZ.aemeasurable
+  rw [hZ.map_eq, hsq]
+  exact (integrable_exp_mul_gaussianReal _).const_mul _
 
 /-- The discounted Black–Scholes call payoff driven by a standard normal is integrable: it is the
 positive part of an integrable function. -/
