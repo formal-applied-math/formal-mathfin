@@ -113,6 +113,15 @@ lemma integral_pow4_gaussianReal (v : ℝ≥0) :
   push_cast
   ring
 
+/-- A centered real Gaussian has an integrable fourth power. -/
+lemma integrable_pow4_gaussianReal (v : ℝ≥0) :
+    Integrable (fun x : ℝ ↦ x ^ 4) (gaussianReal 0 v) := by
+  have h := (memLp_id_gaussianReal (μ := 0) (v := v) 4).integrable_norm_pow (p := 4) (by norm_num)
+  simp only [id_eq, Real.norm_eq_abs] at h
+  have hfe : (fun x : ℝ ↦ |x| ^ 4) = fun x : ℝ ↦ x ^ 4 :=
+    funext fun x ↦ by rw [pow_abs, abs_of_nonneg (by positivity)]
+  rwa [hfe] at h
+
 /-- Sixth moment of a centered real Gaussian: `∫ x, x⁶ ∂(gaussianReal 0 v) = 15 v³`
 (`E[X⁶] = 15·Var³`). It controls the `L²` size of the Itô–Taylor remainder
 (`E[(ΔB)⁶] = 15(Δt)³`, so `‖|ΔB|³‖_{L²} = √15·(Δt)^{3/2}` sums to `O(n^{-1/2})`).
@@ -141,12 +150,7 @@ lemma integral_sq_sub_var_sq_gaussianReal (v : ℝ≥0) :
     ∫ x, (x ^ 2 - (v : ℝ)) ^ 2 ∂(gaussianReal 0 v) = 2 * (v : ℝ) ^ 2 := by
   have hint2 : Integrable (fun x : ℝ ↦ x ^ 2) (gaussianReal 0 v) :=
     (memLp_id_gaussianReal (μ := 0) (v := v) 2).integrable_sq
-  have hint4 : Integrable (fun x : ℝ ↦ x ^ 4) (gaussianReal 0 v) := by
-    have h := (memLp_id_gaussianReal (μ := 0) (v := v) 4).integrable_norm_pow (p := 4) (by norm_num)
-    simp only [id_eq, Real.norm_eq_abs] at h
-    have hfe : (fun x : ℝ ↦ |x| ^ 4) = fun x : ℝ ↦ x ^ 4 :=
-      funext fun x ↦ by rw [pow_abs, abs_of_nonneg (by positivity)]
-    rwa [hfe] at h
+  have hint4 := integrable_pow4_gaussianReal v
   have hcm2 : Integrable (fun x : ℝ ↦ 2 * (v : ℝ) * x ^ 2) (gaussianReal 0 v) :=
     hint2.const_mul (2 * (v : ℝ))
   have hdiff : Integrable (fun a : ℝ ↦ a ^ 4 - 2 * (v : ℝ) * a ^ 2) (gaussianReal 0 v) :=

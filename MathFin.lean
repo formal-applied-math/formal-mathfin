@@ -28,6 +28,8 @@ public import MathFin.Probability.Discrete.SnellDoobDecomposition
 public import MathFin.Probability.Discrete.SnellEnvelope
 public import MathFin.Probability.Discrete.L2MartingaleConvergence
 public import MathFin.Probability.Brownian.BrownianMarkov
+public import MathFin.Probability.Brownian.NowhereDifferentiable
+public import MathFin.Probability.Brownian.ReflectionPrinciple
 -- Markov-chain path law derived from the pin's Ionescu–Tulcea trajectory
 -- kernels (Saporito 1.1.2)
 public import MathFin.Probability.Discrete.MarkovPathMeasure
@@ -65,6 +67,7 @@ public import MathFin.Probability.Jumps.PoissonCompensatedIntegralOperator
 -- QV of an Itô process: drift contributes nothing (Saporito 7.4.5)
 public import MathFin.Probability.Brownian.Ito.ItoProcessQV
 public import MathFin.Probability.Gaussian.GaussianMoments
+public import MathFin.Probability.Gaussian.GaussianSmallBall
 public import MathFin.Probability.Gaussian.BivariateGaussian
 public import MathFin.Probability.Gaussian.BivariateNormalCDF
 public import MathFin.Probability.Gaussian.GaussianCDFDeriv
