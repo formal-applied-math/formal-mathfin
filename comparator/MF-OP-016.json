@@ -1,0 +1,13 @@
+{
+  "challenge_module": "MathFinFrontier.OpenProblems.CompleteMixability",
+  "solution_module": "Catedra.MF_OP_016.Solution",
+  "theorem_names": [
+    "MathFinFrontier.uniform_convex_completelyMixable"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}

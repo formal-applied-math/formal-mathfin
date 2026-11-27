@@ -82,7 +82,10 @@ open a linked `type:proof` issue.
 
 A solution to a stated problem is a proof of the `MathFinFrontier` theorem. It moves into
 `MathFin/`, is tagged in `MathFin/Blueprint.lean` under the frontier label, and the frontier
-entry and the `MathFinFrontier` statement are deleted. The record then becomes `solved` with its
+entry is deleted. The pinned statement moves unchanged to `Catedra/<ID>/Challenge.lean`, beside
+`Catedra/<ID>/Solution.lean`, which restates it and proves it from the `MathFin` theorem:
+`lake comparator` (`comparator/<ID>.json`, `.github/workflows/comparator.yml`) checks that the two
+state the same theorem, every month as well as at delivery. The record then becomes `solved` with its
 Lean declarations listed, its `history` gains the date and reason, and the record is never
 removed. A solution that arrives as a paper without a Lean proof is recorded as
 `resolution_reported` until it is checked. IDs are permanent. The record and its issue are
@@ -144,6 +147,12 @@ first batch.
   catalogued. A blocked problem stays, and its `needs` are what the library builds next:
   `python3 -m tools.verify.research_problems needs` ranks them, and
   `tests/test_research_problems.py` keeps the links real.
+- The cátedra's fields (`docs/specs/2026-11-20-catedra-design.md`, `tools/verify/catedra.py`):
+  `formalization.lean_statement.pinned` is the merge that pinned a statement (`commit`, `pr`) and
+  `statement_sha256`, the hash of its text, so a statement changes only through a pull request
+  that says why and updates the hash; `review.referee` is the Referee's verdict on faithfulness
+  (`verdict`, `date`, `comment`); `attempts` counts each chair's runs. Every stated problem has a
+  comparator config `comparator/<ID>.json`. `python3 -m tools.verify.catedra check` holds them.
 - `issue_number` and `issue_url` connect records to GitHub. This table is a summary of the JSON.
 
 The organization draws on [Ulam AI's UnsolvedMath](https://huggingface.co/datasets/ulamai/UnsolvedMath):

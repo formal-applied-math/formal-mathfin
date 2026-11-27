@@ -1,0 +1,12 @@
+# The lean-repl daemon shared by several agents (the cátedra's chairs, forked sub-agents).
+# One daemon is still the one Lean process on this box; this override only keeps it alive
+# under load: a 6g cap was OOM-killed by six agents' requests (2026-09-29), and nothing
+# restarted it. Use it with scripts/lean-check-shared.sh, never with a second daemon.
+#
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.shared.yml \
+#       up -d --force-recreate lean-repl
+services:
+  lean-repl:
+    mem_limit: 10g
+    memswap_limit: 14g
+    restart: unless-stopped
