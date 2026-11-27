@@ -2005,6 +2005,134 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. europeanCall_selfFinancing in MathFin/Models/BlackScholes/BlackScholesSelfFinancing.lean applies the product rule with the finite-variation factor e^{rt} to the discounted value, which is the Ito process localItoProcess of the delta-hedge integrand (capped in time by timeCap so that its paths are continuous): Ito's formula for f(t, x) = e^{rt} x (ito_formula_adapted_unbounded_process) gives V_t = V_0 + int r V ds + int e^{rs} H_s dB with H the discounted integrand, and r V = Delta r S + r psi splits the drift; the contract value comes from mf-bs-call-contract-value-pathassets and the replication theorem of mf-bs-delta-hedge-replication. SCOPE: an integral identity only. There is no trading-strategy structure and no admissibility or self-financing predicate; the gain int Delta dS is not an integral against the semimartingale S, it is spelled as int Delta r S ds + int Delta sigma S dB, with the Brownian integral predItoIntegral against B at horizon T'. The identity is on [0, T'] with T' < T. Not a legal instrument. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-contract-static-hedge-pathwise",
+      "name": "A Piecewise-Linear Payoff Equals Its Compiled Static Hedge Along Every Path",
+      "description": "For a payoff e of the single terminal observation obs () T built from constants, obs, add, sub, max, min and products with a constant (Payoff.IsPiecewiseLinear), the contract compiled by Payoff.staticHedge (a zero-coupon bond amount, a forward amount and finitely many European calls with weights) has the same pathPV as Contract.pay T e along every scenario with nonnegative terminal observation, for every discount function D. The compiler is an explicit recursion on the payoff, with a positive-part operation that sorts the kinks and inserts the zero crossings; its call list is not reduced (zero weights and repeated strikes can occur).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.StaticHedge\n\nopen scoped NNReal\nopen MathFin.Contracts\n\n/-- A piecewise-linear payoff of the terminal observation has the present value of its compiled\nstatic hedge (a bond, a forward and calls) along every scenario with nonnegative terminal\nobservation, for every discount function. -/\ntheorem staticHedge_pathPV {T : ℝ≥0} {e : Payoff Unit} (h : e.IsPiecewiseLinear T)\n    (D : ℝ≥0 → ℝ) (s : Scenario Unit) (hs : 0 ≤ s () T) :\n    ((e.staticHedge T).contract T).pathPV D s = (Contract.pay T e).pathPV D s :=\n  h.pathPV_staticHedge D s hs\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Static replication of piecewise-linear payoffs by calls (Carr and Madan 1998). Contract-reification framing after P. Bilokon, The Contract Is Not the Model (2026); no code copied.",
+        "citations": [
+          {
+            "key": "CarrMadan1998"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Correctness of the explicit compiler Payoff.staticHedge in MathFin/Contracts/StaticHedge.lean, by induction on the fragment, each case using the evaluation lemma of the matching portfolio operation (StaticHedge.add/sub/smul/sup/inf, with StaticHedge.posPart proved correct on S >= 0 by induction on the sorted kinks). The compiled call list is not reduced and is not claimed minimal or unique; amounts are real numbers, noncomputable in the Lean sense, but no choice principle is used. Single terminal observation of one underlying; outside the fragment the compiler returns the empty portfolio and nothing is claimed. Holds on nonnegative terminal observation only. No model is involved. Not a legal instrument."
+      }
+    },
+    {
+      "id": "mf-market-piecewise-linear-smile",
+      "name": "A Piecewise-Linear Payoff Is Priced by the Normalised Call Price Function",
+      "description": "In a market with unit numeraire, a positive asset at T, and a pricing measure Q up to T, with forward F the price of the claim delivering the asset at T, there is a normalised call price function c (IsNormalizedCallPrice) such that for every piecewise-linear payoff e of the terminal asset the price of pay T e is a + b F + F Σ_j w_j c(K_j / F), where a is the bond amount, b the forward amount and (K_j, w_j) the calls of the compiled static hedge (Payoff.staticHedge). The function c is the market's k ↦ price(europeanCall (k F) T)/F. Nothing is claimed about the hedge being unique or cheapest, or for payoffs outside the fragment.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.StaticHedgeMarket\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Under a pricing measure, with unit numeraire and a positive asset, a piecewise-linear payoff is\npriced by a bond, a forward and a normalised call price function. -/\ntheorem price_pay_smile {M : Market Unit Ω} {T : ℝ≥0} {Q : Measure Ω} {e : Payoff Unit}\n    (hQ : M.IsPricingMeasure T Q) (hN : ∀ t ω, M.numeraire t ω = 1)\n    (hpos : ∀ ω, 0 < M.asset () T ω) {F : ℝ}\n    (hF : F = M.price Q (.pay T (.obs () T))) (h : e.IsPiecewiseLinear T) :\n    ∃ c : ℝ → ℝ, IsNormalizedCallPrice c ∧\n      M.price Q (.pay T e) = (e.staticHedge T).bondAmount + (e.staticHedge T).forwardAmount * F\n        + F * ((e.staticHedge T).calls.map fun p ↦ p.2 * c (p.1 / F)).sum :=\n  hQ.exists_isNormalizedCallPrice_price_pay hN hpos hF h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Model-free pricing from the call price function (Carr and Madan 1998; Roper 2010, Theorem 2.1). Contract-reification framing after P. Bilokon (2026); no code copied.",
+        "citations": [
+          {
+            "key": "CarrMadan1998"
+          },
+          {
+            "key": "Roper2010",
+            "locator": "Theorem 2.1"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Market.IsPricingMeasure.exists_isNormalizedCallPrice_price_pay in MathFin/Models/ModelFree/StaticHedgeMarket.lean, from the every-model value equality of MathFin/Pricing/StaticHedge.lean, the linear decomposition of the value of a portfolio under integrability of the discounted asset (supplied by the pricing measure), and the forward direction of Roper's Theorem 2.1 (IsPricingMeasure.isNormalizedCallPrice). Single underlying, single date T, unit numeraire; the hedge is the explicit compiler's output and its call list is not reduced."
+      }
+    },
+    {
+      "id": "mf-contract-autocall-terminates",
+      "name": "Autocallable Note Terminates at the First Autocall Date",
+      "description": "For the discretely observed autocallable note built from the payoff language (survival indicators, a redemption 1+(k+1)c, a protection barrier P at maturity), along any scenario in which the k-th observation is the first at or above the autocall barrier B, every cash flow of the contract is zero except the redemption 1+(k+1)c at t_k. One underlying, discrete observation; no calendar, issuer credit or coupon memory beyond the (k+1)c accrual.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Contracts.Instruments.Autocall\n\nopen scoped NNReal\nopen MathFin.Contracts\n\ntheorem autocall_terminates {ι : Type*} {s : Scenario ι} {i : ι} {t : ℕ → ℝ≥0} {n k : ℕ}\n    {B c S₀ P : ℝ} {T : ℝ≥0} (hk : s.FirstAbove i t B k) (hkn : k < n) :\n    (autocallUnit i t n B c S₀ P T).cashflows s\n      = (List.range n).map (fun j ↦ (t j, if j = k then 1 + ((k : ℝ) + 1) * c else 0))\n        ++ [(T, 0)] :=\n  cashflows_autocallUnit_of_firstAbove hk hkn\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Autocallable notes (Bouzoubaa and Osseiran, Exotic Options and Hybrids). Contract-reification framing after P. Bilokon (2026); no code copied.",
+        "citations": [
+          {
+            "key": "BouzoubaaOsseiran2010"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof of what the contract defined in MathFin/Contracts/Instruments/Autocall.lean pays along a scenario. The note uses the existing constructors only: a payFlows schedule of survival × redemption × indicator payoffs plus one pay at maturity. Termination is pathwise: the contract lists a payment at every date and all amounts but one are 0. Discrete observation at dates t_0..t_{n-1}, one underlying, notional 1 (autocall scales by N), coupon (k+1)c paid only on redemption. No calendar, business-day convention, market disruption, issuer credit, or path-dependent schedule; not a legal instrument."
+      }
+    },
+    {
+      "id": "mf-contract-autocall-firstpassage-value",
+      "name": "Autocallable Note Value as a Sum of First-Passage Values",
+      "description": "In any model with deflator D and measure Q, if the deflated first-passage indicators D(t_j)·1{j is the first date with S ≥ B} and the deflated maturity payment are integrable, the value of the autocallable note per unit notional is the sum over j<n of (1+(j+1)c) times the value of the deflated first-passage indicator at j, plus the value of the deflated protected maturity redemption on the event that no date reached B. Model-free; integrability is a hypothesis.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Pricing.AutocallValue\n\nopen MeasureTheory\nopen scoped NNReal\nopen MathFin.Contracts\n\ntheorem autocall_value_first_passage {ι Ω : Type*} {mΩ : MeasurableSpace Ω} (Q : Measure Ω)\n    (D : ℝ≥0 → Ω → ℝ) (X : ι → ℝ≥0 → Ω → ℝ) (i : ι) (t : ℕ → ℝ≥0) (n : ℕ) (B c S₀ P : ℝ)\n    (T : ℝ≥0)\n    (hfp : ∀ j < n, Integrable (fun ω ↦\n      D (t j) ω * (if (scenarioAt X ω).FirstAbove i t B j then 1 else 0)) Q)\n    (hmat : Integrable (fun ω ↦ D T ω * (if ∀ j < n, scenarioAt X ω i (t j) < B then\n      (if P ≤ scenarioAt X ω i T then 1 else S₀⁻¹ * scenarioAt X ω i T) else 0)) Q) :\n    (autocallUnit i t n B c S₀ P T).value Q D X\n      = ∑ j ∈ Finset.range n, (1 + ((j : ℝ) + 1) * c) *\n          ∫ ω, D (t j) ω * (if (scenarioAt X ω).FirstAbove i t B j then 1 else 0) ∂Q\n        + ∫ ω, D T ω * (if ∀ j < n, scenarioAt X ω i (t j) < B then\n            (if P ≤ scenarioAt X ω i T then 1 else S₀⁻¹ * scenarioAt X ω i T) else 0) ∂Q :=\n  value_autocallUnit Q D X i t n B c S₀ P T hfp hmat\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Autocallable notes (Bouzoubaa and Osseiran, Exotic Options and Hybrids). Contract-reification framing after P. Bilokon (2026); no code copied.",
+        "citations": [
+          {
+            "key": "BouzoubaaOsseiran2010"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof, in any model X, deflator D and measure Q, through Contract.value, of the first-passage decomposition of the autocallable note of MathFin/Contracts/Instruments/Autocall.lean (linearity of the integral and pathPV_autocallUnit). Integrability of the first-passage and maturity terms is a hypothesis, not derived. No model dynamics, so no closed form. Discrete observation, one underlying; no calendar, issuer credit or coupon memory beyond the (k+1)c accrual."
+      }
+    },
+    {
+      "id": "mf-contract-hedge-in-brownian-price",
+      "name": "A Contract's Value is the Initial Capital of Its Hedge in a Brownian Price",
+      "description": "In the Brownian market with discounted price S = S0 + (σ·B), σ nonzero a.e., a contract that pays at fixed dates, observes and pays only at dates ≤ T on a Brownian-adapted model and deflator, and whose discounted cash flows pathPV are square-integrable, has pathPV = Contract.value + ∫_0^T ψ dS almost surely for a unique holding ψ in the price. The wealth is stated in discounted units. The price is any nonzero L2 volatility S = S0 + (σ·B), not the contract's own underlying.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Pricing.ContractHedge\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.Contracts MathFin.ItoIntegralCLM MathFin.ItoIntegralAgainstMartingale MathFin.ItoIntegralL2\n\nvariable {ι Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n  {B : ℝ≥0 → Ω → ℝ}\n\n/-- The discounted cash flows of a fixed-dated contract are its value plus the gains of a unique\nholding in a Brownian price. -/\ntheorem contract_hedge_in_price' (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0)\n    (σ : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas))\n    (hσ : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), (σ : ℝ≥0 × Ω → ℝ) z ≠ 0)\n    {c : Contract ι} (hc : c.FixedDated) {D : ℝ≥0 → Ω → ℝ} {X : ι → ℝ≥0 → Ω → ℝ}\n    (hD : ∀ t, Measurable[natFiltration hBmeas t] (D t))\n    (hX : ∀ i t, Measurable[natFiltration hBmeas t] (X i t))\n    (hobs : ∀ p ∈ c.obsList, p.2 ≤ T) (hdates : ∀ t ∈ c.dates, t ≤ T)\n    (hL2 : MemLp (fun ω ↦ c.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) 2 μ) :\n    ∃! ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas σ),\n      (fun ω ↦ c.pathPV (fun t ↦ D t ω) (scenarioAt X ω)) =ᵐ[μ]\n        fun ω ↦ c.value μ D X + (itoIntegralAgainstCLM hB T hBmeas σ ψ : Ω → ℝ) ω :=\n  Contract.exists_unique_hedge_in_price hB hBmeas hBcont T σ hσ hc hD hX hobs hdates hL2\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Martingale representation and replication (Karatzas and Shreve, Brownian Motion and Stochastic Calculus; Shreve, Stochastic Calculus for Finance II, §5.4). Contract-reification framing after P. Bilokon (2026); no code copied.",
+        "citations": [
+          {
+            "key": "KaratzasShreve1991"
+          },
+          {
+            "key": "ShreveSCFII",
+            "locator": "§5.4"
+          },
+          {
+            "key": "Bilokon2026"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written. Contract.exists_unique_hedge_in_price in MathFin/Pricing/ContractHedge.lean consumes MarketCompletenessInPrice.exists_replicating_strategy_in_price: the claim is the contract's deflated present value pathPV, known at T by Contract.measurable_pathPV_of_le (Contracts/Adapted.lean), and the initial wealth E[pathPV] is Contract.value by definition. Scope: square-integrability of the cash flows is a hypothesis (discharged for bounded models by exists_bound_pathPV); the wealth is in discounted units, cash paid before T being read as held in the numeraire and not modelled as a strategy; the price S0 + (σ·B) is any a.e.-nonzero L2 volatility and is not identified with the contract's own underlying (for the Black–Scholes stock see mf-bs-european-call-hedge-in-stock); payAtHit contracts are excluded. Not a legal instrument."
+      }
     }
   ]
 }

@@ -12,9 +12,9 @@ hypothesis is stated and every step is checked by Lean's kernel. It covers stoch
 no-arbitrage theory, derivative pricing, fixed income, portfolio choice, risk measures and
 actuarial mathematics.
 
-The [corpus](docs/glossary.md#corpus) records 924 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 877 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 29 are
+The [corpus](docs/glossary.md#corpus) records 933 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 887 are proved in
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 28 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after,
 and say so. The library contains no `sorry`, and a build-time audit checks that every library
 theorem the corpus cites depends only on the axioms `propext`, `Classical.choice` and
@@ -42,14 +42,19 @@ shows it holds whenever $`|r|\sqrt{T} < \sigma`$.
 The [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) prints
 each of these exactly as Lean states it, with what it does not prove beside it.
 
-- **Stochastic calculus.** Itô's formula for f(t, B_t) with no growth condition, and for Itô
-  processes with continuous adapted coefficients; Lévy's characterization; Girsanov's theorem for
+- **Stochastic calculus.** Itô's formula for f(t, B_t) with no growth condition, and for one or
+  two Itô processes on one Brownian motion with continuous adapted coefficients; Lévy's characterization; Girsanov's theorem for
   bounded θ; martingale representation; for Lipschitz coefficients, a unique fixed point of the
   SDE's Picard map.
 - **No arbitrage.** The fundamental theorems of asset pricing on a finite space, and for one real
   asset on any probability space (Dalang–Morton–Willinger).
 - **Black–Scholes.** The PDE from Feynman–Kac, the delta hedge, and the call value as the value of
   a contract.
+- **Contracts.** A payoff language separate from any model. A compiler sends every piecewise-linear
+  payoff of the terminal price to a bond, a forward and calls, proved to pay the same on every
+  path, so any market prices it from its smile. In Black–Scholes, every contract paying at fixed
+  dates with square-integrable cash flows is replicated by a unique holding in the stock, at a cost
+  equal to its value. The autocallable note is written in the language and proved to redeem once.
 - **Trees and the limit.** Cox–Ross–Rubinstein converges to Black–Scholes.
 - **The smile.** An exact polynomial-sign certificate for butterfly-free raw SVI; calendar
   arbitrage as monotone total variance; Dupire's equation in the sense of distributions, with no
@@ -58,21 +63,25 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   question settled here by Robert Martin's proof.
 - **Jumps and rates.** Merton's jump-diffusion price derived from the model; Vasicek and
   Hull–White bonds, Jamshidian's bond options, swaptions under the annuity measure.
-- **Risk.** On a finite state space, a coherent risk measure is the supremum of expected losses
-  over a set of probability vectors.
+- **Risk, insurance and choice.** On a finite state space, a coherent risk measure is the supremum
+  of expected losses over a set of probability vectors. Lundberg's bound on the probability of
+  ruin of a random-walk surplus. The von Neumann–Morgenstern theorem on finitely many outcomes.
+- **Markov chains.** The strong Markov property and the recurrence criterion on a countable state
+  space; on a finite one, the unique stationary distribution and convergence to it.
 
 ## How it is kept honest
 
 - **Every entry has a status**, and only `full` and `library_wrapper` entries may be cited as the
   named theorem. Each entry also publishes, beside its description, what it leaves out.
-- **Reduced cores.** Twenty-nine of the results prove less than the theorem they are named after.
-  Eleven assume a structure whose fields include the textbook conclusion, six rest on a named
-  hypothesis that is not proved, and twelve prove a special case. Each is listed in
+- **Reduced cores.** Twenty-eight of the results prove less than the theorem they are named after.
+  Six assume a structure whose fields include the textbook conclusion, seven rest on a named
+  hypothesis that is not proved, and fifteen prove a special case. Each is listed in
   [`docs/coverage.md`](docs/coverage.md).
 - **Known gaps.** Girsanov is proved for bounded θ only, and Novikov's condition is not. In the
   Brownian market only completeness ⇒ uniqueness of the pricing measure is proved, and the hedge
-  is not identified (Clark–Ocone, [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
-  A multi-dimensional Itô formula is not yet in the library.
+  in the stock is not identified with the delta (Clark–Ocone, [#182](https://github.com/formal-applied-math/formal-mathfin/issues/182)).
+  Itô's formula in two dimensions is proved for processes driven by one Brownian motion; there is
+  no multi-dimensional Brownian motion yet.
 - **Prose against statement.** The failure this library has actually met is prose that claims
   more than its Lean proves, while the build stays green. [`docs/faithfulness.md`](docs/faithfulness.md)
   records the 107 times it happened and what now catches it.

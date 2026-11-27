@@ -511,6 +511,48 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written: chainComplete_eq_of_chainCompleteRat?_eq_some, chainPrediction_eq_of_chainCompleteRat?_eq_some and cast_chainCompleteRat?_some in MathFin/Insurance/ChainLadder.lean (the evaluator contributed in #524). A worked reserve computed by evaluation and certified in ℝ is MathFinExamples/Applications/ChainLadderReserve.lean."
       }
+    },
+    {
+      "id": "mf-lundberg-inequality-random-walk",
+      "name": "Lundberg's Inequality for a Random-Walk Surplus",
+      "description": "For a surplus U_n = u + Σ_{k<n} Y_k with i.i.d. measurable increments Y_k and a real R > 0 with E[exp(−R·Y_0)] = 1, the probability that U_n < 0 for some n is at most exp(−R·u). It holds for every real u and uses no assumption on E[Y_0]; the adjustment coefficient R is a hypothesis, not constructed. This is the discrete-time (random-walk) statement, not the continuous-time Cramér–Lundberg ruin probability.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Insurance.Lundberg\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem lundberg_inequality_random_walk {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {Y : ℕ → Ω → ℝ} {R : ℝ} (u : ℝ) (hY : ∀ k, Measurable (Y k))\n    (hindep : iIndepFun Y P) (hident : ∀ k, IdentDistrib (Y k) (Y 0) P P) (hR : 0 < R)\n    (hadj : mgf (Y 0) P (-R) = 1) :\n    P {ω | ∃ n, u + ∑ k ∈ Finset.range n, Y k ω < 0} ≤ ENNReal.ofReal (Real.exp (-R * u)) :=\n  lundberg_inequality u hY hindep hident hR hadj\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Lundberg's inequality (Asmussen and Albrecher, Ruin Probabilities)",
+        "citations": [
+          {
+            "key": "AsmussenAlbrecher2010"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the statement as written, in MathFin/Insurance/Lundberg.lean: the exponential e^{−R U_n} is a martingale for the increment filtration (martingale_exp_sub_of_indep_increments), Doob's maximal inequality bounds the probability of reaching 1, and ruin is the increasing union of the bounded events. Discrete time only; the adjustment coefficient is assumed, not constructed, and E[Y_0] > 0 is not used."
+      }
+    },
+    {
+      "id": "mf-cramer-lundberg-embedded-ruin-bound",
+      "name": "Lundberg Bound for the Cramér–Lundberg Embedded Walk",
+      "description": "For waiting times T_k and claims X_k whose gaps c·T_k − X_k are i.i.d., with T_0 independent of X_0, E[exp(−R·c·T_0)] = λ/(λ + R·c) (the Exp(λ) Laplace transform, assumed) and R > 0 solving λ(E[exp(R·X_0)] − 1) − c·R = 0, the probability that the surplus u + Σ_{k<n}(c·T_k − X_k) after some claim is negative is at most exp(−R·u). It concerns the embedded random walk at claim instants; no Poisson process is constructed and the link to continuous-time ruin is not formalised.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Insurance.CramerLundberg\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem cramer_lundberg_embedded_ruin {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    [IsProbabilityMeasure P] {T X : ℕ → Ω → ℝ} {lam c R : ℝ} (u : ℝ) (hlam : 0 < lam)\n    (hc : 0 < c) (hR : 0 < R) (hTm : ∀ k, Measurable (T k)) (hXm : ∀ k, Measurable (X k))\n    (hindep : iIndepFun (fun k ω ↦ c * T k ω - X k ω) P)\n    (hident : ∀ k, IdentDistrib (fun ω ↦ c * T k ω - X k ω) (fun ω ↦ c * T 0 ω - X 0 ω) P P)\n    (hpair : IndepFun (T 0) (X 0) P) (hT : mgf (T 0) P (-(R * c)) = lam / (lam + R * c))\n    (hadj : IsLundbergAdjustmentCoefficient lam c R fun r ↦ mgf (X 0) P r) :\n    P {ω | ∃ n, u + ∑ k ∈ Finset.range n, (c * T k ω - X k ω) < 0}\n      ≤ ENNReal.ofReal (Real.exp (-R * u)) :=\n  cramerLundberg_embedded_ruin_le u hlam hc hR hTm hXm hindep hident hpair hT hadj\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Cramér–Lundberg model (Asmussen and Albrecher, Ruin Probabilities)",
+        "citations": [
+          {
+            "key": "AsmussenAlbrecher2010"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core: the embedded-walk bound in MathFin/Insurance/CramerLundberg.lean, composed from lundberg_inequality and the equivalence of the walk's adjustment equation with the Cramér–Lundberg equation. Not proved: the Exp(λ) Laplace transform (hypothesis hT), the Poisson process producing the i.i.d. waiting times, and the equality of the embedded walk's ruin probability with that of the continuous-time surplus process."
+      }
     }
   ]
 }
