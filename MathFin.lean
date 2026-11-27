@@ -240,6 +240,7 @@ public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedUnbounded
 public import MathFin.Probability.Brownian.Ito.ItoIntegralPredictableRiemann
 -- The Itô integral of a predictable integrand with almost surely continuous paths
 public import MathFin.Probability.Brownian.Ito.ItoIntegralLocalisedPredictable
+public import MathFin.Probability.Brownian.Ito.ItoIntegralPredictableL2
 -- Itô's formula as an identity of processes; its stochastic term is a local martingale
 public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 -- The product rule for two Itô processes driven by one Brownian motion
@@ -369,6 +370,7 @@ public import MathFin.Pricing.Duality.ConvexDuality
 -- duality, and uniqueness of the pricing measure on the Brownian filtration
 public import MathFin.Pricing.MarketCompleteness
 public import MathFin.Pricing.MarketCompletenessInPrice
+public import MathFin.Pricing.ContractHedge
 -- The price with a drift, S = S₀ + ∫b ds + (σ●B), and the integral against it
 public import MathFin.Pricing.PricePathDrift
 public import MathFin.Pricing.PricingMeasureL2Density
@@ -741,6 +743,8 @@ public import MathFin.Models.BlackScholes.BlackScholesAsian
 public import MathFin.Models.BlackScholes.BlackScholesSDE
 public import MathFin.Models.BlackScholes.BlackScholesChooser
 public import MathFin.Models.BlackScholes.BlackScholesHedge
+public import MathFin.Models.BlackScholes.BlackScholesContractHedge
+public import MathFin.Models.BlackScholes.BlackScholesStockHedge
 public import MathFin.Models.BlackScholes.BlackScholesPhysical
 public import MathFin.Models.BlackScholes.Market
 public import MathFin.Models.BlackScholes.PricingMeasureUnique

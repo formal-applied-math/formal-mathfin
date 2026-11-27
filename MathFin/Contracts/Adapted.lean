@@ -19,10 +19,9 @@ observation the payoff makes is dated no later than `u`
 (`Payoff.measurable_eval_of_obsList_le`). That second fact is what will make a
 `Payoff` a legitimate stochastic-integral integrand: it is the adaptedness
 hypothesis a future integral rung against a filtered probability space will
-need. **`measurable_eval_of_obsList_le` has no consumer yet** —
-`Pricing/Value.lean` integrates only against a fixed measure `Q`, never
-against a filtration, so it has no adaptedness hypothesis to discharge with
-this file's results.
+need. Its consumer is `Contract.measurable_pathPV_of_le`, the same statement for a fixed-dated
+contract's deflated present value, which `Pricing/ContractHedge.lean` uses to show that the
+discounted cash flows are a claim known at the horizon.
 
 `Payoff.aemeasurable_eval` weakens `measurable_eval`'s hypothesis from
 `Measurable` to `AEMeasurable` — the strength the tower's own pricing
@@ -50,7 +49,9 @@ integrability lemma (`Models/Binomial/Binomial.lean`).
   observations `Contracts/Core.lean` defines; an over-approximation, so the criterion is
   sufficient, not necessary: `Payoff.mul (.const 0) (.obs i t)` lists `t` though its value does
   not depend on it) is `≤ u` and each `X i t` is `𝓕 t`-measurable, then evaluating `e` against `X`
-  is `𝓕 u`-measurable. The filtration's monotonicity (`𝓕.mono`) does the work
+  is `𝓕 u`-measurable (`Contract.measurable_pathPV_of_le`: the same for a fixed-dated contract's
+  deflated present value, given its payment dates are `≤ u` too). The filtration's monotonicity
+  (`𝓕.mono`) does the work
   in the `obs` leaf; the six binary constructors combine two adapted pieces
   into one by the corresponding `Measurable.add`/`.sub`/`.mul`/`.max`/`.min`
   lemma, or `Measurable.ite` composed with `measurableSet_lt` for
@@ -66,6 +67,11 @@ integrability lemma (`Models/Binomial/Binomial.lean`).
   producing.
 * `Payoff.exists_bound_eval` — against a model with bounded coordinates, a payoff is bounded
   (a nonnegative power by `Real.abs_rpow_le_abs_rpow`).
+* `Contract.measurable_pathPV_of_le` — a fixed-dated contract whose observations and payment
+  dates are all `≤ u`, on a model and a deflator adapted to `𝓕`, has an `𝓕 u`-measurable deflated
+  present value.
+* `Contract.exists_bound_pathPV` — on a bounded model and a deterministic discount factor, the
+  deflated present value of a fixed-dated contract is bounded.
 * `Contract.integrable_pathPV_of_bounded` — against a finite measure and a measurable, bounded
   model, the discounted payoff of every fixed-date contract is integrable.
 
@@ -175,12 +181,8 @@ theorem Payoff.aemeasurable_eval {μ : Measure Ω} (e : Payoff ι) (X : ι → �
 
 /-- Evaluating a payoff against a filtration-adapted model `X` is adapted to
 `𝓕 u`, as soon as every time the payoff observes is dated no later than `u`.
-This is the theorem that will make a `Payoff` a legitimate stochastic-integral
-integrand — the adaptedness hypothesis a future integral rung will need.
-Still has no consumer: `Pricing/Value.lean` integrates against a fixed
-measure, not a filtration, and unlike `measurable_eval`'s a.e. counterpart
-above, no `Payoff` in the tower yet needs an argument observed before a fixed
-time rather than a fixed measure. -/
+This is the adaptedness hypothesis a stochastic-integral rung needs of a `Payoff`;
+`Contract.measurable_pathPV_of_le` lifts it to a contract's present value. -/
 theorem Payoff.measurable_eval_of_obsList_le
     {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0} (e : Payoff ι) (X : ι → ℝ≥0 → Ω → ℝ)
     (hX : ∀ i t, Measurable[𝓕 t] (X i t))
@@ -203,6 +205,35 @@ theorem Payoff.measurable_eval_of_obsList_le
       obtain ⟨hl, hr⟩ := List.forall_mem_append.1 hle
       exact Measurable.ite (measurableSet_lt (ha hl) (hb hr)) measurable_const measurable_const
   | rpow a p ha => exact (ha hle).pow_const _
+
+/-- **A fixed-dated contract's deflated present value is known at `u`** once every observation it
+reads and every date it pays on is no later than `u`, for a model `X` and a deflator `D` adapted to
+`𝓕`. The present value is a sum of `D t * payoff` terms: each factor is adapted, so
+`Payoff.measurable_eval_of_obsList_le` and the monotonicity of `𝓕` combine them. A `payAtHit` is
+excluded, as in `Contract.measurable_pathPV`. -/
+theorem Contract.measurable_pathPV_of_le {𝓕 : Filtration ℝ≥0 mΩ} {u : ℝ≥0} {c : Contract ι}
+    (hc : c.FixedDated) {D : ℝ≥0 → Ω → ℝ} (hD : ∀ t, Measurable[𝓕 t] (D t))
+    {X : ι → ℝ≥0 → Ω → ℝ} (hX : ∀ i t, Measurable[𝓕 t] (X i t))
+    (hobs : ∀ p ∈ c.obsList, p.2 ≤ u) (hdates : ∀ t ∈ c.dates, t ≤ u) :
+    Measurable[𝓕 u] fun ω ↦ c.pathPV (fun t ↦ D t ω) (fun i t ↦ X i t ω) := by
+  induction c with
+  | zero =>
+      simp only [Contract.pathPV, Contract.cashflows, List.map_nil, List.sum_nil]
+      exact measurable_const
+  | pay t a =>
+      simp only [Contract.pathPV, Contract.cashflows, List.map_cons, List.map_nil, List.sum_cons,
+        List.sum_nil, add_zero]
+      exact ((hD t).mono (𝓕.mono (hdates t (List.mem_singleton_self t))) le_rfl).mul
+        (a.measurable_eval_of_obsList_le X hX hobs)
+  | payAtHit _ _ _ => exact hc.elim
+  | both a b ha hb =>
+      simp only [Contract.pathPV_both]
+      obtain ⟨hol, hor⟩ := List.forall_mem_append.1 hobs
+      obtain ⟨hdl, hdr⟩ := List.forall_mem_append.1 hdates
+      exact (ha hc.1 hol hdl).add (hb hc.2 hor hdr)
+  | scale r a ha =>
+      simp only [Contract.pathPV_scale]
+      exact (ha hc hobs hdates).const_mul r
 
 /-- Evaluating a payoff against a model whose every coordinate is bounded is bounded: each
 constructor combines its bounds into one, an indicator is bounded by `1`, and a nonnegative power
@@ -233,6 +264,32 @@ theorem Payoff.exists_bound_eval (e : Payoff ι) {X : ι → ℝ≥0 → Ω → 
       obtain ⟨C, hC⟩ := ha
       exact ⟨C ^ (p : ℝ), fun ω ↦ (Real.abs_rpow_le_abs_rpow _ _).trans
         (Real.rpow_le_rpow (abs_nonneg _) (hC ω) p.2)⟩
+
+/-- **A fixed-dated contract on a bounded model has a bounded present value**, for a deterministic
+discount factor `D`: each payment is `D t` times a bounded payoff (`Payoff.exists_bound_eval`), and
+`pathPV` is a signed sum of payments. This is what puts the discounted cash flows in every `Lᵖ`. -/
+theorem Contract.exists_bound_pathPV (D : ℝ≥0 → ℝ) {X : ι → ℝ≥0 → Ω → ℝ}
+    (hXb : ∀ i t, ∃ C, ∀ ω, |X i t ω| ≤ C) {c : Contract ι} (hc : c.FixedDated) :
+    ∃ C, ∀ ω, |c.pathPV D (fun i t ↦ X i t ω)| ≤ C := by
+  induction c with
+  | zero => exact ⟨0, fun ω ↦ by simp [Contract.pathPV, Contract.cashflows]⟩
+  | pay t a =>
+      obtain ⟨C, hC⟩ := a.exists_bound_eval hXb
+      refine ⟨|D t| * C, fun ω ↦ ?_⟩
+      simp only [Contract.pathPV, Contract.cashflows, List.map_cons, List.map_nil,
+        List.sum_cons, List.sum_nil, add_zero]
+      exact (abs_mul _ _).trans_le (mul_le_mul_of_nonneg_left (hC ω) (abs_nonneg _))
+  | payAtHit i A a => exact hc.elim
+  | both a b ha hb =>
+      obtain ⟨⟨Ca, ha⟩, ⟨Cb, hb⟩⟩ := And.intro (ha hc.1) (hb hc.2)
+      exact ⟨Ca + Cb, fun ω ↦ by
+        rw [Contract.pathPV_both]
+        exact (abs_add_le _ _).trans (add_le_add (ha ω) (hb ω))⟩
+  | scale r a ha =>
+      obtain ⟨C, hC⟩ := ha hc
+      exact ⟨|r| * C, fun ω ↦ by
+        rw [Contract.pathPV_scale]
+        exact (abs_mul _ _).trans_le (mul_le_mul_of_nonneg_left (hC ω) (abs_nonneg _))⟩
 
 /-- **A bounded model prices every fixed-date contract.** Against a finite measure and a measurable
 model whose every coordinate is bounded, every contract that pays at fixed dates
