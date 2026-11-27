@@ -1,6 +1,9 @@
 # The cátedra: agents that work the open-problem catalogue
 
-Status: adopted 2026-11-20, decisions below. Nothing here is built yet.
+Status: adopted 2026-11-20, decisions below. Phase 0 built 2026-11-26: the chairs in
+`.claude/agents/`, the skill `.claude/skills/catedra/`, the catalogue fields and the comparator
+configs (`tools/verify/catedra.py`), the shared daemon (`docker/docker-compose.shared.yml`,
+`scripts/lean-check-shared.sh`).
 
 ## Why, and the one thing to copy
 
