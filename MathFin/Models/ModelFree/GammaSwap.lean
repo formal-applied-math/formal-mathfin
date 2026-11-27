@@ -187,10 +187,10 @@ noncomputable def gammaSwapFairStrike (M : Market Unit Ω) (T : ℝ≥0) (Q : Me
 
 /-- **Fair strike equals the expected replication payoff.** Under the hypotheses of
 `IsPricingMeasure.integral_eq_gammaSwap`, twice the expected replication payoff per `κ·T`
-is the fair strike: `K_Γ = 2𝔼_Q[φ(S_T)]/(κT)`. Under the Itô dynamics of the source's §2,
-at the at-the-money-forward instance `κ = F₀`, this is the level its floating leg
-`T⁻¹𝔼[∫₀ᵀ σ_t²·(S_t/κ) dt]` reads at; the dynamics step is the source's, not proved here
-(this module has no process). -/
+is the fair strike: `K_Γ = 2𝔼_Q[φ(S_T)]/(κT)`. Under the zero-rate Itô dynamics of the
+source's §2, at the at-the-money-forward instance `κ = F₀`, this is the level its floating
+leg `T⁻¹𝔼[∫₀ᵀ σ_t²·(S_t/κ) dt]` reads at; the dynamics step is the source's, not proved
+here (this module has no process). -/
 theorem IsPricingMeasure.gammaSwapFairStrike_eq_integral {M : Market Unit Ω} {T : ℝ≥0}
     {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t x, M.numeraire t x = 1)
     {L U κ : ℝ} (hL : 0 < L) (hLκ : L ≤ κ) (hκU : κ ≤ U)

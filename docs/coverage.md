@@ -46,8 +46,8 @@ One `full` entry in `benchmarks/jumps_and_variance_swaps.json` (85 entries in th
   numeraire-discounted instance where the factor collapses to `2` (reference level in the
   `S_0` slot, compact range) -- and `gammaSwapFairStrike_eq_integral` proves
   `K_Gamma = 2 E_Q[phi(S_T)]/(kappa T)`, the level the source's floating leg reads at under
-  its Itô dynamics at the at-the-money-forward instance `kappa = F_0` (the dynamics step is
-  the source's, not proved here).
+  its zero-rate Itô dynamics at the at-the-money-forward instance `kappa = F_0` (the
+  dynamics step is the source's, not proved here).
 
   Corpus counts: 924 before, 925 after.
   Disclosed out of scope: the unbounded strip, the nonzero-rate factor `e^{2rT}`, the
