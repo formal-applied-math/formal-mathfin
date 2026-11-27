@@ -8,6 +8,7 @@ module
 public import MathFin.Models.ModelFree.CarrMadan
 public import MathFin.Probability.Brownian.SDE.GyongyMimicry
 public import MathFin.Models.ModelFree.CallSpreadDigital
+public import MathFin.Models.ModelFree.MarketCallPrice
 public import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 public import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
@@ -93,6 +94,9 @@ bounded drift and bounded diffusion coefficients; the lognormal model is outside
   compactly supported `ψ`, `𝔼[∫ ψ(K) (X_{s⁺} − K)⁺ dK] = ∫ ψ(K) C(s, K) dK`.
 * `breedenLitzenberger_weak`: for an integrable marginal and a smooth compactly supported `ψ`,
   `∫ ψ''(K) C(s, K) dK = 𝔼[ψ(X_{s⁺})]`.
+* `isNormalizedCallPrice_callSurface`: for a positive marginal `X_{t⁺}` of mean `F > 0`, the
+  defined surface `k ↦ C(t, kF)/F` is a normalised call price function (`IsNormalizedCallPrice`),
+  the call prices of a market's pricing measure (`Market.IsPricingMeasure.isNormalizedCallPrice`).
 * `dupire_weak_drift`: for `X = c + ∫β + M` with bounded adapted `β`, `δ` and smooth compactly
   supported `ψ`, `d/dT ∫ ψ(K) C(T, K) dK = ∫ ψ(K) 𝔼[â(T, X_T) 1{X_T > K}] dK +
   ½ 𝔼[ψ(X_T) b̂²(T, X_T)]` on `(0, T)`, `â`, `b̂²` Borel versions of `𝔼[β_T | X_T]`, `𝔼[δ_T² | X_T]`.
@@ -1420,5 +1424,38 @@ theorem dupire_localVol
 
 end Pointwise
 
-end MathFin.Dupire
+section Market
 
+variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {X : ℝ≥0 → Ω → ℝ}
+
+/-- **Dupire's call surface is a market's call price function.** If the marginal `X_{t⁺}` is
+integrable, positive, with mean `F > 0`, then `k ↦ C(t, kF) / F`, the defined surface in units of
+the forward and moneyness `k = K / F`, is a normalised call price function: convex, between
+`(1 − k)⁺` and `1`, vanishing at large strikes. This ties the surface of the local-volatility
+module to the library's pricing objects: the same function is the normalised call price of the
+pricing measure of a market (`Market.IsPricingMeasure.isNormalizedCallPrice`), and an
+`IsNormalizedCallPrice` function is the call price of some market
+(`exists_market_of_isNormalizedCallPrice`). -/
+theorem isNormalizedCallPrice_callSurface (t : ℝ) {F : ℝ} (hF : 0 < F)
+    (hX : Integrable (X (Real.toNNReal t)) μ) (hpos : ∀ ω, 0 < X (Real.toNNReal t) ω)
+    (hmean : ∫ ω, X (Real.toNNReal t) ω ∂μ = F) :
+    IsNormalizedCallPrice fun k ↦ callSurface μ X t (k * F) / F := by
+  have h := isNormalizedCallPrice_integral_call (μ := μ) (X := fun ω ↦ X (Real.toNNReal t) ω / F)
+    (hX.div_const F) (fun ω ↦ div_pos (hpos ω) hF)
+    (by rw [integral_div, hmean, div_self hF.ne'])
+  have hfun : (fun k ↦ callSurface μ X t (k * F) / F)
+      = fun k ↦ ∫ ω, max (X (Real.toNNReal t) ω / F - k) 0 ∂μ := by
+    funext k
+    rw [callSurface, ← integral_div]
+    refine integral_congr_ae (ae_of_all _ fun ω ↦ ?_)
+    show max (X (Real.toNNReal t) ω - k * F) 0 / F = max (X (Real.toNNReal t) ω / F - k) 0
+    rw [← max_div_div_right hF.le, zero_div]
+    congr 1
+    field_simp
+  rw [hfun]
+  exact h
+
+end Market
+
+end MathFin.Dupire
