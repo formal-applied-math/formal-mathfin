@@ -979,7 +979,8 @@
       "known_results": [
         "Gerber 1969, Azcue-Muler: d=1 band strategies.",
         "Albrecher-Azcue-Muler (AAP 2017, arXiv 1505.03980): two insurers, value function smallest viscosity supersolution, curve strategies numerically optimal in an example.",
-        "Azcue-Muler (arXiv 1804.02547): n-dim switching problem, convergent numerical scheme, verification result; conjectures for optimal local control on boundaries."
+        "Azcue-Muler (arXiv 1804.02547): n-dim switching problem, convergent numerical scheme, verification result; conjectures for optimal local control on boundaries.",
+        "Argument here (2026-11-27, n = 2, not formalised, not refereed outside this project), conditional on the value function being C¹ near the boundary point and on the local shape of the waiting region N: if N lies below a C¹ graph x₂ = φ(x₁) with p₂ − p₁φ′ > 0, company 2 paying at rate p₂ − p₁φ′, so that the surplus slides along the graph, is the unique optimal control until the next claim; if the boundary overhangs (N to the left of a graph x₁ = g(x₂) that the drift outruns, including the rightmost point), no finite-rate control is optimal and a lump straight down to the first point of N is optimal. This gives AM18's Example 1 conjecture and contradicts the Example 2 description on its overhang, where value iteration also finds lumps. C¹ regularity of V for n = 2 (only local Lipschitz continuity is known) and the boundary geometry are not proved."
       ],
       "sources": [
         {
@@ -1024,6 +1025,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-27",
+          "status": "open",
+          "reason": "A rate-or-lump dichotomy for the boundary control, proved conditional on C¹ regularity of the value function and on the local boundary geometry; the problem stays open until that regularity is established."
         }
       ],
       "issue_number": 549,
