@@ -1272,7 +1272,9 @@ formalised here. Proof: `dupire_pointwise_drift`, then `driftTail_linear` and
 `strikeDeriv_callSurface_eq_neg_tail` (`∂_K C = −P(X_t > K)`).
 
 **Scope.** The class is that of `dupire_weak_drift` (bounded drift rate `β` and bounded `δ`). The
-lognormal model `dX = μX dt + σX dB` has `β = μX` and `δ = σX`, neither bounded, so it is *not*
+linear-drift hypothesis is restrictive inside it: `â(t, x) = 𝔼[β_t | X_t = x]` is bounded by the bound
+on `β`, so `â(t, x) = m·x` for every `x > a` with `m ≠ 0` can hold only if `X_t` is bounded above
+almost surely; for unbounded `X_t` the theorem applies only with `m = 0`. The lognormal model `dX = μX dt + σX dB` has `β = μX` and `δ = σX`, neither bounded, so it is *not*
 in this class: this theorem says nothing about the Black–Scholes surface, and the textbook formula
 for lognormal models is not proved here. -/
 theorem dupire_pointwise_linearDrift

@@ -19,9 +19,11 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 Novikov's condition makes the Doléans exponential `Z = exp(M − ½A)` a unit-mean variable. This
 file proves the *analytic* half of that statement, with no stochastic calculus in it: a statement
 about sequences of real random variables `Mₙ → M'`, `Aₙ → A'` whose exponentials
-`exp(c·Mₙ − c²/2·Aₙ)` all have unit mean (for every real `c`), which is exactly what the bounded
-Girsanov theorem delivers for the bounded truncations `cθₙ` of an unbounded integrand
-(`integral_ZTpred_eq_one`, `Btheta_isBrownianOn_predictable_of_bdd`).
+`exp(c·Mₙ − c²/2·Aₙ)` all have unit mean (for every real `c`). These are the hypotheses the
+bounded Girsanov theorem should supply for the bounded truncations `cθₙ` of an unbounded integrand
+(`integral_ZTpred_eq_one`, `Btheta_isBrownianOn_predictable_of_bdd`); that this file's hypotheses
+are met by those truncations is not proved here, so Novikov's theorem for the Itô integral is not
+yet a consequence of this file.
 
 The argument is the classical "`p`-exponential" trick (Karatzas–Shreve §3.5; Revuz–Yor §VIII.1),
 run on the truncations so that no stopping times are needed:
