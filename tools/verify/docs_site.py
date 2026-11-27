@@ -715,14 +715,14 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     m = data["metrics"]
     strip = (
         '<div class="tiles t-metrics">'
-        f'<div class="tile"><div class="v">{m["R3"]:g}%</div><div class="k">close to the market '
-        f'<small>· of the {m["theorems"]:,} finance theorems, the share within three steps of '
-        f'the trunk</small></div></div>'
+        f'<div class="tile"><div class="v">{m["R3"]:g}%</div><div class="k">near the trunk '
+        f'<small>· of the {m["theorems"]:,} finance theorems, the share whose statement is '
+        f'at most three steps from a market object</small></div></div>'
         f'<div class="tile"><div class="v">{len(m["sockets"])}/{m["families"]}</div><div class="k">'
         f'priced in a market <small>· model families with a proved pricing measure on a market'
         f'</small></div></div>'
         f'<div class="tile"><div class="v">{m["span"]}</div><div class="k">across limbs '
-        f'<small>· theorems whose statements join two limbs</small></div></div>'
+        f'<small>· theorems whose statements join two limbs of the tree</small></div></div>'
         f'<div class="tile"><div class="v">{m["islands"]}</div><div class="k">not yet connected '
         f'<small>· proved clusters no proof ties to the rest; {m["unreached"]} with no stated '
         f'bridge and no declared reason</small></div></div></div>')
@@ -749,8 +749,7 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
         for a, es in sorted(data["off"].items(), key=lambda kv: -len(kv[1])))
     partial = [n for n in data["nodes"] if n.get("core")]
     partial_rows = "".join(
-        f'<tr><td><button type="button" class="t-chip" data-focus="{esc(n["l"])}">'
-        f'{esc(n["t"])}</button></td><td>{", ".join(f"<code>{esc(c)}</code>" for c in n["core"])}'
+        f'<tr><td>{esc(n["t"])}</td><td>{", ".join(f"<code>{esc(c)}</code>" for c in n["core"])}'
         f"</td></tr>" for n in partial)
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     fam_legend = '<div class="legend">' + "".join(
@@ -763,56 +762,57 @@ def build_tree(site: Site, out: Path, nodes_json: list[dict], frontier: list[dic
     public = sum(1 for d in site.idx.decls.values() if d.kind == "theorem" and not d.private)
     proved = sum(1 for n in nodes_json if n.get("leanOk", True))
     body = f"""<h1>The program tree</h1>
-<p class="lede ink2">The library as a tree: probability and statistics are the roots, positions
-and markets the {term("trunk")}, and valuation, choice and risk the three {term("limb", "limbs")}. On a limb, a result's
-height is its distance from the trunk: one step if its statement mentions a market object, two if
-it mentions an object one step away, and so on. The dark wood is what its proof uses, so a result
-the library has not yet connected stands high or floats beside its limb. Colour is the model
-family. The buttons add the gaps (stated bridges not yet proved, and unconnected clusters), the
-future work the open issues map out, the field's open problems, the corpus as leaves and, as
-Literature, how much the published field says in each cell. Click a
-node to trace its lineage; the panel beside the tree explains every mark.</p>
-<p class="ink2"><b>What the numbers count.</b> The library proves {public:,} public theorems.
-{m["theorems"]:,} of them are finance theorems on the limbs; the rest are probability tools in
-the roots, statements about the market itself, and lemmas. The tree draws {proved} of them as
-proved nodes: landmarks, the theorems that join two parts, and the shared definitions they rest
-on. The corpus is {total:,} benchmark entries, each a statement of its own re-proved by citing
-the library; they hang as leaves on the node their proof rests on.</p>
-{strip}
+<p class="lede ink2">Probability at the roots, markets and prices in the trunk, valuation, risk and
+choice as the limbs. Each dark node is a result proved in Lean, and the wood beneath it is what its
+proof uses. Click one.</p>
 <div class="t-box" id="tree-box"><div class="t-tools">
-<input id="t-q" type="search" placeholder="Find a node: Itô, VaR, Heston…" aria-label="Find a node" autocomplete="off">
-<button type="button" id="t-grow">Grow it again</button>
-<button type="button" data-layer="gaps" aria-pressed="true" title="stated bridges not yet proved, and unconnected clusters">Gaps</button>
-<button type="button" data-layer="future" aria-pressed="false" title="open issues, joined to the proved results they build on">Future work</button>
+<input id="t-q" type="search" placeholder="Find a result: Itô, VaR, Heston…" aria-label="Find a result" autocomplete="off">
+<button type="button" data-layer="future" aria-pressed="false" title="results stated and not yet proved, each carried by an open issue">Next</button>
 <button type="button" data-layer="open" aria-pressed="false" title="open problems of the field">Open problems</button>
-<button type="button" data-layer="leaves" aria-pressed="false" title="corpus entries, on the tree and on the ground">Leaves</button>
-{'<button type="button" data-layer="literature" aria-pressed="false" title="the field, cell by cell: shaded by its share of the literature, the three largest gaps outlined">Literature</button>' if data.get("literature") else ""}
+<button type="button" data-layer="leaves" aria-pressed="false" title="the corpus entries, hung on the result their proof rests on">Corpus</button>
+<button type="button" data-layer="gaps" aria-pressed="false" title="bridges stated and not yet proved">Gaps</button>
+{'<button type="button" data-layer="literature" aria-pressed="false" title="the published field, cell by cell">Literature</button>' if data.get("literature") else ""}
+<button type="button" id="t-grow">Grow it again</button>
 <span class="t-zoom"><button type="button" id="t-zin" aria-label="Zoom in">+</button><button type="button" id="t-zout" aria-label="Zoom out">−</button></span>
 <button type="button" id="t-reset">Reset view</button></div>
 <div class="t-stage"><svg id="tree" role="img" aria-label="The MathFin blueprint as a tree"></svg>
 <aside class="t-panel" id="tree-panel" aria-live="polite"></aside></div>
 <div id="tree-tip" hidden></div></div>
 {fam_legend}
-<h2>Where the corpus sits</h2>
-<p class="ink2">{on} of the {total} corpus entries are on the map: their proofs rest on a blueprint
-node, or a node's proof uses what they cite. {off} cite MathFin results in no relation the map
-records. They are proved, and the import graph connects them to the library, but the program map
-does not show them. The count is a ratchet (<code>corpus_off_blueprint</code>): it may fall and
-may not rise.</p>
-<div class="t-bars">{"".join(bars)}</div>
-{legend([(v, label, "") for _, label, v in TREE_KINDS])}
-<h2>Off the map, by cell</h2><p class="ink2">One dot per entry; hover for its id.</p>
-<div class="t-bed">{plots}</div>
-{literature}
-<h2>Frontier with a proved core</h2>
-<p class="ink2">Frontier results that corpus entries already prove in part (the node's
-<code>core</code>). They stay on the frontier until the whole statement is proved.</p>
-<table class="t-table"><tbody>{partial_rows}</tbody></table>
+<p class="ink2">{proved} results on the tree, {public:,} public theorems in the library, {total:,}
+corpus entries. <a href="tree-numbers.html">The tree in numbers</a>.</p>
 <script type="application/json" id="tree-data">{payload}</script>
 {"".join(f'<script src="{s}" defer></script>' for s in TREE_SCRIPTS)}"""
     (out / "tree.html").write_text(page("Program tree — MathFin", body, "", "tree.html",
                                         "The MathFin blueprint as a tree, with the corpus as "
                                         "its leaves."), encoding="utf-8")
+    numbers = f"""<h1>The tree in numbers</h1>
+<p class="lede ink2">The counts the library holds itself to, for the <a href="tree.html">program
+tree</a>. Each is a ratchet: it may move in one direction only.</p>
+<p class="ink2">The library proves {public:,} public theorems. {m["theorems"]:,} of them are
+finance theorems on the limbs; the rest are probability tools in the roots, statements about the
+market itself, and lemmas. The tree draws {proved} of them: landmarks, the theorems that join two
+parts, and the shared definitions they rest on. The corpus is {total:,} benchmark entries, each a
+statement of its own proved by citing the library.</p>
+{strip}
+<h2>Where the corpus sits</h2>
+<p class="ink2">{on} of the {total} corpus entries rest on a result of the tree, or a result of the
+tree uses what they cite. {off} cite library results in no relation the tree records: they are
+proved, and imported by the library, but the tree does not show them.</p>
+<div class="t-bars">{"".join(bars)}</div>
+{legend([(v, label, "") for _, label, v in TREE_KINDS])}
+<h2>Off the tree, by cell</h2><p class="ink2">One dot per entry; hover for its id.</p>
+<div class="t-bed">{plots}</div>
+{literature}
+<h2>Next results with a proved core</h2>
+<p class="ink2">Stated results that corpus entries already prove in part. They stay stated until
+the whole statement is proved.</p>
+<table class="t-table"><tbody>{partial_rows}</tbody></table>"""
+    (out / "tree-numbers.html").write_text(page("The tree in numbers — MathFin", numbers, "",
+                                                "tree-numbers.html",
+                                                "The program tree's counts: corpus placement, "
+                                                "reach and the literature beside it."),
+                                           encoding="utf-8")
 
 
 def _founding(f: dict) -> str:

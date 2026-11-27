@@ -631,7 +631,7 @@ function nodePanel(n){
   const li = x => `<li><a class="num${x[1] === "o" ? "" : " closed"}" href="${GH}${x[0]}" target="_blank" rel="noopener">#${x[0]}</a><span class="${x[1] === "o" ? "" : "closed"}">${esc(x[3])}${x[2] ? " <span class='muted'>(PR)</span>" : ""}${x[1] === "o" && x[4][0] ? ` <span class="muted">· ${esc(STATUS_TXT[x[4][0]] || x[4][0])}</span>` : ""}${x[1] !== "o" ? " <span class='muted'>· closed</span>" : ""}</span></li>`;
   const uses = n.u.filter(u => N.has(u)), users = n.users;
   return `
-    <button class="backbtn" type="button" data-back>← How to read the tree</button>
+    <button class="backbtn" type="button" data-back>← Back</button>
     <div style="display:flex; gap:6px; flex-wrap:wrap">${kind}${st}<span class="pill">${esc(cellName(cellKey(n)))}</span>${n.f && FAM.get(n.f) ? `<span class="pill"><i style="background:${famVar(n)}"></i>${esc(FAM.get(n.f).title)}</span>` : ""}${isJoint(n) ? `<span class="pill">bridge between ${esc(n.j.map(partTitle).join(" and "))}</span>` : ""}</div>
     <h2>${esc(n.t)}</h2>
     ${n.x ? `<p class="stmt">${prose(n.x)}</p>` : ""}
@@ -669,54 +669,23 @@ function glyph(kind){
   }[kind];
   return `<svg viewBox="0 0 34 24" aria-hidden="true">${s}</svg>`;
 }
-function dots(){ return Object.entries({"ready to pick up":"--tr-ready","in progress":"--tr-progress",research:"--tr-research",blocked:"--tr-blocked"}).map(([t, v]) => `<span class="pill"><i style="background:var(${v})"></i>${t}</span>`).join(" "); }
 function defaultPanel(){
   const ops = D.nodes.filter(n => n.op);
   const ready = D.nodes.filter(n => n.s === "frontier" && n.st === "ready" && !n.op);
   folio.innerHTML = `
-    <h2>How to read the tree</h2>
-    <h3>Always on the tree</h3>
     <div class="legend">
-      <div>${glyph("ghost")}<span><b>The map</b>, in pale wood, is docs/taxonomy.toml: the tools as roots (probability in its branches, statistics), positions and markets as the trunk, and three limbs, one for each question asked of a position (choice, valuation, risk). A node's place on it is a reading, not a proof.</span></div>
-      <div>${glyph("hop")}<span><b>Height is measured</b>: on a limb a node sits at its distance from the trunk, in steps: one step if its statement mentions a market object, two if it mentions an object one step away, and so on. Probability tools stay in the roots.</span></div>
-      <div>${glyph("knot")}<span><b>Dark wood and knots</b>: the proved blueprint nodes and the main use each proof makes; select a node to see all of them. Wood thickens with the corpus it carries; a knot's size counts the corpus entries resting deepest on it.</span></div>
-      <div>${glyph("fam")}<span><b>Colour</b> is the model family, the same hue in every limb; a node in wood colour is general theory. A <b>bridge between limbs</b> sits in the fork between the two limbs its statement joins.</span></div>
-      <div>${glyph("tower")}<span><b>Module groups</b>: a family of modules drawn as one square node, the module count inside; it shows its headline result.</span></div>
-      <div>${glyph("sucker")}<span><b>Stems from the soil</b>: proved nodes off the roots that rest on no blueprint node, only on Mathlib.</span></div>
+      <div>${glyph("knot")}<span>proved in Lean</span></div>
+      <div>${glyph("bud")}<span>stated, not yet proved <span class="muted">(Next)</span></span></div>
+      <div>${glyph("star")}<span>open problem of the field</span></div>
+      <div>${glyph("leaf")}<span>a corpus entry</span></div>
     </div>
-    <h3>Gaps</h3>
-    <div class="legend">
-      <div>${glyph("island")}<span><b>Not yet connected</b>: proved clusters that no chain of statements joins to the trunk float beside their limb; a red outline means no stated bridge reaches them and no reason for standing alone is declared.</span></div>
-      <div>${glyph("phantom")}<span><b>Stated bridges</b>: hollow dashed dots between the nodes a stated, not yet proved theorem would join; the number is how many theorems proving it brings within three steps of the trunk.</span></div>
-    </div>
-    <h3>Future work</h3>
-    <div class="legend">
-      <div>${glyph("bud")}<span><b>Buds</b>: unproved blueprint nodes, each carried by an open issue and joined to the proved node it rests on; the centre shows the issue's state.</span></div>
-      <div>${glyph("issring")}<span><b>Ringed knots</b>: proved nodes an open issue works on (a refactor, an upgrade, a generalisation), ringed in the issue's state.</span></div>
-      <div>${glyph("core")}<span><b>Half-filled bud</b>: its core is already proved in the corpus.</span></div>
-      <div>${glyph("seed")}<span><b>Seedlings</b>: future work that grows straight from Mathlib or BrownianMotion.</span></div>
-    </div>
-    <h3>Open problems</h3>
-    <div class="legend">
-      <div>${glyph("star")}<span><b>Stars</b>: open problems of the field, statements nobody has proved, carried by an issue labelled open-problem.</span></div>
-    </div>
-    <h3>Leaves</h3>
-    <div class="legend">
-      <div>${glyph("leaf")}<span><b>Leaves</b>: the corpus entries, hung on the deepest node their proof rests on.</span></div>
-      <div>${glyph("fallen")}<span><b>Fallen leaves</b>: proved entries that rest on no node; each one is a missing tag or bridge.</span></div>
-    </div>
-    ${LIT ? `<h3>Literature</h3>
-    <div class="legend">
-      <div><span><b>Shaded cells</b>: the field's map. The deeper the blue, the larger the cell's share of ${LIT.corpus.placed.toLocaleString()} papers placed by a trained classifier; a dashed outline marks the three cells where the field's share most exceeds the library's. Hover a cell for its numbers and the works it rests on; the table under the tree has them all.</span></div>
-    </div>` : ""}
-    <div class="chips">${dots()}</div>
     <div><h3>Open problems</h3><div class="chips">${ops.map(n => chip(n.l)).join("")}</div></div>
     <div><h3>Ready to pick up · ${ready.length}</h3><div class="chips">${ready.sort((a, b) => a.t.localeCompare(b.t)).slice(0, 14).map(n => chip(n.l)).join("")}${ready.length > 14 ? ` <span class="muted" style="font-size:12.5px; align-self:center">and ${ready.length - 14} more on the tree</span>` : ""}</div></div>`;
 }
 function selectPile(a){
   selected = "pile:" + a; light(new Set(), selected); selRing.attr("visibility", "hidden");
   const list = piles.find(p => p.a === a)?.list || [];
-  folio.innerHTML = `<button class="backbtn" type="button" data-back>← How to read the tree</button>
+  folio.innerHTML = `<button class="backbtn" type="button" data-back>← Back</button>
     <span class="pill"><i style="background:var(--tr-fallen)"></i>off the map</span>
     <h2>${list.length} ${esc(pileName(a))} entries on the ground</h2>
     <p>Proved and imported by the library, but no constant they cite reaches a blueprint node, and no node depends on them. A tag on the object they share, or a bridge to the node they illustrate, lifts them onto the tree.</p>
