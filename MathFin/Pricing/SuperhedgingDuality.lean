@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Pricing.FTAP.FTAPMultiState
+public import MathFin.Probability.Analysis.StdSimplexMix
 
 /-!
 # The fundamental superhedging bound
@@ -35,12 +36,16 @@ Minkowski–Weyl theorem.
 ## Main definitions
 
 * `martingaleProbVectors`: the probability vectors `q ≥ 0`, `∑ q = 1`, under which every asset's
-  excess return in `z` has expectation zero.
+  excess return in `z` has expectation zero, as functions `Fin N → ℝ`; they are the weight
+  functions of the points of `Convexity.StdSimplex ℝ (Fin N)` with that property
+  (`mem_martingaleProbVectors_iff`).
 * `SuperReplicates`: `(x, θ)` super-replicates the claim `Y`, i.e. cost `x` plus the portfolio
   `θ` dominates `Y` in every state.
 
 ## Main results
 
+* `MathFin.mem_martingaleProbVectors_iff` — the martingale probability vectors are the weight
+  functions of the standard-simplex points that make every excess return fair
 * `MathFin.emm_le_superReplication` — the fundamental bound, over all martingale probability vectors
 * `MathFin.hasEMMMultiState_iff_exists_pos_mem` — the EMMs are the strictly positive ones
 * `MathFin.martingalePrice_eq_of_replicates` — the law of one price
@@ -71,6 +76,22 @@ state. The equivalent martingale measures are the strictly positive members
 (`hasEMMMultiState_iff_exists_pos_mem`). -/
 def martingaleProbVectors (z : Fin M → Fin N → ℝ) : Set (Fin N → ℝ) :=
   {q | (∀ n, 0 ≤ q n) ∧ (∑ n, q n = 1) ∧ ∀ m, ∑ n, q n * z m n = 0}
+
+/-- **The martingale probability vectors are simplex points.** A function `q` is a martingale
+probability vector of `z` exactly when it is the weight function of a point `p` of Mathlib's
+standard simplex `StdSimplex ℝ (Fin N)`, the library's probability vector on a finite type, that
+makes every asset's excess return fair. `martingaleProbVectors` stays a set of functions because
+the representing set of a coherent risk measure (`representingSet`, `Risk/AcceptanceSet.lean`) is
+one, and `representingSet_superhedgingPrice` equates the two. -/
+theorem mem_martingaleProbVectors_iff (z : Fin M → Fin N → ℝ) (q : Fin N → ℝ) :
+    q ∈ martingaleProbVectors z ↔
+      ∃ p : Convexity.StdSimplex ℝ (Fin N), ⇑p.weights = q ∧ ∀ m, ∑ n, p.weights n * z m n = 0 := by
+  constructor
+  · rintro ⟨h0, h1, hm⟩
+    obtain ⟨p, rfl⟩ := Convexity.StdSimplex.exists_weights_eq_iff.2 ⟨h0, h1⟩
+    exact ⟨p, rfl, hm⟩
+  · rintro ⟨p, rfl, hm⟩
+    exact ⟨p.weights_nonneg, p.total_of_fintype, hm⟩
 
 /-- `(x, θ)` super-replicates the claim `Y`: cost `x` plus the portfolio `θ` dominates `Y` in every
 state. -/

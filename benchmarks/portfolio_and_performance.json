@@ -1597,10 +1597,10 @@
     {
       "id": "mf-vnm-representation",
       "name": "von Neumann–Morgenstern Representation Theorem",
-      "description": "A preference R on probability vectors (lotteries) over a finite outcome type that is complete and transitive on lotteries, satisfies independence at every weight in (0,1] and the textbook continuity axiom (p ≻ q ≻ r gives weights α, β in (0,1) with mix α p r ≻ q ≻ mix β p r) is represented by expected utility: there is u with R p q ↔ Σ q_i u_i ≤ Σ p_i u_i on lotteries, and the representing utilities are exactly the a·u + b with a > 0. Finitely many outcomes only.",
+      "description": "A preference R on the lotteries over a finite outcome type, the points of Mathlib's standard simplex, that is complete and transitive, satisfies independence at every weight in (0,1] and the textbook continuity axiom (p ≻ q ≻ r gives weights α, β in (0,1) with mix α p r ≻ q ≻ mix β p r) is represented by expected utility: there is u with R p q ↔ Σ q_i u_i ≤ Σ p_i u_i, and the representing utilities are exactly the a·u + b with a > 0. Finitely many outcomes only.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Choice.Utility.VonNeumannMorgensternRepresentation\n\nopen MathFin\n\ntheorem vnm_representation' {O : Type*} [Fintype O] {R : (O → ℝ) → (O → ℝ) → Prop}\n    (hR : IsVNMPreference R) :\n    ∃ u : O → ℝ, IsEURepresentation R u ∧\n      ∀ v : O → ℝ, IsEURepresentation R v ↔\n        ∃ a b : ℝ, 0 < a ∧ ∀ o, v o = a * u o + b :=\n  vnm_representation hR\n"
+        "lean": "import MathFin.Choice.Utility.VonNeumannMorgensternRepresentation\n\nopen MathFin\n\ntheorem vnm_representation' {O : Type*} [Fintype O]\n    {R : Convexity.StdSimplex ℝ O → Convexity.StdSimplex ℝ O → Prop}\n    (hR : IsVNMPreference R) :\n    ∃ u : O → ℝ, IsEURepresentation R u ∧\n      ∀ v : O → ℝ, IsEURepresentation R v ↔\n        ∃ a b : ℝ, 0 < a ∧ ∀ o, v o = a * u o + b :=\n  vnm_representation hR\n"
       },
       "metadata": {
         "chapter": 10,
@@ -1615,7 +1615,7 @@
         ],
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof (MathFin.vnm_representation in MathFin/Choice/Utility/VonNeumannMorgensternRepresentation.lean), by the Herstein–Milnor calibration against a best and a worst degenerate lottery. Scope: finitely many outcomes (Fintype O); lotteries are probability vectors O → ℝ and the preference is a relation on all functions O → ℝ constrained only on lotteries; independence is the iff form at weights in (0,1]; continuity is the textbook strict form (α, β ∈ (0,1)). The converse (expected-utility preferences satisfy the axioms) is isVNMPreference_prefersEU / isVNMPreference_iff_exists_eu in the same module. Axioms-clean."
+        "formalization_scope": "Full formal proof (MathFin.vnm_representation in MathFin/Choice/Utility/VonNeumannMorgensternRepresentation.lean), by the Herstein–Milnor calibration against a best and a worst degenerate lottery. Scope: finitely many outcomes (Fintype O); lotteries are the points of Mathlib's standard simplex StdSimplex ℝ O and the preference is a relation on them, with the mixture StdSimplex.mix; independence is the iff form at weights in (0,1]; continuity is the textbook strict form (α, β ∈ (0,1)). The converse (expected-utility preferences satisfy the axioms) is isVNMPreference_prefersEU / isVNMPreference_iff_exists_eu in the same module. Axioms-clean."
       }
     }
   ]
