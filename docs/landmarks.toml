@@ -259,3 +259,47 @@ also = [
   "MathFin.Contracts.SwapModel.value_cmsSwaplet_eq",
   "MathFin.Contracts.value_fixedFlows_hjm",
 ]
+
+[[landmark]]
+decl = "MathFin.Contracts.Payoff.IsPiecewiseLinear.pathPV_staticHedge"
+title = "A compiler from payoffs to static hedges"
+summary = """Every payoff of the terminal price built from constants, the price, sums, differences, \
+maxima, minima and constant multiples compiles to a bond, a forward and finitely many calls that \
+pay the same along every path with a nonnegative price, for any discount. In normal form the \
+weight of each call is the jump in the payoff's slope at its strike, and the capped call compiles \
+to exactly long the lower call, short the upper. Under a pricing measure the payoff is priced \
+from the market's call prices."""
+scope = """A single underlying observed once, at T. Payoffs outside the fragment (products of two \
+prices, path dependence) are not compiled. The compiled hedge is not claimed cheapest or unique \
+beyond its normal form, and the smooth case is the separate Carr–Madan spanning formula."""
+also = [
+  "MathFin.Contracts.staticHedge_cappedCall_normalize",
+  "MathFin.Contracts.StaticHedge.jump_eval_of_mem_normalize",
+  "MathFin.Market.IsPricingMeasure.exists_isNormalizedCallPrice_price_pay",
+]
+
+[[landmark]]
+decl = "MathFin.Contracts.BlackScholes.europeanCall_hedge_in_stock_eq_delta"
+title = "The replicating holding of the call is its delta"
+summary = """In Black–Scholes, the discounted call payoff is its Black–Scholes value plus the gains \
+of a unique square-integrable holding in the discounted stock, and that holding equals the delta \
+Φ(d₁) almost everywhere. Every contract paying at fixed dates up to T with square-integrable cash flows \
+has a unique such holding, at a cost equal to its value."""
+scope = """Wealth is in discounted units. The identification with a formula is for the European \
+call only; for a general contract the holding exists and is unique but is not given by a formula \
+(Clark–Ocone). One stock, constant coefficients."""
+also = [
+  "MathFin.Contracts.BlackScholes.exists_unique_hedge_in_stock",
+]
+
+[[landmark]]
+decl = "ProbabilityTheory.IsBrownianReal.reflection_principle"
+title = "The reflection principle"
+summary = """For a Brownian motion, t ≥ 0 and a > 0, the probability that the path reaches a by \
+time t is twice the probability that it is above a at t. Almost surely, the path has no \
+derivative, not even a right derivative, at any time."""
+scope = """Proved without a strong Markov property, from first passages on finite grids and path \
+continuity, so the joint law of the maximum and the endpoint is not stated."""
+also = [
+  "ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt",
+]

@@ -22,6 +22,8 @@ any of it."""
 landmarks = [
   "MathFin.binomialPrice_call_tendsto_bs_closed",
   "MathFin.Contracts.value_europeanCall_sub_put_of_martingale",
+  "MathFin.Contracts.Payoff.IsPiecewiseLinear.pathPV_staticHedge",
+  "MathFin.Contracts.BlackScholes.europeanCall_hedge_in_stock_eq_delta",
   "MathFin.SVI.extendedCertificateFormula_iff_bsSmile_convex",
   "MathFin.calendar_free_iff",
   "MathFin.Dupire.dupire_weak",
