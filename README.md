@@ -52,8 +52,9 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   a contract.
 - **Contracts.** A payoff language separate from any model. A compiler sends every piecewise-linear
   payoff of the terminal price to a bond, a forward and calls, proved to pay the same on every
-  path, so any market prices it from its smile. In Black–Scholes, every contract paying at fixed
-  dates with square-integrable cash flows is replicated by a unique holding in the stock, at a cost
+  path with a nonnegative price, so a market with a pricing measure prices it from its call
+  prices. In Black–Scholes, every contract paying at fixed dates up to T with square-integrable
+  cash flows is replicated by a unique holding in the stock, at a cost
   equal to its value. The autocallable note is written in the language and proved to redeem once.
 - **Trees and the limit.** Cox–Ross–Rubinstein converges to Black–Scholes.
 - **The smile.** An exact polynomial-sign certificate for butterfly-free raw SVI; calendar
