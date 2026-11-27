@@ -38,7 +38,10 @@ it need not be integrable.
 Branching contracts (`ifThen`), currency, and the lifecycle layer (outstanding
 notional, termination, partial redemption). Each is additive and each waits for
 the corpus entry that forces it; see
-`docs/specs/2026-08-16-contracts-tower-design.md` §2.3.
+`docs/specs/2026-08-16-contracts-tower-design.md` §2.3. The autocallable note
+(`Contracts/Instruments/Autocall.lean`), which the spec expected to force branching and
+termination, does not: its first-passage structure is a product of indicators, so it is written
+with these constructors (spec §2.3, amendment of 2026-11-27).
 
 ## Main definitions
 
