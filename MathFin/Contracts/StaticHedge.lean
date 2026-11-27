@@ -52,6 +52,10 @@ that is correct for the function the portfolio stands for:
 portfolios, `add`, `sub`, `max`, `min` to the operations, a product with a constant to `smul`, and
 anything else (and `obs` at another date) to the empty portfolio. The list `calls` is not reduced:
 it may hold calls of weight zero and calls at one strike twice, which is the same function.
+`StaticHedge.normalize` reduces it to the normal form, merged, sorted and without zero weights, with
+the same value (`StaticHedge.eval_normalize`); the normal form is what the slope bridge to the
+Carr–Madan formula reads (`Models/ModelFree/CarrMadan.lean`, `StaticHedge.jump_eval_of_mem_normalize`),
+the finite exact case of `carrMadan_spanning`, which spans a smooth payoff by a continuum of calls.
 Outside the fragment the compiler returns a portfolio that no theorem relates to the payoff.
 
 ## Main definitions
@@ -61,6 +65,8 @@ Outside the fragment the compiler returns a portfolio that no theorem relates to
   `eval` as a function of the terminal price and its `contract` at a date `T`.
 * `StaticHedge.add`, `StaticHedge.sub`, `StaticHedge.smul`, `StaticHedge.posPart`,
   `StaticHedge.sup`, `StaticHedge.inf`: the operations the compiler is built from.
+* `insertCall`, `StaticHedge.normalize`: the normal form of a portfolio, its calls merged by strike,
+  sorted, and without zero weights.
 * `Payoff.IsPiecewiseLinear`: the payoffs of one terminal observation built from constants,
   `obs () T`, `add`, `sub`, `max`, `min` and the product with a constant.
 * `Payoff.staticHedge`: the compiler.
@@ -77,6 +83,9 @@ Outside the fragment the compiler returns a portfolio that no theorem relates to
   present value along every scenario with nonnegative terminal observation, for every discount
   function.
 * `staticHedge_europeanCallPayoff`: the compiler maps the call payoff to the one call at its strike.
+* `StaticHedge.eval_normalize`: the normal form is worth what the portfolio is worth, at every price.
+* `staticHedge_cappedCall_normalize`: the capped call's two calls, compiled and normalised, are the
+  portfolio `⟨0, 0, [(K₁, 1), (K₂, -1)]⟩` for `K₁ < K₂`.
 
 ## References
 
@@ -168,6 +177,78 @@ theorem callSum_split_eq_zero (K : ℝ) (L : List (ℝ × ℝ)) (S : ℝ) (hS : 
     · have h1 : max (S - p.1) 0 = 0 := max_eq_right (by linarith [not_lt.1 hp])
       simp [if_neg hp, h1]
 
+/-- Inserting a call into a list of calls, kept sorted by strictly increasing strike: a call at a
+strike already present is merged into it, the weights adding. -/
+def insertCall (p : ℝ × ℝ) : List (ℝ × ℝ) → List (ℝ × ℝ)
+  | [] => [p]
+  | q :: L =>
+    if p.1 < q.1 then p :: q :: L
+    else if p.1 = q.1 then (q.1, q.2 + p.2) :: L
+    else q :: insertCall p L
+
+/-- **Inserting a call adds it to the call sum.** -/
+theorem callSum_insertCall (p : ℝ × ℝ) (L : List (ℝ × ℝ)) (S : ℝ) :
+    callSum (insertCall p L) S = p.2 * max (S - p.1) 0 + callSum L S := by
+  induction L with
+  | nil => simp [insertCall]
+  | cons q L ih =>
+    unfold insertCall
+    split_ifs with h1 h2
+    · simp only [callSum_cons]
+    · simp only [callSum_cons, ← h2]
+      ring
+    · simp only [callSum_cons, ih]
+      ring
+
+/-- The strikes of the list after an insertion are the strikes before, or the inserted one. -/
+theorem mem_insertCall {p q : ℝ × ℝ} {L : List (ℝ × ℝ)} (h : q ∈ insertCall p L) :
+    q.1 = p.1 ∨ q ∈ L := by
+  induction L with
+  | nil => simp only [insertCall, List.mem_singleton] at h; exact Or.inl (by rw [h])
+  | cons r L ih =>
+    unfold insertCall at h
+    split_ifs at h with h1 h2
+    · rcases List.mem_cons.1 h with rfl | h
+      · exact Or.inl rfl
+      · exact Or.inr h
+    · rcases List.mem_cons.1 h with rfl | h
+      · exact Or.inl h2.symm
+      · exact Or.inr (List.mem_cons_of_mem _ h)
+    · rcases List.mem_cons.1 h with rfl | h
+      · exact Or.inr List.mem_cons_self
+      · rcases ih h with h | h
+        · exact Or.inl h
+        · exact Or.inr (List.mem_cons_of_mem _ h)
+
+/-- **Inserting a call keeps the strikes strictly increasing.** -/
+theorem pairwise_insertCall (p : ℝ × ℝ) :
+    ∀ L : List (ℝ × ℝ), L.Pairwise (fun a b ↦ a.1 < b.1) →
+      (insertCall p L).Pairwise (fun a b ↦ a.1 < b.1)
+  | [], _ => by simp [insertCall]
+  | r :: L, hL => by
+    obtain ⟨h1, h2⟩ := List.pairwise_cons.1 hL
+    unfold insertCall
+    split_ifs with hlt heq
+    · refine List.pairwise_cons.2 ⟨fun q hq ↦ ?_, hL⟩
+      rcases List.mem_cons.1 hq with rfl | hq
+      · exact hlt
+      · exact hlt.trans (h1 q hq)
+    · exact List.pairwise_cons.2 ⟨h1, h2⟩
+    · refine List.pairwise_cons.2 ⟨fun q hq ↦ ?_, pairwise_insertCall p L h2⟩
+      rcases mem_insertCall hq with h | h
+      · exact h ▸ lt_of_le_of_ne (not_lt.1 hlt) (Ne.symm heq)
+      · exact h1 q h
+
+/-- Dropping the calls of weight zero does not change the call sum. -/
+theorem callSum_filter_ne_zero (L : List (ℝ × ℝ)) (S : ℝ) :
+    callSum (L.filter fun p ↦ decide (p.2 ≠ 0)) S = callSum L S := by
+  induction L with
+  | nil => simp
+  | cons p L ih =>
+    by_cases h : p.2 = 0
+    · simp [List.filter_cons, h, ih, callSum_cons]
+    · simp [List.filter_cons, h, ih, callSum_cons]
+
 /-! ### Portfolios and their operations -/
 
 /-- **A static hedge**: an amount of the zero-coupon bond paying `1` at the date, an amount of the
@@ -212,6 +293,38 @@ theorem eval_smul (c : ℝ) (H : StaticHedge) (S : ℝ) : (H.smul c).eval S = c 
 theorem eval_sub (H H' : StaticHedge) (S : ℝ) : (H.sub H').eval S = H.eval S - H'.eval S := by
   simp only [StaticHedge.sub, eval_add, eval_smul]
   ring
+
+/-- **The normal form of a portfolio**: the calls at one strike merged into one (the weights
+adding), sorted by strictly increasing strike, and the calls of weight zero dropped. -/
+noncomputable def normalize (H : StaticHedge) : StaticHedge :=
+  ⟨H.bondAmount, H.forwardAmount,
+    (H.calls.foldr insertCall []).filter fun p ↦ decide (p.2 ≠ 0)⟩
+
+/-- Merging the calls of a list into a sorted list adds their call sums. -/
+theorem callSum_foldr_insertCall (L : List (ℝ × ℝ)) (S : ℝ) :
+    callSum (L.foldr insertCall []) S = callSum L S := by
+  induction L with
+  | nil => simp
+  | cons p L ih => rw [List.foldr_cons, callSum_insertCall, ih, callSum_cons]
+
+/-- **Normalising does not change the value.** -/
+theorem eval_normalize (H : StaticHedge) (S : ℝ) : H.normalize.eval S = H.eval S := by
+  simp only [eval, normalize, callSum_filter_ne_zero, callSum_foldr_insertCall]
+
+/-- The strikes of a normalised portfolio are strictly increasing, so each appears once. -/
+theorem pairwise_normalize_calls (H : StaticHedge) :
+    H.normalize.calls.Pairwise (fun a b ↦ a.1 < b.1) := by
+  have h : ∀ L : List (ℝ × ℝ), (L.foldr insertCall []).Pairwise (fun a b ↦ a.1 < b.1) := by
+    intro L
+    induction L with
+    | nil => simp
+    | cons p L ih => exact pairwise_insertCall p _ ih
+  exact (h H.calls).filter _
+
+/-- No call of a normalised portfolio has weight zero. -/
+theorem weight_ne_zero_of_mem_normalize {H : StaticHedge} {q : ℝ × ℝ}
+    (hq : q ∈ H.normalize.calls) : q.2 ≠ 0 := by
+  simpa [normalize] using (List.mem_filter.1 hq).2
 
 /-- The portfolio of the positive part of the affine function `a + b S`. For `b < 0` it is
 `(a + b S) + (−b)(S − r)⁺` and for `b > 0` it is `b (S − r)⁺`, where `r = −a / b` is the root; for
@@ -543,5 +656,20 @@ theorem staticHedge_europeanCallPayoff (K : ℝ) (T : ℝ≥0) :
   norm_num [europeanCallPayoff, Payoff.staticHedge, StaticHedge.sup, StaticHedge.inf,
     StaticHedge.sub, StaticHedge.add, StaticHedge.smul, StaticHedge.posPart,
     StaticHedge.sortKinks, List.mergeSort_nil, StaticHedge.posAux, StaticHedge.affinePos]
+
+/-- **The capped call, compiled and normalised.** The payoff of the two cash flows of
+`cappedCall K₁ K₂ T` (`Contracts/Instruments/Options.lean`), a call at `K₁` less a call at `K₂`,
+compiles to the calls `[(K₁, 1), (K₂, -1)]` in the order of the syntax; normalised (sorted by
+strike, merged, weights nonzero) it is the portfolio with no bond, no forward and exactly those two
+calls, for `K₁ < K₂`. (At `K₁ = K₂` the two calls cancel and the normal form is empty.) -/
+theorem staticHedge_cappedCall_normalize {K₁ K₂ : ℝ} (h : K₁ < K₂) (T : ℝ≥0) :
+    ((Payoff.sub (europeanCallPayoff K₁ T) (europeanCallPayoff K₂ T)).staticHedge T).normalize
+      = ⟨0, 0, [(K₁, 1), (K₂, -1)]⟩ := by
+  have e : (Payoff.sub (europeanCallPayoff K₁ T) (europeanCallPayoff K₂ T)).staticHedge T
+      = ⟨0, 0, [(K₁, 1), (K₂, -1)]⟩ := by
+    simp only [Payoff.staticHedge, staticHedge_europeanCallPayoff]
+    simp [StaticHedge.sub, StaticHedge.add, StaticHedge.smul]
+  rw [e]
+  simp [StaticHedge.normalize, insertCall, h]
 
 end MathFin.Contracts
