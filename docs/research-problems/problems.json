@@ -592,7 +592,12 @@
           "blueprint": "thm:kyle-equilibrium-unique",
           "needs": [],
           "lean": "MathFinFrontier.kyle_equilibrium_unique",
-          "note": "Stated after Monteiro–Tourky, Theorem 1.1 (uniqueness direction), closed by sorry; a proof settles the problem (#537)."
+          "note": "Stated after Monteiro–Tourky, Theorem 1.1 (uniqueness direction), closed by sorry; a proof settles the problem (#537).",
+          "pinned": {
+            "commit": "09f0f85ebf5afcbbe8badf166f136603bbc92834",
+            "pr": 555,
+            "statement_sha256": "c3ba738d5c32dc0da7f44caa6283cf46443e9193abe5ad8ff0fe5670f7364898"
+          }
         }
       },
       "known_results": [
@@ -635,7 +640,8 @@
           "status": "resolution_reported",
           "reason": "Stated in Lean from Theorem 1.1 of the reported resolution (MathFinFrontier/OpenProblems/KyleUniqueness.lean)."
         }
-      ]
+      ],
+      "attempts": {}
     },
     {
       "id": "MF-OP-009",
@@ -1263,9 +1269,15 @@
           "blueprint": "thm:uniform-convex-complete-mixability",
           "needs": [],
           "lean": "MathFinFrontier.uniform_convex_completelyMixable",
-          "note": "Stated with couplings on Fin n → ℝᵈ; uses only Mathlib."
+          "note": "Stated with couplings on Fin n → ℝᵈ; uses only Mathlib.",
+          "pinned": {
+            "commit": "09f0f85ebf5afcbbe8badf166f136603bbc92834",
+            "pr": 555,
+            "statement_sha256": "649bd3eda4bd660c0f8d6267cfe518ccbcc782e52c041abea20c0dc669b61757"
+          }
         }
-      }
+      },
+      "attempts": {}
     },
     {
       "id": "MF-OP-017",
@@ -1354,9 +1366,15 @@
           "blueprint": "thm:bounded-law-complete-mixability",
           "needs": [],
           "lean": "MathFinFrontier.absolutelyContinuous_eventually_completelyMixable",
-          "note": "Stated in the positive direction; a proof settles the conflict between the two unrefereed claims."
+          "note": "Stated in the positive direction; a proof settles the conflict between the two unrefereed claims.",
+          "pinned": {
+            "commit": "09f0f85ebf5afcbbe8badf166f136603bbc92834",
+            "pr": 555,
+            "statement_sha256": "d3d62c34577fa72f5e143e7ea4fd488476e78e8309920d8695690692c64cf22d"
+          }
         }
-      }
+      },
+      "attempts": {}
     },
     {
       "id": "MF-OP-018",

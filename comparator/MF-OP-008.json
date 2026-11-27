@@ -1,0 +1,13 @@
+{
+  "challenge_module": "MathFinFrontier.OpenProblems.KyleUniqueness",
+  "solution_module": "Catedra.MF_OP_008.Solution",
+  "theorem_names": [
+    "MathFinFrontier.kyle_equilibrium_unique"
+  ],
+  "definition_names": [],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ]
+}

@@ -9,6 +9,11 @@ name: comparator
 # (leanchecker-paranoid, lean4lean, nanoda, con-leche, con-ron), so the verdict needs every one
 # of them, not only Lean's kernel. The project is built and exported inside a `bwrap` sandbox.
 #
+# The cátedra's open problems use the same check (docs/specs/2026-11-20-catedra-design.md):
+# `comparator/<MF-OP-id>.json` names the pinned statement as the challenge (in `MathFinFrontier/`
+# while open, in `Catedra/<ID>/Challenge.lean` once solved) and `Catedra/<ID>/Solution.lean` as the
+# solution. A problem with no solution yet is listed and skipped.
+#
 # Runs on pull requests and pushes to main that change an entry or the library its Solutions use,
 # monthly, and on demand. docs/palomar.md lists the entries and their registry submissions.
 
@@ -22,6 +27,9 @@ on:
       - Challenge.lean
       - Solution.lean
       - comparator.json
+      - comparator/**
+      - Catedra/**
+      - MathFinFrontier/**
       - Palomar/**
       - MathFin/**
       - lean-toolchain
@@ -31,6 +39,9 @@ on:
       - Challenge.lean
       - Solution.lean
       - comparator.json
+      - comparator/**
+      - Catedra/**
+      - MathFinFrontier/**
       - Palomar/**
       - MathFin/**
       - lean-toolchain
@@ -65,6 +76,13 @@ jobs:
         run: |
           status=0
           for config in comparator.json Palomar/*/comparator.json; do
+            echo "::group::$config"
+            lake comparator --config "$config" --paranoid || { echo "::error::$config failed"; status=1; }
+            echo "::endgroup::"
+          done
+          for config in comparator/*.json; do
+            solution=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['solution_module'].replace('.', '/') + '.lean')" "$config")
+            if [ ! -f "$solution" ]; then echo "$config: no solution yet ($solution)"; continue; fi
             echo "::group::$config"
             lake comparator --config "$config" --paranoid || { echo "::error::$config failed"; status=1; }
             echo "::endgroup::"
