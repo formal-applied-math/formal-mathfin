@@ -13,8 +13,8 @@ no-arbitrage theory, derivative pricing, fixed income, portfolio choice, risk me
 actuarial mathematics.
 
 The [corpus](docs/glossary.md#corpus) records 934 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 888 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 28 are
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 890 are proved in
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 26 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after,
 and say so. The library contains no `sorry`, and a build-time audit checks that every library
 theorem the corpus cites depends only on the axioms `propext`, `Classical.choice` and
@@ -42,6 +42,7 @@ shows it holds whenever $`|r|\sqrt{T} < \sigma`$.
 The [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) prints
 each of these exactly as Lean states it, with what it does not prove beside it.
 
+- **Brownian motion.** The reflection principle, and almost surely no derivative at any time.
 - **Stochastic calculus.** Itô's formula for f(t, B_t) with no growth condition, and for one or
   two Itô processes on one Brownian motion with continuous adapted coefficients; Lévy's characterization; Girsanov's theorem for
   bounded θ; martingale representation; for Lipschitz coefficients, a unique fixed point of the
@@ -68,16 +69,17 @@ each of these exactly as Lean states it, with what it does not prove beside it.
   of expected losses over a set of probability vectors. Lundberg's bound on the probability of
   ruin of a random-walk surplus. The von Neumann–Morgenstern theorem on finitely many outcomes.
 - **Markov chains.** The strong Markov property and the recurrence criterion on a countable state
-  space; on a finite one, the unique stationary distribution and convergence to it.
+  space; on a finite one, the unique stationary distribution, convergence to it, and the ergodic
+  theorem in mean square.
 
 ## How it is kept honest
 
 - **Every entry has a status**, and only `full` and `library_wrapper` entries may be cited as the
   named theorem. Each entry also publishes, beside its description, what it leaves out.
-- **Reduced cores.** Twenty-eight of the results prove less than the theorem they are named after.
-  Six assume a structure whose fields include the textbook conclusion, seven rest on a named
-  hypothesis that is not proved, and fifteen prove a special case. Each is listed in
-  [`docs/coverage.md`](docs/coverage.md).
+- **Reduced cores.** Twenty-six of the results prove less than the theorem they are named after.
+  Two assume a structure whose fields include the textbook conclusion, seven rest on a named
+  hypothesis that is not proved, and seventeen prove a special case or part of the theorem. Each
+  is listed in [`docs/coverage.md`](docs/coverage.md).
 - **Known gaps.** Girsanov is proved for bounded θ only; under Novikov's condition only
   E[Z_T] = 1 is proved. In the Brownian market only completeness ⇒ uniqueness of the pricing
   measure is proved, and the hedge of a general claim is not identified with a formula

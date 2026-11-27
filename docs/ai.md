@@ -71,8 +71,10 @@ Each of these is recorded where it was found, and each left a rule or a gate beh
   satisfiable notion, and for one asset the hypothesis is now proved
   ([values-review.md](values-review.md), "One pasting trunk").
 - **Conclusions hidden in hypotheses.** Some entries assumed a structure whose fields contain the
-  textbook conclusion. They are kept, but marked `reduced_core` and said to be so in the same
-  field; a `full` entry whose proof is a definitional `rfl` now fails a gate.
+  textbook conclusion. Each is marked `reduced_core` and says so in the same field, and a `full`
+  entry whose proof is a definitional `rfl` now fails a gate. Of the eleven such entries in
+  November 2026, nine have since been replaced by proofs (the reflection principle, nowhere
+  differentiability, Novikov's unit mean, the Markov theorems); two remain.
 - **Islands.** Proved results that no proof tied to the rest of the library: 34 of them on
   7 November 2026, among them the equivalent martingale measures. A node now joins the tree only
   through a shared object or a bridge theorem, and the count of islands is a ratchet, now zero.
