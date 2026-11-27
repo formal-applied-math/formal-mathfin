@@ -11,6 +11,8 @@ public import Mathlib.MeasureTheory.Measure.Prod
 public import Mathlib.Probability.ConditionalProbability
 public import Mathlib.Analysis.Convex.Combination
 public import Mathlib.Analysis.Normed.Module.FiniteDimension
+public import Mathlib.MeasureTheory.Measure.Haar.Unique
+public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 
 /-!
 # Complete mixability
@@ -105,12 +107,27 @@ theorem JointlyMixable.of_hasLaw {Ω : Type*} [MeasurableSpace Ω] {P : Measure 
     [IsProbabilityMeasure P] {n : ℕ} {μ : Fin n → Measure E} {X : Fin n → Ω → E}
     (hX : ∀ i, Measurable (X i)) (hlaw : ∀ i, P.map (X i) = μ i) (c : E)
     (hc : ∀ᵐ ω ∂P, ∑ i, X i ω = c) : JointlyMixable μ := by
-  sorry
+  have hF : Measurable fun ω i ↦ X i ω := measurable_pi_iff.2 hX
+  refine ⟨P.map fun ω i ↦ X i ω, (Measure.isProbabilityMeasure_map_iff hF.aemeasurable).2 inferInstance, fun i ↦ ?_, c, ?_⟩
+  · rw [Measure.map_map (measurable_pi_apply i) hF]
+    exact hlaw i
+  · exact (ae_map_iff hF.aemeasurable (measurableSet_sum_eq c)).2 hc
 
 /-- **An affine image of a joint mix is a joint mix.** -/
 theorem JointlyMixable.map_affine {n : ℕ} {μ : Fin n → Measure ℝ} (h : JointlyMixable μ)
     (a b : ℝ) : JointlyMixable fun i ↦ (μ i).map fun x ↦ a * x + b := by
-  sorry
+  obtain ⟨π, hπ, hm, c, hc⟩ := h
+  have hg : Measurable fun (x : Fin n → ℝ) i ↦ a * x i + b :=
+    measurable_pi_iff.2 fun i ↦ by fun_prop
+  refine ⟨π.map fun x i ↦ a * x i + b, (Measure.isProbabilityMeasure_map_iff hg.aemeasurable).2 hπ, fun i ↦ ?_,
+    a * c + n * b, ?_⟩
+  · show _ = (μ i).map _
+    rw [Measure.map_map (measurable_pi_apply i) hg, ← hm i,
+      Measure.map_map (by fun_prop) (measurable_pi_apply i)]
+    rfl
+  · refine (ae_map_iff hg.aemeasurable (measurableSet_sum_eq _)).2 ?_
+    filter_upwards [hc] with x hx
+    simp [Finset.sum_add_distrib, ← Finset.mul_sum, hx]
 
 namespace CompletelyMixable
 
@@ -303,20 +320,118 @@ end Uniform
 
 section UniformInterval
 
+/-- The representative in `(0, 1]` of a point of the circle `ℝ/ℤ`. -/
+private noncomputable def circleVal (z : UnitAddCircle) : ℝ :=
+  (AddCircle.equivIoc 1 0 z : Ioc (0 : ℝ) (0 + 1))
+
+private lemma circleVal_mem (z : UnitAddCircle) : circleVal z ∈ Ioc (0 : ℝ) 1 := by
+  simpa [circleVal] using (AddCircle.equivIoc 1 0 z).2
+
+private lemma coe_circleVal (z : UnitAddCircle) : ((circleVal z : ℝ) : UnitAddCircle) = z :=
+  AddCircle.coe_equivIoc
+
+private lemma circleVal_eq {y : ℝ} {z : UnitAddCircle} (hy : y ∈ Ioc (0 : ℝ) 1)
+    (h : (y : UnitAddCircle) = z) : circleVal z = y :=
+  (AddCircle.coe_eq_coe_iff_of_mem_Ioc (p := 1) (a := 0) (by simpa using circleVal_mem z)
+    (by simpa using hy)).1 ((coe_circleVal z).trans h.symm)
+
+/-- The uniform law on `(0, 1]` maps onto the uniform law on `[a, b]` under `x ↦ (b - a) x + a`. -/
+private lemma map_affine_uniform {a b : ℝ} (hab : a < b) :
+    (volume.restrict (Ioc (0 : ℝ) 1)).map (fun x ↦ (b - a) * x + a) = volume[|Icc a b] := by
+  have hp : 0 < b - a := sub_pos.2 hab
+  let e : ℝ ≃ₜ ℝ := (Homeomorph.mulLeft₀ (b - a) hp.ne').trans (Homeomorph.addRight a)
+  have he : MeasurableEmbedding e := e.measurableEmbedding
+  have hmap : volume.map e = ENNReal.ofReal |(b - a)⁻¹| • volume := by
+    show volume.map ((· + a) ∘ ((b - a) * ·)) = _
+    rw [← Measure.map_map (measurable_add_const a) (measurable_const_mul _),
+      Real.map_volume_mul_left hp.ne', Measure.map_smul, map_add_right_eq_self]
+  have hpre : e ⁻¹' Icc a b = Icc 0 1 := by
+    ext x
+    simp only [mem_preimage, mem_Icc, e, Homeomorph.trans_apply, Homeomorph.coe_mulLeft₀,
+      Homeomorph.coe_addRight]
+    constructor
+    · rintro ⟨h1, h2⟩
+      exact ⟨by by_contra h; push_neg at h; nlinarith, by by_contra h; push_neg at h; nlinarith⟩
+    · rintro ⟨h1, h2⟩
+      exact ⟨by nlinarith [mul_nonneg hp.le h1], by nlinarith [mul_nonneg hp.le (sub_nonneg.2 h2)]⟩
+  show (volume.restrict (Ioc (0 : ℝ) 1)).map e = _
+  rw [Measure.restrict_congr_set Ioc_ae_eq_Icc, ← hpre, ← he.restrict_map, hmap,
+    Measure.restrict_smul, ProbabilityTheory.cond, Real.volume_Icc, abs_of_pos (inv_pos.2 hp),
+    ENNReal.ofReal_inv_of_pos hp]
+
+private lemma measurePreserving_circleVal :
+    MeasurePreserving circleVal volume (volume.restrict (Ioc (0 : ℝ) 1)) := by
+  have := (measurePreserving_subtype_coe (μa := volume) measurableSet_Ioc).comp
+    (AddCircle.measurePreserving_equivIoc (T := 1) (a := 0))
+  simpa [circleVal, Function.comp_def] using this
+
 /-- **The uniform law on `(0, 1]` is `3`-completely mixable**, through `x`, the fractional part
 of `-2x` and the fractional part of `x + 1/2`. Off the null set `{1/2, 1}` the three add up to
 `3/2`: for `x < 1/2` they are `x`, `1 - 2x`, `x + 1/2`, and for `x > 1/2` they are `x`,
 `2 - 2x`, `x - 1/2`. On the circle `ℝ/ℤ` the three maps are the identity, multiplication by
 `-2` and a rotation, each preserving the Haar measure. -/
-theorem completelyMixable_three_uniformIoc : CompletelyMixable 3 (volume.restrict (Ioc (0 : ℝ) 1)) := by
-  sorry
+theorem completelyMixable_three_uniformIoc :
+    CompletelyMixable 3 (volume.restrict (Ioc (0 : ℝ) 1)) := by
+  have hmk : MeasurePreserving ((↑) : ℝ → UnitAddCircle) (volume.restrict (Ioc 0 1)) volume := by
+    simpa using UnitAddCircle.measurePreserving_mk 0
+  have h1 := (measurePreserving_circleVal.comp
+    (Measure.measurePreserving_zsmul (volume : Measure UnitAddCircle) (n := -2) (by norm_num))).comp hmk
+  have h2 := (measurePreserving_circleVal.comp
+    (measurePreserving_add_right (volume : Measure UnitAddCircle) ((1 / 2 : ℝ) : UnitAddCircle))).comp
+    hmk
+  refine CompletelyMixable.of_measurePreserving
+    ![fun x ↦ x, fun x ↦ circleVal ((-2 : ℤ) • (x : UnitAddCircle)),
+      fun x ↦ circleVal ((x : UnitAddCircle) + ((1 / 2 : ℝ) : UnitAddCircle))]
+    (fun i ↦ ?_) (3 / 2) ?_
+  · fin_cases i
+    · exact MeasurePreserving.id _
+    · exact h1
+    · exact h2
+  · rw [ae_restrict_iff' measurableSet_Ioc]
+    filter_upwards [(countable_singleton (1 / 2 : ℝ)).ae_notMem volume,
+      (countable_singleton (1 : ℝ)).ae_notMem volume] with x hx2 hx1 hx
+    have hx2 : x ≠ 1 / 2 := hx2
+    have hx1 : x ≠ 1 := hx1
+    have hx1 : x < 1 := lt_of_le_of_ne hx.2 hx1
+    have h0 := hx.1
+    simp only [Fin.sum_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons]
+    rcases lt_or_gt_of_ne hx2 with h | h
+    · rw [circleVal_eq (y := 1 - 2 * x) ⟨by linarith, by linarith⟩ (by
+          rw [show 1 - 2 * x = (-2 : ℤ) • x + 1 by rw [zsmul_eq_mul]; push_cast; ring,
+            AddCircle.coe_add, AddCircle.coe_zsmul, AddCircle.coe_period, add_zero]),
+        circleVal_eq (y := x + 1 / 2) ⟨by linarith, by linarith⟩ (AddCircle.coe_add _ _)]
+      ring
+    · rw [circleVal_eq (y := 2 - 2 * x) ⟨by linarith, by linarith⟩ (by
+          rw [show 2 - 2 * x = (-2 : ℤ) • x + 1 + 1 by rw [zsmul_eq_mul]; push_cast; ring,
+            AddCircle.coe_add, AddCircle.coe_add, AddCircle.coe_zsmul, AddCircle.coe_period,
+            add_zero, add_zero]),
+        circleVal_eq (y := x - 1 / 2) ⟨by linarith, by linarith⟩ (by
+          rw [show x - 1 / 2 = x + 1 / 2 - 1 by ring, AddCircle.coe_sub, AddCircle.coe_period,
+            sub_zero, AddCircle.coe_add])]
+      ring
 
 /-- **The uniform law on an interval is `n`-completely mixable for every `n ≥ 2`**
 (Gaffke–Rüschendorf): `2` by reflection through the midpoint, `3` by
 `completelyMixable_three_uniformIoc`, and every `n ≥ 2` is a sum of twos and threes. -/
 theorem completelyMixable_uniformIcc {a b : ℝ} (hab : a < b) {n : ℕ} (hn : 2 ≤ n) :
     CompletelyMixable n (volume[|Icc a b]) := by
-  sorry
+  have hp : 0 < b - a := sub_pos.2 hab
+  have h0 : volume (Icc a b) ≠ 0 := by simpa using hab
+  have h2 : CompletelyMixable 2 (volume[|Icc a b]) := by
+    simpa using completelyMixable_of_symmetric (volume : Measure ℝ) isClosed_Icc.measurableSet h0
+      (by simp) ((a + b) / 2) (k := 1) (fun x hx ↦ by
+        simp only [two_nsmul]
+        exact ⟨by linarith [hx.2], by linarith [hx.1]⟩) le_rfl
+  have h3 : CompletelyMixable 3 (volume[|Icc a b]) := by
+    rw [← map_affine_uniform hab]
+    exact completelyMixable_three_uniformIoc.map_affine (b - a) a
+  induction n using Nat.strong_induction_on with
+  | _ n ih =>
+    rcases (by omega : n = 2 ∨ n = 3 ∨ 4 ≤ n) with rfl | rfl | h4
+    · exact h2
+    · exact h3
+    · simpa [Nat.sub_add_cancel hn] using (ih (n - 2) (by omega) (by omega)).add h2
 
 end UniformInterval
 

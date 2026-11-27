@@ -852,6 +852,7 @@ public import MathFin.Risk.UtilityDerivation
 -- state) pointwise monotonicity and continuity
 public import MathFin.Risk.Coherent
 public import MathFin.Risk.CompleteMixability
+public import MathFin.Risk.CompleteMixability.Average
 public import MathFin.Risk.CompleteMixability.LargeN
 public import MathFin.Risk.CompleteMixability.Pairing
 public import MathFin.Risk.CompleteMixability.QuantileGrid

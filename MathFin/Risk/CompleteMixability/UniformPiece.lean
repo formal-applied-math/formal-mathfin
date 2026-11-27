@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Risk.CompleteMixability.QuantileGrid
+public import MathFin.Risk.CompleteMixability.Average
 
 /-!
 # Laws with a uniform piece are completely mixable in many copies
@@ -56,6 +57,25 @@ namespace MathFin
 
 open MeasureTheory ProbabilityTheory Set
 open scoped ENNReal
+
+/-- **The coupling for a fixed count `k` of `T`-copies.** For `|m - k| ≤ 1` and room for the
+uniform blocks, there is a coupling of `N + 1` coordinates with sum identically
+`(N - m) c + m · mean T + mean E`, law `E` in the last coordinate, and, in the first `N`, `k` copies
+of `T`, `N - k` copies of `U = U[c - H, c + H]` and the half-interval correction
+`4 E[J] (U[c, c + H] - U)` with `2H E[J] = (m - k)(mean T - c)`. The construction is in the
+module docstring. -/
+theorem exists_coupling_of_count {T E : Measure ℝ} [IsProbabilityMeasure T]
+    [IsProbabilityMeasure E] {c H α R β L m : ℝ} (hH : 0 < H) (hT : T (Icc α (α + R))ᶜ = 0)
+    (hU : Icc (c - H) (c + H) ⊆ Icc α (α + R)) (hE : E (Icc β (β + L))ᶜ = 0) {N k : ℕ}
+    (hk : k ≤ N) (hm : |m - k| ≤ 1) (hroom : 2 * (2 * R + L) / H + 8 ≤ (N - k : ℝ)) :
+    ∃ ρ : Measure (Fin (N + 1) → ℝ), IsProbabilityMeasure ρ ∧
+      (∀ᵐ x ∂ρ, ∑ i, x i = (N - m) * c + m * ∫ x, x ∂T + ∫ x, x ∂E) ∧
+      ρ.map (fun x ↦ x (Fin.last N)) = E ∧
+      ∀ B, MeasurableSet B → (∑ i : Fin N, ρ.map (fun x ↦ x i.castSucc) B).toReal =
+        k * (T B).toReal + (N - k) * (volume[|Icc (c - H) (c + H)] B).toReal +
+          2 * (m - k) * (∫ x, x ∂T - c) / H *
+            ((volume[|Icc c (c + H)] B).toReal - (volume[|Icc (c - H) (c + H)] B).toReal) := by
+  sorry
 
 /-- **Laws with a uniform piece, jointly with one more law.** `N` copies of
 `G = q U[c - H, c + H] + (1 - q) T`, with `T` and the uniform piece in an interval of length
