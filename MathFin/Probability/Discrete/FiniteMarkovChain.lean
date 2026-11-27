@@ -6,7 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Discrete.MarkovPathSpace
-public import Mathlib.Geometry.Convex.ConvexSpace.Defs
+public import MathFin.Probability.Analysis.StdSimplexMix
 public import Mathlib.LinearAlgebra.Matrix.Stochastic
 public import Mathlib.NumberTheory.FrobeniusNumber
 public import Mathlib.Analysis.SpecificLimits.Basic
@@ -121,16 +121,6 @@ noncomputable def lazyChain (P : Matrix S S ℝ) : Matrix S S ℝ :=
 lemma IsStationary.sum_mul {π : Convexity.StdSimplex ℝ S} (h : IsStationary P π) (j : S) :
     ∑ i, π.weights i * P i j = π.weights j :=
   congrFun h j
-
-/-- A nonnegative vector on a finite type with sum one is the weight vector of a point of the
-standard simplex. -/
-lemma exists_stdSimplex_eq {u : S → ℝ} (h0 : ∀ i, 0 ≤ u i) (h1 : ∑ i, u i = 1) :
-    ∃ π : Convexity.StdSimplex ℝ S, ⇑π.weights = u := by
-  have hu : u ∈ Set.range (fun t : Convexity.StdSimplex ℝ S ↦ ⇑t.weights) := by
-    rw [Convexity.StdSimplex.range_toFun_comp_weights]
-    exact ⟨Set.mem_iInter.2 h0, h1⟩
-  obtain ⟨π, hπ⟩ := hu
-  exact ⟨π, hπ⟩
 
 lemma IsPrimitive.isIrreducible (h : IsPrimitive P) : IsIrreducible P :=
   fun i j => by
@@ -403,7 +393,7 @@ theorem exists_isStationary_tendsto_pow_of_isPrimitive [Nonempty S]
       funext fun n => sum_row_of_mem_rowStochastic (pow_mem hP n) i₀
     rw [h2] at h1
     exact (tendsto_nhds_unique tendsto_const_nhds h1).symm
-  obtain ⟨π, hπ⟩ := exists_stdSimplex_eq hL0 hL1
+  obtain ⟨π, hπ⟩ := Convexity.StdSimplex.exists_weights_eq_iff.2 ⟨hL0, hL1⟩
   refine ⟨π, ?_, fun i j => by rw [congrFun hπ j]; exact hL j i⟩
   · show (⇑π.weights) ᵥ* P = ⇑π.weights
     rw [hπ]

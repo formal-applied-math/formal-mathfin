@@ -1596,7 +1596,7 @@ attribute [blueprint "thm:expected-utility-axioms"
   (title := "Expected utility satisfies independence and continuity")
   (statement := /-- A preference defined by finite expected utility, $p \succeq q$ iff $\sum_i
   p_iu_i \ge \sum_i q_iu_i$, satisfies independence: if $p \succeq q$ then $\alpha p +
-  (1-\alpha)r \succeq \alpha q + (1-\alpha)r$ for every weight $\alpha \ge 0$; it also
+  (1-\alpha)r \succeq \alpha q + (1-\alpha)r$ for every weight $\alpha \in [0,1]$; it also
   satisfies continuity (`prefersEU_continuity`). Only this easy direction is proved: the
   representation theorem, that the axioms imply an expected-utility representation, is the
   frontier node `thm:von-neumann-morgenstern`. -/)]
