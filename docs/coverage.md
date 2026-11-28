@@ -29,6 +29,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ### Gamma swap replication and fair strike (2026-11-28)
 
 One `full` entry in `benchmarks/jumps_and_variance_swaps.json` (85 entries in that file).
+Corpus 924 → 925 (877 full before, 878 after; 895 → 896 delivery-ready): the one entry this
+topic adds over the branch's base, upstream `main` at the fork point.
 
 - **`mf-gamma-swap-replication`** (MathFin/Models/ModelFree/GammaSwap.lean): the gamma swap
   (Jacquier–Slaoui arXiv:1004.0125, section 2) runs on the payoff
@@ -49,8 +51,6 @@ One `full` entry in `benchmarks/jumps_and_variance_swaps.json` (85 entries in th
   its zero-rate Itô dynamics at the at-the-money-forward instance `kappa = F_0` (the
   dynamics step is the source's, not proved here).
 
-  Corpus 924 → 925 on the branch's own base, upstream `main` at the fork point (877 full before, 878 after; 895 → 896
-delivery-ready) — the one entry this topic adds.
   Disclosed out of scope: the unbounded strip, the nonzero-rate factor `e^{2rT}`, the
   mark-to-market formula, the Greeks and the dynamic dispersion decomposition of the source's
   §5 (they need the forward dynamics of `S` and a multi-asset index), and the static
