@@ -592,7 +592,12 @@
           "blueprint": "thm:kyle-equilibrium-unique",
           "needs": [],
           "lean": "MathFinFrontier.kyle_equilibrium_unique",
-          "note": "Stated after Monteiro–Tourky, Theorem 1.1 (uniqueness direction), closed by sorry; a proof settles the problem (#537)."
+          "note": "Stated after Monteiro–Tourky, Theorem 1.1 (uniqueness direction), closed by sorry; a proof settles the problem (#537).",
+          "pinned": {
+            "commit": "09f0f85ebf5afcbbe8badf166f136603bbc92834",
+            "pr": 555,
+            "statement_sha256": "c3ba738d5c32dc0da7f44caa6283cf46443e9193abe5ad8ff0fe5670f7364898"
+          }
         }
       },
       "known_results": [
@@ -619,7 +624,12 @@
         "nearby_results_checked": [
           "Continuous-time Kyle–Back uniqueness is a different question."
         ],
-        "conclusion": "Do not publish this as an unqualified open problem. Track the reported resolution and review status separately."
+        "conclusion": "Do not publish this as an unqualified open problem. Track the reported resolution and review status separately.",
+        "referee": {
+          "verdict": "faithful",
+          "date": "2026-11-26",
+          "comment": "https://github.com/formal-applied-math/formal-mathfin/issues/537#issuecomment-7208420387"
+        }
       },
       "related_problems": [],
       "issue_number": 537,
@@ -635,7 +645,10 @@
           "status": "resolution_reported",
           "reason": "Stated in Lean from Theorem 1.1 of the reported resolution (MathFinFrontier/OpenProblems/KyleUniqueness.lean)."
         }
-      ]
+      ],
+      "attempts": {
+        "referee": 1
+      }
     },
     {
       "id": "MF-OP-009",
@@ -871,11 +884,10 @@
           "status": "blocked",
           "blueprint": "thm:raw-filtration-mimicking-martingale",
           "needs": [
-            "def:convex-order",
             "def:markov-martingale"
           ],
           "lean": null,
-          "note": "Needs convex order (peacocks) and Markov martingales for a given filtration."
+          "note": "Needs Markov martingales for a given filtration; convex order (peacocks) is in the library (MathFin.ConvexOrder)."
         }
       }
     },
@@ -967,7 +979,8 @@
       "known_results": [
         "Gerber 1969, Azcue-Muler: d=1 band strategies.",
         "Albrecher-Azcue-Muler (AAP 2017, arXiv 1505.03980): two insurers, value function smallest viscosity supersolution, curve strategies numerically optimal in an example.",
-        "Azcue-Muler (arXiv 1804.02547): n-dim switching problem, convergent numerical scheme, verification result; conjectures for optimal local control on boundaries."
+        "Azcue-Muler (arXiv 1804.02547): n-dim switching problem, convergent numerical scheme, verification result; conjectures for optimal local control on boundaries.",
+        "Argument here (2026-11-27, n = 2, not formalised, not refereed outside this project), conditional on the value function being C¹ near the boundary point and on the local shape of the waiting region N: if N lies below a C¹ graph x₂ = φ(x₁) with p₂ − p₁φ′ > 0, company 2 paying at rate p₂ − p₁φ′, so that the surplus slides along the graph, is the unique optimal control until the next claim; if the boundary overhangs (N to the left of a graph x₁ = g(x₂) that the drift outruns, including the rightmost point), no finite-rate control is optimal and a lump straight down to the first point of N is optimal. This gives AM18's Example 1 conjecture and contradicts the Example 2 description on its overhang, where value iteration also finds lumps. C¹ regularity of V for n = 2 (only local Lipschitz continuity is known) and the boundary geometry are not proved."
       ],
       "sources": [
         {
@@ -1012,6 +1025,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-27",
+          "status": "open",
+          "reason": "A rate-or-lump dichotomy for the boundary control, proved conditional on C¹ regularity of the value function and on the local boundary geometry; the problem stays open until that regularity is established."
         }
       ],
       "issue_number": 549,
@@ -1046,11 +1064,12 @@
       ],
       "background": "The quantitative Halmos--Savage theorems and the robust FTAP for large financial markets of Cuchiero--Klein--Köstenberger--Schmidt assume l(L^infty)=E'; without it the multi-period extension of their robust asymptotic-arbitrage theory is not available.",
       "difficulty": "unassessed",
-      "mathematical_status": "open",
+      "mathematical_status": "resolution_reported",
       "known_results": [
         "For T=1, l(L^infty)=E' holds for the robust binomial model after a canonical extension (Klein--Köstenberger, arXiv 2605.04912, Section 5.3 and Corollary 46).",
         "l(L^infty) is always weak* dense in E' (Lemma 3.4 of arXiv 2504.06686), so the issue is weak* closedness.",
-        "Klein--Köstenberger (Lemma 40, Remark 41) show the supports of the T=1 sub-families are not disjoint in general and that this already occurs for multi-period; the disjoint-support route of the one-period proof therefore does not transfer directly."
+        "Klein--Köstenberger (Lemma 40, Remark 41) show the supports of the T=1 sub-families are not disjoint in general and that this already occurs for multi-period; the disjoint-support route of the one-period proof therefore does not transfer directly.",
+        "Argument here (2026-11-25, not formalised, not refereed outside this project): every law of the Blanchard–Carassus model is purely atomic (Y_t bijective, two-point laws per step), for every T. So the 𝒫-completion of the Borel σ-algebra is the power set; the point masses form a strictly disjointly supported localization (KK Example 30, Def. 1), and KK Thm 4 gives l(L^∞) = E' on that extension for every T ≥ 1. On the Borel σ-algebra and on its universal completion l is not onto (a non-universally-measurable set in the support). A variant with non-injective Y_t (non-atomic laws) is not covered."
       ],
       "sources": [
         {
@@ -1096,6 +1115,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-25",
+          "status": "resolution_reported",
+          "reason": "Positive answer on the canonical extension for every T, by an internal argument checked by an adversarial second reading; thin (KK Example 30 specialised to point masses) and not confirmed with the authors, who may intend a non-injective variant."
         }
       ],
       "issue_number": 550,
@@ -1197,7 +1221,8 @@
       "mathematical_status": "open",
       "known_results": [
         "d=1: uniform on an interval is n-CM for n>=2 (Gaffke-Ruschendorf 1981).",
-        "Projection of an n-CM law to any subspace is n-CM; concave-density laws on R are n-CM for n>=3 (Puccetti-Wang-Wang 2012)."
+        "Projection of an n-CM law to any subspace is n-CM; concave-density laws on R are n-CM for n>=3 (Puccetti-Wang-Wang 2012).",
+        "Proved here (2026-11-25, MathFin/Risk/CompleteMixability.lean): the uniform law on a simplex of R^d is k(d+1)-CM for every k >= 1 (cyclic vertex shifts; the case n = d+1 for simplices), and the uniform law on a centrally symmetric set is 2k-CM. Odd n for parallelograms and general convex bodies remain open."
       ],
       "sources": [
         {
@@ -1225,7 +1250,12 @@
           "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
           "Adversarial check 2026-11-19: survives. Finite-dimensional probability: Lean-statable now (volume.restrict C, identically distributed R^d-valued random variables with a.s. constant sum). S2 coverage of citations is incomplete (rate-limited)."
         ],
-        "conclusion": "Class A source is 11 years old, so by the catalogue's rule the status is 'lead', not 'open': my searches (web search only; arXiv API was rate-limited) found no resolution, but I did not do a citation-graph sweep of papers citing Wang 2015."
+        "conclusion": "Class A source is 11 years old, so by the catalogue's rule the status is 'lead', not 'open': my searches (web search only; arXiv API was rate-limited) found no resolution, but I did not do a citation-graph sweep of papers citing Wang 2015.",
+        "referee": {
+          "verdict": "faithful",
+          "date": "2026-11-26",
+          "comment": "https://github.com/formal-applied-math/formal-mathfin/issues/552#issuecomment-7208419609"
+        }
       },
       "related_problems": [
         "MF-OP-017",
@@ -1236,6 +1266,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-25",
+          "status": "open",
+          "reason": "Partial results formalised: simplices at n = k(d+1), centrally symmetric sets at even n (entries mf-simplex-complete-mixability, mf-symmetric-complete-mixability). The problem stays open."
         }
       ],
       "issue_number": 552,
@@ -1243,14 +1278,25 @@
       "formalization": {
         "status": "stated",
         "scope": "this repository",
-        "declarations": [],
+        "declarations": [
+          "MathFin.completelyMixable_simplex",
+          "MathFin.completelyMixable_of_symmetric"
+        ],
         "lean_statement": {
           "status": "stated",
           "blueprint": "thm:uniform-convex-complete-mixability",
           "needs": [],
           "lean": "MathFinFrontier.uniform_convex_completelyMixable",
-          "note": "Stated with couplings on Fin n → ℝᵈ; uses only Mathlib."
+          "note": "Stated with couplings on Fin n → ℝᵈ; uses only Mathlib.",
+          "pinned": {
+            "commit": "09f0f85ebf5afcbbe8badf166f136603bbc92834",
+            "pr": 555,
+            "statement_sha256": "649bd3eda4bd660c0f8d6267cfe518ccbcc782e52c041abea20c0dc669b61757"
+          }
         }
+      },
+      "attempts": {
+        "referee": 1
       }
     },
     {
@@ -1316,7 +1362,12 @@
           "Mutti-Semeraro 2309.17346 (symmetric Bernoulli minimal convex sums; text grepped, no resolution)",
           "Adversarial check 2026-11-19: killed provisionally by Shmalo (Thm 1.1–1.2); unrefereed, so recorded as resolution_reported."
         ],
-        "conclusion": "Two unrefereed claims conflict: Yin–Zhu (arXiv 1706.05499) report a counterexample; Shmalo (Zenodo 24070253, 2026-11-08, self-declared AI-generated) reports a proof and disputes that example. Neither is checked here."
+        "conclusion": "Two unrefereed claims conflict: Yin–Zhu (arXiv 1706.05499) report a counterexample; Shmalo (Zenodo 24070253, 2026-11-08, self-declared AI-generated) reports a proof and disputes that example. Neither is checked here.",
+        "referee": {
+          "verdict": "faithful",
+          "date": "2026-11-26",
+          "comment": "https://github.com/formal-applied-math/formal-mathfin/issues/553#issuecomment-7208419951"
+        }
       },
       "related_problems": [
         "MF-OP-016",
@@ -1340,8 +1391,17 @@
           "blueprint": "thm:bounded-law-complete-mixability",
           "needs": [],
           "lean": "MathFinFrontier.absolutelyContinuous_eventually_completelyMixable",
-          "note": "Stated in the positive direction; a proof settles the conflict between the two unrefereed claims."
+          "note": "Stated in the positive direction; a proof settles the conflict between the two unrefereed claims.",
+          "pinned": {
+            "commit": "09f0f85ebf5afcbbe8badf166f136603bbc92834",
+            "pr": 555,
+            "statement_sha256": "d3d62c34577fa72f5e143e7ea4fd488476e78e8309920d8695690692c64cf22d"
+          }
         }
+      },
+      "attempts": {
+        "referee": 1,
+        "prover": 1
       }
     },
     {
@@ -1360,7 +1420,9 @@
       "difficulty": "unassessed",
       "mathematical_status": "open",
       "known_results": [
-        "Counterexample class exists; smallest element exists for decreasing densities; Bernoulli marginals always have one (cited from search summary, not opened)."
+        "Counterexample class exists; smallest element exists for decreasing densities; Bernoulli marginals always have one (cited from search summary, not opened).",
+        "A smaller counterexample than Bernard-Jiang-Wang's: marginals uniform on {0,0,4}, {0,2,5}, {0,4,6} (machine-checked, MathFin.exists_not_convexOrder_sum, 2026-11-25).",
+        "Proved here (2026-11-25): when the marginal is n-completely mixable, the complete mix is the convex-order minimum of the sum (MathFin.convexOrder_sum_of_completelyMixable)."
       ],
       "sources": [
         {
@@ -1408,6 +1470,11 @@
           "date": "2026-11-19",
           "status": "open",
           "reason": "Added in round 6 after resolution search and an adversarial check."
+        },
+        {
+          "date": "2026-11-25",
+          "status": "open",
+          "reason": "Convex order added to the library with one counterexample instance; the characterisation stays open."
         }
       ],
       "issue_number": 554,
@@ -1419,11 +1486,9 @@
         "lean_statement": {
           "status": "not_a_proposition",
           "blueprint": "thm:convex-order-minimal-sum",
-          "needs": [
-            "def:convex-order"
-          ],
+          "needs": [],
           "lean": null,
-          "note": "The question asks for necessary and sufficient conditions; candidate conditions are statable once convex order exists."
+          "note": "The question asks for necessary and sufficient conditions, so it is not one proposition. Convex order is in the library (MathFin.ConvexOrder); candidate conditions are statable. One instance without a minimum is proved: MathFin.exists_not_convexOrder_sum (marginals uniform on {0,0,4}, {0,2,5}, {0,4,6}; corpus entry mf-convex-order-no-minimal-sum)."
         }
       }
     }

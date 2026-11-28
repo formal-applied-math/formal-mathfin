@@ -32,7 +32,7 @@ Specialisations:
 | KMV-Merton credit | `V` (firm) | `e^{−rT}` | strike = face debt; `d_2` = distance to default |
 | Swaption (Black model) | `A_annuity · F` | `A_annuity` | annuity numéraire |
 | Quanto-adjusted | drift-shifted | `e^{−r_dom T}` | correlation adjustment in drift |
-| Margrabe exchange (`margrabe_eq_bsVGarman`) | `S¹₀` | `1` | 2nd asset is the strike (see below) |
+| Margrabe exchange (`margrabePrice_eq_bsVGarman`) | `S¹₀` | `1` | 2nd asset is the strike |
 
 In the Margrabe row `σ` is the effective volatility `√(σ₁²+σ₂²−2ρσ₁σ₂)`, and there is no
 discounting: the second asset is the numéraire.

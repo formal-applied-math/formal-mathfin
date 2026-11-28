@@ -322,8 +322,6 @@ theorem trueIncr_sq_le {u v : ℝ≥0} (huv : u ≤ v) (hvT : v ≤ T) :
 
 end StageFourC
 
-set_option maxHeartbeats 1600000 in
--- a long estimate: elaborating the whole proof exceeds the default budget
 /-- **The convergence of the quadratic block** (the summed weighted increment isometry,
 conditional on a gap bound): if for some null sequence `r` the weighted second-moment sum
 along the uniform partition differs from the frozen rectangle sum by at most

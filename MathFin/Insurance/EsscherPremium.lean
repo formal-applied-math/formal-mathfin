@@ -7,6 +7,7 @@ module
 
 public import MathFin.Pricing.OneDateMarket
 public import Mathlib.MeasureTheory.Measure.Tilted
+public import Mathlib.Probability.Moments.MGFAnalytic
 
 /-!
 # The Esscher premium is a price
@@ -26,8 +27,11 @@ The Esscher tilt is a pricing measure of it when `e^{hX}` and `X e^{hX}` are int
 mean of the loss. So the Esscher premium is the price of the loss under a pricing measure of an
 insured market, where the market is built to quote the loss at that premium
 (`price_insuredMarket_tilted`). Another tilt prices it exactly when its premium is the quote
-(`isPricingMeasure_insuredMarket_tilted_iff`); uniqueness of the parameter is not proved here. The
-model has no dynamics before `T`.
+(`isPricingMeasure_insuredMarket_tilted_iff`). **The parameter is determined by the quote**: the
+premium is the derivative of the cumulant generating function, strictly increasing on the interior
+of the exponential-moment interval for a non-degenerate loss (`esscherPremium_strictMonoOn`), so
+there the `h'`-tilt prices the market quoting the `h`-premium exactly when `h' = h`
+(`isPricingMeasure_insuredMarket_tilted_iff_eq`). The model has no dynamics before `T`.
 
 ## Main definitions
 
@@ -44,6 +48,10 @@ model has no dynamics before `T`.
 * `price_insuredMarket_tilted`: under it the claim paying the loss is worth the Esscher premium.
 * `isPricingMeasure_insuredMarket_tilted_iff`: for a date `T > 0`, the `h'`-tilt prices the market
   quoting the `h`-premium exactly when the two premiums agree.
+* `esscherPremium_strictMonoOn`: for a loss that is not almost surely constant, the premium is
+  strictly increasing in `h` on the interior of the exponential-moment interval.
+* `isPricingMeasure_insuredMarket_tilted_iff_eq`: there, the `h'`-tilt prices the market quoting
+  the `h`-premium exactly when `h' = h`.
 
 ## References
 
@@ -132,6 +140,45 @@ theorem price_insuredMarket_tilted (hX : Measurable X) (T : ℝ≥0) :
   simp only [neg_zero, zero_mul, Real.exp_zero, one_mul]
   exact integral_tilted_eq_esscherPremium P X h
 
+/-- **The Esscher premium is strictly increasing in the parameter.** For a probability measure `P`
+and a loss `X` that is not almost surely constant, `h ↦ esscherPremium P X h` is strictly
+increasing on the interior of the interval where `e^{hX}` is integrable. The premium is the
+derivative of the cumulant generating function (`deriv_cgf`), whose second derivative is the
+variance of `X` under the tilt (`iteratedDeriv_two_cgf_eq_integral`), positive as `X` is not
+constant. -/
+theorem esscherPremium_strictMonoOn [IsProbabilityMeasure P]
+    (hX : ∀ c, ¬ X =ᵐ[P] fun _ ↦ c) :
+    StrictMonoOn (esscherPremium P X) (interior (integrableExpSet X P)) := by
+  have key : StrictMonoOn (deriv (cgf X P)) (interior (integrableExpSet X P)) := by
+    refine strictMonoOn_of_deriv_pos (convex_integrableExpSet.interior) ?_ fun v hv ↦ ?_
+    · exact fun v hv ↦ ((analyticAt_cgf hv).deriv.continuousAt).continuousWithinAt
+    · rw [interior_interior] at hv
+      have h2 : deriv (deriv (cgf X P)) v = iteratedDeriv 2 (cgf X P) v := by
+        rw [iteratedDeriv_succ, iteratedDeriv_one]
+      rw [h2, iteratedDeriv_two_cgf_eq_integral hv]
+      refine div_pos ?_ (mgf_pos' (IsProbabilityMeasure.ne_zero P) (interior_subset hv))
+      set m := deriv (cgf X P) v
+      have hf : Integrable (fun ω ↦ (X ω - m) ^ 2 * Real.exp (v * X ω)) P := by
+        have h0 := integrable_pow_mul_exp_of_mem_interior_integrableExpSet hv 0
+        have h1 := integrable_pow_mul_exp_of_mem_interior_integrableExpSet hv 1
+        have h2 := integrable_pow_mul_exp_of_mem_interior_integrableExpSet hv 2
+        simp only [pow_zero, one_mul, pow_one] at h0 h1
+        exact ((h2.sub (h1.const_mul (2 * m))).add (h0.const_mul (m ^ 2))).congr
+          (ae_of_all _ fun ω ↦ by simp only [Pi.add_apply, Pi.sub_apply]; ring)
+      have hnn : 0 ≤ᵐ[P] fun ω ↦ (X ω - m) ^ 2 * Real.exp (v * X ω) :=
+        ae_of_all _ fun ω ↦ by simp only [Pi.zero_apply]; positivity
+      rw [integral_pos_iff_support_of_nonneg_ae hnn hf]
+      have hsupp : Function.support (fun ω ↦ (X ω - m) ^ 2 * Real.exp (v * X ω))
+          = {ω | ¬ X ω = m} := by
+        ext ω
+        simp [Real.exp_ne_zero, sub_eq_zero]
+      rw [hsupp, pos_iff_ne_zero]
+      exact fun h ↦ hX m (ae_iff.2 h)
+  intro a ha b hb hab
+  have := key ha hb hab
+  rw [deriv_cgf ha, deriv_cgf hb] at this
+  exact this
+
 /-- **Which Esscher tilts price the insured market.** For a date `T > 0`, the `h'`-tilt of `P` is a
 pricing measure of the insured market `insuredMarket P hX h T`, the one that quotes the loss at the
 `h`-premium, exactly when the `h'`-premium is that quote,
@@ -139,7 +186,8 @@ pricing measure of the insured market `insuredMarket P hX h T`, the one that quo
 The tilts of the other parameters price the market only through that coincidence: the pricing
 measure fixes the premium, not the parameter (`Market.isPricingMeasure_oneDate` and its converse
 `Market.integral_eq_of_isPricingMeasure_oneDate`). That the premium is strictly increasing in the
-parameter for a non-degenerate loss, so that `h' = h` follows, is not proved here. -/
+parameter for a non-degenerate loss, so that `h' = h` follows, is
+`isPricingMeasure_insuredMarket_tilted_iff_eq`. -/
 theorem isPricingMeasure_insuredMarket_tilted_iff [IsProbabilityMeasure P] (hX : Measurable X)
     {T : ℝ≥0} (hT : 0 < T) {h' : ℝ} (hexp : Integrable (fun ω ↦ Real.exp (h' * X ω)) P)
     (hXexp : Integrable (fun ω ↦ X ω * Real.exp (h' * X ω)) P) :
@@ -162,5 +210,19 @@ theorem isPricingMeasure_insuredMarket_tilted_iff [IsProbabilityMeasure P] (hX :
       exact mul_comm _ _
     · rw [integral_tilted_eq_esscherPremium, heq]
       simp
+
+/-- **The quote determines the Esscher parameter.** For a loss that is not almost surely constant
+and parameters `h`, `h'` in the interior of the exponential-moment interval, the `h'`-tilt of `P`
+is a pricing measure of the insured market quoting the `h`-premium exactly when `h' = h`:
+`isPricingMeasure_insuredMarket_tilted_iff` and the strict monotonicity of the premium
+(`esscherPremium_strictMonoOn`). -/
+theorem isPricingMeasure_insuredMarket_tilted_iff_eq [IsProbabilityMeasure P] (hX : Measurable X)
+    (hnc : ∀ c, ¬ X =ᵐ[P] fun _ ↦ c) {T : ℝ≥0} (hT : 0 < T) {h' : ℝ}
+    (hh : h ∈ interior (integrableExpSet X P)) (hh' : h' ∈ interior (integrableExpSet X P)) :
+    (insuredMarket P hX h T).IsPricingMeasure T (P.tilted fun ω ↦ h' * X ω) ↔ h' = h := by
+  have hXexp : Integrable (fun ω ↦ X ω * Real.exp (h' * X ω)) P := by
+    simpa using integrable_pow_mul_exp_of_mem_interior_integrableExpSet hh' 1
+  rw [isPricingMeasure_insuredMarket_tilted_iff hX hT (interior_subset hh') hXexp]
+  exact ⟨fun heq ↦ (esscherPremium_strictMonoOn hnc).injOn hh' hh heq, fun e ↦ by rw [e]⟩
 
 end MathFin

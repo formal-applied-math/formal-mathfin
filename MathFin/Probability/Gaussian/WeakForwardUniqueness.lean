@@ -242,35 +242,35 @@ Volterra system in `pairing_cos_sin_eq`. -/
 /-- The derivative of `x ↦ cos (ξ * x)` is `-ξ * sin (ξ * x)`. -/
 lemma hasDerivAt_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.cos (ξ * x)) (-ξ * Real.sin (ξ * x)) x :=
-  ((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul ξ)).congr_deriv (by ring)
+  (hasDerivAt_const_mul ξ : HasDerivAt (fun y : ℝ ↦ ξ * y) ξ x).cos.congr_deriv (by ring)
 
 /-- The derivative of `x ↦ -ξ * sin (ξ * x)` is `-ξ ^ 2 * cos (ξ * x)`. -/
 lemma hasDerivAt_neg_mul_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ * Real.sin (ξ * x)) (-ξ ^ 2 * Real.cos (ξ * x)) x :=
-  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul (-ξ)).congr_deriv
+  ((hasDerivAt_const_mul ξ : HasDerivAt (fun y : ℝ ↦ ξ * y) ξ x).sin.const_mul (-ξ)).congr_deriv
     (by ring)
 
 /-- The derivative of `x ↦ -ξ ^ 2 * cos (ξ * x)` is `ξ ^ 3 * sin (ξ * x)`. -/
 lemma hasDerivAt_neg_sq_mul_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.cos (ξ * x)) (ξ ^ 3 * Real.sin (ξ * x)) x :=
-  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul
+  ((hasDerivAt_const_mul ξ : HasDerivAt (fun y : ℝ ↦ ξ * y) ξ x).cos.const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
 /-- The derivative of `x ↦ sin (ξ * x)` is `ξ * cos (ξ * x)`. -/
 lemma hasDerivAt_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => Real.sin (ξ * x)) (ξ * Real.cos (ξ * x)) x :=
-  ((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul ξ)).congr_deriv (by ring)
+  (hasDerivAt_const_mul ξ : HasDerivAt (fun y : ℝ ↦ ξ * y) ξ x).sin.congr_deriv (by ring)
 
 /-- The derivative of `x ↦ ξ * cos (ξ * x)` is `-ξ ^ 2 * sin (ξ * x)`. -/
 lemma hasDerivAt_mul_cos_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => ξ * Real.cos (ξ * x)) (-ξ ^ 2 * Real.sin (ξ * x)) x :=
-  (((Real.hasDerivAt_cos (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul ξ).congr_deriv
+  ((hasDerivAt_const_mul ξ : HasDerivAt (fun y : ℝ ↦ ξ * y) ξ x).cos.const_mul ξ).congr_deriv
     (by ring)
 
 /-- The derivative of `x ↦ -ξ ^ 2 * sin (ξ * x)` is `-ξ ^ 3 * cos (ξ * x)`. -/
 lemma hasDerivAt_neg_sq_mul_sin_const_mul (ξ x : ℝ) :
     HasDerivAt (fun x => -ξ ^ 2 * Real.sin (ξ * x)) (-ξ ^ 3 * Real.cos (ξ * x)) x :=
-  (((Real.hasDerivAt_sin (ξ * x)).comp x (hasDerivAt_const_mul ξ)).const_mul
+  ((hasDerivAt_const_mul ξ : HasDerivAt (fun y : ℝ ↦ ξ * y) ξ x).sin.const_mul
     (-ξ ^ 2)).congr_deriv (by ring)
 
 /-- The sup bounds for the `cos(ξ·)` derivative chain, bundled: `C1 = |ξ|`, `C2 = ξ²`,

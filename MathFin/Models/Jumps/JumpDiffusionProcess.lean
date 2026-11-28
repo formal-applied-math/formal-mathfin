@@ -6,7 +6,9 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Models.Jumps.JumpDiffusionCanonical
+public import MathFin.Probability.Dependence.IndepPast
 public import MathFin.Probability.Jumps.ExpMartingaleIndepIncrements
+public import Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic
 
 /-!
 # The jump-diffusion price process
@@ -47,6 +49,8 @@ martingale has constant mean, and the mean at time `1` is `S₀e^{b + σ²/2 + �
 
 ## Main results
 
+* `JumpDiffusionProcess.hasIndepIncrements`: a jump-diffusion has independent increments in
+  Mathlib's sense (`HasIndepIncrements`), through `hasIndepIncrements_of_indep_past`.
 * `integral_exp_const_mul_jumpDiffusionIncrementLaw`, `mgf_id_jumpDiffusionIncrementLaw`,
   `cgf_id_jumpDiffusionIncrementLaw`: for `θ` with `∫ e^{θx} dν < ∞`, its moment-generating
   function is `e^{κ(θ)τ}`.
@@ -95,17 +99,16 @@ its moment-generating function `e^{Λ(𝔼[e^{θJ}] − 1)}` (`compoundPoisson_m
 aggregate-loss MGF of `Probability/Jumps/CompoundPoissonMGF.lean`). -/
 lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     (hJ : Integrable (fun ω ↦ rexp (θ * J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
-    mgf (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω) Q θ
+    mgf (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + compoundSum N J ω) Q θ
       = rexp ((b * θ + σ ^ 2 * θ ^ 2 / 2) * T + Λ * (mgf (J 0) Q θ - 1)) := by
   have hind : IndepFun (fun ω ↦ σ * Real.sqrt T * Z ω)
-      (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+      (compoundSum N J) Q :=
     h.Z_indep_jumps.comp (measurable_const_mul (σ * Real.sqrt T)) measurable_sum_range_prod
-  have hS : AEMeasurable (fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) Q :=
+  have hS : AEMeasurable (compoundSum N J) Q :=
     measurable_sum_range_prod.comp_aemeasurable
       (h.N_law.aemeasurable.prodMk h.aemeasurable_jumps)
-  have hsplit : (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)
-      = fun ω ↦ b * T + ((fun ω ↦ σ * Real.sqrt T * Z ω)
-          + fun ω ↦ ∑ i ∈ Finset.range (N ω), J i ω) ω := by
+  have hsplit : (fun ω ↦ b * T + σ * Real.sqrt T * Z ω + compoundSum N J ω)
+      = fun ω ↦ b * T + ((fun ω ↦ σ * Real.sqrt T * Z ω) + compoundSum N J) ω := by
     funext ω
     simp only [Pi.add_apply]
     ring
@@ -120,7 +123,7 @@ lemma mgf_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
 /-- `JumpDiffusionHyp.mgf_logReturn` as an integral. -/
 lemma integral_exp_mul_logReturn (h : JumpDiffusionHyp Q Λ Z N J) {θ : ℝ}
     (hJ : Integrable (fun ω ↦ rexp (θ * J 0 ω)) Q) (b σ : ℝ) {T : ℝ} (hT : 0 ≤ T) :
-    ∫ ω, rexp (θ * (b * T + σ * Real.sqrt T * Z ω + ∑ i ∈ Finset.range (N ω), J i ω)) ∂Q
+    ∫ ω, rexp (θ * (b * T + σ * Real.sqrt T * Z ω + compoundSum N J ω)) ∂Q
       = rexp ((b * θ + σ ^ 2 * θ ^ 2 / 2) * T + Λ * (∫ ω, rexp (θ * J 0 ω) ∂Q - 1)) :=
   h.mgf_logReturn hJ b σ hT
 
@@ -171,9 +174,9 @@ theorem integral_exp_const_mul_jumpDiffusionIncrementLaw (b σ : ℝ) (Λ : ℝ�
     (measurable_jumpDiffusionLogReturn b σ τ).aemeasurable
     (measurable_const_mul θ).exp.aestronglyMeasurable]
   unfold jumpDiffusionLogReturn
-  rw [(jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_mul_logReturn
-      (integrable_exp_mul_canonical_jump hν) b σ (NNReal.coe_nonneg τ),
-    integral_exp_mul_canonical_jump (Λ * τ) ν θ, jumpDiffusionExponent, NNReal.coe_mul]
+  refine ((jumpDiffusionHyp_canonical (Λ * τ) ν).1.integral_exp_mul_logReturn
+      (integrable_exp_mul_canonical_jump hν) b σ (NNReal.coe_nonneg τ)).trans ?_
+  rw [integral_exp_mul_canonical_jump (Λ * τ) ν θ, jumpDiffusionExponent, NNReal.coe_mul]
   congr 1
   ring
 
@@ -318,6 +321,15 @@ lemma integral_exp_increment (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsP
       = rexp ((b + σ ^ 2 / 2 + Λ * (∫ x, rexp x ∂ν - 1)) * (t - s : ℝ≥0)) := by
   rw [← integral_exp_jumpDiffusionIncrementLaw b σ Λ hν (t - s)]
   exact (h.law s t hst).integral_comp measurable_exp.aestronglyMeasurable
+
+/-- **A jump-diffusion has independent increments**, in Mathlib's sense (`HasIndepIncrements`):
+each increment is independent of the past `𝓕_s` (`indep`), and the earlier increments of a
+partition are `𝓕_s`-measurable (`adapted`). -/
+theorem hasIndepIncrements (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) [IsProbabilityMeasure ν] :
+    HasIndepIncrements X P :=
+  haveI := h.isProbabilityMeasure
+  hasIndepIncrements_of_indep_past (fun t ↦ 𝓕 t) (fun _ _ hst ↦ 𝓕.mono hst)
+    (fun t ↦ (h.adapted t).measurable) h.indep
 
 /-- **The law of `X_t`** is the log-return law over `t`: `X_t = X_t − X_0` almost surely. -/
 lemma hasLaw (h : JumpDiffusionProcess P 𝓕 X b σ Λ ν) (t : ℝ≥0) :

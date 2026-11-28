@@ -21,8 +21,13 @@ this is the numéraire-portfolio identity, `sdf = w₀ / W`: the stochastic disc
 density of the pricing measure times the deflator `N 0 / N T`) is `w₀` over the wealth of a
 portfolio at which the expected log-wealth is stationary on the budget set
 (`sdf_eq_div_of_logOptimal`), so deflating by that wealth prices the assets under the physical
-measure. The hypothesis is the first-order condition only; that the portfolio maximises the
-expected log-wealth is not used or proved.
+measure. The hypothesis is the first-order condition. A local maximum of the expected log-wealth
+on the budget set gives it (`foc_of_isLocalMaxOn_log`), so the theorems apply at an optimum.
+
+## Main definitions
+
+* `Market.IsFiniteComplete`: the standing hypotheses on a finite market's start and span: full
+  support of `P`, deterministic initial numéraire and prices, and completeness.
 
 ## Main results
 
@@ -31,11 +36,14 @@ expected log-wealth is not used or proved.
   `μ > 0`, and `μ * w₀ = E_P[u'(W) W]`.
 * `Market.IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn`: the same at a local maximum of
   the expected utility `∫ u(W) ∂P` on the budget set.
+* `Market.foc_of_isLocalMaxOn_log`: a local maximum of the expected log-wealth on the budget set
+  is stationary, the hypothesis of the next theorem.
 * `Market.IsPricingMeasure.sdf_eq_div_of_logOptimal`: for `u = log`, `sdf ω = w₀ / W ω`.
 * `Market.IsPricingMeasure.integral_div_logOptimal_mul`: the prices deflated by the stationary log
   wealth are `P`-martingales in one period, `E_P[S_k(T) / W] = S_k(0) / w₀`.
 
-The initial prices `pr k` are deterministic. Completeness of the market is a hypothesis.
+The initial prices `pr k` are deterministic. The standing hypotheses (full support of `P`,
+deterministic start, completeness) are one bundle, `Market.IsFiniteComplete`.
 
 ## References
 
@@ -60,16 +68,49 @@ namespace MathFin.Market
 
 variable {N K : ℕ} [NeZero N] {M : Market (Fin K) (Fin N)} {T : ℝ≥0} {Q : Measure (Fin N)}
 
-/-! The standing hypotheses of the section: `P` is a probability measure charging every state, `Q`
-prices the market up to `T`, the numéraire and the asset prices at `0` are deterministic, and the
-terminal payoffs span the states. -/
+omit [NeZero N] in
+/-- **The standing hypotheses on the market's start and span**, as one bundle: the reference
+measure `P` charges every state, the numéraire and the asset prices at `0` are the deterministic
+`n₀` and `pr`, and the terminal payoffs span the states (no non-zero `x : Fin N → ℝ` has
+`∑ ω, x ω * S_k(T) ω = 0` for every asset `k`), which is completeness. -/
+structure IsFiniteComplete (M : Market (Fin K) (Fin N)) (T : ℝ≥0) (n₀ : ℝ) (pr : Fin K → ℝ) :
+    Prop where
+  /-- `P` charges every state. -/
+  real_pos : ∀ ω, 0 < M.P.real {ω}
+  /-- The numéraire at `0` is deterministic. -/
+  numeraire_zero : ∀ ω, M.numeraire 0 ω = n₀
+  /-- The asset prices at `0` are deterministic. -/
+  asset_zero : ∀ k ω, M.asset k 0 ω = pr k
+  /-- The terminal payoffs span the states: the market is complete. -/
+  complete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0
 
-variable [IsProbabilityMeasure M.P] (hP : ∀ ω, 0 < M.P.real {ω}) (hQ : M.IsPricingMeasure T Q)
-  {n₀ : ℝ} (hN₀ : ∀ ω, M.numeraire 0 ω = n₀) {pr : Fin K → ℝ}
-  (hpr : ∀ k ω, M.asset k 0 ω = pr k)
-  (hcomplete : ∀ x : Fin N → ℝ, (∀ k, ∑ ω, x ω * M.asset k T ω = 0) → x = 0)
+variable [IsProbabilityMeasure M.P] (hQ : M.IsPricingMeasure T Q) {n₀ : ℝ} {pr : Fin K → ℝ}
+  (hS : M.IsFiniteComplete T n₀ pr)
 
-include hP hQ hN₀ hpr hcomplete
+include hQ hS
+
+omit [NeZero N] hQ hS in
+/-- **A local maximum of the expected log-wealth on the budget set is stationary.** If `θ` of cost
+`w₀` with positive terminal wealth `W` is a local maximum of `θ' ↦ ∫ log W(θ') ∂P` on the budget
+set `{θ' | cost θ' = w₀}`, then `∑ ω, P{ω} · W⁻¹ · (payoff of d) = 0` for every budget-neutral `d`:
+the first-order condition `sdf_eq_div_of_logOptimal` takes as hypothesis. -/
+theorem foc_of_isLocalMaxOn_log {w₀ : ℝ} {θ : Fin K → ℝ}
+    (hmax : IsLocalMaxOn
+      (fun θ' ↦ ∫ ω, Real.log (portfolioPayoff (fun j ↦ M.asset j T) θ' ω) ∂M.P)
+      {θ' | portfolioCost pr θ' = w₀} θ)
+    (hθ : portfolioCost pr θ = w₀)
+    (hW : ∀ ω, 0 < portfolioPayoff (fun j ↦ M.asset j T) θ ω) :
+    ∀ d, portfolioCost pr d = 0 →
+      ∑ ω, M.P.real {ω} * (portfolioPayoff (fun j ↦ M.asset j T) θ ω)⁻¹ *
+        portfolioPayoff (fun j ↦ M.asset j T) d ω = 0 := by
+  have hobj : (fun θ' ↦ ∫ ω, Real.log (portfolioPayoff (fun j ↦ M.asset j T) θ' ω) ∂M.P) =
+      portfolioUtility (fun ω ↦ M.P.real {ω}) Real.log (fun j ↦ M.asset j T) := by
+    funext θ'
+    exact (expectedUtility_univ_real_eq_integral M.P _).symm
+  rw [hobj] at hmax
+  intro d hd
+  simpa only [Real.deriv_log] using sum_marginalUtility_mul_payoff_eq_zero_of_isLocalMaxOn hmax hθ
+    (fun ω ↦ Real.differentiableAt_log (hW ω).ne') hd
 
 /-- **Marginal utility is the stochastic discount factor.** In a market on a finite sample space
 with a pricing measure `Q` up to `T`, a probability measure `P` charging every state and
@@ -91,9 +132,9 @@ theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary {u : ℝ → ℝ}
         portfolioPayoff (fun j ↦ M.asset j T) θ ω ∧
       ∀ ω, deriv u (portfolioPayoff (fun j ↦ M.asset j T) θ ω) = μ * M.sdf Q T ω := by
   obtain ⟨μ, hμ, hμw, hk⟩ := exists_pos_smul_eq_of_stationary (p := fun ω ↦ M.P.real {ω})
-    (A := fun j ↦ M.asset j T) hθ hw₀ hP hW hu hfoc
+    (A := fun j ↦ M.asset j T) hθ hw₀ hS.real_pos hW hu hfoc
   have hm (k : Fin K) : ∑ ω, M.P.real {ω} * M.sdf Q T ω * M.asset k T ω = pr k := by
-    have h := hQ.integral_sdf_mul_asset hN₀ k (hpr k)
+    have h := hQ.integral_sdf_mul_asset hS.numeraire_zero k (hS.asset_zero k)
     rw [integral_fintype Integrable.of_finite] at h
     simpa only [smul_eq_mul, mul_assoc] using h
   have hx (k : Fin K) : ∑ ω, (M.P.real {ω} *
@@ -104,12 +145,12 @@ theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_stationary {u : ℝ → ℝ}
           rw [Finset.mul_sum, ← Finset.sum_sub_distrib]
           exact Finset.sum_congr rfl fun ω _ ↦ by ring
       _ = 0 := by linear_combination hk k - μ * hm k
-  have h0 := hcomplete _ hx
+  have h0 := hS.complete _ hx
   refine ⟨μ, hμ, hμw, fun ω ↦ ?_⟩
   have h1 : M.P.real {ω} *
       (deriv u (portfolioPayoff (fun j ↦ M.asset j T) θ ω) - μ * M.sdf Q T ω) = 0 :=
     congrFun h0 ω
-  have h2 := (mul_eq_zero.mp h1).resolve_left (hP ω).ne'
+  have h2 := (mul_eq_zero.mp h1).resolve_left (hS.real_pos ω).ne'
   linarith
 
 /-- **Marginal utility is the stochastic discount factor at a local optimum.** Under the
@@ -130,7 +171,7 @@ theorem IsPricingMeasure.exists_deriv_eq_mul_sdf_of_isLocalMaxOn {u : ℝ → �
     funext θ'
     exact (expectedUtility_univ_real_eq_integral M.P _).symm
   rw [hobj] at hmax
-  obtain ⟨μ, hμ, -, h⟩ := hQ.exists_deriv_eq_mul_sdf_of_stationary hP hN₀ hpr hcomplete hθ hw₀ hW
+  obtain ⟨μ, hμ, -, h⟩ := hQ.exists_deriv_eq_mul_sdf_of_stationary hS hθ hw₀ hW
     hu fun _ hd ↦ sum_marginalUtility_mul_payoff_eq_zero_of_isLocalMaxOn hmax hθ
       (fun ω ↦ differentiableAt_of_deriv_ne_zero (hu ω).ne') hd
   exact ⟨μ, hμ, h⟩
@@ -149,7 +190,7 @@ theorem IsPricingMeasure.sdf_eq_div_of_logOptimal
   have hu (ω : Fin N) : 0 < deriv Real.log (portfolioPayoff (fun j ↦ M.asset j T) θ ω) := by
     rw [Real.deriv_log]
     exact inv_pos.mpr (hW ω)
-  obtain ⟨μ, hμ, hμw, h⟩ := hQ.exists_deriv_eq_mul_sdf_of_stationary hP hN₀ hpr hcomplete hθ hw₀
+  obtain ⟨μ, hμ, hμw, h⟩ := hQ.exists_deriv_eq_mul_sdf_of_stationary hS hθ hw₀
     hW hu (by simpa only [Real.deriv_log] using hfoc)
   have hp1 : ∑ ω, M.P.real {ω} = 1 := by
     have := integral_fintype (f := fun _ : Fin N ↦ (1 : ℝ)) (μ := M.P) Integrable.of_finite
@@ -177,7 +218,8 @@ theorem IsPricingMeasure.integral_div_logOptimal_mul
     ∫ ω, M.asset k T ω / portfolioPayoff (fun j ↦ M.asset j T) θ ω ∂M.P = pr k / w₀ := by
   have e (ω : Fin N) : M.asset k T ω / portfolioPayoff (fun j ↦ M.asset j T) θ ω =
       w₀⁻¹ * (M.sdf Q T ω * M.asset k T ω) := by
-    rw [hQ.sdf_eq_div_of_logOptimal hP hN₀ hpr hcomplete hθ hw₀ hW hfoc ω]
+    rw [hQ.sdf_eq_div_of_logOptimal hS hθ hw₀ hW hfoc ω]
     field_simp [hw₀.ne', (hW ω).ne']
   simp_rw [e]
-  rw [integral_const_mul, hQ.integral_sdf_mul_asset hN₀ k (hpr k), inv_mul_eq_div]
+  rw [integral_const_mul, hQ.integral_sdf_mul_asset hS.numeraire_zero k (hS.asset_zero k),
+    inv_mul_eq_div]

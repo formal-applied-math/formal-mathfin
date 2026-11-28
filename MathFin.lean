@@ -45,6 +45,8 @@ public import MathFin.Probability.Jumps.PoissonPgf
 -- iterated integral
 public import MathFin.Probability.Laws.GammaPoissonMixturePgf
 -- The freezing lemma: E[g(X, Y)] = ∫ x, E[g(x, Y)] d(law X) for independent X, Y
+public import MathFin.Probability.Analysis.IdentDistribSum
+public import MathFin.Probability.Dependence.IndepPast
 public import MathFin.Probability.Analysis.IndepFreezing
 -- Jensen's inequality through a supporting line (no closed domain needed)
 public import MathFin.Probability.Analysis.AffineMinorant
@@ -124,6 +126,7 @@ public import MathFin.Probability.Dependence.HoeffdingCovariance
 public import MathFin.Probability.Dependence.MarshallOlkin
 public import MathFin.Probability.Dependence.CorrelationFallacies
 public import MathFin.Probability.Laws.ExtremeValue
+public import MathFin.Probability.Laws.ConvexOrder
 public import MathFin.Probability.Laws.GeneralizedPareto
 public import MathFin.Probability.Jumps.PoissonMaxima
 public import MathFin.Probability.Analysis.DerivOfDeriv
@@ -243,8 +246,9 @@ public import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 public import MathFin.Probability.Brownian.Ito.ItoProductRule
 -- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
 public import MathFin.Probability.Brownian.Ito.DriftRiemannConvergence
+public import MathFin.Probability.Brownian.Ito.DriftPath
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward
--- Btheta_isQBrownianMotion_adapted
+-- Btheta_isBrownianOn_adapted
 public import MathFin.Probability.Brownian.Girsanov.GirsanovAdaptedTheta
 -- Rung 1 (bounded predictable θ Girsanov, Route B): marshal a SimpleProcess into single-partition
 -- (s,c) form; generic simple-Doléans moment bounds; the predictable distributional Girsanov
@@ -415,6 +419,7 @@ public import MathFin.Models.ModelFree.VarianceSwapLimit
 public import MathFin.Models.ModelFree.VarianceSwapDriftImmunity
 public import MathFin.Models.Rates.HullWhiteCalibration
 public import MathFin.Models.Rates.HullWhiteBondPriceAt
+public import MathFin.Models.Rates.HoLeeBondPrice
 public import MathFin.Models.BlackScholes.MonteCarloPricer
 -- Phase 45: Variance swap log-payoff and QV-limit form equivalence
 public import MathFin.Models.ModelFree.VarianceSwapEquivalence
@@ -427,6 +432,7 @@ public import MathFin.Models.BlackScholes.DigitalGreeks
 public import MathFin.Models.BlackScholes.Dividends
 public import MathFin.Models.BlackScholes.DividendsGreeks
 public import MathFin.Models.BlackScholes.Forward
+public import MathFin.Models.BlackScholes.ForwardStart
 public import MathFin.Models.BlackScholes.HigherGreeks
 public import MathFin.Models.BlackScholes.StrikeGreeks
 -- Local-vol skew of a tilted smile surface via Dupire's ratio; the rule of two
@@ -434,6 +440,7 @@ public import MathFin.Models.LocalVol.ForwardSmile
 public import MathFin.Models.LocalVol.MarketCallSurface
 public import MathFin.Models.BlackScholes.PutStrikeConvexity
 public import MathFin.Models.BlackScholes.AsianInequality
+public import MathFin.Models.BlackScholes.AsianArithmeticAverageStrike
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
 public import MathFin.Models.BlackScholes.AsianGeometric
 -- Geometric-average Asian: n-date driver law + closed-form price via effective-BS reduction
@@ -547,11 +554,16 @@ public import MathFin.Models.StochVol.Heston.LogSpotCharacteristic
 -- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
 -- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 public import MathFin.Models.BlackScholes.Lookback
+public import MathFin.Models.BlackScholes.BarrierReflection
 public import MathFin.Models.BlackScholes.BarrierParity
 public import MathFin.Models.BlackScholes.BinaryBarrierOption
 -- Also consumes the bivariate normal CDF (Probability/Gaussian/BivariateNormalCDF),
 -- like Stulz/Heynen-Kat below
 public import MathFin.Models.BlackScholes.PartialTimeBarrierOption
+-- Spatial and time-volatility scaling of the Black–Scholes call
+public import MathFin.Models.BlackScholes.ScalingInvariance
+-- Broadie–Glasserman–Kou barrier shift for discretely monitored down-and-out calls
+public import MathFin.Models.BlackScholes.DiscreteBarrierCorrection
 public import MathFin.Models.BlackScholes.PowerOption
 public import MathFin.Models.ModelFree.BreedenLitzenberger
 public import MathFin.Models.BlackScholes.BisectionIV
@@ -573,6 +585,7 @@ public import MathFin.Models.Forwards.SchwartzOneFactor
 public import MathFin.Models.Binomial.Model
 public import MathFin.Models.Binomial.American
 public import MathFin.Models.Binomial.AmericanMarket
+public import MathFin.Models.Binomial.AmericanPutPremium
 public import MathFin.Models.Binomial.CRRConvergence
 public import MathFin.Models.Binomial.DriftLimit
 public import MathFin.Models.Binomial.Bermudan
@@ -689,6 +702,7 @@ public import MathFin.Models.Rates.ForwardMeasure
 -- Inflation is FX: the zero-coupon inflation swap and the YoY convexity
 public import MathFin.Models.Rates.Inflation
 public import MathFin.Models.Rates.OvernightCompounding
+public import MathFin.Models.Rates.JarrowYildirim
 -- ABCD instantaneous volatility: closed-form integrated variance over a window
 public import MathFin.Models.Rates.ABCDVolatility
 -- GSR (Gaussian short rate): two-piece piecewise-constant-volatility bond price
@@ -790,6 +804,7 @@ public import MathFin.Models.ModelFree.SVI.TraceForm
 public import MathFin.Models.ModelFree.SVI.TraceSignature
 -- The SVI tail condition d₊ → −∞ iff b(1+ρ) < 2, and the butterfly-free sign formula
 public import MathFin.Models.ModelFree.SVI.TailCondition
+public import MathFin.Models.ModelFree.SVI.SSVI
 -- Calendar-spread arbitrage (Gatheral–Jacquier Lemma 2.1) and its raw-SVI form
 public import MathFin.Models.ModelFree.CalendarArbitrage
 -- Fisher/Sraffa own rate: Sraffa's implied own rate from spot, forward and financing rate
@@ -816,6 +831,8 @@ public import MathFin.Models.Rates.CleanPriceAccrued
 public import MathFin.Models.Rates.BondForward
 -- Covered and uncovered interest parity, from no-arbitrage and the Garman–Kohlhagen measure
 public import MathFin.Models.Forwards.FxForwardParity
+-- Contango, backwardation and basis convergence for the cost-of-carry forward
+public import MathFin.Models.Forwards.ContangoBackwardation
 -- Loan amortization: bullet, equal-principal, and level-payment against annuityValue
 public import MathFin.Models.Rates.LoanAmortization
 -- Key-rate partials sum to the parallel-shift derivative; on a flat curve, to dP/dy
@@ -837,6 +854,8 @@ public import MathFin.Risk.UtilityDerivation
 -- The one coherence structure: the four ADEH axioms for losses, ρ(0) = 0, convexity, and (finite
 -- state) pointwise monotonicity and continuity
 public import MathFin.Risk.Coherent
+public import MathFin.Risk.CompleteMixability
+public import MathFin.Risk.ConvexOrderSums
 -- The positions convention of the ADEH paper is the loss convention at L ↦ ρ(−L)
 public import MathFin.Risk.PositionsConvention
 -- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
@@ -964,6 +983,10 @@ public import MathFin.Markets.Microstructure.MarketMakingRiccati
 public import MathFin.Markets.Microstructure.MatrixMarketMakingRiccati
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
 public import MathFin.Markets.DeFi.ConstantProductAMM
+-- Constant-mean (Balancer) AMM: the weighted-product invariant generalizing the pool above
+public import MathFin.Markets.DeFi.ConstantMeanAMM
+-- the constant-mean LP position as a payoff, priced (the bridge into the payoff language)
+public import MathFin.Markets.DeFi.ConstantMeanLPContract
 -- DeFi/AMM group: Uniswap v2/v3 mechanics (impermanent loss, TWAP, fee invariant, v3 real reserves)
 public import MathFin.Markets.DeFi.UniswapMechanics
 -- DeFi/lending group: Aave kinked-rate + health factor, Compound cToken exchange rate

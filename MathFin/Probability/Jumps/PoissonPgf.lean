@@ -34,6 +34,8 @@ the jump-compensated conditional spots average back to the true spot
 * `PoissonPgf.tsum_poisson_weights_mul_pow` — the `tsum` form.
 * `PoissonPgf.integral_pow_poissonMeasure` — the pgf `E[x^N] = e^{r(x−1)}`.
 * `PoissonPgf.integrable_pow_poissonMeasure` — `n ↦ xⁿ` is integrable against `Poisson(r)`.
+* `PoissonPgf.integrable_natCast_poissonMeasure` — `n ↦ n` is integrable against `Poisson(r)`: the
+  mean exists.
 
 ## References
 
@@ -89,6 +91,12 @@ lemma integrable_pow_poissonMeasure (r : ℝ≥0) (x : ℝ) :
   rw [integrable_poissonMeasure_iff]
   simp_rw [norm_pow, Real.norm_eq_abs]
   exact (hasSum_poisson_weights_mul_pow r |x|).summable
+
+/-- `n ↦ n` is integrable against `Poisson(r)`: the mean exists. It is dominated by `n ↦ 2ⁿ`. -/
+lemma integrable_natCast_poissonMeasure (r : ℝ≥0) :
+    Integrable (fun n : ℕ ↦ (n : ℝ)) (poissonMeasure r) :=
+  (integrable_pow_poissonMeasure r 2).mono' Measurable.of_discrete.aestronglyMeasurable
+    (ae_of_all _ fun n ↦ by rw [Real.norm_natCast]; exact_mod_cast Nat.lt_two_pow_self.le)
 
 end PoissonPgf
 

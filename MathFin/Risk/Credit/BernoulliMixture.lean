@@ -192,6 +192,48 @@ noncomputable def oneFactorPD (π ρ f : ℝ) : ℝ :=
 lemma measurable_oneFactorPD (π ρ : ℝ) : Measurable (oneFactorPD π ρ) :=
   continuous_Phi.measurable.comp (by fun_prop)
 
+/-- **The conditional default probability is injective for `0 < ρ < 1`**: `Φ` is strictly increasing
+and `f ↦ (Φ⁻¹(π) − √ρ f)/√(1 − ρ)` is strictly decreasing. -/
+lemma injective_oneFactorPD (π : ℝ) {ρ : ℝ} (hρ : ρ ∈ Ioo 0 1) :
+    Function.Injective (oneFactorPD π ρ) := fun x y hxy ↦ by
+  have hs : 0 < √(1 - ρ) := Real.sqrt_pos.2 (sub_pos.2 hρ.2)
+  have h := strictMono_Phi.injective hxy
+  rw [div_left_inj' hs.ne'] at h
+  exact mul_left_cancel₀ (Real.sqrt_pos.2 hρ.1).ne' (by linarith)
+
+omit [IsProbabilityMeasure P] in
+/-- **The default-probability mixing variable is not constant**: for `0 < ρ < 1` and a standard
+normal factor `F`, the variance of `p(F)`, `p = oneFactorPD π ρ`, is positive. If it vanished,
+`p` would be constant almost everywhere under the Gaussian law, but `p` is injective
+(`injective_oneFactorPD`), so a level set is a single point, a null set for the atomless Gaussian
+law. -/
+theorem variance_oneFactorPD_pos (π : ℝ) {ρ : ℝ} (hρ : ρ ∈ Ioo 0 1) {F : Ω → ℝ}
+    (hF : HasLaw F (gaussianReal 0 1) P) :
+    0 < Var[fun ω ↦ oneFactorPD π ρ (F ω); P] := by
+  have hm := measurable_oneFactorPD π ρ
+  have hvar : Var[oneFactorPD π ρ ∘ F; P] = Var[oneFactorPD π ρ; gaussianReal 0 1] := by
+    have h := variance_map (X := oneFactorPD π ρ) (μ := P) (Y := F)
+      (by rw [hF.map_eq]; exact hm.aemeasurable) hF.aemeasurable
+    rw [hF.map_eq] at h
+    exact h.symm
+  change 0 < Var[oneFactorPD π ρ ∘ F; P]
+  rw [hvar]
+  have : NullSingletonClass (gaussianReal 0 1) := nullSingletonClass_gaussianReal one_ne_zero
+  refine lt_of_le_of_ne (variance_nonneg _ _) fun h0 ↦ ?_
+  have hL : MemLp (oneFactorPD π ρ) 2 (gaussianReal 0 1) :=
+    MemLp.of_bound hm.aestronglyMeasurable 1 (ae_of_all _ fun x ↦ by
+      exact (Real.norm_of_nonneg (Phi_nonneg _)).trans_le (Phi_le_one _))
+  have hae := ae_eq_integral_of_variance_eq_zero hL h0.symm
+  set m := (gaussianReal 0 1)[oneFactorPD π ρ]
+  have hs : {x | oneFactorPD π ρ x = m}.Subsingleton := fun x hx y hy ↦
+    injective_oneFactorPD π hρ (hx.trans hy.symm)
+  have hmeas : MeasurableSet {x | oneFactorPD π ρ x = m} := hm (measurableSet_singleton m)
+  have h1 := measure_add_measure_compl (μ := gaussianReal 0 1) hmeas
+  rw [hs.measure_zero, measure_univ, zero_add] at h1
+  have h2 : (gaussianReal 0 1) {x | oneFactorPD π ρ x = m}ᶜ = 0 := ae_iff.1 hae
+  rw [h2] at h1
+  exact zero_ne_one h1
+
 /-- The asset value `√ρ f + √(1 − ρ) e` falls below the threshold `Φ⁻¹(π)` exactly when the
 idiosyncratic term `e` falls below the factor-dependent level `(Φ⁻¹(π) − √ρ f)/√(1 − ρ)`. -/
 lemma oneFactor_asset_le_iff {π ρ : ℝ} (hρ : ρ < 1) (f e : ℝ) :

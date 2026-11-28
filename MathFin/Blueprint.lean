@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -38,6 +38,7 @@ import MathFin.Probability.Brownian.Ito.ItoFormulaAdaptedProcess
 import MathFin.Models.Forwards.SchwartzOneFactor
 import MathFin.Models.Credit.CVA
 import MathFin.Models.Forwards.FxForwardParity
+import MathFin.Models.Forwards.ContangoBackwardation
 import MathFin.Models.Jumps.JumpDiffusionProcess
 import MathFin.Models.Jumps.JumpDiffusionVarianceSwap
 import MathFin.Pricing.Numeraire
@@ -99,6 +100,8 @@ import MathFin.Insurance.EsscherPremium
 import MathFin.Insurance.SurvivalModel
 import MathFin.Markets.DeFi.LPContract
 import MathFin.Markets.DeFi.LiquidationAsStructuralDefault
+import MathFin.Markets.DeFi.ConstantMeanAMM
+import MathFin.Markets.DeFi.ConstantMeanLPContract
 import MathFin.Markets.DeFi.UniswapMechanics
 import MathFin.Markets.Microstructure.GlostenMilgromCondExp
 import MathFin.Markets.Microstructure.GlostenMilgromMarket
@@ -117,6 +120,7 @@ import MathFin.Models.BlackScholes.BlackScholesAsian
 import MathFin.Models.BlackScholes.BlackScholesPhysical
 import MathFin.Models.BlackScholes.Call
 import MathFin.Models.BlackScholes.DeltaHedge
+import MathFin.Models.BlackScholes.ForwardStart
 import MathFin.Models.BlackScholes.GaussianGirsanov
 import MathFin.Models.BlackScholes.Market
 import MathFin.Models.BlackScholes.MargrabeGrounding
@@ -213,9 +217,12 @@ import MathFin.Models.Binomial.BarrierReflection
 import MathFin.Models.Binomial.BarrierMarket
 import MathFin.Pricing.AmericanPrice
 import MathFin.Models.Binomial.AmericanMarket
+import MathFin.Models.Binomial.AmericanPutPremium
 import MathFin.Models.Rates.VasicekMarketPDE
 import MathFin.Choice.Performance.KellyNumeraire
 import MathFin.Risk.JointElicitability
+import MathFin.Risk.CompleteMixability
+import MathFin.Risk.ConvexOrderSums
 import MathFin.Models.Binomial.PathMeasure
 import MathFin.Probability.Brownian.BrownianDoobMaximal
 import MathFin.Probability.Discrete.SnellDoobDecomposition
@@ -898,6 +905,21 @@ attribute [blueprint "thm:bs-call"
   the uniqueness of the pricing measure is `thm:bs-arbitrage-free-price`. -/)]
   MathFin.Contracts.BlackScholes.price_europeanCall_constGirsanovMeasure
 
+attribute [blueprint "thm:forward-start-call"
+  (title := "The forward-start call in the Black–Scholes market")
+  (statement := /-- In the Black–Scholes market of a pre-Brownian motion $W$ with $S_0, \alpha,
+  \sigma > 0$ and a reset date $0 < t_1 < T$, the call whose strike is set at $t_1$ as the
+  multiple $\alpha$ of the then-observed price, paying $(S_T - \alpha S_{t_1})^+$ at $T$, is
+  worth $S_0 \cdot bsV(\alpha, r, \sigma, 1, T - t_1)$ under the Girsanov pricing measure of the
+  market price of risk $\theta = (m - r)/\sigma$, whatever the physical drift $m$, at any
+  horizon $H \ge T$: Rubinstein's
+  factorization, at zero dividend yield. The ratio $S_T/S_{t_1}$ is a function of the Brownian
+  increment $B_T - B_{t_1}$, independent of $\mathcal{F}_{t_1}$, so the expectation of the product
+  splits
+  (`condExp_mul_of_indep`); the frozen leg contributes the martingale mean and the ratio leg is
+  the call price on a unit spot (`bsV`, via `integral_bsCall_payoff_eq_bsV`). -/)]
+  MathFin.Contracts.BlackScholes.price_forwardStartCall_constGirsanovMeasure
+
 attribute [blueprint "thm:bs-delta"
   (title := "Black–Scholes Greeks")
   (statement := /-- $\partial V/\partial S = \Phi(d_1)$ — delta, the hedge ratio;
@@ -1066,6 +1088,21 @@ attribute [blueprint "thm:binomial-american-market"
   stopping, whose value is the Snell envelope's (Snell's theorem). -/)]
   MathFin.Contracts.Binomial.americanPrice_market_europeanPutPayoff
 
+attribute [blueprint "thm:american-put-premium"
+  (title := "American put early-exercise premium")
+  (statement := /-- In the binomial tree under no-arbitrage, if at some node — every node is
+  reached with positive probability, the risk-neutral up-probability lying in $(0, 1)$ —
+  immediate exercise of the put is worth strictly more than the one-period discounted
+  continuation of the American price, then the American put is worth strictly more than the
+  European put of the same strike and expiry at the root: in the binomial market at unit step
+  under the risk-neutral coin flips (a pricing measure), the price of the European put with
+  horizon $N$ is strictly below the market's American price of the put, both being the tree
+  prices, and the premium at the root bounds every path-weighted premium below it. Deep in the
+  money the closed forms hold: the American price $K - S$ (for $r \ge 0$), the European price
+  $K e^{-rN} - S$, and the strict inequality which with them gives the premium
+  $K (1 - e^{-rN}) > 0$ (for $r > 0$ and $N \ge 1$). -/)]
+  MathFin.Contracts.Binomial.price_europeanPut_lt_americanPrice_of_immediate_exercise_gt_continuation
+
 -- ===== valuation/volatility: Volatility =====
 
 attribute [blueprint "def:heston-transform"
@@ -1228,6 +1265,28 @@ attribute [blueprint "thm:interest-rate-parity"
   lognormal law at drift $r_d - r_f$ this $F$ is also the expected terminal spot
   (`covered_eq_uncovered_interest_parity`). -/)]
   MathFin.market_covered_interest_parity
+
+attribute [blueprint "def:fx-forward"
+  (title := "The cost-of-carry forward")
+  (statement := /-- $\mathsf{fxForward}(S, r_d, r_f, T) = Se^{(r_d-r_f)T}$: the forward, for
+  delivery at $T$, of one unit of an asset at spot $S$ carrying a continuously compounded rate
+  $r_d$ against a carry yield $r_f$. In its FX reading (the foreign rate in the yield slot) it
+  is derived from no-arbitrage (`covered_interest_parity`) and equal to the risk-neutral
+  expected terminal (`uncovered_interest_parity`); the commodity cost-of-carry forward with a
+  continuous convenience yield $\delta$ is the same formula. -/)]
+  MathFin.fxForward
+
+attribute [blueprint "thm:futures-basis-convergence"
+  (title := "Contango, backwardation and basis convergence")
+  (statement := /-- For the cost-of-carry forward $F(T) = Se^{(r-\delta)T}$ with $S > 0$ — the
+  library's `fxForward`, the convenience yield $\delta$ in the foreign-rate slot — the forward
+  is above the spot exactly when $\delta < r$ (contango) and below it exactly when
+  $r < \delta$ (backwardation, `fxForward_backwardation_iff`), the maturity curve is strictly
+  increasing exactly when $r > \delta$ (`fxForward_strictMono_iff`), and the spot-minus-forward
+  basis $S - F(T)$ vanishes at $T = 0$ and tends to $0$ as $T \to 0^+$
+  (`fxForward_basis_tendsto_zero`). The curve is the deterministic-rate forward; futures agree
+  with it only under deterministic rates (`thm:futures-forward-convexity` is the gap). -/)]
+  MathFin.fxForward_contango_iff
 
 attribute [blueprint "thm:key-rate-duration"
   (title := "Key-rate durations")
@@ -1430,6 +1489,29 @@ attribute [blueprint "thm:impermanent-loss"
   hold value $D_T(x_0P_T + y_0)$ is integrable, the constant-product position of invariant
   $x_0y_0$ paid at $T$ is worth at most the claim paying the deposit $x_0P_T + y_0$. -/)]
   MathFin.DeFi.price_constantProductPayoff_le_hodl
+
+attribute [blueprint "thm:balancer-invariant"
+  (title := "Balancer constant-mean AMM")
+  (statement := /-- In a constant-mean pool with reserves $B_k > 0$ and weights $w_k > 0$, a
+  swap of $\Delta$ of token $i$ in for the out-amount of token $j$ out preserves the weighted
+  product $\prod_k B_k^{w_k}$ of the reserves (`swap_preserves_constantMean`), and the spot
+  price of token $i$ in terms of token $j$ is the ratio of reserve-to-weight ratios
+  $(B_j/w_j)/(B_i/w_i)$, derived as the marginal rate of the out-amount at zero trade
+  (`hasDerivAt_swapOut_zero`). At two tokens with equal weights the invariant squared is the
+  constant product $x \cdot y$, the spot price is the reserve ratio $y/x$ and the out-amount
+  is $y\Delta/(x+\Delta)$ (`constantMeanInvariant_two_sq_eq`, `spotPrice_two_eq_internalPrice`,
+  `swapOut_two_eq_swapOutput`). Priced: the two-token position of invariant $V$ and weight $w$
+  on $X$, marked at the price $P$ of $X$ in $Y$, is worth $V P^w/(w^w (1-w)^{1-w})$ in $Y$
+  (`constantMeanPayoff`, `eval_constantMeanPayoff`); at the pool's own spot price the mark is
+  the reserves $xP + y$, the constant value distribution $B_Y/W_Y$
+  (`eval_constantMeanPayoff_eq_reserves`); paying it at $T$ is worth the discounted
+  expectation of the mark (`price_constantMeanPayoff`, the market's price of a payment
+  unfolded); in a market whose price of $X$ in $Y$ at $T$ is the pool's own spot price almost
+  surely, the position is priced as its reserves, the claim paying $xP_T + y$
+  (`price_constantMeanPayoff_eq_hodl`, the tagged statement); and at $w = 1/2$ the position is
+  the constant-product payoff of invariant $V^2$
+  (`constantMeanPayoff_one_half_eq_constantProductPayoff`, for $V > 0$). -/)]
+  MathFin.DeFi.price_constantMeanPayoff_eq_hodl
 
 attribute [blueprint "def:v3-position-value"
   (title := "Value of a concentrated-liquidity position")
@@ -1705,19 +1787,21 @@ attribute [blueprint "thm:kelly-criterion"
   growth of one bet, $g(f) = p\log(1+fb) + (1-p)\log(1-f)$, has derivative zero at the Kelly
   fraction $f^* = (pb - q)/b$, $q = 1-p$: the first-order condition of growth-optimal betting.
   Over $n$ repeated bets the growth is $n\,g$, with the same stationary fraction
-  (`kelly_n_periods_deriv_at_kelly`). First order only: global optimality and the
-  continuous-time case are not proved (`thm:log-optimal-numeraire`). -/)]
+  (`kelly_n_periods_deriv_at_kelly`). With $\log x \le x - 1$ the condition gives the global
+  form, Kelly's inequality: $f^*$ maximises $g$ among the fractions with positive wealth in both
+  states (`kelly_log_le`). The continuous-time case is not proved
+  (`thm:log-optimal-numeraire`). -/)]
   MathFin.kellyGrowth_deriv_at_kelly
 
 attribute [blueprint "thm:kelly-is-log-optimal"
   (title := "The Kelly wealth is the numéraire portfolio of the betting market")
   (statement := /-- In the two-state market of a bond (price $1$) and a bet of odds $b > 0$ won with
   probability $p \in (0,1)$, the portfolio of one bond and the fraction $f^* = (pb - q)/b$ on the
-  bet is stationary for the expected log wealth (its derivative along the bet is
-  $g'(f^*) = 0$, `thm:kelly-criterion`), so by `thm:log-optimal-numeraire-one-period` its terminal
-  wealth $W$ satisfies $\mathrm{sdf} = 1/W$ under the fair-odds pricing measure
-  $q_+ = 1/(b+1)$, $q_- = b/(b+1)$, and $E_P[S_k(1)/W] = S_k(0)$ for the bond and the bet (price
-  $0$). The market is complete; first order only, global optimality is not proved. -/)]
+  bet is a local maximum of the expected log wealth on the budget set (`kelly_isLocalMaxOn`, from
+  Kelly's inequality, the global form of `thm:kelly-criterion`), hence stationary, so by
+  `thm:log-optimal-numeraire-one-period` its terminal wealth $W$ satisfies $\mathrm{sdf} = 1/W$
+  under the fair-odds pricing measure $q_+ = 1/(b+1)$, $q_- = b/(b+1)$, and
+  $E_P[S_k(1)/W] = S_k(0)$ for the bond and the bet (price $0$). The market is complete. -/)]
   MathFin.kellyMarket_numeraire_portfolio
 
 -- ===== choice/trading: Strategic trading =====
@@ -1880,6 +1964,38 @@ attribute [blueprint "thm:rockafellar-uryasev"
   \sim \mathrm{Poisson}(\lambda)$ independent of identically distributed integrable claims
   (`isLeast_rockafellarUryasev_compoundPoisson`). -/)]
   MathFin.isLeast_rockafellarUryasev
+
+attribute [blueprint "def:convex-order"
+  (title := "Convex order")
+  (statement := /-- $\mu \le_{cx} \nu$ when $\int \varphi\,d\mu \le \int \varphi\,d\nu$ for every
+  convex $\varphi$ integrable under both laws. Ordered laws have equal means and ordered call and
+  put prices, and, when the call or put at $t$ is integrable under both laws, $\mu$ lives in
+  every half-line bounded by $t$ that $\nu$ lives in (`ConvexOrder.ae_le_of_ae_le`). -/)]
+  MathFin.ConvexOrder
+
+attribute [blueprint "thm:es-convex-order"
+  (title := "Expected shortfall respects convex order")
+  (statement := /-- If the law of $X$ is below the law of $Y$ in convex order, then
+  $\mathrm{ES}_\alpha(X) \le \mathrm{ES}_\alpha(Y)$ for every $\alpha \in (0,1)$: the
+  Rockafellar–Uryasev objective of $X$ at $c = \mathrm{VaR}_\alpha(Y)$ is below that of $Y$. -/)]
+  MathFin.expectedShortfall_le_of_convexOrder
+
+attribute [blueprint "def:complete-mixability"
+  (title := "Complete mixability")
+  (statement := /-- A law $\mu$ is $n$-completely mixable when some coupling of $n$ copies of
+  $\mu$ has an almost surely constant sum. Measure-preserving maps whose values add up to a
+  constant give such a coupling, and mixes concatenate. The uniform law on a simplex with $n$
+  vertices is $n$-completely mixable through the cyclic shifts of its vertices, and the uniform
+  law on a centrally symmetric set is $2k$-completely mixable for every $k \ge 1$. -/)]
+  MathFin.CompletelyMixable
+
+attribute [blueprint "thm:complete-mix-convex-order-minimum"
+  (title := "A complete mix is the convex-order minimum of the sum")
+  (statement := /-- If an integrable law $\mu$ on $\mathbb R$ is $n$-completely mixable, the
+  complete mix's sum is below, in convex order, the sum under every coupling of $n$ copies of
+  $\mu$ (`convexOrder_sum_of_completelyMixable`): the constant is the common mean, and Jensen's
+  inequality (`ConvexOrder.dirac_integral_le`) compares it with any law of that mean. -/)]
+  MathFin.CompletelyMixable.exists_convexOrder_min
 
 attribute [blueprint "thm:expected-shortfall-coherent"
   (title := "Expected shortfall is a law-invariant coherent risk measure")

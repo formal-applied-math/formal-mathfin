@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Probability.Brownian.Ito.DriftProcessPredictable
+public import MathFin.Probability.Brownian.Ito.DriftPath
 public import MathFin.Probability.Analysis.FiniteMeasureCauchySchwarz
 
 /-! # The pathwise drift process: convergence and modification (SDE-existence bridge, #19→existence)
@@ -328,13 +329,7 @@ theorem driftProcessAssembled_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
     filter_upwards [driftContinuousMod_tendsto T hBmeas g] with ω hω
     exact hω t htT
   -- transfer prod-conull ↦ trim-conull (C is predictable-measurable)
-  have h0 : (trimMeasure (μ := μ) T hBmeas) Cᶜ = 0 := by
-    rw [show trimMeasure (μ := μ) T hBmeas
-        = ((timeMeasureHorizon T).prod μ).trim (natFiltration hBmeas).predictable_le_prod from rfl,
-      trim_measurableSet_eq (natFiltration hBmeas).predictable_le_prod hCpred.compl]
-    exact hCprod
-  have hae_trim : ∀ᵐ z ∂(trimMeasure (μ := μ) T hBmeas), z ∈ C := by
-    rw [ae_iff]; exact h0
+  have hae_trim := ItoIntegralCLM.ae_trimMeasure_of_ae_prod T hBmeas hCpred hCprod
   -- the E-limit: driftSimpleProcessLp Vₙ → driftProcessAssembled g by CLM continuity
   have hsa : Tendsto (fun n ↦ simpleAssemblyHorizon (μ := μ) T hBmeas (V n)) atTop (𝓝 g) := by
     rw [tendsto_iff_norm_sub_tendsto_zero]
@@ -521,6 +516,15 @@ theorem driftContinuousMod_eq_setIntegral (T : ℝ≥0) (hBmeas : ∀ t, Measura
     · rw [← Real.sqrt_zero, ← mul_zero (T : ℝ)]
       exact (Real.continuous_sqrt.tendsto _).comp (tendsto_const_nhds.mul hωD)
   exact tendsto_nhds_unique hlim_sub hlim_int
+
+/-- **The pathwise drift is the drift path of the limit rate**: for each `t ≤ T`, almost surely
+`driftContinuousMod T g t ω = driftPath (fun s ω ↦ ⇑g (s, ω)) t ω`, the pathwise integral
+`∫₀ᵗ ⇑g(s, ω) ds` of the representative of `g` (`driftContinuousMod_eq_setIntegral`). -/
+theorem driftContinuousMod_ae_eq_driftPath (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (g : Lp ℝ 2 (trimMeasure (μ := μ) T hBmeas)) {t : ℝ≥0} (ht : t ≤ T) :
+    ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas g t ω
+      = AdaptedDrift.driftPath (fun s ω ↦ ⇑g (s, ω)) t ω :=
+  driftContinuousMod_eq_setIntegral T hBmeas g ht
 
 end ItoIntegralProcessContinuousModification
 end MathFin

@@ -55,7 +55,7 @@ sources:
     location: De Gruyter, Chapter 5
     note: "The proofs follow this book's one-asset argument for the first theorem and its proof of the second, with one change in the first: the one-period weights are left unnormalised and the total mass is normalised once, at the end, since a conditional one-period density of mean one can fail to exist."
 status:
-  scope: 910 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 888 delivery-ready (full + library-wrapper).
+  scope: 928 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 899 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -119,7 +119,7 @@ automation:
   spend_usd: 0 (Mistral Labs beta)
   notes: "scout, not author: the pipeline opens the PR; a human reviews and merges, so no machine proof enters the library unreviewed"
 fidelity:
-  divergences: 22 reduced-core (a faithful but reduced formal core of the informal statement) and 18 library-wrappers (a thin restatement consuming a Mathlib/BrownianMotion lemma); 0 placeholders. The reduced-core entries are the honest divergences — each is itemised in docs/coverage.md.
+  divergences: 29 reduced-core (a faithful but reduced formal core of the informal statement) and 18 library-wrappers (a thin restatement consuming a Mathlib/BrownianMotion lemma); 0 placeholders. The reduced-core entries are the honest divergences — each is itemised in docs/coverage.md.
 review:
   status: continuous — an 8-lens values-review panel runs at each proof-content change (docs/values-review.md); cadence machine-enforced by test_values_review_is_current
   reviewers:
@@ -139,9 +139,9 @@ alignment:
       status: full 10 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 40 statements
+      lean: 41 statements
       module: benchmarks/binomial.json
-      status: full 40 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 41 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 128 statements
@@ -154,9 +154,9 @@ alignment:
       status: full 5 · wrapper 3 · reduced 3 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 5 statements
+      lean: 6 statements
       module: benchmarks/commodities.json
-      status: full 5 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 6 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: measure_theory (Saporito, Stochastic Processes)
       lean: 7 statements
@@ -184,9 +184,9 @@ alignment:
       status: full 1 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 10 statements
+      lean: 11 statements
       module: benchmarks/defi.json
-      status: full 10 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 11 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: measure_theory (Saporito, Stochastic Processes)
       lean: 6 statements
@@ -194,9 +194,9 @@ alignment:
       status: full 4 · wrapper 2 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 27 statements
+      lean: 33 statements
       module: benchmarks/exotic_options.json
-      status: full 22 · wrapper 0 · reduced 5 · placeholder 0
+      status: full 23 · wrapper 0 · reduced 10 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 27 statements
@@ -204,9 +204,9 @@ alignment:
       status: full 26 · wrapper 0 · reduced 1 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 72 statements
+      lean: 75 statements
       module: benchmarks/interest_rates.json
-      status: full 69 · wrapper 0 · reduced 3 · placeholder 0
+      status: full 70 · wrapper 0 · reduced 5 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
       lean: 84 statements
@@ -249,9 +249,9 @@ alignment:
       status: full 76 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: "Several works: each entry's `reference` names its source (textbooks, papers and regulatory texts in mathematical finance)"
-      lean: 49 statements
+      lean: 54 statements
       module: benchmarks/risk_measures.json
-      status: full 49 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 54 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
       lean: 66 statements
@@ -263,9 +263,9 @@ alignment:
       module: benchmarks/stochastic_foundations.json
       status: full 13 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
-    - source: "Gatheral and Jacquier (2014), Lemma 2.2; Roper (2010), Theorem 2.1; Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; Roper (2010), Theorem 2.1; Breeden and Litzenberger (1978); Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Lemma 2.2; MathFin issue #174; Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Lemma 2.2; docs/specs/2026-11-08-chain-design.md K2"
-      lean: 7 statements
+    - source: "Gatheral and Jacquier (2014), Lemma 2.2; Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Section 4; Robert Martin, ButterflyFreeSVI, https://github.com/robertmartin8/ButterflyFreeSVI/tree/eca8edd76aff6a22ffa7efbe0a9e5c3dc7c49c9a; Roper (2010), Theorem 2.1; Breeden and Litzenberger (1978); Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Lemma 2.2; MathFin issue #174; Roper (2010), Theorem 2.1; Gatheral and Jacquier (2014), Lemma 2.2; docs/specs/2026-11-08-chain-design.md K2"
+      lean: 8 statements
       module: benchmarks/svi_certificate.json
-      status: full 7 · wrapper 0 · reduced 0 · placeholder 0
+      status: full 8 · wrapper 0 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
 acknowledgements: ""

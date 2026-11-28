@@ -102,7 +102,7 @@ overlap intersected with `(0,t]`). These are equal: both measure the length of
 `(p.1,p.2] ∩ (q.1,q.2] ∩ (0,t]`. When the joint overlap is nonempty its left endpoint
 `max p.1 q.1 < t`, so the individual `∧t`-truncations on the left are inert; when empty,
 both clamp to `0`. -/
-lemma band_overlap_real (P1 P2 Q1 Q2 T : ℝ) :
+lemma overlap_truncate_eq_truncate_overlap (P1 P2 Q1 Q2 T : ℝ) :
     max 0 (min (min P2 T) (min Q2 T) - max (min P1 T) (min Q1 T))
       = max 0 (min (min P2 Q2) T - max P1 Q1) := by
   -- The right endpoints coincide unconditionally: `(P2∧T)∧(Q2∧T) = (P2∧Q2)∧T`.
@@ -199,7 +199,7 @@ omit [IsProbabilityMeasure μ] in
 for `t ≤ T`: the LHS is B1a's `itoSimpleProcess_isometry_time` (the per-endpoint
 `∧t`-truncated predictable-rectangle double sum); the RHS is `band_integral_uncurry_sq`
 (the joint-overlap-`∩(0,t]` double sum); the two overlap forms agree pointwise by
-`band_overlap_real`. -/
+`overlap_truncate_eq_truncate_overlap`. -/
 private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ (natFiltration hBmeas)) :
     ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
@@ -216,7 +216,7 @@ private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
   refine Finset.sum_congr rfl fun p _ ↦ Finset.sum_congr rfl fun q _ ↦ ?_
   congr 1
   push_cast
-  exact band_overlap_real _ _ _ _ _
+  exact overlap_truncate_eq_truncate_overlap _ _ _ _ _
 
 omit hB in
 /-- `(0,t]×Ω` is measurable for the predictable σ-algebra carried by `trimMeasure`. -/

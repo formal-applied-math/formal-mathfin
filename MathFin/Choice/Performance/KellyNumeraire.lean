@@ -45,8 +45,10 @@ a bond and the bet (the one-date market `Market.oneDate` of the payoff `(b, -1)`
 bond), `kellyFairLaw` is a pricing measure of it, and the Kelly portfolio is stationary for the
 expected log-wealth (`kelly_foc`, from `kellyGrowth_deriv_at_kelly`). So the market theorems
 `sdf_eq_div_of_logOptimal` and `integral_div_logOptimal_mul` apply: the Kelly wealth `W` has
-`sdf = 1 / W`, and `E_P[S_k(1) / W] = S_k(0)` (`kellyMarket_numeraire_portfolio`). First order only:
-that the Kelly portfolio maximises the expected log-wealth is not proved.
+`sdf = 1 / W`, and `E_P[S_k(1) / W] = S_k(0)` (`kellyMarket_numeraire_portfolio`). The Kelly
+portfolio is optimal, not only stationary: it is a local maximum of the expected log-wealth on the
+budget set (`kelly_isLocalMaxOn`, from Kelly's inequality `kelly_log_le`), and the market theorems
+take their stationarity from it (`Market.foc_of_isLocalMaxOn_log`).
 
 ## Main definitions
 
@@ -70,6 +72,10 @@ that the Kelly portfolio maximises the expected log-wealth is not proved.
   stationarity hypothesis is the Kelly first-order condition, which is
   `kellyNumeraire_isRiskNeutral`.
 
+* `kelly_log_le` — Kelly's inequality: the Kelly fraction has the largest expected log-growth among
+  the fractions with positive wealth in both states.
+* `kelly_isLocalMaxOn` — the Kelly portfolio is a local maximum of the expected log-wealth on the
+  budget set of the Kelly market.
 * `kelly_foc` — the Kelly portfolio is stationary for the expected log-wealth on the budget set.
 * `kellyFairLaw_isPricingMeasure` — the fair-odds law is a pricing measure of `kellyMarket`.
 * `kellyMarket_numeraire_portfolio` — in `kellyMarket`, `sdf = 1 / W` under `kellyFairLaw` and
@@ -158,15 +164,21 @@ def kellyPrice : Fin 2 → ℝ := ![1, 0]
 
 lemma kellyPayoff_win (θ : Fin 2 → ℝ) :
     portfolioPayoff (kellyPayoff b) θ 0 = θ 0 + θ 1 * b := by
-  simp [portfolioPayoff, kellyPayoff, Fin.sum_univ_two]
+  simp [portfolioPayoff, Matrix.vecMul, dotProduct, kellyPayoff, Fin.sum_univ_two]
 
 lemma kellyPayoff_lose (θ : Fin 2 → ℝ) :
     portfolioPayoff (kellyPayoff b) θ 1 = θ 0 - θ 1 := by
-  simp [portfolioPayoff, kellyPayoff, Fin.sum_univ_two]
+  simp [portfolioPayoff, Matrix.vecMul, dotProduct, kellyPayoff, Fin.sum_univ_two]
   ring
 
 lemma kellyCost (θ : Fin 2 → ℝ) : portfolioCost kellyPrice θ = θ 0 := by
-  simp [portfolioCost, kellyPrice, Fin.sum_univ_two]
+  simp [portfolioCost, dotProduct, kellyPrice, Fin.sum_univ_two]
+
+/-- The win and lose probabilities `![p, 1 - p]` are positive for `0 < p < 1`. -/
+lemma kellyWeights_pos (hp : 0 < p) (hp1 : p < 1) (ω : Fin 2) : 0 < ![p, 1 - p] ω := by
+  fin_cases ω
+  · simpa using hp
+  · simpa using sub_pos.mpr hp1
 
 /-- The Kelly winning wealth `1 + f*·b` is positive. -/
 lemma kellyWealth_win_pos (hp : 0 < p) (hb : 0 < b) : 0 < 1 + kellyFraction p b * b := by
@@ -204,6 +216,35 @@ theorem kelly_foc (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) (d : Fin 2 → ℝ) (h
   simp only [kellyPayoff_win, kellyPayoff_lose, hd, Matrix.cons_val_zero, Matrix.cons_val_one]
   linear_combination (-d 1) * h0
 
+/-- **Kelly's inequality**: among the fractions `y` with positive wealth in both states
+(`1 + y b > 0`, `1 − y > 0`), the Kelly fraction has the largest expected log-growth,
+`p log(1 + y b) + (1 − p) log(1 − y) ≤ p log(1 + f* b) + (1 − p) log(1 − f*)`. From
+`log x ≤ x − 1` applied to the wealth ratios `W / W*`, whose `P`-mean is `1` by the first-order
+condition `kelly_foc` along the budget-neutral direction `(0, y − f*)`: the first-order condition
+and the concavity of `log` give the global bound. -/
+lemma kelly_log_le (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) {y : ℝ} (hA : 0 < 1 + y * b)
+    (hB : 0 < 1 - y) :
+    p * Real.log (1 + y * b) + (1 - p) * Real.log (1 - y) ≤
+      p * Real.log (1 + kellyFraction p b * b) + (1 - p) * Real.log (1 - kellyFraction p b) := by
+  have hA' := kellyWealth_win_pos hp hb
+  have hB' := kellyWealth_lose_pos hp1 hb
+  have h1 : Real.log (1 + y * b) - Real.log (1 + kellyFraction p b * b) ≤
+      (1 + y * b) / (1 + kellyFraction p b * b) - 1 := by
+    rw [← Real.log_div hA.ne' hA'.ne']
+    exact Real.log_le_sub_one_of_pos (div_pos hA hA')
+  have h2 : Real.log (1 - y) - Real.log (1 - kellyFraction p b) ≤
+      (1 - y) / (1 - kellyFraction p b) - 1 := by
+    rw [← Real.log_div hB.ne' hB'.ne']
+    exact Real.log_le_sub_one_of_pos (div_pos hB hB')
+  have key : p * ((1 + y * b) / (1 + kellyFraction p b * b) - 1) +
+      (1 - p) * ((1 - y) / (1 - kellyFraction p b) - 1) = 0 := by
+    have h := kelly_foc hp hp1 hb ![0, y - kellyFraction p b] rfl
+    rw [Fin.sum_univ_two] at h
+    simp only [kellyPayoff_win, kellyPayoff_lose, Matrix.cons_val_zero, Matrix.cons_val_one] at h
+    rw [div_sub_one hA'.ne', div_sub_one hB'.ne']
+    linear_combination h
+  nlinarith [mul_le_mul_of_nonneg_left h1 hp.le, mul_le_mul_of_nonneg_left h2 (sub_pos.2 hp1).le]
+
 /-- **The GOP-deflated probabilities are the state prices of the Kelly market.** The Kelly
 portfolio (one unit in the bond, the fraction `f*` on the bet) has the marginal-utility density
 `p / W*` of the logarithmic utility, and this density, which is `q₊, q₋`, prices both assets of the
@@ -216,21 +257,13 @@ theorem kelly_statePrices (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) (k : Fin 2) :
   have hW : portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] =
       ![1 + kellyFraction p b * b, 1 - kellyFraction p b] := by
     funext ω
-    fin_cases ω
-    · simp [kellyPayoff_win]
-    · simp [kellyPayoff_lose]
+    fin_cases ω <;> simp [kellyPayoff_win, kellyPayoff_lose]
   have hq : (fun ω : Fin 2 ↦ 1 * ![p, 1 - p] ω /
       portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω) =
       ![p / (1 + kellyFraction p b * b), (1 - p) / (1 - kellyFraction p b)] := by
     funext ω
-    fin_cases ω
-    · simp [hW]
-    · simp [hW]
-  have hpos : ∀ ω, 0 < ![p, 1 - p] ω := by
-    intro ω
-    fin_cases ω
-    · simpa using hp
-    · simpa using hp1
+    fin_cases ω <;> simp [hW]
+  have hpos := kellyWeights_pos hp hp1
   have hWpos : ∀ ω, 0 < portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω := by
     intro ω
     rw [hW]
@@ -305,15 +338,54 @@ lemma kellyMarket_asset_one (k ω : Fin 2) : (kellyMarket p b).asset k 1 ω = ke
 lemma kellyMarket_asset_zero (k ω : Fin 2) : (kellyMarket p b).asset k 0 ω = kellyPrice k := by
   fin_cases k <;> simp [kellyMarket, kellyBetMarket, Market.oneDate, kellyPrice]
 
+/-- **The Kelly portfolio maximises the expected log-wealth locally on the budget set.** In the
+Kelly market (`p ∈ (0, 1)`, `b > 0`), the portfolio with one unit in the bond and the fraction `f*`
+on the bet is a local maximum of `θ ↦ ∫ log W(θ) ∂P` on the budget set `{θ | cost θ = 1}`, that is,
+of the expected log-growth `kellyGrowth` of the bet. The wealths of the portfolios near it are
+positive in both states, and there Kelly's inequality (`kelly_log_le`) bounds the objective by its
+value at `θ*`. -/
+theorem kelly_isLocalMaxOn (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
+    IsLocalMaxOn
+      (fun θ : Fin 2 → ℝ ↦ ∫ ω, Real.log (portfolioPayoff (kellyPayoff b) θ ω) ∂(kellyLaw p))
+      {θ | portfolioCost kellyPrice θ = 1} ![1, kellyFraction p b] := by
+  have hc0 : Continuous fun θ : Fin 2 → ℝ ↦ portfolioPayoff (kellyPayoff b) θ 0 := by
+    simp only [kellyPayoff_win]
+    fun_prop
+  have hc1 : Continuous fun θ : Fin 2 → ℝ ↦ portfolioPayoff (kellyPayoff b) θ 1 := by
+    simp only [kellyPayoff_lose]
+    fun_prop
+  have h0 : 0 < portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] 0 := by
+    simpa [kellyPayoff_win] using kellyWealth_win_pos hp hb
+  have h1 : 0 < portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] 1 := by
+    simpa [kellyPayoff_lose] using kellyWealth_lose_pos hp1 hb
+  have hev : ∀ᶠ θ in nhds ![1, kellyFraction p b],
+      0 < portfolioPayoff (kellyPayoff b) θ 0 ∧ 0 < portfolioPayoff (kellyPayoff b) θ 1 :=
+    (hc0.continuousAt.eventually (lt_mem_nhds h0)).and
+      (hc1.continuousAt.eventually (lt_mem_nhds h1))
+  have hobj (θ : Fin 2 → ℝ) :
+      ∫ ω, Real.log (portfolioPayoff (kellyPayoff b) θ ω) ∂(kellyLaw p) =
+        p * Real.log (θ 0 + θ 1 * b) + (1 - p) * Real.log (θ 0 - θ 1) := by
+    haveI := isProbabilityMeasure_kellyLaw hp.le hp1.le
+    rw [integral_fintype Integrable.of_finite, Fin.sum_univ_two,
+      kellyLaw_real_singleton _ hp.le hp1.le, kellyLaw_real_singleton _ hp.le hp1.le,
+      kellyPayoff_win, kellyPayoff_lose]
+    simp
+  unfold IsLocalMaxOn IsMaxFilter
+  filter_upwards [nhdsWithin_le_nhds hev, self_mem_nhdsWithin] with θ hpos hmem
+  have hθ0 : θ 0 = 1 := by simpa [kellyCost] using hmem
+  obtain ⟨hA, hB⟩ := hpos
+  rw [kellyPayoff_win, hθ0] at hA
+  rw [kellyPayoff_lose, hθ0] at hB
+  beta_reduce
+  rw [hobj, hobj, hθ0]
+  simpa using kelly_log_le hp hp1 hb hA hB
+
 /-- **The fair-odds law prices the Kelly market.** For `p ∈ (0, 1)` and `b > 0` the law
 `q₊ = 1/(b+1)`, `q₋ = b/(b+1)` is equivalent to the physical law and makes the deflated bond and
 bet martingales up to the date `1`. -/
 theorem kellyFairLaw_isPricingMeasure (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
     (kellyMarket p b).IsPricingMeasure 1 (kellyFairLaw b) := by
-  have hpos : ∀ i, 0 < ![p, 1 - p] i := fun i ↦ by
-    fin_cases i
-    · simpa using hp
-    · simpa using sub_pos.mpr hp1
+  have hpos := kellyWeights_pos hp hp1
   have hqpos : ∀ i, 0 < ![1 / (b + 1), b / (b + 1)] i := fun i ↦ by
     fin_cases i
     · simpa using by positivity
@@ -347,8 +419,9 @@ theorem kellyFairLaw_isPricingMeasure (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
 `f* = kellyFraction p b` on the bet. Under the fair-odds pricing measure `kellyFairLaw b`, the
 stochastic discount factor is `1 / W` in every state, and the prices deflated by `W` are
 `P`-martingales over the period: `E_P[S_k(1) / W] = S_k(0)` for the bond (`k = 0`, `E_P[1 / W] = 1`)
-and the bet (`k = 1`, `E_P[payoff / W] = 0`, its price). The stationarity of the Kelly portfolio is
-`kelly_foc`, a consequence of `kellyGrowth_deriv_at_kelly`; the identities are
+and the bet (`k = 1`, `E_P[payoff / W] = 0`, its price). The Kelly portfolio is a local maximum of
+the expected log-wealth (`kelly_isLocalMaxOn`), hence stationary
+(`Market.foc_of_isLocalMaxOn_log`); the identities are
 `IsPricingMeasure.sdf_eq_div_of_logOptimal` and `IsPricingMeasure.integral_div_logOptimal_mul`
 for the market. -/
 theorem kellyMarket_numeraire_portfolio (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
@@ -361,9 +434,7 @@ theorem kellyMarket_numeraire_portfolio (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) 
     funext fun j ↦ funext (kellyMarket_asset_one j)
   have hPr : ∀ ω, 0 < (kellyMarket p b).P.real {ω} := fun ω ↦ by
     rw [show (kellyMarket p b).P = kellyLaw p from rfl, kellyLaw_real_singleton ω hp.le hp1.le]
-    fin_cases ω
-    · simpa using hp
-    · simpa using sub_pos.mpr hp1
+    exact kellyWeights_pos hp hp1 ω
   have hQ := kellyFairLaw_isPricingMeasure hp hp1 hb
   have hθ : portfolioCost kellyPrice ![1, kellyFraction p b] = 1 := by
     rw [kellyCost]; simp
@@ -374,10 +445,14 @@ theorem kellyMarket_numeraire_portfolio (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) 
   have hfoc : ∀ d, portfolioCost kellyPrice d = 0 →
       ∑ ω, (kellyMarket p b).P.real {ω} *
         (portfolioPayoff (kellyPayoff b) ![1, kellyFraction p b] ω)⁻¹ *
-        portfolioPayoff (kellyPayoff b) d ω = 0 := fun d hd ↦ by
-    simp only [show (kellyMarket p b).P = kellyLaw p from rfl,
-      kellyLaw_real_singleton _ hp.le hp1.le]
-    exact kelly_foc hp hp1 hb d (by rwa [kellyCost] at hd)
+        portfolioPayoff (kellyPayoff b) d ω = 0 := by
+    have hmax : IsLocalMaxOn (fun θ' : Fin 2 → ℝ ↦ ∫ ω,
+        Real.log (portfolioPayoff (fun j ↦ (kellyMarket p b).asset j 1) θ' ω) ∂(kellyMarket p b).P)
+        {θ' | portfolioCost kellyPrice θ' = 1} ![1, kellyFraction p b] := by
+      rw [hA]
+      exact kelly_isLocalMaxOn hp hp1 hb
+    have h := Market.foc_of_isLocalMaxOn_log hmax hθ (by rw [hA]; exact hW)
+    rwa [hA] at h
   have hcomplete : ∀ x : Fin 2 → ℝ, (∀ k, ∑ ω, x ω * (kellyMarket p b).asset k 1 ω = 0) →
       x = 0 := fun x hx ↦ by
     have h0 := hx 0
@@ -392,10 +467,12 @@ theorem kellyMarket_numeraire_portfolio (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) 
     · simpa [hx0] using h0
   have hN₀ : ∀ ω, (kellyMarket p b).numeraire 0 ω = 1 := fun ω ↦ by
     simp [kellyMarket, kellyBetMarket, Market.oneDate]
-  have h1 := hQ.sdf_eq_div_of_logOptimal (w₀ := 1) (θ := ![1, kellyFraction p b]) hPr hN₀
-    kellyMarket_asset_zero hcomplete hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
-  have h2 := hQ.integral_div_logOptimal_mul (w₀ := 1) (θ := ![1, kellyFraction p b]) hPr hN₀
-    kellyMarket_asset_zero hcomplete hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
+  have hS : (kellyMarket p b).IsFiniteComplete 1 1 kellyPrice :=
+    ⟨hPr, hN₀, kellyMarket_asset_zero, hcomplete⟩
+  have h1 := hQ.sdf_eq_div_of_logOptimal hS (w₀ := 1) (θ := ![1, kellyFraction p b])
+    hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
+  have h2 := hQ.integral_div_logOptimal_mul hS (w₀ := 1) (θ := ![1, kellyFraction p b])
+    hθ one_pos (by rw [hA]; exact hW) (by rw [hA]; exact hfoc)
   rw [hA] at h1 h2
   refine ⟨fun ω ↦ h1 ω, fun k ↦ ?_⟩
   have h3 := h2 k

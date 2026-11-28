@@ -22,6 +22,9 @@ instantiated on the terminal law `N((r−σ²/2)T, σ²T)` through the standardi
 
 * `exp_neg_mul_integral_put_gaussian_eq`: for `σ, T, S₀, K > 0`, the discounted put expectation
   under `N((r − σ²/2)T, σ²T)` equals the Black–Scholes put value.
+* `binomialPrice_put_tendsto_bs_closed`: for `σ, T, S₀, K > 0`, if the CRR tree is
+  arbitrage-free for every size `n > 0`, its `n`-step put price tends to
+  `K · e^{−rT} · Φ(−d₂) − S₀ · Φ(−d₁)`.
 * `binomialPrice_call_tendsto_bs_closed`: for `σ, T, S₀, K > 0`, if the CRR tree is
   arbitrage-free for every size `n > 0`, its `n`-step call price tends to
   `S₀ · Φ(d₁) − K · e^{−rT} · Φ(d₂)`.
@@ -98,6 +101,20 @@ lemma exp_neg_mul_integral_put_gaussian_eq {r σ T S₀ K : ℝ}
   rw [← integral_const_mul, show Real.exp (-(r * T)) = Real.exp (-r * T) from by
     rw [neg_mul]]
   exact hpf
+
+/-- **Cox–Ross–Rubinstein → Black–Scholes, put price in closed form.** Under no-arbitrage at
+every step with `n ≥ 1`, the `n`-step CRR binomial put price converges to the Black–Scholes put
+price `K·e^{−rT}·Φ(−d₂) − S₀·Φ(−d₁)`: `binomialPrice_put_tendsto_bs` with its integral limit
+rewritten by `exp_neg_mul_integral_put_gaussian_eq`. -/
+theorem binomialPrice_put_tendsto_bs_closed {r σ T S₀ K : ℝ}
+    (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)
+    (hna : ∀ n, 0 < n → BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x ↦ max (K - x) 0) n S₀) atTop
+      (𝓝 (K * Real.exp (-(r * T)) * Phi (-(bsd2 S₀ K r σ T))
+          - S₀ * Phi (-(bsd1 S₀ K r σ T)))) := by
+  rw [← exp_neg_mul_integral_put_gaussian_eq hσ hT hS₀ hK]
+  exact binomialPrice_put_tendsto_bs hσ hT hS₀ hna
 
 /-- **Cox–Ross–Rubinstein → Black–Scholes, closed form.** Under no-arbitrage at
 every step with `n ≥ 1`, the `n`-step CRR binomial call price converges to the *literal*

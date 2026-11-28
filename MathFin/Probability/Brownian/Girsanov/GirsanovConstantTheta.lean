@@ -46,7 +46,7 @@ adapted-integrand Itô formula.
 ## Main results
 
 * `MathFin.expBtheta_isQMartingale` — the exponential `Q`-martingale above.
-* `MathFin.Btheta_isQBrownianMotion` — zero start, `N(0,t−s)` increments and independent
+* `MathFin.Btheta_isBrownianOn` — zero start, `N(0,t−s)` increments and independent
   increments of `B^θ` under `Q` on `[0,T]`.
 
 ## Tags
@@ -210,7 +210,7 @@ For constant `θ`, the process `B^θ_u = X_u + θ u` is `𝓕`-adapted, starts a
 Girsanov measure `Q = P.withDensity(exp(−θ X_T − ½θ² T))` (`X_0 = 0` a.e. `P`, `Q ≪ P`), and for
 every `a` the exponential `exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`
 (`expBtheta_isQMartingale`). This is exactly `IsExpQMartingale`, the hypothesis bundle consumed by
-the process-agnostic `isQBrownianMotion_of_expMartingale`. -/
+the process-agnostic `isBrownianOn_of_expMartingale`. -/
 private theorem isExpQMartingale_Btheta
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
@@ -276,12 +276,12 @@ theorem Btheta_increment_map_eq_gaussianReal
 `[0,T]`: zero start `B^θ_0 = 0` a.e. `Q`, Gaussian increments `B^θ_t − B^θ_s ~ N(0, t−s)`, and
 independent increments (`HasIndepIncrements`). Together these fix every finite-dimensional law of
 `B^θ` under `Q` on `[0,T]` to that of a standard Brownian motion; path continuity is not stated. One
-application of `isQBrownianMotion_of_expMartingale` to the constant-θ exponential martingale
+application of `isBrownianOn_of_expMartingale` to the constant-θ exponential martingale
 (`isExpQMartingale_Btheta`), reached on the existing tower (Bayes engine + Wald exponentials) with
 no adapted-integrand Itô formula. The bounded-*adapted*-θ statements are delivered separately, by
 `GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous adapted) and
 `GirsanovPredictableTheta` (bounded predictable). -/
-theorem Btheta_isQBrownianMotion
+theorem Btheta_isBrownianOn
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
     {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
@@ -292,6 +292,6 @@ theorem Btheta_isQBrownianMotion
   have : IsProbabilityMeasure (P.withDensity fun ω ↦ ENNReal.ofReal
       (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) :=
     girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
-  exact isQBrownianMotion_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T)
+  exact isBrownianOn_of_expMartingale (isExpQMartingale_Btheta (X := X) (𝓕 := 𝓕) θ T)
 
 end MathFin

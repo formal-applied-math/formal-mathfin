@@ -22,7 +22,7 @@ with `B^λ_t = B_t + λt`. The risk-adjusted long-run level is `θ − λσ/κ`.
 `vasicekIntegratedRate`), as elsewhere in the Vasicek layer.
 That they solve the SDE, and the time-order swap behind the integrated rate, are cited, not proved.
 `Q_λ` is the measure the library constructs: `isProbabilityMeasure_withDensity_girsanov` shows
-it is a probability measure, and with a filtration `Btheta_isQBrownianMotion` shows that `B^λ`
+it is a probability measure, and with a filtration `Btheta_isBrownianOn` shows that `B^λ`
 has, on `[0, T]`, the increments of a `Q_λ`-Brownian motion.
 
 ## Main results

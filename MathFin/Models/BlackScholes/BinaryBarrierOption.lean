@@ -8,6 +8,7 @@ module
 public import MathFin.Probability.Gaussian.StandardNormal
 public import MathFin.Models.BlackScholes.Call
 public import MathFin.Models.BlackScholes.BlackScholes
+public import MathFin.Models.BlackScholes.BarrierReflection
 
 /-!
 # Binary (digital) barrier options: Rubinstein & Reiner's closed form
@@ -54,7 +55,8 @@ QuantLib's 16-branch `switch` (barrier type × call/put × strike-vs-barrier) se
 * `bboPhiOf`: the sign `φ`, equal to `1` for a call and `-1` for a put.
 * `bboX1`, `bboX2`, `bboY1`, `bboY2`: the exponents of the four terms, struck at `X` (`x₁`), at the
   barrier `H` (`x₂`), at the reflected log `log (H²/(S X))` (`y₁`) and at `log (H/S)` (`y₂`).
-* `bboHS2mu`: the factor `(H/S)^{2μ}`, written as `exp (2μ · log (H/S))`.
+* `barrierReflection` (`BarrierReflection.lean`): the factor `(H/S)^{2μ}`, written as
+  `exp (2μ · log (H/S))`.
 * `bboB1`, `bboB2`, `bboB3`, `bboB4`: the four building blocks `B₁` to `B₄` of the Rubinstein and
   Reiner binary-barrier formulas.
 * `bboDownInAlpha`, `bboDownOutAlpha`, `bboUpInAlpha`, `bboUpOutAlpha`: the knock-in and knock-out
@@ -131,11 +133,6 @@ noncomputable def bboY1 (S X H mu σ T eta : ℝ) : ℝ :=
 noncomputable def bboY2 (S H mu σ T eta : ℝ) : ℝ :=
   eta * (Real.log (H / S) / (σ * Real.sqrt T) + mu * σ * Real.sqrt T)
 
-/-- **`(H/S)^{2μ}`**, written as `exp(2μ·log(H/S))` — algebraically the same value for
-`S, H > 0`. QuantLib's own overflow guard evaluates this factor together with its `Φ(y)`
-multiplier as one logged product, not this factor alone. -/
-noncomputable def bboHS2mu (S H mu : ℝ) : ℝ := Real.exp (2 * mu * Real.log (H / S))
-
 /-- **`B₁`**: the vanilla (barrier-free) digital `α`-factor for the `isCall` side — cash-or-nothing
 or asset-or-nothing depending on which `mu`/`K` substitution is made (see the module docstring);
 the price itself is `discount·K·B₁`, not `B₁` alone. -/
@@ -148,11 +145,11 @@ noncomputable def bboB2 (S H mu σ T : ℝ) (isCall : Bool) : ℝ :=
 
 /-- **`B₃`**: the reflected term paired with `B₁` across the barrier. -/
 noncomputable def bboB3 (S X H mu σ T eta : ℝ) : ℝ :=
-  bboHS2mu S H mu * Phi (bboY1 S X H mu σ T eta)
+  barrierReflection S H mu * Phi (bboY1 S X H mu σ T eta)
 
 /-- **`B₄`**: the reflected term paired with `B₂` across the barrier. -/
 noncomputable def bboB4 (S H mu σ T eta : ℝ) : ℝ :=
-  bboHS2mu S H mu * Phi (bboY2 S H mu σ T eta)
+  barrierReflection S H mu * Phi (bboY2 S H mu σ T eta)
 
 /-- **Down-barrier knock-in value** (`η = 1`), QuantLib's `DownIn` switch case: `B₃` when
 `isCall` and the strike dominates the barrier (`xGeH`), `B₁ − B₂ + B₄` when `isCall` and

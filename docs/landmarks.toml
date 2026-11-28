@@ -48,7 +48,7 @@ fixed horizon T and changes with T; past T the process is B plus the drift froze
 derived."""
 also = [
   "MathFin.Btheta_isBrownianReal_predictable_of_bdd",
-  "MathFin.Btheta_isQBrownianMotion_predictable_of_bdd",
+  "MathFin.Btheta_isBrownianOn_predictable_of_bdd",
 ]
 
 [[landmark]]

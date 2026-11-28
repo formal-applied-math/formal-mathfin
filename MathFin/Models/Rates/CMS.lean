@@ -258,35 +258,13 @@ private theorem continuousOn_cmsCurveRate (P0 δ C : ℝ) (hδ : 0 < δ) (hC : 0
 
 /-- **Convexity of the shifted inverse** `x ↦ (C + x)⁻¹` on the nonnegative
 half-line — the convexity engine behind the CMS rate's convexity. The two-point
-inequality `(u(C+x)+v(C+y))⁻¹ ≤ u(C+x)⁻¹ + v(C+y)⁻¹` is the AM–GM identity
-`(ua+vb)(u/a+v/b) − 1 = uv(a−b)²/(ab) ≥ 0` for `a, b > 0`, `u + v = 1`. -/
+inequality `(u(C+x)+v(C+y))⁻¹ ≤ u(C+x)⁻¹ + v(C+y)⁻¹` is Mathlib's `convexOn_zpow (-1)` on
+`(0, ∞)`, translated by `C`. -/
 theorem convexOn_inv_shift (C : ℝ) (hC : 0 < C) :
-    ConvexOn ℝ (Set.Ici (0 : ℝ)) (fun x : ℝ ↦ (C + x)⁻¹) := by
-  refine ⟨convex_Ici 0, fun x hx y hy u v hu hv huv ↦ ?_⟩
-  change (C + (u * x + v * y))⁻¹ ≤ u * (C + x)⁻¹ + v * (C + y)⁻¹
-  have hx0 : (0 : ℝ) ≤ x := Set.mem_Ici.1 hx
-  have hy0 : (0 : ℝ) ≤ y := Set.mem_Ici.1 hy
-  have hxa : 0 < C + x := by linarith
-  have hya : 0 < C + y := by linarith
-  have hxu : 0 ≤ u * x := mul_nonneg hu hx0
-  have hxv : 0 ≤ v * y := mul_nonneg hv hy0
-  have hcomb : C + (u * x + v * y) = u * (C + x) + v * (C + y) := by
-    have hCmul : u * C + v * C = C := by linear_combination C * huv
-    linarith
-  rw [hcomb]
-  have hA : 0 < u * (C + x) + v * (C + y) := by rw [← hcomb]; linarith
-  have hkey2 : (C + x) * (C + y)
-      ≤ (u * (C + x) + v * (C + y)) * (u * (C + y) + v * (C + x)) := by
-    have h1 : 0 ≤ u * v * (x - y) ^ 2 := mul_nonneg (mul_nonneg hu hv) (sq_nonneg _)
-    have h2 : 0 ≤ (C + x) * (C + y) * ((u + v) ^ 2 - 1) := by rw [huv]; simp
-    -- certificate: RHS − LHS = uv(x−y)² + (C+x)(C+y)·((u+v)² − 1), an identity
-    nlinarith [h1, h2]
-  have hkey : 1 ≤ (u * (C + x)⁻¹ + v * (C + y)⁻¹) * (u * (C + x) + v * (C + y)) := by
-    field_simp
-    nlinarith
-  -- last step: `A⁻¹ ≤ B ↔ 1 ≤ B * A`, avoiding the generic-lemma instance mismatch
-  rw [inv_eq_one_div, div_le_iff₀ hA]
-  exact hkey
+    ConvexOn ℝ (Set.Ici (0 : ℝ)) (fun x : ℝ ↦ (C + x)⁻¹) :=
+  (((convexOn_zpow (-1)).translate_right C).subset
+    (fun _ hx ↦ show 0 < C + _ from add_pos_of_pos_of_nonneg hC hx) (convex_Ici 0)).congr
+    fun _ _ ↦ zpow_neg_one _
 
 /-- **The CMS rate is convex in the discount factor on the nonnegative
 half-line**. Hypotheses: `δ > 0` (daycount),
@@ -387,8 +365,6 @@ theorem annuityMeasure_price {Q : Measure Ω} (D : Ω → ℝ) (δ : ℝ) (P : �
 
 /-! ### 4. The headline: the Jensen gap under the annuity measure -/
 
-set_option maxHeartbeats 1000000 in
--- the Jensen application carries heavy higher-order unification
 /-- **The Jensen gap of the CMS rate functional under `Qᴬ`** (the headline). Let
 `S = cmsCurveRate P₀ δ C`, with `P₀` and `C` deterministic; it is convex on
 `[0, ∞)`. Every nonnegative `W` with `W` and `S ∘ W` integrable under the annuity
@@ -439,8 +415,6 @@ end Annuity
 
 /-! ### 5. The replication seed: Carr–Madan spanning of the rate functional -/
 
-set_option maxHeartbeats 1000000 in
--- the Carr–Madan instantiation carries heavy higher-order unification
 /-- **The replication seed**: the CMS rate functional spanned as cash + forward
 + static OTM option strips on the discount factor (Carr–Madan, compact strike
 range `[L, U]` with `L > −C`). The strip weights are

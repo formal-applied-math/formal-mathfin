@@ -143,7 +143,8 @@ theorem tendstoInMeasure_riemannStieltjes_itoContinuousMod {t : ℝ≥0} (ht : t
         * (M (unifPart t n (k + 1)) ω - M (unifPart t n k) ω)) atTop
       (itoContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hθ_pred hθ_bdd) t) := by
   set φt := processToLp (μ := μ) t hBmeas hadap hcont hbdd
-  have h := tendstoInMeasure_riemannStieltjes hB t hBmeas φt hM hw_pred hw_cont hw_bdd
+  have h := AdaptedRiemannStieltjes.tendstoInMeasure_riemannStieltjes hB t hBmeas φt hM hw_pred
+    hw_cont hw_bdd
   rw [itoIntegralAgainst_weightLp hB t hBmeas φt hw_pred hw_bdd
     (processToLpPredictable t hBmeas hθ_pred hθ_bdd) ?_] at h
   · refine h.congr_right ?_

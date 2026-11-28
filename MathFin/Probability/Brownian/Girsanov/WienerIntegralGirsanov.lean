@@ -18,7 +18,7 @@ Fix a pre-Brownian motion `B` under `μ`, a horizon `T` and a constant `λ`, and
 the constant-`θ` Girsanov measure of `Probability/Brownian/Girsanov/GirsanovConstantTheta` (there,
 with a filtration,
 `B_t + λt` is shown to have the increments of a `Q_λ`-Brownian motion on `[0, T]`,
-`Btheta_isQBrownianMotion`). This file computes the `Q_λ`-law of every Wiener integral with a
+`Btheta_isBrownianOn`). This file computes the `Q_λ`-law of every Wiener integral with a
 deterministic kernel: the measure change shifts its mean by `−λ∫₀ᵀ f` and keeps its variance,
 
   under `Q_λ`, `∫₀ᵀ f dB ~ N(−λ∫₀ᵀ f, ∫₀ᵀ f²)`   (`wienerIntegralLp_hasLaw_girsanov`).

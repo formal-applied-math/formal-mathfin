@@ -56,6 +56,29 @@ theorem pathAssets_eq_bsTerminal (B : ℝ≥0 → Ω → ℝ) {u : ℝ≥0} (hu 
     pathAssets S_0 r σ B () u ω = bsTerminal S_0 r σ u (B u ω / Real.sqrt u) := by
   simpa [pathAssets] using (bsTerminal_via_brownian B (S_0 := S_0) (r := r) (σ := σ) hu ω).symm
 
+/-- The geometric Brownian path is nonnegative at every date, for a nonnegative spot. -/
+theorem pathAssets_nonneg (B : ℝ≥0 → Ω → ℝ) {S_0 : ℝ} (hS₀ : 0 ≤ S_0) (r σ : ℝ) (u : ℝ≥0)
+    (ω : Ω) : 0 ≤ pathAssets S_0 r σ B () u ω :=
+  mul_nonneg hS₀ (Real.exp_pos _).le
+
+/-- **The ratio decomposition of the geometric Brownian path**: at a later date `T > t₁` the
+path is its value at `t₁` times the `bsTerminal` of unit spot over the remaining time `T − t₁`,
+driven by the standardised increment `(B_T − B_{t₁})/√(T − t₁)`. The increment is independent
+of the past for a filtered Brownian motion, which is what the forward-start price uses. -/
+theorem pathAssets_eq_mul_bsTerminal (B : ℝ≥0 → Ω → ℝ) {t₁ T : ℝ≥0}
+    (h : (t₁ : ℝ) < (T : ℝ)) (S_0 r σ : ℝ) (ω : Ω) :
+    pathAssets S_0 r σ B () T ω = pathAssets S_0 r σ B () t₁ ω *
+      bsTerminal 1 r σ ((T : ℝ) - (t₁ : ℝ))
+        ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) := by
+  have hne : Real.sqrt ((T : ℝ) - (t₁ : ℝ)) ≠ 0 := (Real.sqrt_pos.mpr (sub_pos.2 h)).ne'
+  have hz : σ * Real.sqrt ((T : ℝ) - (t₁ : ℝ)) *
+      ((B T ω - B t₁ ω) / Real.sqrt ((T : ℝ) - (t₁ : ℝ))) = σ * (B T ω - B t₁ ω) := by
+    field_simp
+  unfold pathAssets bsTerminal
+  rw [one_mul, mul_assoc S_0 (Real.exp _) (Real.exp _), ← Real.exp_add, hz]
+  congr 2
+  ring
+
 /-- **The chooser's Black–Scholes value** is the closed form `chooserPrice`: for a pre-Brownian
 motion `B` under a probability measure `μ`, positive spot, strike and volatility and positive
 dates `t₁`, `T`, the replicating portfolio `chooser K r T t₁` with the discount `e^{−ru}` is

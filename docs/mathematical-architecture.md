@@ -64,9 +64,9 @@ filtration is an Itô integral, which is completeness.
 * Change of measure: `changeOfMeasure_setIntegral_eq`
   (`Probability/Martingales/ChangeOfMeasure.lean`), the Bayes rule for martingales;
   `bs_discounted_isQMartingale` (`Pricing/Girsanov.lean`), the Black–Scholes pricing measure as a
-  density tilt; `isQBrownianMotion_of_expMartingale`
+  density tilt; `isBrownianOn_of_expMartingale`
   (`Probability/Brownian/ExpMartingaleQBrownian.lean`) and
-  `Btheta_isQBrownianMotion_predictable_of_bdd`
+  `Btheta_isBrownianOn_predictable_of_bdd`
   (`Probability/Brownian/Girsanov/GirsanovPredictableTheta.lean`) for the drift-removed process.
 * Representation and completeness: `itoIntegralCLM_surjective_onto_centered` and
   `martingale_representation` (`Probability/Brownian/MartingaleRepresentation.lean`);

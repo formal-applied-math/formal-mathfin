@@ -36,8 +36,10 @@ pr-description.md
 # Already-tracked historical docs here remain tracked; new files stay local.
 docs/superpowers/
 
-# agent-local state (mirrors .codex/)
-.claude/
+# agent-local state (mirrors .codex/); the cátedra's chairs and skill are tracked
+.claude/*
+!.claude/agents/
+!.claude/skills/
 .superpowers/
 
 # HF dataset build output (CI artifact, regenerated from benchmarks/)

@@ -65,6 +65,11 @@ proved here.
 * `MathFin.Rates.bondPriceKeyRate_eq_sum_bondPrice`, `MathFin.Rates.bondPriceDisc_eq_sum_bondPrice`:
   the key-rate price is `∑ cᵢ P(0, tᵢ)`, each cash flow at its own curve `(1 + kᵢ)^{−⌊u⌋}`, and the
   coupon bond at a yield is the flat case.
+* `MathFin.Rates.bondPriceKeyRate_eq_price_deterministicMarket`: for distinct tenors the key-rate
+  price is the price of the schedule in the deterministic bond market of one discount curve.
+* `MathFin.Rates.TenorGrid.price_eq_price_deterministicMarket`: the same for the price on a tenor
+  grid, whose key-rate durations sum to the effective duration
+  (`TenorGrid.sum_keyRateDuration_eq_effectiveDuration`).
 * `MathFin.Rates.price_immunization_first_order`: first-order immunization stated for the market
   prices of the asset and liability schedules, in a family of markets with numéraires `e^{rt}`.
 * `MathFin.Rates.sum_deriv_keyRate_eq_deriv_price`: the key-rate partials of a coupon bond sum to
@@ -230,6 +235,53 @@ theorem bondPriceKeyRate_eq_sum_bondPrice {κ : Type*} (Q : Measure Ω) [IsFinit
     MathFin.bondPriceKeyRate s t c k =
       ∑ i ∈ s, c i * bondPrice Q 𝓕 (fun u _ ↦ ((1 + k i) ^ ⌊u⌋₊)⁻¹) 0 (t i) ω := by
   simp [bondPrice_deterministic, MathFin.bondPriceKeyRate, div_eq_mul_inv]
+
+/-- **The key-rate price is a market price on one discount curve.** If the tenors `t i`, `i < n`,
+are distinct (`Set.InjOn t`) and each node rate has `1 + k i > 0`, there is a single deterministic
+numéraire `N` with `N 0 = 1` and `N (t i) = (1 + k i)^{t i}`, and the key-rate price
+`bondPriceKeyRate` of the cash flows `c i` is the price of their schedule in the deterministic bond
+market of `N`, under any probability measure. Distinct tenors are what let one curve carry every
+node: a repeated tenor with two different rates has no single discount factor. -/
+theorem bondPriceKeyRate_eq_price_deterministicMarket (P Q : Measure Ω) [IsProbabilityMeasure Q]
+    (τ : ι → ℝ≥0) (n : ℕ) (t : ℕ → ℕ) (c k : ℕ → ℝ) (hk : ∀ i < n, 0 < 1 + k i)
+    (hinj : Set.InjOn t (Finset.range n)) :
+    ∃ (N : ℝ≥0 → ℝ) (hN : ∀ s, 0 < N s), N 0 = 1 ∧
+      MathFin.bondPriceKeyRate (Finset.range n) t c k =
+        (deterministicMarket P N hN τ).price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n) := by
+  classical
+  let N : ℝ≥0 → ℝ := fun u ↦
+    if h : ∃ i < n, ((t i : ℕ) : ℝ≥0) = u then (1 + k h.choose) ^ t h.choose else 1
+  have hNt (i : ℕ) (hi : i < n) : N (t i) = (1 + k i) ^ t i := by
+    have h : ∃ j < n, ((t j : ℕ) : ℝ≥0) = t i := ⟨i, hi, rfl⟩
+    have hj : h.choose = i := hinj (by simpa using h.choose_spec.1) (by simpa using hi)
+      (Nat.cast_injective h.choose_spec.2)
+    simp only [N, dite_eq_left h, hj]
+  have hN : ∀ u, 0 < N u := fun u ↦ by
+    by_cases h : ∃ i < n, ((t i : ℕ) : ℝ≥0) = u
+    · simpa only [N, dite_eq_left h] using pow_pos (hk _ h.choose_spec.1) _
+    · simp only [N, dite_eq_right h, zero_lt_one]
+  have hN0 : N 0 = 1 := by
+    by_cases h : ∃ i < n, ((t i : ℕ) : ℝ≥0) = 0
+    · obtain ⟨i, hi, hi0⟩ := h
+      rw [← hi0, hNt i hi, Nat.cast_eq_zero.1 hi0, pow_zero]
+    · simp only [N, dite_eq_right h]
+  refine ⟨N, hN, hN0, ?_⟩
+  rw [price_fixedFlows_deterministicMarket, MathFin.bondPriceKeyRate]
+  refine Finset.sum_congr rfl fun i hi ↦ ?_
+  rw [hN0, hNt i (Finset.mem_range.1 hi)]
+  ring
+
+/-- **The grid price is a market price on one discount curve.** For a tenor grid `G`, node rates
+`k` and distinct cash-flow tenors with `1 + r > 0` at the interpolated rates, the price
+`G.price` of the cash flows is their price in the deterministic bond market of one numéraire `N`
+(`bondPriceKeyRate_eq_price_deterministicMarket`), under any probability measure. -/
+theorem TenorGrid.price_eq_price_deterministicMarket {κ : Type*} [Fintype κ] (G : TenorGrid κ)
+    (P Q : Measure Ω) [IsProbabilityMeasure Q] (τ : ι → ℝ≥0) (n : ℕ) (t : ℕ → ℕ) (c : ℕ → ℝ)
+    (k : κ → ℝ) (hk : ∀ i < n, 0 < 1 + G.rate k (t i)) (hinj : Set.InjOn t (Finset.range n)) :
+    ∃ (N : ℝ≥0 → ℝ) (hN : ∀ s, 0 < N s), N 0 = 1 ∧
+      G.price (Finset.range n) t c k =
+        (deterministicMarket P N hN τ).price Q (fixedFlows (fun i ↦ ((t i : ℕ) : ℝ≥0)) c n) :=
+  bondPriceKeyRate_eq_price_deterministicMarket P Q τ n t c (fun i ↦ G.rate k (t i)) hk hinj
 
 /-- **A coupon bond is a sum of its zero-coupon bond prices**: at the annually compounded yield
 `y`, the price `bondPriceDisc` of the cash flows `c i` at the integer dates `t i` is

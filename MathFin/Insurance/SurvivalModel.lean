@@ -42,7 +42,7 @@ that the life reaches age `x`. Its survival function is the conditional probabil
 For readers coming from the AFP entry, our declarations line up with its `Survival_Model` names:
 `alive`↔`alive`, `futureLifetime`↔`futr_life`, `survivalFunction`↔`ccdf (distr 𝔐 borel X)`,
 `survive`↔`survive` (`$p_{t&x}`), `die`↔`die` (`$q_{t&x}`), `survivalFunction_zero`↔`ccdfX_0_1`,
-`survive_zero`↔`ccdfTx_0_1`, `survive_eq_survivalFunction_ratio`↔`ccdfTx_ccdfX`.
+`survive_zero`↔`ccdfTx_0_1`, `survive_eq_survivalFunction_div`↔`ccdfTx_ccdfX`.
 
 ## Main definitions
 
@@ -63,7 +63,7 @@ For readers coming from the AFP entry, our declarations line up with its `Surviv
 * `survivalFunction_antitone`, `survivalFunction_le_one` — the survival function decreases in
   `[0, 1]`.
 * `survive_zero` — `₀pₓ = 1` for a life alive at `x`.
-* `survive_eq_survivalFunction_ratio` — `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0`, the survival-ratio
+* `survive_eq_survivalFunction_div` — `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0`, the survival-ratio
   keystone: the conditional-probability definition of `survive` collapses to the ratio.
 * `real_le_eq_one_sub_survivalFunction` — `P(X ≤ t) = 1 - S_X(t)`.
 * `survivalFunction_lifeTable` — under the life-table law, `S(m) = l m / l 0` at the observed dates
@@ -165,7 +165,7 @@ lemma survive_zero [IsProbabilityMeasure P] (hX : Measurable X) (x : ℝ)
 /-- **The survival ratio** `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0` — the survival-ratio keystone (AFP:
 `ccdfTx_ccdfX`). Conditioning on survival to age `x`, a further `t` years of survival has
 probability the ratio of the two unconditional survival probabilities. -/
-lemma survive_eq_survivalFunction_ratio (hX : Measurable X) (x : ℝ)
+lemma survive_eq_survivalFunction_div (hX : Measurable X) (x : ℝ)
     {t : ℝ} (ht : 0 ≤ t) :
     survive P X t x = survivalFunction P X (x + t) / survivalFunction P X x := by
   have hsub : alive X (x + t) ⊆ alive X x := alive_subset_alive (le_add_of_nonneg_right ht)
@@ -256,7 +256,7 @@ theorem survive_lifeTable (n : ℕ) (l : ℕ → ℝ) (hl0 : 0 < l 0)
     (hmono : ∀ k < n, l (k + 1) ≤ l k) (hnonneg : ∀ k ≤ n, 0 ≤ l k)
     (x k : ℕ) (hxk : x + k ≤ n) :
     survive (lifeTableMeasure n l) (lifeTableLifetime n) k x = l (x + k) / l x := by
-  rw [survive_eq_survivalFunction_ratio (measurable_of_finite _) _ k.cast_nonneg, ← Nat.cast_add,
+  rw [survive_eq_survivalFunction_div (measurable_of_finite _) _ k.cast_nonneg, ← Nat.cast_add,
     survivalFunction_lifeTable n l hl0 hmono hnonneg hxk,
     survivalFunction_lifeTable n l hl0 hmono hnonneg ((x.le_add_right k).trans hxk),
     div_div_div_cancel_right₀ hl0.ne']

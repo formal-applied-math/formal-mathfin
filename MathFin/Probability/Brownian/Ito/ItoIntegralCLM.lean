@@ -148,10 +148,8 @@ lemma ae_fst_ne_zero_trim (hBmeas : ∀ u, Measurable (B u)) :
     ∀ᵐ z ∂((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod), z.1 ≠ 0 := by
   rw [Filter.eventually_iff, mem_ae_iff,
-    show {z : ℝ≥0 × Ω | z.1 ≠ 0}ᶜ = {(⊥ : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
-    trim_measurableSet_eq _ (MeasureTheory.measurableSet_predictable_singleton_bot_prod
-      (𝓕 := natFiltration (mΩ := mΩ) hBmeas) MeasurableSet.univ),
-    Measure.prod_prod, timeMeasure_singleton, zero_mul]
+    show {z : ℝ≥0 × Ω | z.1 ≠ 0}ᶜ = {(0 : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp]
+  exact trim_singleton_zero_prod_eq_zero (timeMeasure_singleton 0) hBmeas MeasurableSet.univ
 
 /-- Restricting to the band `(0,T] × Ω` commutes with taking indicators: a.e.-equality in
 the `[0,T]` trim lifts to a.e.-equality of the band indicators in the `[0,∞)` trim. -/

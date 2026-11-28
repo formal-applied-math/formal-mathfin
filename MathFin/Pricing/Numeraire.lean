@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Raphael Coelho
+Authors: Raphael Coelho, Yang Ye
 -/
 module
 
@@ -51,6 +51,13 @@ choosing `B`, `N` and reading off the density.
 
 ## Main results
 
+* `MathFin.numeraireMeasure_rnDeriv` — the density **is** the Radon–Nikodym derivative of
+  the numéraire measure: `(numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q]
+  numeraireDensity BT NT B0 N0`, for σ-finite `Q` and measurable numéraire terminals.
+* `MathFin.numeraireMeasure_absolutelyContinuous` — `Q^N ≪ Q`, with no hypothesis beyond
+  the definition.
+* `MathFin.numeraireMeasure_absolutelyContinuous'` — with measurable, positive numéraires
+  (`B0 > 0`, `N0 > 0`) also `Q ≪ Q^N`, the density being strictly positive at every state.
 * `MathFin.numeraireMeasure_isEquivProbMeasure` — `Q^N` is a probability measure
   equivalent to `Q` (`Q^N ≪ Q` and `Q ≪ Q^N`), under the martingale/normalization
   condition `𝔼^Q[N_T/B_T] = N₀/B₀`; `numeraireMeasure_isProbabilityMeasure` is its first
@@ -107,6 +114,43 @@ noncomputable def numeraireMeasure [MeasurableSpace Ω]
 section
 
 variable [MeasurableSpace Ω] {Q : Measure Ω} {BT NT : Ω → ℝ} {B0 N0 : ℝ}
+
+/-- **The numéraire density is the Radon–Nikodym derivative of the numéraire measure**: for
+σ-finite `Q` and measurable numéraire terminals,
+
+  `(numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q] numeraireDensity BT NT B0 N0`.
+
+This is the lemma form of the defining reading `dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`: Mathlib's
+`Measure.rnDeriv_withDensity` at the numéraire density. -/
+theorem numeraireMeasure_rnDeriv [SigmaFinite Q] (hNTmeas : Measurable NT)
+    (hBTmeas : Measurable BT) :
+    (numeraireMeasure Q BT NT B0 N0).rnDeriv Q =ᵐ[Q] numeraireDensity BT NT B0 N0 :=
+  Measure.rnDeriv_withDensity Q
+    (((hNTmeas.mul measurable_const).div (measurable_const.mul hBTmeas)).ennreal_ofReal)
+
+/-- **The numéraire measure is absolutely continuous with respect to `Q`**: `Q^N ≪ Q`. This
+holds with no hypothesis beyond the definition `numeraireMeasure Q BT NT B0 N0 =
+Q.withDensity (numeraireDensity BT NT B0 N0)` (Mathlib's `withDensity_absolutelyContinuous`). -/
+theorem numeraireMeasure_absolutelyContinuous :
+    numeraireMeasure Q BT NT B0 N0 ≪ Q :=
+  withDensity_absolutelyContinuous Q _
+
+/-- **`Q` is absolutely continuous with respect to the numéraire measure** when the numéraire
+terminals are measurable and positive (`B0 > 0`, `N0 > 0` included): the density
+`(N_T·B₀)/(N₀·B_T)` is then strictly positive at every state, so the a.e.-positivity
+hypothesis of the library's `absolutelyContinuous_withDensity_ofReal` holds everywhere. This is
+the integrability-free half of `numeraireMeasure_isEquivProbMeasure`, which also takes the
+integrability and martingale hypotheses that make `Q^N` a probability measure. -/
+theorem numeraireMeasure_absolutelyContinuous' (hNTmeas : Measurable NT)
+    (hBTmeas : Measurable BT) (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω)
+    (hB0 : 0 < B0) (hN0 : 0 < N0) :
+    Q ≪ numeraireMeasure Q BT NT B0 N0 :=
+  absolutelyContinuous_withDensity_ofReal Q
+    (g := fun ω ↦ NT ω * B0 / (N0 * BT ω))
+    (hmeas := ((hNTmeas.mul measurable_const).div
+      (measurable_const.mul hBTmeas)).aemeasurable)
+    (hpos := ae_of_all Q fun ω ↦
+      div_pos (mul_pos (hNTpos ω) hB0) (mul_pos hN0 (hBTpos ω)))
 
 /-- **The numéraire measure is an equivalent probability measure.** Under the tradeability /
 normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀` (equivalently: `N/B` is a `Q`-martingale), the

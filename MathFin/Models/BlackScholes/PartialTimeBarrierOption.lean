@@ -1,13 +1,16 @@
 /-
 Copyright (c) 2026 Yang Ye. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Yang Ye
+Authors: Yang Ye, Raphael Coelho
 -/
 module
 
 public import MathFin.Probability.Gaussian.BivariateNormalCDF
 public import MathFin.Models.BlackScholes.Call
 public import MathFin.Models.BlackScholes.HeynenKatTwoAssetBarrier
+public import MathFin.Models.BlackScholes.BarrierReflection
+public import MathFin.Models.BlackScholes.DividendsGreeks
+public import MathFin.Models.BlackScholes.ScalingInvariance
 
 /-!
 # Partial-time barrier options (start window, call): Haug's closed form
@@ -55,8 +58,8 @@ With cost-of-carry `b = r − q`, `ρ = √(t₁/T)`, `μ = (b − σ²/2)/σ²`
   `e₃ = e₁ + 2log(H/S)/(σ√t₁)`,  `e₄ = e₃ − σ√t₁`,
   `f₁ = (log(S/X) + 2log(H/S) + (b+σ²/2)T)/(σ√T)`,  `f₂ = f₁ − σ√T`,
 
-and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `exp(·log·)` (as in `BinaryBarrierOption.lean` and
-`HeynenKatTwoAssetBarrier.lean`), the
+and `(H/S)^{2μ}`, `(H/S)^{2(μ+1)}` as `barrierReflection` (shared with `BinaryBarrierOption.lean`
+and `HeynenKatTwoAssetBarrier.lean`), the
 start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
 
   `CA(η) = S·e^{(b−r)T}·(N₂(d₁, ηe₁; ηρ) − (H/S)^{2(μ+1)}·N₂(f₁, ηe₃; ηρ))`
@@ -98,10 +101,25 @@ start-window out-barrier **call** value (`η = 1` down, `η = −1` up) is
   `ptCA_down_add_up` reaches.
   Both are identities between transcribed closed forms; neither is proved to be a price.
 
+* `ptDownOutCall_eq_image`: `ptDownOutCall S K H r r σ T` is the image form
+  `bsV K r σ S T − (H/S)^{2r/σ²−1} · bsV K r σ (H²/S) T`, for positive `S, K, H, σ`.
+* `ptDownOutCall_eq_image_printed`: the same with the ratio and the dividend yield `q` as printed
+  in [HowisonSteinberg2005], `ptDownOutCall S K H (r − q) r σ T = bsVDiv K r q σ S T −
+  (S/H)^{1−2(r−q)/σ²} · bsVDiv K r q σ (H²/S) T`.
+* `ptDownOutCall_zero_barrier`: at `H = 0` the closed form is the junk value `0`.
+* `ptDownOutCall_scale`: spatial homogeneity, `(S, K, H) ↦ c(S, K, H)` scales it by `c`, at any
+  carry (via `bsd1_scale`, `bsd2_scale`).
+* `ptDownOutCall_timeScale`: it is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ√c, T/c)` (via
+  `bsd1_timeScale`, `bsd2_timeScale`).
+* `continuousAt_ptDownOutCall_barrier`: `ptDownOutCall` is continuous in the barrier at every
+  nonzero barrier, for nonzero spot, at any strike, carry, rate, volatility and maturity.
+
 ## References
 
 * [Haug, *The Complete Guide to Option Pricing Formulas*][Haug2007], ch. 4
 * [Heynen and Kat, *Partial barrier options*][HeynenKat1994b]
+* [Howison and Steinberg, *A matched asymptotic expansions approach to continuity corrections for
+  discretely sampled options. Part 1: barrier options*][HowisonSteinberg2005], §2 and §3.7
 
 ## Tags
 
@@ -147,23 +165,17 @@ noncomputable def ptF1 (S X H b σ T : ℝ) : ℝ :=
 /-- **`f₂` = `f₁ − σ√T`**. -/
 noncomputable def ptF2 (S X H b σ T : ℝ) : ℝ := ptF1 S X H b σ T - σ * Real.sqrt T
 
-/-- **`(H/S)^{2μ}`**, written as `exp(·log·)`. -/
-noncomputable def ptHSmu (S H b σ : ℝ) : ℝ := Real.exp (2 * ptMu b σ * Real.log (H / S))
-
-/-- **`(H/S)^{2(μ+1)}`**. -/
-noncomputable def ptHSmu1 (S H b σ : ℝ) : ℝ := Real.exp (2 * (ptMu b σ + 1) * Real.log (H / S))
-
 /-- **Partial-time-start barrier call value** `CA(η)` (QuantLib's
 `AnalyticPartialTimeBarrierOptionEngine::CA`; `η = 1` down, `η = −1` up; call-only — see the
 module docstring's "Scope" paragraph for how QuantLib prices the put side instead). -/
 noncomputable def ptCA (eta S X H b r σ t1 T : ℝ) : ℝ :=
   S * Real.exp ((b - r) * T) *
       (bivariateNormalCDF (ptD1 S X b σ T) (eta * ptE1 S H b σ t1) (eta * ptRho t1 T)
-        - ptHSmu1 S H b σ *
+        - barrierReflection S H (ptMu b σ + 1) *
             bivariateNormalCDF (ptF1 S X H b σ T) (eta * ptE3 S H b σ t1) (eta * ptRho t1 T))
     - X * Real.exp (-r * T) *
         (bivariateNormalCDF (ptD2 S X b σ T) (eta * ptE2 S H b σ t1) (eta * ptRho t1 T)
-          - ptHSmu S H b σ *
+          - barrierReflection S H (ptMu b σ) *
               bivariateNormalCDF (ptF2 S X H b σ T) (eta * ptE4 S H b σ t1) (eta * ptRho t1 T))
 
 /-- **The full-life down-and-out call closed form** (Rubinstein & Reiner (1991); Haug (2007),
@@ -171,9 +183,9 @@ ch. 4, the `X ≥ H` branch), transcribed: the barrier monitored over all of `[0
 closed-form expression here, not proved to be the expected discounted knock-out payoff. -/
 noncomputable def ptDownOutCall (S X H b r σ T : ℝ) : ℝ :=
   S * Real.exp ((b - r) * T) *
-      (Phi (ptD1 S X b σ T) - ptHSmu1 S H b σ * Phi (ptF1 S X H b σ T))
+      (Phi (ptD1 S X b σ T) - barrierReflection S H (ptMu b σ + 1) * Phi (ptF1 S X H b σ T))
     - X * Real.exp (-r * T) *
-        (Phi (ptD2 S X b σ T) - ptHSmu S H b σ * Phi (ptF2 S X H b σ T))
+        (Phi (ptD2 S X b σ T) - barrierReflection S H (ptMu b σ) * Phi (ptF2 S X H b σ T))
 
 /-- `ρ² ≤ 1` whenever `0 ≤ t₁ ≤ T` — the hypothesis `bivariateNormalCDF_flip_snd` needs, since
 a monitoring window can only be a sub-interval of the option's life. -/
@@ -194,8 +206,9 @@ theorem ptCA_down_add_up (S X H b r σ t1 T : ℝ) (ht1 : 0 ≤ t1) (hT : t1 ≤
   have hf2 := bivariateNormalCDF_flip_snd (ptF2 S X H b σ T) (ptE4 S H b σ t1) hr
   simp only [ptCA, ptDownOutCall, one_mul, neg_one_mul]
   linear_combination S * Real.exp ((b - r) * T) * hd1
-    - S * Real.exp ((b - r) * T) * ptHSmu1 S H b σ * hf1
-    - X * Real.exp (-r * T) * hd2 + X * Real.exp (-r * T) * ptHSmu S H b σ * hf2
+    - S * Real.exp ((b - r) * T) * barrierReflection S H (ptMu b σ + 1) * hf1
+    - X * Real.exp (-r * T) * hd2
+    + X * Real.exp (-r * T) * barrierReflection S H (ptMu b σ) * hf2
 
 /-- **Monitoring over the whole life gives the full-life closed form.** With the barrier live on
 `[0, T]` (i.e. `t₁ = T`) and the strike dominating the barrier (`X ≥ H`, the branch where the
@@ -244,5 +257,145 @@ theorem ptCA_down_monitored_full_life (S X H b r σ T : ℝ) (hS : 0 < S) (hX : 
   have hF2 := bivariateNormalCDF_one (ptF2 S X H b σ T) (ptE4 S H b σ T)
   simp only [ptCA, ptDownOutCall, one_mul, hrho, hD1, hF1, hD2, hF2,
     min_eq_left hd1e1, min_eq_left hf1e3, min_eq_left hd2e2, min_eq_left hf2e4]
+
+/-- **Printed shape of the image form, with a dividend yield.** The display of
+[HowisonSteinberg2005], §2: `V(S) − (S/H)^{1−2(r−q)/σ²} · V(H²/S)` with `V = bsVDiv`, the
+Black–Scholes call price at dividend yield `q`; the closed form `ptDownOutCall` carries the cost
+of carry `b = r − q`. The case `q = 0`, with the base reciprocated, is `ptDownOutCall_eq_image`. As
+there, an identity between two closed forms, with `S`, `K`, `H` and `σ` taken positive, and
+a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. -/
+theorem ptDownOutCall_eq_image_printed {K H r q σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
+    (hH : 0 < H) (hσ : 0 < σ) :
+    ptDownOutCall S K H (r - q) r σ T
+      = bsVDiv K r q σ S T
+        - (S / H) ^ (1 - 2 * (r - q) / σ ^ 2) * bsVDiv K r q σ (H ^ 2 / S) T := by
+  have hHS : 0 < H / S := div_pos hH hS
+  have hσ2 : σ ^ 2 ≠ 0 := by positivity
+  have hmu : 2 * ptMu (r - q) σ = 2 * (r - q) / σ ^ 2 - 1 := by
+    unfold ptMu hkMu; field_simp
+  have hpow : (S / H) ^ (1 - 2 * (r - q) / σ ^ 2) = (H / S) ^ (2 * (r - q) / σ ^ 2 - 1) := by
+    rw [show 1 - 2 * (r - q) / σ ^ 2 = -(2 * (r - q) / σ ^ 2 - 1) by ring,
+      Real.rpow_neg (by positivity), ← Real.inv_rpow (by positivity), inv_div]
+  have h0 : barrierReflection S H (ptMu (r - q) σ) = (H / S) ^ (2 * (r - q) / σ ^ 2 - 1) := by
+    rw [barrierReflection_eq_rpow _ hHS, hmu]
+  have h1 : barrierReflection S H (ptMu (r - q) σ + 1)
+      = barrierReflection S H (ptMu (r - q) σ) * (H / S) ^ 2 :=
+    barrierReflection_add_one _ hHS
+  have hsq : H ^ 2 / S = S * (H / S) ^ 2 := by field_simp
+  have hf1 : ptF1 S K H (r - q) σ T = bsd1 (H ^ 2 / S) K (r - q) σ T := by
+    unfold ptF1 bsd1
+    congr 2
+    rw [Real.log_div hS.ne' hK.ne', Real.log_div (by positivity) hK.ne',
+      Real.log_div hH.ne' hS.ne', Real.log_div (by positivity) hS.ne', Real.log_pow]
+    push_cast; ring
+  have hf2 : ptF2 S K H (r - q) σ T = bsd2 (H ^ 2 / S) K (r - q) σ T := by
+    rw [ptF2, bsd2, hf1]
+  have hE : Real.exp (-(q * T)) * Real.exp (-((r - q) * T)) = Real.exp (-r * T) := by
+    rw [← Real.exp_add]; congr 1; ring
+  have hE' : Real.exp ((r - q - r) * T) = Real.exp (-(q * T)) := by congr 1; ring
+  rw [hpow]
+  symm
+  unfold ptDownOutCall bsVDiv bsV
+  rw [← h0, ← hf1, ← hf2, h1, hE']
+  nth_rewrite 1 [hsq]
+  simp only [ptD1, ptD2]
+  linear_combination
+    -(K * Phi (bsd2 S K (r - q) σ T)
+      - barrierReflection S H (ptMu (r - q) σ) * K * Phi (ptF2 S K H (r - q) σ T)) * hE
+
+/-- **Image form of the full-life down-and-out closed form.** For positive spot, strike, barrier
+and volatility, `ptDownOutCall S K H r r σ T` (the transcribed Reiner–Rubinstein full-life
+down-and-out call, `X ≥ H` branch, at cost of carry `b = r`) equals
+`V(S) − (H/S)^{2r/σ²−1} · V(H²/S)` with `V = bsV`, equivalently the form of [HowisonSteinberg2005],
+§2 (restated as eq. (7) in §3.7) with the ratio reciprocated. The exponent `2r/σ² − 1` is
+`2 · ptMu r σ`, the term `(H/S)^{2r/σ²−1} · (H²/S)` is
+`S · barrierReflection S H (ptMu r σ + 1)`, and `d₁, d₂` at `H²/S` are `ptF1, ptF2`.
+The case `q = 0` of `ptDownOutCall_eq_image_printed`, with `S`, `K`, `H` and `σ` taken positive.
+An identity between two closed forms; neither is proved here to be a price.
+The right-hand side is a price form only for `σ > 0`, `0 < T`, `0 < S, K, H`,
+`H ≤ K` and `S > H`; the identity itself holds at every maturity `T`. -/
+theorem ptDownOutCall_eq_image {K H r σ S T : ℝ} (hS : 0 < S) (hK : 0 < K)
+    (hH : 0 < H) (hσ : 0 < σ) :
+    ptDownOutCall S K H r r σ T
+      = bsV K r σ S T - (H / S) ^ (2 * r / σ ^ 2 - 1) * bsV K r σ (H ^ 2 / S) T := by
+  have h := ptDownOutCall_eq_image_printed (K := K) (H := H) (r := r) (q := 0) (σ := σ)
+    (S := S) (T := T) hS hK hH hσ
+  simp only [sub_zero, bsVDiv, zero_mul, neg_zero, Real.exp_zero, one_mul] at h
+  rw [h, show 1 - 2 * r / σ ^ 2 = -(2 * r / σ ^ 2 - 1) by ring, Real.rpow_neg (by positivity),
+    ← Real.inv_rpow (by positivity), inv_div]
+
+/-- **Zero barrier is a junk corner.** At `H = 0` the logarithm `log (0 / S)` is `0` and
+`ptDownOutCall` is `0`, which is a junk value and not the vanilla price. Continuity in the barrier
+is stated for `H ≠ 0`; a price needs `0 < H`. -/
+theorem ptDownOutCall_zero_barrier {K b r σ S T : ℝ} :
+    ptDownOutCall S K 0 b r σ T = 0 := by
+  simp [ptDownOutCall, barrierReflection, ptF1, ptF2, ptD1, ptD2, bsd1, bsd2]
+
+/-- Spatial homogeneity of the closed form: scaling spot, strike and barrier by any real `c` scales
+`ptDownOutCall` by `c`, at any cost of carry `b`. An identity of the closed form, not a claim of
+price (it holds at every input, junk corners included). -/
+theorem ptDownOutCall_scale {K H b r σ S T c : ℝ} :
+    ptDownOutCall (c * S) (c * K) (c * H) b r σ T = c * ptDownOutCall S K H b r σ T := by
+  rcases eq_or_ne c 0 with rfl | hc
+  · simp [ptDownOutCall_zero_barrier]
+  simp only [ptDownOutCall, ptD1, ptD2, ptF1, ptF2, barrierReflection, bsd1_scale hc,
+    bsd2_scale hc, mul_div_mul_left _ _ hc]
+  ring
+
+/-- The closed form is unchanged under `(b, r, σ, T) ↦ (c b, c r, σ √c, T / c)` for `c > 0`, at
+any cost of carry `b`: the quantities `(b - r) T`, `r T`, `σ √T`, `(b + σ²/2) T` and
+`(b - σ²/2) / σ²` are all fixed. An identity of the closed form, not a claim of price (it holds
+at every input, junk corners included). -/
+theorem ptDownOutCall_timeScale {K H b r σ S T c : ℝ} (hc : 0 < c) :
+    ptDownOutCall S K H (c * b) (c * r) (σ * Real.sqrt c) (T / c)
+      = ptDownOutCall S K H b r σ T := by
+  have hsq : Real.sqrt c ^ 2 = c := Real.sq_sqrt hc.le
+  have hden := vol_sqrt_timeScale (σ := σ) (τ := T) hc
+  have hnum : (c * b + (σ * Real.sqrt c) ^ 2 / 2) * (T / c) = (b + σ ^ 2 / 2) * T := by
+    rw [mul_pow, hsq]; field_simp
+  have hmu : ptMu (c * b) (σ * Real.sqrt c) = ptMu b σ := by
+    unfold ptMu hkMu
+    rw [mul_pow, hsq]
+    rcases eq_or_ne σ 0 with h | h
+    · simp [h]
+    · field_simp
+  have hF : ptF1 S K H (c * b) (σ * Real.sqrt c) (T / c) = ptF1 S K H b σ T := by
+    unfold ptF1; rw [hnum, hden]
+  have hF2 : ptF2 S K H (c * b) (σ * Real.sqrt c) (T / c) = ptF2 S K H b σ T := by
+    unfold ptF2; rw [hF, hden]
+  have e1 : (c * b - c * r) * (T / c) = (b - r) * T := by field_simp
+  have e2 : -(c * r) * (T / c) = -r * T := by field_simp
+  have hD : ptD1 S K (c * b) (σ * Real.sqrt c) (T / c) = ptD1 S K b σ T :=
+    bsd1_timeScale hc
+  have hD2 : ptD2 S K (c * b) (σ * Real.sqrt c) (T / c) = ptD2 S K b σ T :=
+    bsd2_timeScale hc
+  simp only [ptDownOutCall, hmu, hF, hF2, hD, hD2, e1, e2]
+
+/-- `ptDownOutCall` is continuous in the barrier at every nonzero barrier, for nonzero spot, at
+every strike, carry, rate, volatility and maturity (the proof consumes only `S ≠ 0` and `H ≠ 0`,
+so it also covers the junk values `σ = 0`, `T ≤ 0`). Positivity is only the price reading: a
+price statement needs `σ > 0`, `0 < T`, `0 < S, K, H`, `H ≤ K` and `S > H`. The hypotheses
+`S ≠ 0` and `H ≠ 0` keep the statement off the junk corners (at `H = 0` the closed form is the
+junk constant `0`, so continuity fails wherever the vanilla value is nonzero, in particular on the
+price domain; at `S = 0` the closed form is
+constant in the barrier); the proof uses both. -/
+theorem continuousAt_ptDownOutCall_barrier {K b r σ S T : ℝ} {H : ℝ} (hS : S ≠ 0)
+    (hH : H ≠ 0) :
+    ContinuousAt (fun h ↦ ptDownOutCall S K h b r σ T) H := by
+  have hl : ContinuousAt (fun h : ℝ ↦ Real.log (h / S)) H :=
+    ContinuousAt.log (continuousAt_id.div_const S) (div_ne_zero hH hS)
+  have hPhi : ∀ {f : ℝ → ℝ}, ContinuousAt f H → ContinuousAt (fun h ↦ Phi (f h)) H :=
+    fun hf ↦ continuous_Phi.continuousAt.comp hf
+  have hE : ∀ a : ℝ, ContinuousAt (fun h ↦ Real.exp (a * Real.log (h / S))) H := fun a ↦
+    Real.continuous_exp.continuousAt.comp (continuousAt_const.mul hl)
+  have hF1 : ContinuousAt (fun h ↦ ptF1 S K h b σ T) H := by
+    unfold ptF1
+    exact (((continuousAt_const).add (continuousAt_const.mul hl)).add
+      continuousAt_const).div_const _
+  have hF2 : ContinuousAt (fun h ↦ ptF2 S K h b σ T) H := by
+    unfold ptF2; exact hF1.sub continuousAt_const
+  unfold ptDownOutCall barrierReflection
+  exact (continuousAt_const.mul (continuousAt_const.sub ((hE _).mul (hPhi hF1)))).sub
+    (continuousAt_const.mul (continuousAt_const.sub ((hE _).mul (hPhi hF2))))
 
 end MathFin

@@ -17,9 +17,9 @@ machine has checked, to build on them in other Lean projects, and to see what is
 stated and open, and where a new result would fit. It is written for mathematicians and for AI
 agents alike.
 
-The [corpus](docs/glossary.md#corpus) records 910 results from the literature in
-[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 870 are proved in
-full, 18 restate a lemma from Mathlib or BrownianMotion, and 22 are
+The [corpus](docs/glossary.md#corpus) records 928 results from the literature in
+[`benchmarks/`](benchmarks), each with a Lean statement and proof. Of these, 881 are proved in
+full, 18 restate a lemma from Mathlib or BrownianMotion, and 29 are
 [reduced cores](docs/glossary.md#status) that prove less than the result they are named after.
 Each entry records its status and what it leaves out. The library contains no `sorry`, and a
 build-time audit checks that every library theorem the benchmark's proofs cite depends only on the
@@ -166,21 +166,30 @@ from one file, [`docs/taxonomy.toml`](docs/taxonomy.toml), and the site's
 
 ## Limitations
 
-- **Reduced cores.** Twenty-two of the results prove less than the theorem they are named after.
+- **Reduced cores.** Twenty-nine of the results prove less than the theorem they are named after.
   - Eleven assume a structure whose fields include the textbook conclusion: the reflection
     principle, nowhere differentiability and the law of the iterated logarithm for Brownian motion,
     Novikov's condition, the general Girsanov theorem, the two-dimensional Itô formula, and five
     theorems on Markov chains.
-  - Three rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
+  - Six rest on a named hypothesis that is not proved. The Dalang–Morton–Willinger theorem for
     several assets assumes a conditional one-period fundamental theorem (for one asset the theorem
     is proved without it). Fixed cash flows in a Heath–Jarrow–Morton model assume the bond-pricing
     identity that the drift condition would deliver. The backward-looking caplet assumes the
-    lognormal law of the compounded overnight rate.
-  - Eight prove a special case or check transcribed closed forms against each other: the first
+    lognormal law of the compounded overnight rate. The Jarrow–Yildirim zero-coupon inflation
+    caplet assumes the index-linked bond pricing on the real curve and the lognormal law of the
+    index under the nominal forward measure, and the year-on-year payment assumes the martingale
+    property of the forward index and the Hull–White reconstitution form of the bond ratio. The
+    average-strike conditioning lower bound assumes the conditional-mean identification of the
+    terminal payoff with its Gaussian conditional mean.
+  - Twelve prove a special case or check transcribed closed forms against each other: the first
     arrival of a Poisson process, the Ornstein–Uhlenbeck Hermite modes up to degree 2, Stulz's call
     on the maximum at zero strike, the Heynen–Kat barrier at zero correlation, Haug's and
     Rubinstein–Reiner's barrier formulas, a piecewise-linear interpolation of call quotes weaker
-    than Kahalé's, and the transcribed Goldman–Sosin–Gatto lookback, bounded below by the call.
+    than Kahalé's, the transcribed Goldman–Sosin–Gatto lookback bounded below by the call, the
+    Broadie–Glasserman–Kou shifted barrier for discrete monitoring on the transcribed continuous
+    formula, the image form of the transcribed down-and-out call, the Gaussian positive part of a
+    signed exponential sum, and the one-fixing average-strike conditioning bound as the
+    Black–Scholes forward-start call.
 - **Girsanov.** Only bounded θ. Novikov's condition is not proved.
 - **Completeness.** In the Brownian market only completeness ⇒ uniqueness of the pricing measure is
   proved, and the hedge is not identified (Clark–Ocone,
@@ -223,7 +232,8 @@ which takes hours on one machine.
 [`lean-toolchain`](lean-toolchain) pins the Lean version and
 [`lake-manifest.json`](lake-manifest.json) pins Mathlib and BrownianMotion. BrownianMotion and the
 library itself are compiled from source. [`CONTRIBUTING.md`](CONTRIBUTING.md) describes a prebuilt
-Docker image and a faster edit-and-check loop for contributors.
+Docker image and a faster edit-and-check loop for contributors. [`docs/pin-bumps.md`](docs/pin-bumps.md)
+says when the pins move and what must be true before a bump merges.
 
 ## Using the library in a project
 
@@ -290,7 +300,7 @@ Contributions are welcome, from people and from agents working for them.
 [`CONTRIBUTING.md`](CONTRIBUTING.md) explains how to add a theorem, and
 [`docs/onboarding.md`](docs/onboarding.md) walks through a first contribution. Issues labelled
 [good first issue](https://github.com/formal-applied-math/formal-mathfin/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-are the usual starting point.
+are the usual starting point. To report a security concern, see [`SECURITY.md`](SECURITY.md).
 
 ## Contributors
 
@@ -305,6 +315,8 @@ Raphael Coelho maintains the library, with contributions from:
 - [Aleksey Salkutsan](https://github.com/kernelpanic888): forward rate agreements and downside
   performance metrics.
 - [Mert Unsal](https://github.com/mertunsall): the Black–Scholes charm.
+- [WorldianAI](https://github.com/WorldianAI): the Ho–Lee bond price, the security policy and the
+  pin-bump policy.
 - [Yang Ye](https://github.com/leafyoung): the integrated Itô–drift identity, Hull–White
   calibration, a Monte Carlo pricer, Cox credit, CMS rates and curve bootstrapping; the bivariate
   normal CDF, the Schwartz futures price, CVA, inflation, the LHP tranche loss, calendar arbitrage,
@@ -313,7 +325,11 @@ Raphael Coelho maintains the library, with contributions from:
   cubic splines, FX smile quotes, SABR chain-rule Greeks, the continuous lookback and the shout
   floor, Marchenko–Pastur edges and historical VaR for concentrated liquidity; the Bachelier spread
   call, the Nelson–Siegel–Svensson decay limit, the backward-looking caplet, the lognormal
-  volatility swap and the Heston transform at maturity.
+  volatility swap, the Jarrow–Yildirim inflation caplet and year-on-year forward, the
+  average-strike Asian conditioning bound, the Heston transform at maturity and the
+  Broadie–Glasserman–Kou barrier shift for discrete monitoring; the forward-start call, the
+  strict American put premium, contango and basis convergence, the Balancer constant-mean pool,
+  the numéraire density as a Radon–Nikodym derivative and the Ho–Lee limit of Vasicek.
 - [Adam Kiezun](https://github.com/akiezun): whole-life insurance on the survival function, the
   life table, two-life annuities, Thiele's reserve equation, Bühlmann credibility, sampled stopping
   rules, CDS recovery timing, the stop-loss recursion, discrete Almgren–Chriss liquidation, and

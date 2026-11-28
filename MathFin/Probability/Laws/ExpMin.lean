@@ -20,6 +20,9 @@ independence (`iIndepFun.meas_iInter`) and the individual exponential laws
 
 ## Main results
 
+* `expMeasure_real_Ioi`, `expMeasure_Ioi`, `expMeasure_Iic`: the survival function
+  `Exp(r)(t, ∞) = exp (-(r * t))` for `t ≥ 0` (`max t 0` in the real form, valid for all `t`) and
+  the distribution function `1 - exp (-(r * t))`, the one place they are stated.
 * `minimum_survival`: for jointly independent `τ i` with exponential laws of rates `rates i > 0`
   and `t ≥ 0`, `μ {ω | t < min_i τ_i ω} = exp (-(∑ rates) * t)`. The law of the minimum as a
   measure is not stated.
@@ -42,27 +45,39 @@ open MeasureTheory ProbabilityTheory Finset
 
 variable {Ω : Type*} {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}
 
-/-- Survival function of `expMeasure r` for `t ≥ 0`. -/
+/-- **The exponential survival function**: `Exp(r)` puts mass `exp(−r · max(t, 0))` on `(t, ∞)`. -/
+lemma expMeasure_real_Ioi {r : ℝ} (hr : 0 < r) (t : ℝ) :
+    (expMeasure r).real (Set.Ioi t) = Real.exp (-(r * max t 0)) := by
+  have := isProbabilityMeasure_expMeasure hr
+  rw [← Set.compl_Iic, probReal_compl_eq_one_sub measurableSet_Iic, ← cdf_eq_real,
+    cdf_expMeasure_eq hr]
+  rcases le_total 0 t with ht | ht
+  · rw [ite_eq_left ht, max_eq_left ht]
+    ring
+  · rcases ht.lt_or_eq with ht | rfl
+    · rw [ite_eq_right (not_le.2 ht), max_eq_right ht.le]
+      simp
+    · simp
+
+/-- The `ENNReal` form of `expMeasure_real_Ioi`: survival function of `expMeasure r` for
+`t ≥ 0`. -/
 lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
-  have : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr
-  have h_compl : expMeasure r (Set.Ioi t) = 1 - expMeasure r (Set.Iic t) := by
-    have h_eq : (Set.Ioi t : Set ℝ) = (Set.Iic t)ᶜ := Set.compl_Iic.symm
-    rw [h_eq, measure_compl measurableSet_Iic (measure_ne_top _ _), measure_univ]
-  have h_iic : expMeasure r (Set.Iic t) = ENNReal.ofReal (cdf (expMeasure r) t) :=
-    (ProbabilityTheory.ofReal_cdf (expMeasure r) t).symm
-  rw [h_compl, h_iic, cdf_expMeasure_eq hr t, ite_eq_left ht]
-  have hexp_le : Real.exp (-(r * t)) ≤ 1 := by
-    apply Real.exp_le_one_iff.mpr
-    have := mul_nonneg hr.le ht
-    linarith
-  have h_diff_nonneg : (0 : ℝ) ≤ 1 - Real.exp (-(r * t)) := by linarith
-  rw [← ENNReal.ofReal_one, ← ENNReal.ofReal_sub _ h_diff_nonneg]
-  congr 1
-  ring
+  have := isProbabilityMeasure_expMeasure hr
+  have h := expMeasure_real_Ioi hr t
+  rw [max_eq_left ht] at h
+  rw [← h, ofReal_measureReal (measure_ne_top _ _)]
+
+/-- **The exponential distribution function**: `Exp(r)(−∞, t] = 1 − exp(−(r t))` for `t ≥ 0`, the
+complement of the survival function `expMeasure_Ioi`. -/
+lemma expMeasure_Iic (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
+    expMeasure r (Set.Iic t) = ENNReal.ofReal (1 - Real.exp (-(r * t))) := by
+  have := isProbabilityMeasure_expMeasure hr
+  rw [← Set.compl_Ioi, prob_compl_eq_one_sub measurableSet_Ioi, expMeasure_Ioi r hr ht,
+    ENNReal.ofReal_sub _ (Real.exp_nonneg _), ENNReal.ofReal_one]
 
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
-lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
+lemma setOf_lt_inf'_eq_iInter_preimage (hn : 0 < n) (t : ℝ) :
     {ω : Ω | t < (Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
       (fun i : Fin n ↦ τ i ω))}
       = ⋂ i : Fin n, (τ i) ⁻¹' Set.Ioi t := by
@@ -87,7 +102,7 @@ theorem minimum_survival
     μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
       (fun i : Fin n ↦ τ i ω)} =
         ENNReal.ofReal (Real.exp (-((∑ i, rates i) * t))) := by
-  rw [min_gt_iInter hn t]
+  rw [setOf_lt_inf'_eq_iInter_preimage hn t]
   rw [hindep.meas_iInter (fun _ ↦ ⟨Set.Ioi t, measurableSet_Ioi, rfl⟩)]
   have step_each : ∀ i, μ ((τ i) ⁻¹' Set.Ioi t)
       = ENNReal.ofReal (Real.exp (-(rates i * t))) := fun i ↦ by

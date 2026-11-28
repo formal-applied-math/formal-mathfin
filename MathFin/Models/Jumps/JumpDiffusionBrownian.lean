@@ -44,6 +44,8 @@ Brownian motion:
   Black–Scholes formulas `bsV K r σ S τ` and `K e^{−rτ} Φ(−d₂) − S Φ(−d₁)`.
 * `IsFilteredPreBrownian.jumpDiffusionProcess`: for a filtered pre-Brownian motion `B`, the
   log-price `b t + σ B_t` is a `JumpDiffusionProcess` with rate `0`, for any jump law.
+* `JumpDiffusionProcess.isFilteredPreBrownian`: the converse, a jump-diffusion with drift `0`,
+  volatility `1` and rate `0` is a filtered pre-Brownian motion.
 * `IsFilteredPreBrownian.martingale_discounted_iff`: for `S₀ ≠ 0`, the discounted price
   `e^{−rt} S₀ e^{bt + σB_t}` is a martingale iff `b = r − σ²/2`.
 * `IsFilteredPreBrownian.condExp_call_eq_bsV`, `IsFilteredPreBrownian.condExp_put_eq_bsPut`:
@@ -160,6 +162,33 @@ theorem jumpDiffusionPutPrice_zero {S K r σ : ℝ} (hS : 0 < S) (hK : 0 < K) (h
   rw [bsTerminal, hw, show (r - σ ^ 2 / 2) * (τ : ℝ) + (y - (r - σ ^ 2 / 2) * τ) = y by ring]
 
 end MathFin
+
+namespace MathFin.JumpDiffusionProcess
+
+open MeasureTheory ProbabilityTheory
+open scoped NNReal
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} {𝓕 : Filtration ℝ≥0 mΩ}
+  {X : ℝ≥0 → Ω → ℝ} {ν : Measure ℝ}
+
+/-- **The converse bridge.** A jump-diffusion with no drift, unit diffusion and no jumps is a
+filtered pre-Brownian motion: its marginals are `N(0, t)` (`jumpDiffusionIncrementLaw_zero`), its
+increments are independent (`JumpDiffusionProcess.hasIndepIncrements`), so it is pre-Brownian
+(`HasIndepIncrements.isPreBrownianReal_of_hasLaw`), and it is adapted with increments independent
+of the past. With `IsFilteredPreBrownian.jumpDiffusionProcess` the two models are interchanged. -/
+theorem isFilteredPreBrownian [IsProbabilityMeasure ν] (h : JumpDiffusionProcess P 𝓕 X 0 1 0 ν) :
+    IsFilteredPreBrownian X 𝓕 P where
+  toIsPreBrownianReal := h.hasIndepIncrements.isPreBrownianReal_of_hasLaw fun t ↦ by
+    have hl : jumpDiffusionIncrementLaw 0 1 0 ν t = gaussianReal 0 t := by
+      rw [jumpDiffusionIncrementLaw_zero, zero_mul]
+      congr 1
+      ext
+      simp
+    exact hl ▸ h.hasLaw t
+  stronglyAdapted := h.adapted
+  indep s t hst := h.indep s t hst
+
+end MathFin.JumpDiffusionProcess
 
 namespace ProbabilityTheory.IsFilteredPreBrownian
 
