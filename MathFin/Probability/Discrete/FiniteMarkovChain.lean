@@ -429,8 +429,9 @@ theorem isPrimitive_of_isIrreducible_of_isAperiodic (hP : P ∈ rowStochastic �
         Nat.setGcd_dvd_of_mem (s := {n : ℕ | 0 < (P ^ n) i i}) hpos
     have hmem : n ∈ AddSubmonoid.closure {n : ℕ | 0 < (P ^ n) i i} :=
       hN n hn (by rw [hg]; exact one_dvd n)
-    exact (AddSubmonoid.closure_le.2 (fun x hx => hx : {n : ℕ | 0 < (P ^ n) i i} ⊆
-      (returnTimes hP i : Set ℕ))) hmem
+    have hle : AddSubmonoid.closure {n : ℕ | 0 < (P ^ n) i i} ≤ returnTimes hP i :=
+      AddSubmonoid.closure_le.2 fun _ hx => hx
+    exact hle hmem
   choose N hN using hN
   choose a ha using (hirr : ∀ i j, ∃ n : ℕ, 0 < (P ^ n) i j)
   obtain ⟨N', hN'⟩ : ∃ N' : ℕ, ∀ i, N i ≤ N' :=
@@ -548,8 +549,8 @@ for some `n`. -/
 theorem isIrreducible_transitionMatrix_iff :
     IsIrreducible (transitionMatrix K) ↔ ∀ i j, ∃ n : ℕ, 0 < chainLaw K i {ω | ω n = j} := by
   refine forall₂_congr fun i j => exists_congr fun n => ?_
-  rw [← chainLaw_visit_toReal_eq_pow, ENNReal.toReal_pos_iff]
-  exact (and_iff_left (MeasureTheory.measure_lt_top _ _)).symm
+  simp only [← chainLaw_visit_toReal_eq_pow K i n j, ENNReal.toReal_pos_iff,
+    MeasureTheory.measure_lt_top, and_true]
 
 /-- **Stationarity of a chain**: if `π` is stationary for the transition matrix of `K`, the
 chain started from `π` has marginal `π` at every time, `∑ᵢ πᵢ ℙ_i(X_n = j) = π j`. -/

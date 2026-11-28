@@ -946,11 +946,11 @@ theorem dupire_ae_window
           = fun K => 2 * (ψ K * Ct t K) - 2 * (ψ K * driftTail μ X (afn t) t K)
               - ψ K * ((ρ K : ℝ) * bt K) := by
         funext K; simp only [hf, smul_eq_mul]; ring
-      rw [hpt, integral_sub (((hCtint.bdd_mul hψm hψb).const_mul 2).sub
-          ((hDrint.bdd_mul hψm hψb).const_mul 2)) (hρb.bdd_mul hψm hψb),
-        integral_sub ((hCtint.bdd_mul hψm hψb).const_mul 2)
-          ((hDrint.bdd_mul hψm hψb).const_mul 2),
-        integral_const_mul, integral_const_mul]
+      have hC := (hCtint.bdd_mul hψm hψb).const_mul 2
+      have hD := (hDrint.bdd_mul hψm hψb).const_mul 2
+      have hsub := integral_sub (hC.sub hD) (hρb.bdd_mul hψm hψb)
+      simp only [Pi.sub_apply] at hsub
+      rw [hpt, hsub, integral_sub hC hD, integral_const_mul, integral_const_mul]
     have huniq' : ∫ K, ψ K * Ct t K
         = (∫ K, ψ K * driftTail μ X (afn t) t K)
           + 1 / 2 * ∫ ω, ψ (Xt ω) * bt (Xt ω) ∂μ := huniq
