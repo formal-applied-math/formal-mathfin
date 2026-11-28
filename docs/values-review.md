@@ -129,6 +129,34 @@ check "beautiful"; it can check "nobody refreshed the backlog."
 
 ## Review log
 
+## 2026-11-28 — corpus 928, modules 876 — Heston on the updated main branch
+
+Three independent read-only reviewers examined the combination of the Heston candidate with
+main at `9f1c0ab5`, focusing on the changed stochastic dependencies, prior review scope,
+and the descriptions published with the benchmarks.
+
+* **First principles and mathematical quality.** The state predicate records the SDE, and the
+  construction supplies a witness before identifying its law. The natural-filtration CIR integral
+  lifts to the common past by density. Continuity gives a single event for all times, which matters
+  when stopping. A useful subsequent interface would expose common-filtration pathwise uniqueness
+  directly for two state witnesses.
+* **Elegance.** The Gram-barrier proof prevents the denominator from vanishing even at endpoint
+  correlations. A continuous logarithm along the flow would be the next step toward a specific
+  complex little-trap branch. The maintainer identified the existing characteristic function as
+  the intended contribution to issue 99 and indicated blueprint tagging at merge.
+* **Coherence, architecture and economy.** Joint kernels use the upstream stochastic-integral
+  predicate. The new main also has a Hausdorff-valued continuous-version agreement lemma in
+  `LocalisationInMeasure` and a convergence-in-measure lemma for L¹ differences. Candidates for
+  consolidation include the two scalar continuous-version lemmas, the copy of Lebesgue time on
+  the nonnegative reals, and the weighted quadratic variation proofs for the two filtrations.
+  These findings concern proof reuse; the common-filtration lift has mathematical consumers.
+* **Concept clarity and idiom.** The two-state benchmark needs pathwise time continuity of drift
+  and diffusion; the published description and coverage row now include that condition. The
+  deterministic PDE node and the principal-log candidate module now distinguish the proved
+  characteristic function from the remaining logarithm comparison. The ordinary CIR construction
+  leaves the rough Volterra problem MF-OP-001 open. The unrestricted time-dependent two-state
+  blueprint is also open.
+
 ## 2026-11-25 — corpus 921, modules 808 — the recorded backlog cleared: every item done, filed or retired
 
 Scope: every ranked-backlog item recorded in this file, 326 across 57 entries. Ten workstreams
@@ -408,6 +436,50 @@ custom syntax, `unsafe`, `extern` or new axiom in any added Lean or snippet; eve
 is MathFin or Mathlib; no bidirectional-text or zero-width characters. Ledger rows restored only
 where the recorded input hash equals the merged tree's; the rest re-verified on runners. One
 umbrella `lake build` and the blueprint export on a runner, then `build.yml`.
+
+## 2026-11-24 — corpus 910, modules 858 — Heston characteristic function
+
+Three independent read-only reviewers examined the stochastic integration, transform and
+corpus interfaces in the local issue 99 candidate. The following decisions concern this branch.
+
+* **Mathematical quality.** The stopped characteristic function has an integrable unit bound.
+  The next analytic step is to compare its coefficients with a specified complex logarithm
+  along the characteristic axis, including the degenerate-root cases.
+* **Library coherence.** The terminal integral of joint predictable kernels satisfies
+  BrownianMotion's stochastic-integral characterization. The review found a second scalar
+  driver record at the input. The revision uses the library's filtered scalar driver directly;
+  joint future independence remains an input of the Brownian pair.
+* **Proof economy.** The curry-to-L² identity has a consumer in the two-state formula.
+  The natural and common filtrations previously repeated the same monotone-class uniqueness
+  argument. The candidate now specializes one generic proof and retains the old public
+  statements. The next cleanup is to audit the remaining elementary-process convenience lemmas.
+* **Architecture.** The CIR construction uses the isometry for lifting kernels to a larger
+  filtration. The process-domain and class-selector generalization lets the native bracket
+  integral and the joint integral share the same representation. The L² and pathwise layers
+  should continue to be compared at the level of their actual kernel domains.
+* **First principles.** The characteristic-function theorem constructs an SDE state and
+  identifies its law at all real frequencies. The existing common-filtration uniqueness theorem
+  could also be exposed on the state predicate once a caller needs it.
+* **Idiomatic interfaces.** The all-time spatial formula places every time inside the
+  almost-sure event. A future general two-process formula should reuse the predictable product
+  kernel and identify its representative directly.
+* **Concept clarity.** The two-state benchmark now spells out the function and coefficient
+  restrictions. The real-strip comparison concerns deterministic transforms at zero terminal
+  variance weight. The unrestricted time-dependent two-process formula remains a frontier item.
+* **Elegance.** The Gram-barrier argument rules out zeros of the linear-flow denominator at
+  endpoint correlations as well. A continuous logarithm of that denominator is a natural
+  intermediate result for the classical little-trap representation.
+
+A read-only follow-up on the revised stochastic layer found one shared uniqueness argument and
+no remaining scalar driver object alongside `IsFilteredPreBrownian`. A baseline-to-candidate
+Lean comparison checked the 41 original public declarations of the natural-filtration module.
+Forty expanded types printed identically. For the remaining type, the displayed compiler-generated
+proof of a numeral instance changed; the exact original statement elaborated with the new theorem.
+
+The two-state benchmark names the bounded-derivative, two-driver theorem it actually derives.
+Its full status applies to that restricted result. The one-driver frontier theorem with general
+time-dependent testing and the specific complex-axis little-trap branch are separate tasks.
+This local review does not record an upstream maintainer decision.
 
 ## 2026-11-19 — corpus 903, modules 790 — one concept, one object: the seven duplicates of the trunk table tied or removed
 

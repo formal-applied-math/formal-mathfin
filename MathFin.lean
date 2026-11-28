@@ -147,6 +147,8 @@ public import MathFin.Probability.Brownian.Ito.ItoIntegralAgainstMartingale
 -- BrownianMotion's axiomatic characterisation, instantiated: the integral against M = φ●B is an
 -- `IsStochasticIntegral` (Riemann–Stieltjes values, dominated convergence, uniqueness)
 public import MathFin.Probability.Brownian.Ito.StochasticIntegralCharacterisation
+public import MathFin.Probability.Brownian.Ito.Filtered.JointItoFormula
+public import MathFin.Probability.Brownian.Ito.Filtered.StochasticIntegralIdentification
 -- The pointwise bracket: conditional Brownian kernels + single-band generators whose
 -- integrals evaluate to explicit increments (the rung toward the conditional second moment)
 public import MathFin.Probability.Martingales.BracketCompensator
@@ -548,6 +550,7 @@ public import MathFin.Models.StochVol.Heston
 -- The Heston transform at vanishing vol-of-vol: the Black-Scholes moment with the integrated
 -- deterministic variance
 public import MathFin.Models.StochVol.HestonSmallVolOfVol
+public import MathFin.Models.StochVol.Heston.LogSpotCharacteristic
 -- The Heston transform at zero maturity: the Riccati flows vanish at τ = 0 and the
 -- profile degenerates to the point-mass mgf (the undiscounted-payoff convention)
 public import MathFin.Models.BlackScholes.Lookback

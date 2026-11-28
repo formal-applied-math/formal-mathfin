@@ -26,7 +26,7 @@ pick up `sorryAx` (a `sorry`) or a non-standard axiom without breaking
 
 The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
 narrative); THIS file is its machine-written closure over the benchmark
-corpus (1168 MathFin constants, 29 upstream). Citations
+corpus (1172 MathFin constants, 29 upstream). Citations
 are resolved by declaration (tools/verify/mathfin_index.py), so a name cited
 unqualified under `open`, by dot notation on a hypothesis, or declared
 outside the MathFin namespace is pinned like any other. Statement-position
@@ -848,6 +848,14 @@ namespace MathFin.AxiomAuditGen
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.FeynmanKacHeatEquation.feynmanU_eq_expectation
 
+/-- info: 'MathFin.FilteredIto.CommonIto.ito_formula_stochasticIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.FilteredIto.CommonIto.ito_formula_stochasticIntegral
+
+/-- info: 'MathFin.FilteredIto.CommonLift.lifted_modification_isStochasticIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.FilteredIto.CommonLift.lifted_modification_isStochasticIntegral
+
 /-- info: 'MathFin.ForwardSmile.dupireRatio_sqrt_slope' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.ForwardSmile.dupireRatio_sqrt_slope
@@ -863,6 +871,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms MathFin.GammaPoissonMixturePgf.mgf_id_gammaMeasure
+
+/-- info: 'MathFin.Heston.CommonAffineTransform.exists_hestonState_charFun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.CommonAffineTransform.exists_hestonState_charFun
+
+/-- info: 'MathFin.Heston.globalAffineTransform_eq_hestonTransform' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.Heston.globalAffineTransform_eq_hestonTransform
 
 /-- info: 'MathFin.Heston.hestonTransform_pde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

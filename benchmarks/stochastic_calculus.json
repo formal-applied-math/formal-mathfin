@@ -1430,6 +1430,48 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the statement as written. ito_product_rule_process in MathFin/Probability/Brownian/Ito/ItoProductRule.lean is polarisation: Ito's formula for f(x) = x^2/2 (ito_half_sq_process, the case f_t = 0 of ito_formula_adapted_unbounded_C2_process) along X, Y and Z = X + Y gives XY = Z^2/2 - X^2/2 - Y^2/2. Z is again an Ito process with coefficients sigma + tau, b + c (ae_localItoProcess_add): localItoIntegral and predItoIntegral are additive up to indistinguishability on [0, T] (ae_localItoIntegral_add, ae_predItoIntegral_add), being at each time limits in probability of Riemann sums that add. SCOPE: product rule f(x, y) = xy only; one scalar Brownian driver; continuous adapted coefficients; the stochastic integral is predItoIntegral against B with horizon T. Itô's formula for general f(t, x, y) needs the Taylor argument of ItoFormulaAdaptedTD in two coordinates and is not proved. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-two-state-two-drivers",
+      "name": "Two-state Itô formula with two Brownian drivers and bounded spatial derivatives",
+      "domain": "stochastic_calculus",
+      "description": "For a spatial C² test with bounded first and second derivatives and uniformly continuous Hessian, compute its change at a fixed finite horizon for a two-coordinate Itô process with predictable L² diffusion kernels driven by an independent continuous Brownian pair. The correction includes the mixed derivative. The drift and diffusion coefficients have almost surely continuous paths on the time interval.",
+      "code": {
+        "lean": "import MathFin.Probability.Brownian.Ito.Filtered.JointItoFormula\n\nnamespace MathFin.FilteredIto.CommonIto\nopen MeasureTheory ProbabilityTheory\nopen MathFin.FilteredIto.CommonNoise MathFin.FilteredIto.CommonPredictable MathFin.FilteredIto.CommonRiemann MathFin.FilteredIto.CommonCovariation\nopen scoped NNReal ENNReal\nvariable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {ℱ : Filtration ℝ≥0 mΩ} {B Z : ℝ≥0 → Ω → ℝ}\nlocal notation \"leb\" => MathFin.ItoIntegralL2.timeMeasure\n\n\ntheorem benchmark_two_state_ito (hP :\n      IndependentPair ℱ B Z μ)\n    (hBc : ∀ ω, Continuous fun u : ℝ≥0 ↦ B u ω) (hZc : ∀ ω, Continuous fun u : ℝ≥0 ↦ Z u ω)\n    {T : ℝ≥0} {Y : (Fin 2) → ℝ≥0 → Ω → ℝ} {y : (Fin 2) → ℝ} {a b c : (Fin 2) → ℝ≥0 → Ω → ℝ}\n    {φB φZ : (Fin 2) → Lp ℝ 2 (trimMeasureT (μ := μ) T ℱ)} (hY : ItoProc hP T Y y a b c φB φZ)\n    {f : ((Fin 2) → ℝ) → ℝ} {C₁ C₂ : ℝ} (hf : ItoTest f C₁ C₂) :\n    ∀ᵐ ω ∂μ, f (fun i ↦ Y i T ω) = f y\n      + ∫ s in Set.Ioc 0 T, (∑ i, pd f i (fun l ↦ Y l s ω) * a i s ω\n          + (1 / 2) * ∑ i, ∑ k, pd2 f i k (fun l ↦ Y l s ω)\n              * (b i s ω * b k s ω + c i s ω * c k s ω)) ∂leb\n      + ∑ i, CommonIntegral.sIntegral T ℱ hP.left (Function.curry ⇑(mulKernel T (goodProcess_pd\n            hY.proc hf i).pred\n          (goodProcess_pd hY.proc hf i).bdd (φB i))) ω\n      + ∑ i, CommonIntegral.sIntegral T ℱ hP.right (Function.curry ⇑(mulKernel T (goodProcess_pd\n            hY.proc hf i).pred\n          (goodProcess_pd hY.proc hf i).bdd (φZ i))) ω :=\n  MathFin.FilteredIto.CommonIto.ito_formula_stochasticIntegral hP hBc hZc hY hf\n\nend MathFin.FilteredIto.CommonIto\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "KaratzasShreve1991",
+        "citations": [
+          {
+            "key": "KaratzasShreve1991"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "The state has constant deterministic initial coordinates, almost surely continuous paths, a pathwise-integrable drift and continuous diffusion coefficients represented by predictable L² kernels. The supplied Brownian pair has continuous paths and joint future increments independent of the common past. The spatial test is C² with bounded first and second derivatives and uniformly continuous Hessian. This is the two-driver bounded-derivative theorem at the specified horizon; the unrestricted two-process blueprint statement is separate. The drift and diffusion coefficients have almost surely continuous paths on the time interval."
+      }
+    },
+    {
+      "id": "sc-stochastic-integral-filtration-lift",
+      "name": "Continuous integral under filtration enlargement",
+      "domain": "stochastic_calculus",
+      "description": "The continuous realization of a natural-filtration kernel lifted to a compatible common Brownian filtration represents the same stopped integrator on the natural-filtration stochastic-integral domain.",
+      "code": {
+        "lean": "import MathFin.Probability.Brownian.Ito.Filtered.StochasticIntegralIdentification\n\nnamespace MathFin.FilteredIto.CommonLift\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin.FilteredIto.CommonNoise MathFin.StochasticIntegralCharacterisation\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {ℱ : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n\n\ntheorem benchmark_lifted_stochastic_integral (hB : IsFilteredPreBrownian B ℱ μ)\n    (hpath : ∀ ω, Continuous (fun t ↦ B t ω)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (MathFin.ItoIntegralCLM.trimMeasure (μ := μ) T hB.measurable_eval)) :\n    IsStochasticIntegral μ\n      (fun t ↦ CommonContinuous.itoContinuousMod T hB.measurable_eval\n        (lpLift (natural_le hB) T φ) (min t T))\n      (MathFin.ItoIntegralL2.natFiltration hB.measurable_eval)\n      (sIntegral T hB.measurable_eval φ hB.toIsPreBrownianReal) (domain T hB.measurable_eval φ) :=\n  MathFin.FilteredIto.CommonLift.lifted_modification_isStochasticIntegral hB hpath T φ\n\nend MathFin.FilteredIto.CommonLift\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "KaratzasShreve1991",
+        "citations": [
+          {
+            "key": "KaratzasShreve1991"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "The driver satisfies BrownianMotion’s IsFilteredPreBrownian on the supplied filtration and has continuous paths. The L² kernel in this comparison is predictable in the natural filtration."
+      }
     }
   ]
 }

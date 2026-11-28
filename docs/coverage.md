@@ -24,6 +24,24 @@ full + library_wrapper
 
 Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conclusion is `reduced_core`, not `full`.**
 
+## Heston characteristic function
+
+The Heston state is constructed on a supplied common Brownian filtration. Its terminal
+log-spot law has a complex characteristic function at every real frequency. The initial
+state and horizon are deterministic, variance is initially nonnegative, and the model
+allows both endpoint correlations. The volatility of volatility is positive.
+
+| Entry | Mathematical scope |
+| --- | --- |
+| `mf-heston-characteristic-function` | Existence of a Heston state and the characteristic function of its terminal log-spot law. |
+| `mf-heston-linear-flow-real-moment` | At zero terminal variance weight and real exponent strictly between 0 and 1, the constructed transform agrees with `hestonTransform` at carry `r - q`. |
+| `sc-ito-two-state-two-drivers` | A two-coordinate Itô formula at a fixed finite horizon, with the stochastic terms given by the integral on the common filtration. The test function has bounded first and second derivatives and uniformly continuous Hessian. Drift and diffusion coefficients have almost surely continuous paths. |
+| `sc-stochastic-integral-filtration-lift` | The continuous modification after lifting a natural-filtration kernel represents the same integrator for BrownianMotion's stochastic-integral characterization. |
+
+The characteristic function uses a quotient of a linear flow for D and a time integral
+for C. Choosing a complex logarithm on the characteristic axis, Fourier inversion, and
+the unrestricted two-process Itô formula are separate obligations.
+
 ## Current Audit
 
 ### The 2026-11-25 merge
