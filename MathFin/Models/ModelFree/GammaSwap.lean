@@ -43,8 +43,8 @@ assembled.
 ## Main definitions
 
 * `gammaSwapPayoff κ x`: the replication payoff `x·log(x/κ) − x + κ`; it is the payoff
-  meant by the strip identity at `x > 0` with `κ > 0` (outside that quadrant the
-  logarithm is out of its domain and the value is junk).
+  meant by the strip identity at `x > 0` with `κ > 0` (outside that quadrant the value
+  carries no financial meaning).
 * `Market.gammaSwapFairStrike M T Q κ L U`: twice the market price of the `1/K` strip
   per `κ·T`; under a pricing measure with the unit numéraire and `S_T ∈ [L, U]` a.s., and
   `0 < κ`, `0 < T`, `0 < L ≤ κ ≤ U`, it is the fair strike. The division is junk at
