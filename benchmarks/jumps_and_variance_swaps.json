@@ -81,7 +81,7 @@
         "reference": "Gamma swap replication and fair strike (Jacquier-Slaoui 2010; Demeterfi-Derman-Kamal 1999)",
         "citations": [
           {
-            "key": "JacquierSlaoui2010"
+            "key": "JacquierSlaoui"
           },
           {
             "key": "DemeterfiDermanKamalZou1999"

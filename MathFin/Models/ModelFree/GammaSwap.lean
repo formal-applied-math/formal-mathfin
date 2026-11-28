@@ -34,8 +34,9 @@ spanning identity has no cash or forward leg at all:
   twice the expected replication payoff per `κ·T`, `K_Γ = 2𝔼_Q[φ(S_T)]/(κT)` — the
   expectation-level reading of the floating leg.
 
-The mark-to-market formula, the Greeks and the dispersion decomposition of the source
-need the forward dynamics of `S` and a multi-asset index; they are not treated here. The
+The mark-to-market formula, the Greeks and the dynamic dispersion decomposition of the
+source's §5 need the forward dynamics of `S` and a multi-asset index; they are not treated
+here, and neither is the static dispersion decomposition of the source's §3.1. The
 strike range is bounded and `S_T` is assumed to stay in it; the unbounded strip is not
 assembled.
 
@@ -62,7 +63,7 @@ assembled.
 
 ## References
 
-* [Jacquier and Slaoui, *Variance dispersion and correlation swaps*][JacquierSlaoui2010], §2
+* [Jacquier and Slaoui, *Variance dispersion and correlation swaps*][JacquierSlaoui], §2
 * [Carr and Madan (2001)][CarrMadan2001]
 * [Demeterfi et al., *More than you ever wanted to know about volatility
   swaps*][DemeterfiDermanKamalZou1999]

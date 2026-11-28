@@ -51,8 +51,9 @@ One `full` entry in `benchmarks/jumps_and_variance_swaps.json` (85 entries in th
 
   Corpus counts: 924 before, 925 after.
   Disclosed out of scope: the unbounded strip, the nonzero-rate factor `e^{2rT}`, the
-  mark-to-market formula, the Greeks and the dispersion decomposition (they need the forward
-  dynamics of `S` and a multi-asset index). Axioms-clean, `full`.
+  mark-to-market formula, the Greeks and the dynamic dispersion decomposition of the source's
+  §5 (they need the forward dynamics of `S` and a multi-asset index), and the static
+  dispersion decomposition of the source's §3.1. Axioms-clean, `full`.
 
 ### The 2026-11-25 merge
 
