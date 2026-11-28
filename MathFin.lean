@@ -452,6 +452,9 @@ public import MathFin.Models.StochVol.SABRImpliedVol
 public import MathFin.Models.StochVol.SABRFlochKennedyLimits
 public import MathFin.Models.BlackScholes.LognormalMoments
 public import MathFin.Models.ModelFree.VarianceSwap
+-- gamma swap: replication payoff, its 1/K strip in a market, fair strike
+-- (consumes CarrMadanMarket; a sibling of the variance swap's 1/K^2 log strip)
+public import MathFin.Models.ModelFree.GammaSwap
 -- the volatility-swap fair strike under an assumed lognormal law of realized variance
 public import MathFin.Models.ModelFree.VolatilitySwapLognormal
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation

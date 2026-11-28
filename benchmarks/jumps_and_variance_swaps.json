@@ -69,6 +69,30 @@
       }
     },
     {
+      "id": "mf-gamma-swap-replication",
+      "name": "Gamma Swap Replication in a Market",
+      "description": "In a market with unit numeraire, under a pricing measure Q with S_T in a bounded range [L,U] almost surely and 0 < L <= kappa <= U, the expected gamma-swap replication payoff phi(S_T) = S_T log(S_T/kappa) - S_T + kappa equals the market price of the gamma swap's 1/K strip: the European put prices on [L,kappa] plus the European call prices on [kappa,U], each weighted by 1/K. The module also defines the fair strike as twice the strip per kappa*T and proves it equals twice the expected payoff per kappa*T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Models.ModelFree.GammaSwap\n\nopen MeasureTheory MathFin MathFin.Contracts Set\nopen scoped NNReal\n\n/-- **Gamma swap replication in a market.** Under a pricing measure of a market with unit\nnumeraire, with `S_T \u2208 [L, U]` almost surely and `0 < L \u2264 \u03ba \u2264 U`, the expected gamma-swap\nreplication payoff is the market price of the gamma swap's `1/K` strip. -/\ntheorem gammaSwap_market_thm {Ω : Type*} {mΩ : MeasurableSpace Ω} {M : Market Unit Ω}\n    {T : ℝ≥0} {Q : Measure Ω} (hQ : M.IsPricingMeasure T Q) (hN : ∀ t x, M.numeraire t x = 1)\n    {L U κ : ℝ} (hL : 0 < L) (hLκ : L ≤ κ) (hκU : κ ≤ U)\n    (hS : ∀ᵐ x ∂Q, M.asset () T x ∈ Icc L U) :\n    ∫ x, gammaSwapPayoff κ (M.asset () T x) ∂Q\n      = (∫ K in L..κ, K⁻¹ * M.price Q (europeanPut K T))\n        + ∫ K in κ..U, K⁻¹ * M.price Q (europeanCall K T) :=\n  MathFin.Market.IsPricingMeasure.integral_eq_gammaSwap hQ hN hL hLκ hκU hS\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Gamma swap replication and fair strike (Jacquier-Slaoui 2010; Demeterfi-Derman-Kamal 1999)",
+        "citations": [
+          {
+            "key": "JacquierSlaoui"
+          },
+          {
+            "key": "DemeterfiDermanKamalZou1999"
+          }
+        ],
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the Carr-Madan market replication (integral_eq_carrMadan) instantiated at the payoff phi(x) = x log(x/kappa) - x + kappa, whose convexity 1/K is the gamma swap's strip weight and whose value and first derivative vanish at kappa, so no cash or forward leg remains. The strike range is bounded and S_T is assumed to stay in it; the unbounded strip, the nonzero-rate factor e^(2rT) of the source's fair strike, the mark-to-market formula, the Greeks and the dynamic dispersion decomposition of the source's section 5 are not treated, and neither is the static dispersion decomposition of its section 3.1. The fair-strike normalization (gammaSwapFairStrike) and the identity K_Gamma = 2 E_Q[phi(S_T)]/(kappa T) live in the same module. Lives in MathFin/Models/ModelFree/GammaSwap.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-variance-swap-drift-immunity",
       "name": "Variance Swap Fair Strike Is Drift-Immune (L² Realized Variance)",
       "description": "Realized variance of GBM log-returns along the uniform partition converges in mean-square to σ²T for ANY drift parameter μd: the variance-swap fair strike is a quadratic-variation functional, immune to the physical-vs-risk-neutral drift.",

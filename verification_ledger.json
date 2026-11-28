@@ -3013,6 +3013,13 @@
       "input_hash": "f5d600d9ed5ca4f42da500c3fe69b17040dd2c3dce8041eb7b5c8d8848cadbc6",
       "verified_at_commit": "f7773e9"
     },
+    "mf-gamma-swap-replication": {
+      "benchmark_file": "jumps_and_variance_swaps.json",
+      "date": "2026-11-28",
+      "elapsed_s": 2.6,
+      "input_hash": "0dbc3548098b6d85c33e91a22c3b6d7daf922d6a753829d10324a50ca24780ed",
+      "verified_at_commit": "13d01ab"
+    },
     "mf-garman-kohlhagen": {
       "benchmark_file": "black_scholes.json",
       "date": "2026-11-26",
