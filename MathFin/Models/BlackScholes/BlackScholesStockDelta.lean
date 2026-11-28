@@ -275,7 +275,8 @@ theorem ae_eq_hedgeDelta_of_replicates (hB : IsPreBrownianReal B μ)
       stockVol_ne_zero hB hBmeas hBcont T hS₀ hσ.ne'] with z hz1 hz2 hz3 hz4
     rw [h2] at hz1
     refine mul_left_cancel₀ hz4 ?_
-    rw [← hz1, hz2, hz3]
+    refine hz1.symm.trans (hz2.trans ?_)
+    rw [hz3]
     exact (deltaHedgeIntegrand_eq_hedgeDelta_mul (B := B) K r σ S_0 T z.1 z.2).trans
       (mul_comm _ _)
   have hac : bracketMeasure (μ := μ) T hBmeas (stockVol hB hBmeas hBcont T S_0 σ)

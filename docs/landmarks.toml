@@ -42,11 +42,12 @@ summary = """For bounded predictable θ and a horizon T, under the measure with 
 exp(−∫₀ᵀ θ dB − ½∫₀ᵀ θ² dt), an adapted modification of B_t + ∫₀^{t∧T} θ_s ds is a Brownian motion \
 for the Brownian filtration F: it starts at 0, has N(0,t−s) increments, and each increment is independent of F_s, \
 on all of [0,∞). If B has continuous paths so does the new process."""
-scope = """Only bounded θ, for an adapted modification of the process. The measure is that of the \
-fixed horizon T and changes with T; past T the process is B plus the drift frozen at T. Unbounded \
-θ, Novikov's condition and the general form of Girsanov's theorem are reduced cores, not \
-derived."""
+scope = """The Brownian change of measure uses bounded θ and an adapted modification. Its density \
+depends on the horizon T and the drift stays fixed after T. For predictable θ with almost surely \
+finite energy satisfying Novikov's exponential moment condition, the density has unit mean at T. \
+The Brownian change of measure for this wider class remains open."""
 also = [
+  "MathFin.exists_integral_contDoleansExp_eq_one_of_novikov",
   "MathFin.Btheta_isBrownianReal_predictable_of_bdd",
   "MathFin.Btheta_isBrownianOn_predictable_of_bdd",
 ]
@@ -296,10 +297,10 @@ also = [
 decl = "ProbabilityTheory.IsBrownianReal.reflection_principle"
 title = "The reflection principle"
 summary = """For a Brownian motion, t ≥ 0 and a > 0, the probability that the path reaches a by \
-time t is twice the probability that it is above a at t. Almost surely, the path has no \
+time t is twice the probability that its value at t is at least a. Almost surely, the path has no \
 derivative, not even a right derivative, at any time."""
 scope = """Proved without a strong Markov property, from first passages on finite grids and path \
 continuity, so the joint law of the maximum and the endpoint is not stated."""
 also = [
-  "ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt",
+  "ProbabilityTheory.IsPreBrownianReal.ae_not_hasDerivWithinAt_Ici",
 ]

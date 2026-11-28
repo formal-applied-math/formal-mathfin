@@ -116,6 +116,9 @@ lemma ext_of_map_frestrictLe {μ ν : Measure (ℕ → ι)} [IsFiniteMeasure μ]
           (frestrictLe₂ (π := fun _ : ℕ ↦ ι) hab) = μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) a)
       rw [Measure.map_map (measurable_frestrictLe₂ (X := fun _ : ℕ ↦ ι) hab)
         (measurable_frestrictLe (X := fun _ : ℕ ↦ ι) b), frestrictLe₂_comp_frestrictLe]
+  letI : ∀ I : Finset ℕ, IsFiniteMeasure
+      (inducedFamily (X := fun _ : ℕ ↦ ι) (fun n ↦ μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) I) :=
+    fun I ↦ by unfold inducedFamily; infer_instance
   exact ((isProjectiveLimit_nat_iff hproj μ).2 fun n ↦ by rw [inducedFamily_Iic]).unique
     ((isProjectiveLimit_nat_iff hproj ν).2 fun n ↦ by rw [inducedFamily_Iic, h n])
 

@@ -12,11 +12,10 @@ public import MathFin.Models.ModelFree.MarketCallPrice
 /-!
 # A piecewise-linear payoff is priced by the smile alone
 
-In a market with a pricing measure, the price of a payoff `e` of the terminal asset that is a
-continuous piecewise-linear function (the fragment `Payoff.IsPiecewiseLinear`) is read off the
-prices of the bond, the forward and finitely many calls, with the weights of the static hedge that
-`Payoff.staticHedge` compiles. No model of the asset enters: two markets with the same call prices
-at the hedge's strikes, the same forward and the same discount give `pay T e` the same price.
+Assume the market has a deterministic numéraire, a pricing measure up to `T`, and a nonnegative
+terminal asset price. For an expression in the fragment `Payoff.IsPiecewiseLinear`,
+`Payoff.staticHedge` gives weights for a bond, a forward and finitely many calls. Their prices
+determine the price of `pay T e`.
 
 With a unit numéraire and a positive asset, the call prices at the strikes `k F` in units of the
 forward `F` are a normalised call price function (`Market.IsPricingMeasure.isNormalizedCallPrice`),

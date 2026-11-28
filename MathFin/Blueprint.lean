@@ -399,11 +399,10 @@ attribute [blueprint "thm:reflection-principle"
 attribute [blueprint "thm:brownian-nowhere-differentiable"
   (title := "Brownian paths are nowhere differentiable")
   (uses := ["def:brownian-motion"])
-  (statement := /-- Almost every path of a pre-Brownian motion has, at no time $x \ge 0$, a right
-  derivative, so in particular is differentiable at no time (Paley–Wiener–Zygmund: three
-  consecutive small increments near a point of differentiability have probability
-  $O(n^{-1/2})$ per position). -/)]
-  ProbabilityTheory.IsPreBrownianReal.ae_not_differentiableAt
+  (statement := /-- Almost surely, a pre-Brownian path has no right derivative at any time $x \ge 0$.
+  Three consecutive increments of size at most $c/n$ have probability $O(n^{-3/2})$ at a fixed
+  grid position. Summing over the grid on a bounded interval gives $O(n^{-1/2})$. -/)]
+  ProbabilityTheory.IsPreBrownianReal.ae_not_hasDerivWithinAt_Ici
 
 attribute [blueprint "thm:quadratic-variation"
   (title := "Quadratic variation of Brownian motion")

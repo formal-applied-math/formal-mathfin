@@ -292,7 +292,7 @@ theorem integral_tailPrimitive_mul [IsFiniteMeasure μ] {Y : Ω → ℝ} (hY : M
     refine integral_congr_ae (Eventually.of_forall fun K => ?_)
     by_cases h : K < Y ω <;> simp [Set.indicator, h]
   calc ∫ ω, (∫ K in Set.Iio (Y ω), ψ K) * g (Y ω) ∂μ
-      = ∫ ω, ∫ K, ψ K * (if K < Y ω then g (Y ω) else 0) ∂μ :=
+      = ∫ ω, (∫ K, ψ K * (if K < Y ω then g (Y ω) else 0)) ∂μ :=
         integral_congr_ae (Eventually.of_forall hL)
     _ = ∫ K, ∫ ω, ψ K * (if K < Y ω then g (Y ω) else 0) ∂μ := integral_integral_swap hint
     _ = ∫ K, ψ K * ∫ ω, (if K < Y ω then g (Y ω) else 0) ∂μ :=
@@ -419,7 +419,7 @@ private theorem integrable_marginal_drift
       ((AdaptedDrift.stronglyMeasurable_driftPath hBmeas hβadap hβcont hβbdd
         s).measurable.mono ((natFiltration hBmeas).le s) le_rfl).aestronglyMeasurable
       (Db * s) (ae_of_all _ fun ω => by
-        have h := AdaptedDrift.abs_driftPath_sub_le hβcont hβbdd (zero_le s) ω
+        have h := AdaptedDrift.abs_driftPath_sub_le hβcont hβbdd (show (0 : ℝ≥0) ≤ s from zero_le) ω
         have h0 : AdaptedDrift.driftPath β 0 ω = 0 := by simp [AdaptedDrift.driftPath]
         rw [h0, sub_zero] at h
         simpa using h)
@@ -429,7 +429,7 @@ private theorem integrable_marginal_drift
 
 /-- The constructed process is measurable at every time. -/
 private theorem measurable_marginal_drift
-    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     {T : ℝ≥0} {β : ℝ≥0 → Ω → ℝ}
     (hβadap : ∀ t, StronglyMeasurable[natFiltration hBmeas t] (β t))
