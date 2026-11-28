@@ -3,7 +3,7 @@
 **Date:** 2026-08-16 · **Status:** design, awaiting approval · **Corpus at design time:** 358
 **Companions:** [`mathematical-architecture.md`](../mathematical-architecture.md),
 [`bridges.md`](../bridges.md), [`roadmap.md`](../archive/roadmap-history.md),
-[`2026-08-16-ito-chain-rule-design.md`](2026-08-16-ito-chain-rule-design.md) (in flight, disjoint)
+[Itô chain-rule work in PR #198](https://github.com/formal-applied-math/formal-mathfin/pull/198)
 
 **External source:** Bilokon, *The Contract Is Not the Model: Proof-Carrying Exotic
 Derivatives and the Economics of Model Risk*, working paper, 9 August 2026;
@@ -298,8 +298,9 @@ Stated here so no downstream prose outruns it:
    `BlackScholes.stockVol` (the class of `σ S̃`; square-integrable by the lognormal second moment),
    `pricePath_stockVol_ae_eq` makes the price the discounted stock, and
    `BlackScholes.exists_unique_hedge_in_stock` and `europeanCall_hedge_in_stock` replicate a
-   contract on the stock by a unique holding in the stock. `ψ` is still not identified with the
-   delta `Φ(d₁)` of `europeanCall_deltaHedge` (that needs `T' → T` in `L²`).
+   contract on the stock by a unique holding in the stock. For a European call with positive spot,
+   strike, volatility and maturity, `europeanCall_hedge_in_stock_eq_delta` identifies that holding
+   with `Φ(d₁)` almost everywhere for the stock’s bracket measure.
 3. **Rung (c) is single-asset.** `bs_call_formula` and friends are stated under
    `BSCallHyp` at `ι = Unit`. Multi-asset instances need a joint law we do not
    have.

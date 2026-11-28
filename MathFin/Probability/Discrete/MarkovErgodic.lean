@@ -17,12 +17,12 @@ time average `(1/n) ∑_{k<n} f(X_k)` of any function `f` converges to `∑ⱼ �
 the law `chainLaw K i` of the chain started at any state `i` (Saporito Theorem 1.4.32, finite state
 space, mean-square form).
 
-The proof is a variance computation. By the Markov property at a fixed time
-(`markovPathMeasure_inter_shift`), the covariance of `g(X_j)` and `g(X_{j+m})` for `g = f - ∑ πf`
+Centre the observable at its stationary mean. By the Markov property at a fixed time
+(`markovPathMeasure_inter_shift`), the mixed moment `E_i[g(X_j) g(X_{j+m})]` for `g = f - ∑ πf`
 is `∑ₓ ℙ_i(X_j = x) g(x) (Pᵐ g)(x)` (`integral_mul_shift`), and `(Pᵐ g)(x) → ∑ πg = 0` for every
 `x` by the convergence theorem (`tendsto_pow_of_isStationary`). A recursion on the double sum of
-covariances (`sum_sum_le_of_abs_le`) bounds the variance of the sum by `3 G n ∑_{m<n} εₘ` with
-`εₘ → 0`, and the Cesàro mean of a null sequence is null (`Filter.Tendsto.cesaro`).
+mixed moments (`sum_sum_le_of_abs_le`) bounds the second moment of the sum by `3 G n ∑_{m<n} εₘ`
+with `εₘ → 0`, and the Cesàro mean of a null sequence is null (`Filter.Tendsto.cesaro`).
 
 ## Main results
 
@@ -77,8 +77,9 @@ finitely many values. -/
 lemma integrable_pair (μ : Measure (ℕ → S)) [IsFiniteMeasure μ] (φ : S → S → ℝ) (j k : ℕ) :
     Integrable (fun ω : ℕ → S ↦ φ (ω j) (ω k)) μ := by
   refine Integrable.of_bound ?_ (∑ p : S × S, ‖φ p.1 p.2‖) (ae_of_all _ fun ω ↦ ?_)
-  · exact ((measurable_of_countable (fun p : S × S ↦ φ p.1 p.2)).comp
-      ((measurable_pi_apply j).prodMk (measurable_pi_apply k))).aestronglyMeasurable
+  · have hm : Measurable (fun ω : ℕ → S ↦ (ω j, ω k)) :=
+      (measurable_pi_apply j).prodMk (measurable_pi_apply k)
+    exact ((measurable_of_countable (fun p : S × S ↦ φ p.1 p.2)).comp hm).aestronglyMeasurable
   · exact Finset.single_le_sum (f := fun p : S × S ↦ ‖φ p.1 p.2‖) (fun _ _ ↦ norm_nonneg _)
       (Finset.mem_univ (ω j, ω k))
 
@@ -117,9 +118,9 @@ lemma integral_mul_shift (φ ψ : S → ℝ) (j m : ℕ) :
   rw [measureReal_def, chainLaw_pair_toReal K i j m x y]
   ring
 
-/-! ### The covariance bound -/
+/-! ### The mixed-moment bound -/
 
-/-- The covariance of `g(X_j)` and `g(X_{j+m})` is at most `(∑ |g|) · ∑ₓ |(Pᵐ g)(x)|`. -/
+/-- The absolute mixed moment `|E_i[g(X_j) g(X_{j+m})]|` is at most `(∑ |g|) · ∑ₓ |(Pᵐ g)(x)|`. -/
 lemma abs_integral_mul_shift_le (g : S → ℝ) (j m : ℕ) :
     |∫ ω, g (ω j) * g (ω (j + m)) ∂chainLaw K i|
       ≤ (∑ x, |g x|) * ∑ x, |∑ y, (transitionMatrix K ^ m) x y * g y| := by
@@ -128,8 +129,8 @@ lemma abs_integral_mul_shift_le (g : S → ℝ) (j m : ℕ) :
   rw [Finset.mul_sum]
   refine Finset.sum_le_sum fun x _ ↦ ?_
   have hM := pow_mem (transitionMatrix_mem_rowStochastic K) j
-  have hp0 : 0 ≤ (transitionMatrix K ^ j) i x := nonneg_of_mem_rowStochastic hM
-  have hp1 : (transitionMatrix K ^ j) i x ≤ 1 := le_one_of_mem_rowStochastic hM
+  have hp0 : 0 ≤ (transitionMatrix K ^ j) i x := Matrix.nonneg_of_mem_rowStochastic hM
+  have hp1 : (transitionMatrix K ^ j) i x ≤ 1 := Matrix.le_one_of_mem_rowStochastic hM
   have hgx : |g x| ≤ ∑ y, |g y| :=
     Finset.single_le_sum (f := fun y ↦ |g y|) (fun _ _ ↦ abs_nonneg _) (Finset.mem_univ x)
   rw [abs_mul, abs_of_nonneg hp0, abs_mul]
@@ -154,7 +155,7 @@ lemma tendsto_sum_abs_pow_mul (hirr : IsIrreducible (transitionMatrix K))
   have h3 := tendsto_finsetSum Finset.univ fun x _ ↦ hx x
   rwa [Finset.sum_const_zero] at h3
 
-/-! ### A recursion for the double sum of covariances -/
+/-! ### A recursion for the double sum of mixed moments -/
 
 lemma sum_sum_le_of_abs_le (E : ℕ → ℕ → ℝ) (hsymm : ∀ j k, E j k = E k j) (ε : ℕ → ℝ)
     (hε : ∀ m, 0 ≤ ε m) {G : ℝ} (hG : 0 ≤ G) (hE : ∀ j m, |E j (j + m)| ≤ G * ε m) (n : ℕ) :
