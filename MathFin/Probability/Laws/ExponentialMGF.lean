@@ -59,7 +59,7 @@ theorem mgf_id_expMeasure {r t : ℝ} (hr : 0 < r) (ht : t < r) :
     simp [gammaPDFReal, hx']
   have h : ∀ x ∈ Ici (0 : ℝ),
       gammaPDFReal 1 r x * Real.exp (t * x) = r * Real.exp ((t - r) * x) := fun x hx ↦ by
-    rw [gammaPDFReal, if_pos hx]
+    rw [gammaPDFReal, if_pos (show 0 ≤ x from hx)]
     simp only [Real.rpow_one, Real.Gamma_one, div_one, sub_self, Real.rpow_zero, mul_one]
     rw [mul_assoc, ← Real.exp_add]
     congr 2

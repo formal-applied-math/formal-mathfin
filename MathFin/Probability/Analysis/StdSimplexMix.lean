@@ -7,11 +7,10 @@ module
 
 public import MathFin.Init
 public import Mathlib.Analysis.Convex.Combination
+public import Mathlib.Data.Real.Basic
 public import Mathlib.Geometry.Convex.ConvexSpace.Defs
 public import Mathlib.Tactic.Linarith.Frontend
 public import Mathlib.Tactic.Ring.RingNF
-
-public import Mathlib.Data.Real.Basic
 
 /-!
 # Mixtures of standard simplices
@@ -44,6 +43,10 @@ that no rewrite has to go through a term that a proof depends on.
 * `Convexity.StdSimplex.exists_weights_eq_iff`: a function on a finite type is the weight
   function of a probability vector exactly when it is nonnegative and sums to one, the bridge to
   the predicate form `(∀ i, 0 ≤ q i) ∧ ∑ i, q i = 1`.
+
+## References
+
+* [H. Föllmer and A. Schied, *Stochastic Finance*][FollmerSchied], §2.2, mixtures of lotteries.
 
 ## Tags
 

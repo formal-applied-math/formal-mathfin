@@ -108,10 +108,11 @@ lemma ext_of_map_frestrictLe {μ ν : Measure (ℕ → ι)} [IsFiniteMeasure μ]
     (h : ∀ n, μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)
       = ν.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) :
     μ = ν := by
-  have hproj : IsProjectiveMeasureFamily
+  have hproj : IsProjectiveMeasureFamily (α := fun _ : ℕ ↦ ι)
       (inducedFamily (X := fun _ : ℕ ↦ ι) fun n ↦ μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) :=
-    isProjectiveMeasureFamily_inducedFamily _ fun a b hab ↦ by
-      show (μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) b)).map
+    isProjectiveMeasureFamily_inducedFamily (X := fun _ : ℕ ↦ ι)
+      (fun n ↦ μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) n)) fun a b hab ↦ by
+      change (μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) b)).map
           (frestrictLe₂ (π := fun _ : ℕ ↦ ι) hab) = μ.map (frestrictLe (π := fun _ : ℕ ↦ ι) a)
       rw [Measure.map_map (measurable_frestrictLe₂ (X := fun _ : ℕ ↦ ι) hab)
         (measurable_frestrictLe (X := fun _ : ℕ ↦ ι) b), frestrictLe₂_comp_frestrictLe]
@@ -632,7 +633,7 @@ lemma tsum_range_mul_eq (g q : ℕ → ℝ≥0∞) :
   simp_rw [← Finset.Nat.sum_antidiagonal_eq_sum_range_succ fun k l ↦ g k * q l]
   symm
   calc (∑' k, g k) * ∑' n, q n = ∑' p : ℕ × ℕ, g p.1 * q p.2 := by
-         rw [ENNReal.tsum_prod]
+         rw [ENNReal.tsum_prod (f := fun k l ↦ g k * q l)]
          simp_rw [ENNReal.tsum_mul_left]
          rw [ENNReal.tsum_mul_right]
     _ = _ := by
@@ -641,7 +642,9 @@ lemma tsum_range_mul_eq (g q : ℕ → ℝ≥0∞) :
       rw [ENNReal.tsum_sigma']
       apply tsum_congr
       intro n
-      rw [tsum_fintype, ← Finset.sum_finset_coe]
+      rw [tsum_fintype]
+      change (∑ p : antidiagonal n, g p.val.1 * q p.val.2) = _
+      exact Finset.sum_finset_coe (fun p : ℕ × ℕ ↦ g p.1 * q p.2) (antidiagonal n)
 
 omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
 lemma tsum_eq_one_add_mul (g p : ℕ → ℝ≥0∞) (hp0 : p 0 = 1)

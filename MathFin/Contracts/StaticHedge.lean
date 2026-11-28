@@ -609,9 +609,7 @@ theorem Payoff.IsPiecewiseLinear.eval_staticHedge {T : ℝ≥0} {e : Payoff Unit
   | @mulConst a c _ iha =>
     rcases hc : a.constOf with _ | d
     · rw [Payoff.eval, Payoff.staticHedge, hc]
-      simp only [Payoff.constOf, StaticHedge.eval_smul,
-        ← iha]
-      ring
+      simp only [Payoff.constOf, Payoff.eval, StaticHedge.eval_smul, ← iha, mul_comm]
     · have ha : a = .const d := Payoff.eq_const_of_constOf hc
       subst ha
       simp [Payoff.staticHedge, Payoff.constOf, Payoff.eval, StaticHedge.smul,

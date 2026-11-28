@@ -89,7 +89,7 @@ None of the gates below decides faithfulness; they narrow where a gap can hide.
   in disguise.
 - Each entry publishes, beside its `description`, a `metadata.formalization_scope` saying what it
   leaves out. Both ship in the Hugging Face dataset.
-- The README's [Limitations](../README.md#limitations) and the scope line of every card on the
+- The README's [summary of known gaps](../README.md#how-it-is-kept-honest) and the scope line of every card on the
   [landmarks page](https://formal-applied-math.github.io/formal-mathfin/landmarks.html) say what
   each headline theorem does not prove.
 - The last step of every working session is to read the touched prose against its statement

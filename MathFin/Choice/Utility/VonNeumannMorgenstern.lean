@@ -100,7 +100,7 @@ calibrates each outcome against a best and a worst lottery and is built on this 
 
 * [von Neumann and Morgenstern, *Theory of Games and Economic Behavior*][VonNeumannMorgenstern1944]
 * [H. Föllmer and A. Schied, *Stochastic Finance: An Introduction in Discrete Time*][FollmerSchied],
-  §1.1
+  §§2.2–2.3
 
 ## Tags
 

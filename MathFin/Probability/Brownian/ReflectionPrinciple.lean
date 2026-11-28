@@ -333,7 +333,9 @@ theorem measure_ge_add_le (hX : IsPreBrownianReal X P) (hm : ∀ t, Measurable (
       = P {ω | ∃ k ≤ n, a ≤ X ((k : ℝ≥0) * τ) ω} := by
     have h := measure_inter_add_sdiff
       {ω | ∃ k ≤ n, a ≤ X ((k : ℝ≥0) * τ) ω} (μ := P) hG₁
-    rwa [Set.inter_eq_right.2 fun ω hω ↦ ⟨n, le_rfl, hω⟩] at h
+    have hsub : {ω | a ≤ X ((n : ℝ≥0) * τ) ω} ⊆ {ω | ∃ k ≤ n, a ≤ X ((k : ℝ≥0) * τ) ω} :=
+      fun _ hω ↦ ⟨n, le_rfl, hω⟩
+    rwa [Set.inter_eq_right.2 hsub] at h
   -- (2) reflected pieces fit inside `H \ G₁`
   have hRefl : ∑ k ∈ Finset.range (n + 1),
         P (W k ∩ {ω | X ((n : ℝ≥0) * τ) ω - X ((k : ℝ≥0) * τ) ω < -δ})

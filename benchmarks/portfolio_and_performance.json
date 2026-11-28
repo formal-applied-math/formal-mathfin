@@ -1548,11 +1548,11 @@
       },
       "metadata": {
         "chapter": 10,
-        "reference": "Föllmer and Schied, Stochastic Finance, §1.1",
+        "reference": "Föllmer and Schied, Stochastic Finance, §2.3",
         "citations": [
           {
             "key": "FollmerSchied",
-            "locator": "§1.1"
+            "locator": "§2.3"
           }
         ],
         "difficulty": "advanced",

@@ -249,7 +249,7 @@ theorem _root_.ProbabilityTheory.IsPreBrownianReal.ae_not_hasDerivWithinAt_Ici
     simp only [E, Set.mem_iUnion, Set.mem_iInter, Finset.mem_range, Finset.mem_Ico]
     refine ⟨k, by rw [mul_comm]; exact Nat.lt_succ_of_le hk, fun m ⟨hm1, hm2⟩ ↦ ?_⟩
     have := hm m hm1 hm2
-    simpa only [toNNReal_natCast_div] using this
+    simpa only [Set.mem_setOf_eq, toNNReal_natCast_div] using this
   · simp only [measure_iUnion_null_iff]
     exact fun N M n₀ ↦ hnull N M n₀
 

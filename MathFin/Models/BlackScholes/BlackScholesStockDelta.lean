@@ -164,7 +164,7 @@ theorem europeanCall_deltaHedge_eq_itoProcessCLM (hB : IsPreBrownianReal B μ)
       = itoProcessCLM hB T T' hBmeas
         (deltaHedgeLp hB hBmeas hBcont T K r σ S_0 T) :=
     (itoProcessCLM_terminal_eq hB T' hBmeas _).trans
-      (itoProcessCLM_toLp_eq_itoIntegralCLM hB T hBmeas hT'.le hpred
+      (ItoIntegralPredictable.itoProcessCLM_toLp_eq_itoIntegralCLM hB T hBmeas hT'.le hpred
         (memLp_two_deltaHedgeIntegrand hB hBmeas hBcont T K r σ S_0 T)
         (memLp_two_deltaHedgeIntegrand hB hBmeas hBcont T' K r σ S_0 T)).symm
   filter_upwards [europeanCall_deltaHedge hB hBmeas hBcont hT hS₀ hK hσ T' hT', hA] with ω h1 h2
@@ -246,7 +246,7 @@ theorem ae_eq_hedgeDelta_of_replicates (hB : IsPreBrownianReal B μ)
               Ω → ℝ) ω) :
     ⇑ψ =ᵐ[bracketMeasure (μ := μ) T hBmeas (stockVol hB hBmeas hBcont T S_0 σ)]
       fun z ↦ hedgeDelta K r σ S_0 T B z.1 z.2 := by
-  have hφm : Measurable ⇑(stockVol hB hBmeas hBcont T S_0 σ) :=
+  have hφm : Measurable[(natFiltration hBmeas).predictable] ⇑(stockVol hB hBmeas hBcont T S_0 σ) :=
     (Lp.stronglyMeasurable (stockVol hB hBmeas hBcont T S_0 σ)).measurable
   -- the two terminal integrals agree
   have h1 : itoIntegralCLM hB T hBmeas (mulLI (trimMeasure (μ := μ) T hBmeas) hφm ψ)

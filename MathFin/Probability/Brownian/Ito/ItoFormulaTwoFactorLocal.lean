@@ -70,7 +70,7 @@ theorem tendsto_measure_compl_inter {Ω : Type*} [MeasurableSpace Ω] {μ : Meas
     (hB : Tendsto (fun N ↦ μ (B N)ᶜ) atTop (𝓝 0)) :
     Tendsto (fun N ↦ μ (A N ∩ B N)ᶜ) atTop (𝓝 0) :=
   tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds (by simpa using hA.add hB)
-    (fun _ ↦ bot_le) fun N ↦ (measure_mono (compl_inter _ _).le).trans (measure_union_le _ _)
+    (fun _ ↦ bot_le) fun N ↦ (measure_mono (Set.compl_inter _ _).le).trans (measure_union_le _ _)
 
 end LocalisationInMeasure
 

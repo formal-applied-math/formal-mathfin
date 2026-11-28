@@ -263,15 +263,15 @@ also = [
 [[landmark]]
 decl = "MathFin.Contracts.Payoff.IsPiecewiseLinear.pathPV_staticHedge"
 title = "A compiler from payoffs to static hedges"
-summary = """Every payoff of the terminal price built from constants, the price, sums, differences, \
-maxima, minima and constant multiples compiles to a bond, a forward and finitely many calls that \
-pay the same along every path with a nonnegative price, for any discount. In normal form the \
-weight of each call is the jump in the payoff's slope at its strike, and the capped call compiles \
-to exactly long the lower call, short the upper. With a deterministic numéraire, a pricing measure gives its price \
-from the bond, forward and call prices."""
-scope = """A single underlying observed once, at T. Payoffs outside the fragment (products of two \
-prices, path dependence) are not compiled. The compiled hedge is not claimed cheapest or unique \
-beyond its normal form, and the smooth case is the separate Carr–Madan spanning formula."""
+summary = """A payoff built from one terminal observation, constants, sums, differences, maxima, \
+minima and constant multiples compiles to a bond, a forward and finitely many calls. Its path \
+value agrees with the hedge for every nonnegative terminal price and any discount. In the \
+normalised hedge, each call weight is the jump in the slope of the portfolio value at its strike. \
+A lower-strike call less a higher-strike call compiles to those two positions. With a deterministic \
+numéraire, a pricing measure gives the payoff's price from the bond, forward and call prices."""
+scope = """The correctness theorem covers expressions in the stated fragment on one underlying at T. \
+Products of two prices and path-dependent observations fall outside its scope. The theorem gives a \
+replicating hedge. Optimality and uniqueness are separate questions."""
 also = [
   "MathFin.Contracts.staticHedge_cappedCall_normalize",
   "MathFin.Contracts.StaticHedge.jump_eval_of_mem_normalize",
