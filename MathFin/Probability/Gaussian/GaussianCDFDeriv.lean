@@ -76,6 +76,22 @@ theorem hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
   rw [h_eq] at h
   exact h
 
+/-- The shifted density's antiderivative: `(−ϕ(m,1,·))' = (z − m)·ϕ(m,1,z)`, the
+general-mean sibling of `hasDerivAt_neg_gaussianPDFReal_zero_one`. -/
+lemma hasDerivAt_neg_gaussianPDFReal_at (m x : ℝ) :
+    HasDerivAt (fun z' : ℝ ↦ -gaussianPDFReal m 1 z') ((x - m) * gaussianPDFReal m 1 x) x := by
+  have h2 : HasDerivAt (fun z' : ℝ ↦ z' - m) 1 x := (hasDerivAt_id x).sub_const m
+  have h1 := (hasDerivAt_neg_gaussianPDFReal_zero_one (x - m)).comp x h2
+  rw [show ((fun z' : ℝ ↦ -gaussianPDFReal 0 1 z') ∘ (fun z' : ℝ ↦ z' - m))
+        = (fun z' : ℝ ↦ -gaussianPDFReal 0 1 (z' - m)) from rfl,
+    show (fun z' : ℝ ↦ -gaussianPDFReal 0 1 (z' - m))
+        = (fun z' : ℝ ↦ -gaussianPDFReal m 1 z') from
+      funext fun z' ↦ by rw [← gaussianPDFReal_sub_center],
+    mul_one,
+    show (x - m) * gaussianPDFReal 0 1 (x - m)
+        = (x - m) * gaussianPDFReal m 1 x from by rw [← gaussianPDFReal_sub_center]] at h1
+  exact h1
+
 /-- **Standard normal CDF derivative**: `Phi'(x) = gaussianPDFReal 0 1 x`. -/
 theorem hasDerivAt_Phi (x : ℝ) :
     HasDerivAt Phi (gaussianPDFReal 0 1 x) x := by

@@ -61,6 +61,32 @@ namespace MathFin.AxiomAudit
 #guard_msgs in
 #print axioms MathFin.expected_terminal_eq_forward
 
+/-! ## Monte Carlo Greeks and the Euler step -/
+
+/-- info: 'MathFin.pathwiseDeltaPayoff_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.pathwiseDeltaPayoff_mean
+
+/-- info: 'MathFin.likelihoodRatioDeltaPayoff_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.likelihoodRatioDeltaPayoff_mean
+
+/-- info: 'MathFin.pathwiseDelta_deriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.pathwiseDelta_deriv
+
+/-- info: 'MathFin.hasDerivAt_marketPrice_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.hasDerivAt_marketPrice_S
+
+/-- info: 'MathFin.eulerGbmStep_mean_le_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.eulerGbmStep_mean_le_exact
+
+/-- info: 'MathFin.eulerGbmStep_variance_le_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms MathFin.eulerGbmStep_variance_le_exact
+
 /-! ## Feynman–Kac → Black–Scholes-PDE keystone -/
 
 /-- info: 'MathFin.FeynmanKacHeatEquation.feynmanU_heat_equation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
