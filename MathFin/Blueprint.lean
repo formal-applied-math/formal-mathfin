@@ -1127,8 +1127,8 @@ attribute [blueprint "thm:heston-pde"
   (statement := /-- For $0 < u < 1$ and $\xi \ne 0$, the profile $\Phi(t,x,v) = \exp(A(t) + ux +
   B(t)v)$ built from the explicit solutions $A(t) = \hat a(T-t)$, $B(t) = \hat b(T-t)$ of the
   Heston Riccati system satisfies the backward Heston pricing equation $\partial_t\Phi + L\Phi =
-  0$, and $\Phi(T,x,v) = e^{ux}$ (`hestonTransform_terminal`). The Heston variance process is
-  not constructed, so the link from $\Phi$ to a market's prices is not proved. -/)]
+  0$, and $\Phi(T,x,v) = e^{ux}$ (`hestonTransform_terminal`). This node verifies the deterministic profile. The companion
+  characteristic-function theorem constructs the state and identifies the terminal log-spot law. -/)]
   MathFin.Heston.hestonTransform_pde
 
 attribute [blueprint "thm:dupire-zero-rates"

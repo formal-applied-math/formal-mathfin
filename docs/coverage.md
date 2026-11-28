@@ -35,7 +35,7 @@ allows both endpoint correlations. The volatility of volatility is positive.
 | --- | --- |
 | `mf-heston-characteristic-function` | Existence of a Heston state and the characteristic function of its terminal log-spot law. |
 | `mf-heston-linear-flow-real-moment` | At zero terminal variance weight and real exponent strictly between 0 and 1, the constructed transform agrees with `hestonTransform` at carry `r - q`. |
-| `sc-ito-two-state-two-drivers` | A two-coordinate Itô formula at a fixed finite horizon, with the stochastic terms given by the integral on the common filtration. The test function has bounded first and second derivatives and uniformly continuous Hessian. |
+| `sc-ito-two-state-two-drivers` | A two-coordinate Itô formula at a fixed finite horizon, with the stochastic terms given by the integral on the common filtration. The test function has bounded first and second derivatives and uniformly continuous Hessian. Drift and diffusion coefficients have almost surely continuous paths. |
 | `sc-stochastic-integral-filtration-lift` | The continuous modification after lifting a natural-filtration kernel represents the same integrator for BrownianMotion's stochastic-integral characterization. |
 
 The characteristic function uses a quotient of a linear flow for D and a time integral

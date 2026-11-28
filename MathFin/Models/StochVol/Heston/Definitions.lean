@@ -18,9 +18,9 @@ public import Mathlib.Tactic.Ring
 /-!
 # Explicit Heston Riccati closed forms
 
-Source candidate, NOT yet compiled in the authoring environment.
-Complex time is used for the analytic identities. Real-time corollaries follow
-by `HasDerivAt.comp_ofReal`. No stochastic interpretation is asserted here.
+These definitions give the principal-log candidates at complex time. The characteristic-function
+theorem uses the linear flow and its time integral. Identifying that flow with these candidates
+on the characteristic axis requires a further branch argument.
 
 ## Main definitions
 
@@ -62,7 +62,7 @@ def logArgument (b d t : Complex) : Complex := denominator b d t / (2 * d)
 def closedD (b d h t : Complex) : Complex :=
   -h * (1 - decay d t) / denominator b d t
 
-/-- Explicit C. Its derivative is asserted only on the principal-log slit plane. -/
+/-- Candidate constant coefficient, evaluated with the principal complex logarithm. -/
 def closedC (b d a s m t : Complex) : Complex :=
   m * t + (a / s) * ((b - d) * t - 2 * Complex.log (logArgument b d t))
 

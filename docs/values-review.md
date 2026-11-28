@@ -129,6 +129,34 @@ check "beautiful"; it can check "nobody refreshed the backlog."
 
 ## Review log
 
+## 2026-11-28 — corpus 928, modules 876 — Heston on the updated main branch
+
+Three independent read-only reviewers examined the combination of the Heston candidate with
+main at `9f1c0ab5`, focusing on the changed stochastic dependencies, prior review scope,
+and the descriptions published with the benchmarks.
+
+* **First principles and mathematical quality.** The state predicate records the SDE, and the
+  construction supplies a witness before identifying its law. The natural-filtration CIR integral
+  lifts to the common past by density. Continuity gives a single event for all times, which matters
+  when stopping. A useful subsequent interface would expose common-filtration pathwise uniqueness
+  directly for two state witnesses.
+* **Elegance.** The Gram-barrier proof prevents the denominator from vanishing even at endpoint
+  correlations. A continuous logarithm along the flow would be the next step toward a specific
+  complex little-trap branch. The maintainer identified the existing characteristic function as
+  the intended contribution to issue 99 and indicated blueprint tagging at merge.
+* **Coherence, architecture and economy.** Joint kernels use the upstream stochastic-integral
+  predicate. The new main also has a Hausdorff-valued continuous-version agreement lemma in
+  `LocalisationInMeasure` and a convergence-in-measure lemma for L¹ differences. Candidates for
+  consolidation include the two scalar continuous-version lemmas, the copy of Lebesgue time on
+  the nonnegative reals, and the weighted quadratic variation proofs for the two filtrations.
+  These findings concern proof reuse; the common-filtration lift has mathematical consumers.
+* **Concept clarity and idiom.** The two-state benchmark needs pathwise time continuity of drift
+  and diffusion; the published description and coverage row now include that condition. The
+  deterministic PDE node and the principal-log candidate module now distinguish the proved
+  characteristic function from the remaining logarithm comparison. The ordinary CIR construction
+  leaves the rough Volterra problem MF-OP-001 open. The unrestricted time-dependent two-state
+  blueprint is also open.
+
 ## 2026-11-25 — corpus 921, modules 808 — the recorded backlog cleared: every item done, filed or retired
 
 Scope: every ranked-backlog item recorded in this file, 326 across 57 entries. Ten workstreams
