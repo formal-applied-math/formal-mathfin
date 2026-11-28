@@ -146,6 +146,12 @@ lemma gaussianPDFReal_zero_one_neg (z : ℝ) :
   congr 2
   ring
 
+/-- The unit-variance Gaussian density is the standard density shifted by the mean:
+`ϕ(m, 1, x) = ϕ(x − m)`. -/
+lemma gaussianPDFReal_sub_center (m x : ℝ) :
+    gaussianPDFReal m 1 x = gaussianPDFReal 0 1 (x - m) := by
+  simp only [gaussianPDFReal, NNReal.coe_one, mul_one, sub_zero]
+
 /-- A Gaussian density is continuous. -/
 lemma continuous_gaussianPDFReal (μ : ℝ) (v : ℝ≥0) : Continuous (gaussianPDFReal μ v) := by
   rw [gaussianPDFReal_def]

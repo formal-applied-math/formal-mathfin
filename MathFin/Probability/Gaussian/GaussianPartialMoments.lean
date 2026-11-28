@@ -120,6 +120,77 @@ lemma integral_id_mul_gaussianPDFReal_Ioi (a : ℝ) :
   -- hres : ∫ z in Ioi a, z * pdf z = 0 - (-pdf a) = pdf a
   linarith [hres]
 
+
+/-- The first moment of `z ↦ z·ϕ(m,1,z)` exists against Lebesgue: `Integrable id` under
+`N(m,1)`, transferred through the withDensity identification (the general-mean sibling of
+`integrable_id_mul_gaussianPDFReal_volume`). -/
+lemma integrable_id_mul_gaussianPDFReal_m_volume (m : ℝ) :
+    Integrable (fun z : ℝ ↦ z * gaussianPDFReal m 1 z) volume := by
+  have h1 : Integrable (id : ℝ → ℝ) (gaussianReal m 1) := by
+    have h2 := memLp_id_gaussianReal (2 : ℝ≥0) (μ := m) (v := 1)
+    exact h2.mono_exponent (by norm_num : (1 : ℝ≥0∞) ≤ 2) |>.integrable le_rfl
+  rw [gaussianReal_of_var_ne_zero m (one_ne_zero : (1 : ℝ≥0) ≠ 0)] at h1
+  have hpdfm : Measurable (gaussianPDF m 1) := by
+    unfold gaussianPDF; fun_prop
+  have htop : ∀ᵐ z ∂(volume : Measure ℝ), gaussianPDF m 1 z < ∞ := by
+    refine ae_of_all _ (fun z ↦ ?_)
+    unfold gaussianPDF
+    exact ENNReal.ofReal_lt_top
+  rw [integrable_withDensity_iff_integrable_smul' hpdfm htop] at h1
+  have h_eq : (fun z : ℝ ↦ (gaussianPDF m 1 z).toReal • id z)
+            = (fun z : ℝ ↦ z * gaussianPDFReal m 1 z) := by
+    funext z
+    change (gaussianPDF m 1 z).toReal • z = z * gaussianPDFReal m 1 z
+    unfold gaussianPDF
+    rw [ENNReal.toReal_ofReal (gaussianPDFReal_nonneg _ _ _)]
+    simp [smul_eq_mul, mul_comm]
+  rwa [h_eq] at h1
+
+
+/-- The centered truncated first moment of `N(m,1)`: `∫_(a,∞) (z−m)·ϕ(m,1,z) dz = ϕ(m,1,a)`,
+by the fundamental theorem of calculus with antiderivative `−ϕ(m,1,·)` (the shifted sibling
+of `integral_id_mul_gaussianPDFReal_Ioi`). -/
+lemma integral_sub_id_mul_gaussianPDFReal_Ioi (m a : ℝ) :
+    ∫ z in Set.Ioi a, (z - m) * gaussianPDFReal m 1 z = gaussianPDFReal m 1 a := by
+  have hderiv : ∀ x ∈ Set.Ioi a,
+      HasDerivAt (fun z' : ℝ ↦ -gaussianPDFReal m 1 z') ((x - m) * gaussianPDFReal m 1 x) x :=
+    fun x _ ↦ hasDerivAt_neg_gaussianPDFReal_at m x
+  have hcont : ContinuousWithinAt (fun z' : ℝ ↦ -gaussianPDFReal m 1 z') (Set.Ici a) a := by
+    have hc : Continuous fun z' : ℝ ↦ -gaussianPDFReal m 1 z' := by
+      unfold gaussianPDFReal; fun_prop
+    exact hc.continuousWithinAt
+  have hint : IntegrableOn (fun z' : ℝ ↦ (z' - m) * gaussianPDFReal m 1 z') (Set.Ioi a)
+      volume := by
+    have h1 : Integrable (fun z : ℝ ↦ z * gaussianPDFReal m 1 z) volume :=
+      integrable_id_mul_gaussianPDFReal_m_volume m
+    have h2 : Integrable (fun z : ℝ ↦ m * gaussianPDFReal m 1 z) volume :=
+      (integrable_gaussianPDFReal m 1).const_mul m
+    exact (h1.sub h2).congr (Filter.Eventually.of_forall fun z ↦ by
+      simp only [Pi.sub_apply]; ring) |>.integrableOn
+  have hlim : Filter.Tendsto (fun z' : ℝ ↦ -gaussianPDFReal m 1 z') atTop (nhds 0) := by
+    rw [show (0 : ℝ) = -0 from neg_zero.symm]
+    refine Filter.Tendsto.neg ?_
+    have h_atBot : Filter.Tendsto (fun z : ℝ ↦ -(z - m) ^ 2 / 2) atTop atBot := by
+      have hshift : Filter.Tendsto (fun z : ℝ ↦ z - m) atTop atTop :=
+        tendsto_atTop_add_const_right atTop (-m) fun _ a => a
+      have hsquare : Filter.Tendsto (fun z : ℝ ↦ (z - m) * (z - m)) atTop atTop :=
+        hshift.atTop_mul_atTop₀ hshift
+      have hdiv : Filter.Tendsto (fun z : ℝ ↦ (z - m) ^ 2) atTop atTop :=
+        hsquare.congr (fun z ↦ by rw [pow_two])
+      have hneg : Filter.Tendsto (fun z : ℝ ↦ -((z - m) ^ 2)) atTop atBot :=
+        tendsto_neg_atBot_iff.mpr hdiv
+      exact hneg.atBot_div_const (show (0 : ℝ) < 2 by norm_num)
+    have h_exp : Filter.Tendsto (fun z : ℝ ↦ Real.exp (-(z - m) ^ 2 / 2)) atTop (nhds 0) :=
+      Real.tendsto_exp_atBot.comp h_atBot
+    have h_mul := h_exp.const_mul ((Real.sqrt (2 * π))⁻¹ : ℝ)
+    rw [mul_zero] at h_mul
+    convert h_mul using 1
+    funext z
+    unfold gaussianPDFReal
+    simp [NNReal.coe_one]
+  have hres := integral_Ioi_of_hasDerivAt_of_tendsto hcont hderiv hint hlim
+  linarith [hres]
+
 /-! ### Tail mass and the stop-loss transform -/
 
 /-- **Gaussian tail mass in pdf form**: `∫_{Ioi a} ϕ(x) dx = 1 − Φ(a)`. -/
